@@ -160,6 +160,10 @@ Route::group(['middleware' => 'auth:api'], function () {
             });
         });
 
+        Route::group(['prefix' => 'assets'], function () {
+            Route::post('/', 'AssetController@uploadFile');
+        });
+
         Route::group(['prefix' => 'approvals'], function () {
             Route::get('/', 'ApprovalController@getAll');
             Route::post('/', 'ApprovalController@create');
