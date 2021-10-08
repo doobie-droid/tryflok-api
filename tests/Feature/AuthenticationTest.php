@@ -142,6 +142,43 @@ class AuthenticationTest extends TestCase
 
     }
 
+    public function testInvalidUsernamesAreNotRegistered()
+    {
+        $testData = UserMock::UNSEEDED_USER;
+
+        $testData['username'] = 'e-rtra';
+        $response = $this->json('POST', '/api/v1/auth/register', $testData);
+        $response->assertStatus(400);
+
+        $testData['username'] = 'user@';
+        $response = $this->json('POST', '/api/v1/auth/register', $testData);
+        $response->assertStatus(400);
+
+        $testData['username'] = 'user#';
+        $response = $this->json('POST', '/api/v1/auth/register', $testData);
+        $response->assertStatus(400);
+    }
+
+    public function testValidUsernamesAreRegistered()
+    {
+        $testData = UserMock::UNSEEDED_USER;
+
+        $testData['username'] = 'the_user9';
+        $testData['email'] = 'valid1@test.com';
+        $response = $this->json('POST', '/api/v1/auth/register', $testData);
+        $response->assertStatus(200);
+
+        $testData['username'] = '9the_user9';
+        $testData['email'] = 'valid2@test.com';
+        $response = $this->json('POST', '/api/v1/auth/register', $testData);
+        $response->assertStatus(200);
+
+        $testData['username'] = '_9the_user9';
+        $testData['email'] = 'valid3@test.com';
+        $response = $this->json('POST', '/api/v1/auth/register', $testData);
+        $response->assertStatus(200);
+    }
+
     public function testUpdatePasswordWorks()
     {
         $user = User::where('email', UserMock::SEEDED_USER['email'])->first();

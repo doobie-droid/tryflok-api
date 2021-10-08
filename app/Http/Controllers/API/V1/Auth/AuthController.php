@@ -29,7 +29,7 @@ class AuthController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'name' => ['required', 'string', 'max:255'],
-                'username' => ['required', 'max:20', 'unique:users,username'],
+                'username' => ['required', 'max:20', 'unique:users,username', 'regex:/^[A-Za-z0-9_]*$/'],
 				'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
 				'password' => ['required', 'string', 'confirmed'],
                 'referral_id' => ['sometimes', 'nullable','string', 'exists:users,referral_id'],
