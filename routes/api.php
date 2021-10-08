@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 use App\Constants\Constants;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\TagResource;
 
 /*
 |--------------------------------------------------------------------------
