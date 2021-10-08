@@ -16,7 +16,7 @@ class CreateCategorablesTable extends Migration
         Schema::create('categorables', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('category_id');
-            $table->morphs('categorable');
+            $table->uuidMorphs('categorable');
             $table->timestamps();
         });
     }

@@ -20,7 +20,7 @@ class CreateCartsTable extends Migration
             $table->boolean('refunded')->default(0);
             $table->string('refund_status')->nullable();
             $table->boolean('checked_out')->default(0);
-            $table->morphs('cartable');
+            $table->uuidMorphs('cartable');
             $table->string('status')->default('in-cart'); // in-cart, completed, cancelled
             $table->timestamps();
         });

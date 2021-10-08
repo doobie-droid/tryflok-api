@@ -17,7 +17,7 @@ class CreateAssetablesTable extends Migration
             $table->uuid('id')->primary();
             $table->string('purpose')->comment('cover, page, i360-page, video, profile-picture');
             $table->foreignUuid('asset_id');
-            $table->morphs('assetable');
+            $table->uuidMorphs('assetable');
             $table->timestamps();
         });
     }

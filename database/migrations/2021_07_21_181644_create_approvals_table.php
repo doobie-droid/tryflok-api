@@ -15,7 +15,7 @@ class CreateApprovalsTable extends Migration
     {
         Schema::create('approvals', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->morphs('approvable');
+            $table->uuidMorphs('approvable');
             $table->foreignUuid('user_id');//the user doing it
             $table->string('status');//approved,pending,declined
             $table->string('needs_action_from');//creator,admin

@@ -23,7 +23,7 @@ class CreatePaymentsTable extends Migration
             $table->mediumText('description')->nullable();
             $table->string('provider');
             $table->string('provider_id');
-            $table->morphs('paymentable'); // entity that is being paid for
+            $table->uuidMorphs('paymentable'); // entity that is being paid for
             $table->timestamps();
         });
     }

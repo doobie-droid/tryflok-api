@@ -15,7 +15,7 @@ class CreateWalletsTable extends Migration
     {
         Schema::create('wallets', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->morphs('walletable');
+            $table->uuidMorphs('walletable');
             $table->decimal('balance', 9, 2)->default(0);
             $table->string('currency')->default('FLK');//to be spent as cents
             $table->timestamps();

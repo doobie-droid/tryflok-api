@@ -16,7 +16,7 @@ class CreateTaggableTable extends Migration
         Schema::create('taggables', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('tag_id');
-            $table->morphs('taggable');
+            $table->uuidMorphs('taggable');
             $table->timestamps();
         });
     }

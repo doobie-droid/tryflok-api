@@ -17,7 +17,7 @@ class CreateUserablesTable extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id');//person that owns entities
             $table->foreignUuid('parent_id')->nullable();//references id on userables
-            $table->morphs('userable'); // the entitiy (digiverse, collection, or content)
+            $table->uuidMorphs('userable'); // the entitiy (digiverse, collection, or content)
             $table->string('status')->default('available'); // wishlist, available, subscription-ended, content-deleted
             $table->timestamps();
         });

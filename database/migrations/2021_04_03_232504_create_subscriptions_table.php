@@ -17,7 +17,7 @@ class CreateSubscriptionsTable extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('userable_id'); // person that paid for subscription
             $table->foreignUuid('price_id'); // check if the price is still a subscription model
-            $table->morphs('subscriptionable'); // entity being subscribed to
+            $table->uuidMorphs('subscriptionable'); // entity being subscribed to
             $table->string('status')->default('active'); // active, disabled
             $table->boolean('auto_renew')->default(1);
             $table->dateTime('start');

@@ -15,7 +15,7 @@ class CreateSalesTable extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->morphs('saleable');
+            $table->uuidMorphs('saleable');
             $table->foreignUuid('user_id');
             $table->unsignedDecimal('amount', 6, 2);
             $table->string('currency')->default('USD');

@@ -18,7 +18,7 @@ class CreateReviewsTable extends Migration
             $table->foreignUuid('user_id');//person writing review
             $table->integer('rating')->default(0);
             $table->mediumText('comment')->nullable();
-            $table->morphs('reviewable');
+            $table->uuidMorphs('reviewable');
             $table->timestamps();
         });
     }

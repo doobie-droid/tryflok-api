@@ -15,7 +15,7 @@ class CreateBenefactorsTable extends Migration
     {
         Schema::create('benefactors', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->morphs('benefactable');
+            $table->uuidMorphs('benefactable');
             $table->foreignUuid('user_id');
             $table->decimal('share', 5,2);
             $table->timestamps();
