@@ -168,7 +168,7 @@ class AuthController extends Controller
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
     
-			if(Auth::attempt(['username' => $request->username, 'password' => $request->password]) || Auth::attempt(['username' => $request->username, 'password' => $request->password])){
+			if(Auth::attempt(['email' => $request->username, 'password' => $request->password]) || Auth::attempt(['username' => $request->username, 'password' => $request->password])){
 				$user = Auth::user();
                 if (!is_null($request->role) && $request->role === Roles::CREATOR) {
                     if (!$user->hasRole(Roles::CREATOR)) {
