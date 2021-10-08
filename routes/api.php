@@ -71,16 +71,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         ]);
     });
 
-    Route::get('/categories', function () {
-        return response()->json([
-            "message" => "Categories retrieved successfully",
-            "data" => [
-                "categories" => \App\Models\Category::orderBy('name')->get(),
-            ]
-        ]);
-    });
-
-    Route::get('/categories-paginated', function (Request $request) {
+    Route::get('/categories', function (Request $request) {
         $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
         $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
         if ($limit > Constants::MAX_ITEMS_LIMIT) {
@@ -93,6 +84,26 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
             "message" => "Categories retrieved successfully",
             "data" => [
                 "categories" => CategoryResource::collection($categories),
+                'current_page' => $categories->currentPage(),
+                'items_per_page' => $categories->perPage(),
+                'total' => $categories->total(),
+            ]
+        ]);
+    });
+
+    Route::get('/tags', function (Request $request) {
+        $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
+        $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
+        if ($limit > Constants::MAX_ITEMS_LIMIT) {
+            $limit = Constants::MAX_ITEMS_LIMIT;
+        }
+        $search = urldecode($request->query('search', ''));
+
+        $tags = \App\Models\Tag::where('name', 'LIKE', '%' . $search . '%')->orderBy('name')->paginate($limit, array('*'), 'page', $page);
+        return response()->json([
+            "message" => "Categories retrieved successfully",
+            "data" => [
+                "categories" => TagResource::collection($tags),
                 'current_page' => $categories->currentPage(),
                 'items_per_page' => $categories->perPage(),
                 'total' => $categories->total(),
