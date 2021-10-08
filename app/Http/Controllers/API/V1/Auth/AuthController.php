@@ -46,7 +46,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'public_id' => uniqid(rand()),
                 'email_token' => Str::random(16),
-                'referral_id' => strtoupper(Str::random(6)) . "-" . date('ymd'),
+                'referral_id' => strtoupper(Str::random(6)) . "-" . date('Ymd'),
             ]);
 
             if (!is_null($request->referral_id)) {
@@ -133,11 +133,11 @@ class AuthController extends Controller
                 $user = User::create([
                     'name' => $name,
                     'email' => $email,
-                    'username' => Str::random(8) . 'ymd',
+                    'username' => Str::random(8) . 'Ymd',
                     'password' => Hash::make(Str::random(8)),
                     'public_id' => uniqid(rand()),
                     'email_token' => Str::random(16),
-                    'referral_id' => strtoupper(Str::random(6)) . "-" . date('ymd'),
+                    'referral_id' => strtoupper(Str::random(6)) . "-" . date('Ymd'),
                 ]);
                 event(new ConfirmEmailEvent($user));
                 $user->assignRole(Roles::USER);

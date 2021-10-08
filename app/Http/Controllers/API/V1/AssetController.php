@@ -144,22 +144,22 @@ class AssetController extends Controller
                 $filename = date('Ymd') . Str::random(16);
                 $originalName = $file->getClientOriginalName();
                 $ext = $file->getClientOriginalExtension();
-                $folder = join_path('assets', Str::random(16) . date('Ymd'), 'image');
+                $folder = join_path('assets', Str::random(16) . date('Ymd'), 'audio');
                 $fullFilename = join_path($folder, $filename . "." . $ext);
-                $url = join_path(env('PUBLIC_AWS_CLOUDFRONT_URL'), $fullFilename);
+                $url = join_path(env('PRIVATE_AWS_CLOUDFRONT_URL'), $fullFilename);
 
                 $asset = Asset::create([
                     'url' => $url,
-                    'storage_provider' => 'public-s3',
+                    'storage_provider' => 'private-s3',
                     'storage_provider_id' => $fullFilename,
-                    'asset_type' => 'image',
+                    'asset_type' => 'audio',
                     'mime_type' => $file->getMimeType(),
                 ]);
                 //append to assets array
                 $asset->original_name = $originalName;
                 $assets[] = $asset;
                 //delegate upload to job
-                $path = Storage::disk('local')->put('uploads/images', $file);
+                $path = Storage::disk('local')->put('uploads/audio', $file);
                 $uploadedFilePath = storage_path() . "/app/" . $path;
                 GenerateAudioResolutionsJob::dispatch([
                     'asset' => $asset,
