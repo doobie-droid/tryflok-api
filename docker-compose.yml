@@ -1,0 +1,61 @@
+version: "3.3"
+services:
+  api:
+    build: 
+      args:
+        user: flok
+        uid: 1000
+      context: ./
+    depends_on:
+      - mysql
+    environment:
+      - WAIT_HOSTS=mysql:3306
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+    links:
+      - redis
+      - mysql
+    volumes:
+      - ./:/var/www
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
+    command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+
+  cron:
+    build:
+      context: ./
+      dockerfile: Dockerfile.cron
+    volumes:
+      - ./:/var/www
+      - ./cron/logs:/var/log/cron
+    links:
+      - redis
+      - mysql
+
+  nginx:
+    image: nginx:1.17-alpine
+    restart: unless-stopped
+    links:
+      - api
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/var/www
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx:/etc/nginx/conf.d
+
+  mysql:
+    image: mysql:5.7.12
+    volumes:
+      - ./mysql:/var/lib/mysql
+    restart: always
+    ports:
+      - '9099:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: flok
+
+  redis:
+    image: redis:3.0

@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Jobs\Subscriptions;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use App\Models\Collection;
+use App\Models\Userable;
+use App\Models\Price;
+use App\Models\Content;
+use App\Models\Subscription;
+use App\Models\WalletTransaction;
+use App\Jobs\Userables\UpdateContentUserable as UpdateContentUserableJob;
+use App\Jobs\Userables\UpdateCollectionUserable as UpdateCollectionUserable;
+use App\Jobs\Payment\Purchase as PurchaseJob;
+
+class EndSubscription implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    public $subscription;
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct($subscription)
+    {
+        $this->subscription = $subscription;
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        $this->subscription->status = 'disabled';
+        $this->subscription->save();
+        $parentUserable = Userable::where('id', $this->subscription->userable_id)->first();
+        if (is_null($parentUserable)) {
+            Log::error("Invalid userable_id supplied");
+            Log::error($this->subscription);
+            return;
+        }
+        //attempt to renew subscription
+        if ($this->subscription->auto_renew == 1) {
+            $user = $parentUserable->user()->first();
+            $price = Price::where('id', $this->subscription->price_id)->first();
+            $item = null;
+            switch ($this->subscription->subscriptionable_type) {
+                case "collection":
+                    $item = Collection::where('id', $this->subscription->subscriptionable_id)->first();
+                    break;
+                case "content":
+                    $item = Content::where('id', $this->subscription->subscriptionable_id)->first();
+                    break;
+            }
+            $user_wallet_balance = (float) $user->wallet->balance;//wallet is in AKC
+            $item_price = (float) $price->amount * 100;//converting dollars to AKC.
+            if (($item_price < $user_wallet_balance) && !is_null($item)){
+                $newWalletBalance = bcsub($user->wallet->balance, $item_price, 2);
+                $transaction = WalletTransaction::create([
+                    'public_id' => uniqid(rand()),
+                    'wallet_id' => $user->wallet->id,
+                    'amount' => $item_price,
+                    'balance' => $newWalletBalance,
+                    'transaction_type' => 'deduct',
+                    'details' => 'Deduct from wallet to renew subscription for ' . $item->title,
+                ]);
+                $user->wallet->balance = $newWalletBalance;
+                $user->wallet->save();
+                PurchaseJob::dispatch([
+                    'total_amount' => $price->amount,
+                    'total_fees' => 0,
+                    'user' => $user->toArray(),
+                    'provider' => 'wallet',
+                    'provider_id' => $transaction->public_id,
+                    'items' => [
+                        [
+                            'public_id' => $item->public_id,
+                            'type' => $this->subscription->subscriptionable_type,
+                            'price' => [
+                                'amount' => $price->amount,
+                                'interval' => $price->interval,
+                                'interval_amount' => $price->interval_amount,
+                            ]
+                        ]
+                    ],
+                ]);
+                //TO DO: mail user that their auto-renewal was succesful
+                return;
+            }
+        }
+        
+        //renew of subscription failed, go ahead to end subscription
+        $parentUserable->status = 'subscription-ended';
+        $parentUserable->save();
+        //I do not check for userable type as only collections can be subscribed to
+        $item = Collection::where('id', $parentUserable->userable_id)->first();
+        foreach ($item->contents as $content) {
+            UpdateContentUserableJob::dispatch([
+                'content' => $content,
+                'user' => $parentUserable->user,
+                'parent_userable' => $parentUserable,
+                'status' => 'subscription-ended',
+            ]);
+        }
+        //handle item's collections in userables
+        foreach ($item->childCollections as $collection) {
+            UpdateCollectionUserable::dispatch([
+                'collection' => $collection,
+                'parent_userable' => $parentUserable,
+                'user' => $parentUserable->user,
+                'status' => 'subscription-ended',
+            ]);
+        }
+    }
+
+    public function failed(\Throwable $exception)
+    {
+        Log::error($exception);
+    }
+}

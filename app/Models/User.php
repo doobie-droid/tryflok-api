@@ -1,0 +1,160 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\Uuid;
+
+class User extends Authenticatable implements JWTSubject
+{
+    use HasFactory, Notifiable, HasRoles, SoftDeletes, Uuid;
+
+   /**
+     * The attributes that are not mass assignable.
+     *
+     * @var array
+     */
+    protected $guarded = [
+        'id',
+    ];
+
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'password_token',
+        'email_token',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        
+    ];
+
+    protected $guard_name = 'api';
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public function assets()
+    {
+        return $this->morphToMany(Asset::class, 'assetable');
+    }
+
+    public function profile_picture()
+    {
+        return $this->morphToMany(Asset::class, 'assetable')->where('purpose', 'profile-picture');
+    }
+
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referrer_id');
+    }
+
+    public function contentsPaidFor()
+    {
+        return $this->morphedByMany(Content::class, 'userable');
+    }
+
+    public function collectionsPaidFor()
+    {
+        return $this->morphedByMany(Collection::class, 'userable');
+    }
+
+    public function digiversesPaidFor()
+    {
+        return $this->morphedByMany(Collection::class, 'userable')->where('type', 'digiverse');
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class, 'user_id');
+    }
+
+    public function contentsCreated()
+    {
+        return $this->hasMany(Content::class);
+    }
+
+    public function collectionsCreated()
+    {
+        return $this->hasMany(Collection::class);
+    }
+
+    public function digiversesCreated()
+    {
+        return $this->hasMany(Collection::class)->where('type', 'digiverse');
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function payouts()
+    {
+        return $this->hasMany(Payout::class);
+    }
+
+    public function paymentAccounts()
+    {
+        return $this->hasMany(PaymentAccount::class);
+    }
+
+    public function paymentsMade()
+    {
+        return $this->hasMany(Payment::class, 'payer_id');
+    }
+
+    public function paymentsReceived()
+    {
+        return $this->hasMany(Payment::class, 'payee_id');
+    }
+
+    public function otps()
+    {
+        return $this->hasMany(Otp::class);
+    }
+
+    public function wallet()
+    {
+        return $this->morphOne(Wallet::class, 'walletable');
+    }
+}
