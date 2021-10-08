@@ -105,9 +105,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
             "message" => "Categories retrieved successfully",
             "data" => [
                 "categories" => TagResource::collection($tags),
-                'current_page' => $categories->currentPage(),
-                'items_per_page' => $categories->perPage(),
-                'total' => $categories->total(),
+                'current_page' => $tags->currentPage(),
+                'items_per_page' => $tags->perPage(),
+                'total' => $tags->total(),
             ]
         ]);
     });
