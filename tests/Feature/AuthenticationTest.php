@@ -6,10 +6,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Tests\MockData\User as UserMock;
 use Tests\TestCase;
 use App\Constants\Roles;
 use App\Models\User;
+use App\Notifications\User\EmailConfirmation;
 
 class AuthenticationTest extends TestCase
 {
@@ -100,6 +102,7 @@ class AuthenticationTest extends TestCase
 
     public function testRegistrationWorks()
     {
+        Notification::fake();
         $response = $this->json('POST', '/api/v1/auth/register', UserMock::UNSEEDED_USER);
         $response->assertStatus(200)
         ->assertJsonStructure([
@@ -127,6 +130,10 @@ class AuthenticationTest extends TestCase
                 ]
             ]
         ]);
+        $user = User::where('email', UserMock::UNSEEDED_USER['email'])->first();
+        Notification::assertSentTo(
+            [$user], EmailConfirmation::class
+        );
 
         $this->assertDatabaseHas('users', [
             'email' => UserMock::UNSEEDED_USER['email'],
