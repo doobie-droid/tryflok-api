@@ -72,6 +72,6 @@ class User {
         'username' => 'unseeded',
         'password' => 'user123',
         'password_confirmation' => 'user123',
-        'referral_id' => 'TLHJKB-210506',
+        //'referral_id' => 'TLHJKB-210506',
     ];
 }

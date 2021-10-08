@@ -24,7 +24,6 @@ class AuthenticationTest extends TestCase
             'data' => [
                 'user' => [
                     'roles',
-                    'public_id',
                 ],
                 'token',
             ]
@@ -77,7 +76,8 @@ class AuthenticationTest extends TestCase
             'message',
             'data' => [
                 'user' => [
-                    'roles'
+                    'roles',
+                    'wallet',
                 ],
                 'token',
             ]
@@ -85,6 +85,9 @@ class AuthenticationTest extends TestCase
         ->assertJson([
             'data' => [
                 'user' => [
+                    'name' => UserMock::SEEDED_USER['name'],
+                    'email' => UserMock::SEEDED_USER['email'],
+                    'username' => UserMock::SEEDED_USER['username'],
                     'roles' => [
                         [
                             'name' => Roles::USER,
@@ -104,7 +107,8 @@ class AuthenticationTest extends TestCase
             'message',
             'data' => [
                 'user' => [
-                    'roles'
+                    'roles',
+                    'wallet',
                 ],
                 'token',
             ]
@@ -112,6 +116,9 @@ class AuthenticationTest extends TestCase
         ->assertJson([
             'data' => [
                 'user' => [
+                    'name' => UserMock::UNSEEDED_USER['name'],
+                    'email' => UserMock::UNSEEDED_USER['email'],
+                    'username' => UserMock::UNSEEDED_USER['username'],
                     'roles' => [
                         [
                             'name' => Roles::USER,

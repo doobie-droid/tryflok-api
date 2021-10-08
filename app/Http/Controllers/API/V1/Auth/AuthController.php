@@ -29,10 +29,10 @@ class AuthController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'name' => ['required', 'string', 'max:255'],
+                'username' => ['required', 'max:20', 'unique:users,username'],
 				'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
 				'password' => ['required', 'string', 'confirmed'],
                 'referral_id' => ['sometimes', 'nullable','string', 'exists:users,referral_id'],
-                'role' => ['sometimes', 'required', 'string', 'regex:(creator|user)'],
 			]);
 			
 			if ($validator->fails()) {
@@ -41,7 +41,8 @@ class AuthController extends Controller
 
             $user = User::create([
                 'name' => $request->name,
-                'email' =>$request->email,
+                'email' => $request->email,
+                'username' => $request->username,
                 'password' => Hash::make($request->password),
                 'public_id' => uniqid(rand()),
                 'email_token' => Str::random(16),
@@ -56,13 +57,8 @@ class AuthController extends Controller
 
             event(new ConfirmEmailEvent($user));
             $user->assignRole(Roles::USER);
-            if (!is_null($request->role) && $request->role === Roles::CREATOR) {
-                $user->assignRole(Roles::CREATOR);
-            }
             //add wallet
-            $user->wallet()->create([
-                'public_id' => uniqid(rand()),
-            ]);
+            $user->wallet()->create([]);
             $token = JWTAuth::fromUser($user);
             $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $user->id)->first();
             return $this->respondWithSuccess("Registration successful", [
@@ -137,6 +133,7 @@ class AuthController extends Controller
                 $user = User::create([
                     'name' => $name,
                     'email' => $email,
+                    'username' => Str::random(8) . 'ymd',
                     'password' => Hash::make(Str::random(8)),
                     'public_id' => uniqid(rand()),
                     'email_token' => Str::random(16),
@@ -144,20 +141,7 @@ class AuthController extends Controller
                 ]);
                 event(new ConfirmEmailEvent($user));
                 $user->assignRole(Roles::USER);
-                $user->wallet()->create([
-                    'public_id' => uniqid(rand()),
-                ]);
-                if (!is_null($picture) && $picture !== '') {
-                    $user->assets()->create([
-                        'public_id' => uniqid(rand()),
-                        'storage_provider' => 'google',
-                        'storage_provider_id' => Str::random(8),
-                        'url' => $picture,
-                        'purpose' => 'profile-picture',
-                        'asset_type' => 'image',
-                        'mime_type' => 'image/jpeg',
-                    ]);
-                }
+                $user->wallet()->create([]);
             }
 
             $token = JWTAuth::fromUser($user);
@@ -176,16 +160,15 @@ class AuthController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-				'email' => ['required', 'string', 'email', 'max:255'],
+				'username' => ['required', 'string', 'max:255'],
 				'password' => ['required', 'string',],
-                'role' => ['sometimes', 'required', 'string', 'regex:(creator|user)'],
 			]);
 			
 			if ($validator->fails()) {
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
     
-			if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
+			if(Auth::attempt(['username' => $request->username, 'password' => $request->password]) || Auth::attempt(['username' => $request->username, 'password' => $request->password])){
 				$user = Auth::user();
                 if (!is_null($request->role) && $request->role === Roles::CREATOR) {
                     if (!$user->hasRole(Roles::CREATOR)) {
@@ -195,9 +178,7 @@ class AuthController extends Controller
 				$token = JWTAuth::fromUser($user);
                 $wallet = $user->wallet()->first();
                 if (is_null($wallet)) {
-                    $user->wallet()->create([
-                        'public_id' => uniqid(rand()),
-                    ]);
+                    $user->wallet()->create([]);
                 }
                 $user = User::with('roles', 'profile_picture', 'wallet')->where('id', Auth::user()->id)->first();
 				return $this->respondWithSuccess("Login successful", [
