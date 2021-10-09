@@ -190,8 +190,46 @@ class AssetController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
+            $assets = [];
+
+            foreach ($request->file('files') as $file) {
+                //create the asset on the table
+                $filename = date('Ymd') . Str::random(16);
+                $originalName = $file->getClientOriginalName();
+                $ext = $file->getClientOriginalExtension();
+                $folder = join_path('assets', Str::random(16) . date('Ymd'), 'pdf');
+                $fullFilename = join_path($folder, $filename . "." . $ext);
+                $url = join_path(env('PRIVATE_AWS_CLOUDFRONT_URL'), $fullFilename);
+
+                $asset = Asset::create([
+                    'url' => $url,
+                    'storage_provider' => 'private-s3',
+                    'storage_provider_id' => $fullFilename,
+                    'asset_type' => 'pdf',
+                    'mime_type' => $file->getMimeType(),
+                ]);
+                //append to assets array
+                $asset->original_name = $originalName;
+                $assets[] = $asset;
+                //delegate upload to job
+                $path = Storage::disk('local')->put('uploads/pdf', $file);
+                $uploadedFilePath = storage_path() . "/app/" . $path;
+                GeneratePdfResolutionsJob::dispatch([
+                    'asset' => $asset,
+                    'filepath' => $uploadedFilePath,
+                    'filename' => $filename,
+                    'full_file_name' => $fullFilename,
+                ]);
+            }
+
+            return $this->respondWithSuccess("Assets have been created successfully.", [
+                'assets' => $assets,
+            ]);
         }  catch(\Exception $exception) {
             Log::error($exception);
+            foreach ($assets as $asset) {
+                $asset->delete();
+            }
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
 		}
     }
