@@ -40,22 +40,22 @@ class Video implements ShouldQueue
      */
     public function handle()
     {
-        $baseUrl = join_path(env('PUBLIC_AWS_CLOUDFRONT_URL'), $this->folder);
+        $baseUrl = join_path(env('PRIVATE_AWS_CLOUDFRONT_URL'), $this->folder);
         //upload encryption key
         $nameParts = explode('/', $this->hls_key_filepath);
         $filename = end($nameParts);
         $fullFilename = join_path($this->folder, $filename);
-        Storage::disk('public_s3')->put($fullFilename, file_get_contents($this->hls_key_filepath));
+        Storage::disk('private_s3')->put($fullFilename, file_get_contents($this->hls_key_filepath));
         unlink($this->hls_key_filepath);
         //upload raw file
-        Storage::disk('public_s3')->put($this->full_file_name, file_get_contents($this->filepath));
+        Storage::disk('private_s3')->put($this->full_file_name, file_get_contents($this->filepath));
         unlink($this->filepath);
         //upload ts files
         foreach ($this->ts_files as $tsPath) {
             $nameParts = explode('/', $tsPath);
             $filename = end($nameParts);
             $fullFilename = join_path($this->folder, $filename);
-            Storage::disk('public_s3')->put($fullFilename, file_get_contents($tsPath));
+            Storage::disk('private_s3')->put($fullFilename, file_get_contents($tsPath));
             unlink($tsPath);
         }
         //upload resolutions
@@ -63,7 +63,7 @@ class Video implements ShouldQueue
             $nameParts = explode('/', $data['filepath']);
             $filename = end($nameParts);
             $fullFilename = join_path($this->folder, $filename);
-            Storage::disk('public_s3')->put($fullFilename, file_get_contents( $data['filepath']));
+            Storage::disk('private_s3')->put($fullFilename, file_get_contents( $data['filepath']));
             unlink( $data['filepath']);
             $this->asset->resolutions()->create([
                 'storage_provider' => 'private-s3',
@@ -76,7 +76,7 @@ class Video implements ShouldQueue
                 $nameParts = explode('/', $tsPath);
                 $filename = end($nameParts);
                 $fullFilename = join_path($this->folder, $filename);
-                Storage::disk('public_s3')->put($fullFilename, file_get_contents($tsPath));
+                Storage::disk('private_s3')->put($fullFilename, file_get_contents($tsPath));
                 unlink($tsPath);
             }
         }
