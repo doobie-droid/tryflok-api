@@ -22,7 +22,7 @@ class CreateAssetResolutionsTable extends Migration
             $table->string('resolution')->nullable(); // 480, 720, 1080
             $table->string('storage_provider')->nullable();
             $table->string('storage_provider_id')->nullable();
-            $table->string('encryption_key');
+            $table->string('encryption_key')->nullable();
             $table->timestamps();
         });
     }

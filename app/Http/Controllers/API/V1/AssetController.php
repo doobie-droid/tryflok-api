@@ -118,6 +118,41 @@ class AssetController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
+            $assets = [];
+            foreach ($request->file('files') as $file) {
+                //create the asset on the table
+                $filename = date('Ymd') . Str::random(16);
+                $originalName = $file->getClientOriginalName();
+                $ext = $file->getClientOriginalExtension();
+                $folder = join_path('assets', Str::random(16) . date('Ymd'), 'video');
+                $fullFilename = join_path($folder, $filename . ".m3u8");
+                $url = join_path(env('PUBLIC_AWS_CLOUDFRONT_URL'), $fullFilename);
+
+                $asset = Asset::create([
+                    'url' => $url,
+                    'storage_provider' => 'private-s3',
+                    'storage_provider_id' => $fullFilename,
+                    'asset_type' => 'video',
+                    'mime_type' => 'application/vnd.apple.mpegurl',
+                ]);
+                //append to assets array
+                $asset->original_name = $originalName;
+                $assets[] = $asset;
+                //delegate upload to job
+                $path = Storage::disk('local')->put('uploads/videos', $file);
+                $uploadedFilePath = storage_path() . "/app/" . $path;
+                GenerateVideoResolutionsJob::dispatch([
+                    'asset' => $asset,
+                    'filepath' => $uploadedFilePath,
+                    'folder' => $folder,
+                    'ext' => $ext,
+                    'filename' => $filename,
+                    'full_file_name' => $fullFilename,
+                ]);
+            }
+            return $this->respondWithSuccess("Assets have been created successfully.", [
+                'assets' => $assets,
+            ]);
         }  catch(\Exception $exception) {
             Log::error($exception);
             foreach ($assets as $asset) {

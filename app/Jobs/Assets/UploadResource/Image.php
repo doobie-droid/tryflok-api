@@ -26,6 +26,7 @@ class Image implements ShouldQueue
         $this->filepath = $data['filepath'];
         $this->filename = $data['filename'];
         $this->ext = $data['ext'];
+        $this->folder = $data['folder'];
         $this->full_file_name = $data['full_file_name'];
     }
 
