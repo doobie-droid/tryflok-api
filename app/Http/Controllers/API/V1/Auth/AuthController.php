@@ -170,11 +170,6 @@ class AuthController extends Controller
     
 			if(Auth::attempt(['email' => $request->username, 'password' => $request->password]) || Auth::attempt(['username' => $request->username, 'password' => $request->password])){
 				$user = Auth::user();
-                if (!is_null($request->role) && $request->role === Roles::CREATOR) {
-                    if (!$user->hasRole(Roles::CREATOR)) {
-                        $user->assignRole(Roles::CREATOR);
-                    }
-                }
 				$token = JWTAuth::fromUser($user);
                 $wallet = $user->wallet()->first();
                 if (is_null($wallet)) {
