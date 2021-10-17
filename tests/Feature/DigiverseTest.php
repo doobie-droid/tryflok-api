@@ -35,6 +35,8 @@ class DigiverseTest extends TestCase
                 'approved_by_admin',
                 'show_only_in_collections',
                 'views',
+                'ratings_count',
+                'ratings_average',
                 'cover' => [
                     'url',
                     'asset_type',

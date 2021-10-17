@@ -20,8 +20,9 @@ class CollectionResource extends JsonResource
         unset($parent["child_collections"]);
         unset($parent["ratings_avg_rating"]);
         return array_merge($parent , [
+            'ratings_count' => $this->ratings->where('rating', '>', 0)->count(),
+            'ratings_average' => $this->ratings->where('rating', '>', 0)->avg('rating'),
             'cover' => !is_null($this->cover) ? $this->cover->first() : null,
-            'ratings' => $this->ratings_avg_rating,
             'owner' => new UserResource($this->owner),
             'prices' => $this->prices,
             'tags' => $this->tags,

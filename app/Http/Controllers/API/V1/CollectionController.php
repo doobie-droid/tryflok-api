@@ -116,6 +116,11 @@ class CollectionController extends Controller
 		}
     }
 
+    public function updateDigiverse(Request $request, $id)
+    {
+
+    }
+
     public function update(Request $request, $public_id)
     {
         try {
