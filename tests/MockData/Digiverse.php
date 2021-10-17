@@ -16,7 +16,7 @@ class Digiverse {
             "120566de-0361-4d66-b458-321d4ede62a9"
         ],
         "cover" => [
-            "asset_id" => "27c65768-c6c1-4875-872d-616c88062a7a",
+            "asset_id" => "",
         ],
     ];
 }

@@ -12,11 +12,12 @@ use App\Models\User;
 use App\Models\Collection;
 use App\Models\Benefactor;
 use App\Models\Tag;
+use App\Models\Asset;
 
 class DigiverseTest extends TestCase
 {
     use DatabaseTransactions;
-    const STANDARD_DIDIGVERSE_RESPONSE = [
+    const STANDARD_DIGIVERSE_RESPONSE = [
         'status_code',
         'message',
         'data' => [
@@ -66,9 +67,19 @@ class DigiverseTest extends TestCase
     {
         $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
         $this->be($user);
-        $response = $this->json('POST', '/api/v1/digiverses', DigiverseMock::UNSEEDED_DIGIVERSE);
+        $coverAsset = Asset::create([
+            'url' => 'https://d14qbv6p3sxwfx.cloudfront.net/assets/NIDJyTFyaTcG1bDJ20211008/image/20211008GRZtNTbuzBJYK0FP.png',
+            'storage_provider' => 'public-s3',
+            'storage_provider_id' => 'assets/NIDJyTFyaTcG1bDJ2',
+            'asset_type' => 'image',
+            'mime_type' => 'image/png',
+        ]);
+
+        $request = DigiverseMock::UNSEEDED_DIGIVERSE;
+        $request['cover']['asset_id'] = $coverAsset->id;
+        $response = $this->json('POST', '/api/v1/digiverses', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(self::STANDARD_DIDIGVERSE_RESPONSE);
+        ->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
 
         $this->assertDatabaseHas('collections', [
             'title' => DigiverseMock::UNSEEDED_DIGIVERSE['title'],
@@ -100,7 +111,7 @@ class DigiverseTest extends TestCase
         $this->assertDatabaseHas('assetables', [
             'assetable_type' => 'collection',
             'assetable_id' => $digiverse->id,
-            'asset_id' => DigiverseMock::UNSEEDED_DIGIVERSE['cover']['asset_id'],
+            'asset_id' => $coverAsset->id,
             'purpose' => 'cover',
         ]);
         $this->assertTrue($digiverse->cover()->count() === 1);
@@ -140,11 +151,22 @@ class DigiverseTest extends TestCase
     {
         $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
         $this->be($user);
-        $response = $this->json('POST', '/api/v1/digiverses', DigiverseMock::UNSEEDED_DIGIVERSE);
+
+        $coverAsset = Asset::create([
+            'url' => 'https://d14qbv6p3sxwfx.cloudfront.net/assets/NIDJyTFyaTcG1bDJ20211008/image/20211008GRZtNTbuzBJYK0FP.png',
+            'storage_provider' => 'public-s3',
+            'storage_provider_id' => 'assets/NIDJyTFyaTcG1bDJ2',
+            'asset_type' => 'image',
+            'mime_type' => 'image/png',
+        ]);
+
+        $request = DigiverseMock::UNSEEDED_DIGIVERSE;
+        $request['cover']['asset_id'] = $coverAsset->id;
+        $response = $this->json('POST', '/api/v1/digiverses', $request);
         $response->assertStatus(200);
 
         $digiverse = Collection::where('title', DigiverseMock::UNSEEDED_DIGIVERSE['title'])->first();
         $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}");
-        $response->assertJsonStructure(self::STANDARD_DIDIGVERSE_RESPONSE);
+        $response->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
     }
 }
