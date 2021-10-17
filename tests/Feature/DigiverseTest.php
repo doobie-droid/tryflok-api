@@ -16,56 +16,57 @@ use App\Models\Tag;
 class DigiverseTest extends TestCase
 {
     use DatabaseTransactions;
-    
+    const STANDARD_DIDIGVERSE_RESPONSE = [
+        'status_code',
+        'message',
+        'data' => [
+            'digiverse' => [
+                'id',
+                'title',
+                'description',
+                'owner' => [
+                    'id',
+                    'name',
+                    'email',
+                    'username',
+                ],
+                'type',
+                'is_available',
+                'approved_by_admin',
+                'show_only_in_collections',
+                'views',
+                'cover' => [
+                    'url',
+                    'asset_type',
+                    'encryption_key',
+                ],
+                'prices' => [
+                    [
+                        'id',
+                        'amount',
+                        'currency',
+                        'interval',
+                        'interval_amount'
+                    ]
+                ],
+                'tags' => [
+                    [
+                        'id',
+                        'type',
+                        'name',
+                    ]
+                ],
+            ]
+        ]
+    ];
+
     public function testCreateDigiverseWorksWithCorrectData()
     {
         $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
         $this->be($user);
         $response = $this->json('POST', '/api/v1/digiverses', DigiverseMock::UNSEEDED_DIGIVERSE);
         $response->assertStatus(200)
-        ->assertJsonStructure([
-            'status_code',
-            'message',
-            'data' => [
-                'digiverse' => [
-                    'id',
-                    'title',
-                    'description',
-                    'owner' => [
-                        'id',
-                        'name',
-                        'email',
-                        'username',
-                    ],
-                    'type',
-                    'is_available',
-                    'approved_by_admin',
-                    'show_only_in_collections',
-                    'views',
-                    'cover' => [
-                        'url',
-                        'asset_type',
-                        'encryption_key',
-                    ],
-                    'prices' => [
-                        [
-                            'id',
-                            'amount',
-                            'currency',
-                            'interval',
-                            'interval_amount'
-                        ]
-                    ],
-                    'tags' => [
-                        [
-                            'id',
-                            'type',
-                            'name',
-                        ]
-                    ],
-                ]
-            ]
-        ]);
+        ->assertJsonStructure(self::STANDARD_DIDIGVERSE_RESPONSE);
 
         $this->assertDatabaseHas('collections', [
             'title' => DigiverseMock::UNSEEDED_DIGIVERSE['title'],
@@ -131,5 +132,17 @@ class DigiverseTest extends TestCase
         $testData['cover']['asset_id'] = '263ec55f-2bfc-4259-a66d-08ceed037f74';
         $response = $this->json('POST', '/api/v1/digiverses',  $testData);
         $response->assertStatus(400);
+    }
+
+    public function testRetrieveDigiverseWorks()
+    {
+        $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
+        $this->be($user);
+        $response = $this->json('POST', '/api/v1/digiverses', DigiverseMock::UNSEEDED_DIGIVERSE);
+        $response->assertStatus(200);
+
+        $digiverse = Collection::where('title', DigiverseMock::UNSEEDED_DIGIVERSE['title'])->first();
+        $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}");
+        $response->assertJsonStructure(self::STANDARD_DIDIGVERSE_RESPONSE);
     }
 }

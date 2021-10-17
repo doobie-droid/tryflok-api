@@ -93,159 +93,27 @@ class CollectionController extends Controller
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
 		}
     }
-    public function create(Request $request)
+
+    public function getDigiverse(Request $request, $id)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'title' => ['required', 'string'],
-                'description' => ['sometimes', 'string'],
-                'price' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:9999.99'],
-                'price_interval' => ['sometimes', 'nullable', 'string', 'regex:(one-off|month)'],
-                'price_interval_amount' => ['sometimes','min:1', 'max:1','numeric', 'integer'],
-                'cover' => ['required', 'image'],
-                'type' => ['required', 'string', 'regex:(book|series|channel|collectible)'],
-                'contents' => ['sometimes'],
-                'collections' => ['sometimes',],
-                'contents.*' => ['sometimes','required', 'string', 'exists:contents,public_id'],
-                'collections.*' => ['sometimes','required','exists:collections,public_id'],
-                'categories' => ['sometimes', 'required'],
-                'categories.*' => ['sometimes', 'string', 'exists:categories,public_id'],
-                'benefactors' => ['required'],
-                'benefactors.*.public_id' => ['required', 'exists:users,public_id'],
-                'is_available' => ['required', 'integer', 'regex:(0|1)'],
-                'show_only_in_collections' => ['required', 'integer', 'regex:(0|1)'],
+            $validator = Validator::make(['id' => $id], [
+                'id' => ['required', 'string', 'exists:collections,id'],
             ]);
 
             if ($validator->fails()) {
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
-            $reworkedBenefactors = [];
-            $totalShare = 0;
-            $creatorInBenefactorList = false;
-            foreach ($request->benefactors as $key => $data) {
-                if (array_key_exists("public_id", $data)) {
-                    $reworkedBenefactors["k" . $key]['public_id'] = $data['public_id'];
-                    if ($data['public_id'] === $request->user()->public_id) {
-                        $creatorInBenefactorList = true;
-                    }
-                }
-
-                if (array_key_exists("share", $data)) {
-                    $reworkedBenefactors["k" . $key]['share'] = $data['share'];
-                    $totalShare = bcadd($totalShare, $data['share'], 2);
-                }
-            }
-            //make sure that the share add up to 100
-            if ((int)$totalShare !== 100) {
-                return $this->respondBadRequest("Benefactor share numbers do not add up to 100");
-            }
-            //make sure the creator of this content/collection is included in benefactor list
-            if ($creatorInBenefactorList === false) {
-                return $this->respondBadRequest("Creator of content not included in benefactor list");
-            }
-            $reworkedBenefactors2 = [];
-            foreach ($reworkedBenefactors as $key => $data) {
-                $reworkedBenefactors2[] = $data;
-            }
-            
-            $user = $request->user();
-
-            $collection = Collection::create([
-                'public_id' => uniqid(rand()),
-                'title' => $request->title,
-                'description' => $request->description,
-                'user_id' => $user->id,
-                'type' => $request->type,
-                'is_available' => $request->is_available,
-                'show_only_in_collections' => $request->show_only_in_collections,
+            $digiverse = Collection::where('id', $id)->first();
+            return $this->respondWithSuccess("Digiverse retrieved successfully.", [
+                'digiverse' => new CollectionResource($digiverse),
             ]);
 
-            foreach ($reworkedBenefactors2 as $benefactorData) {
-                $bUM = User::where('public_id', $benefactorData['public_id'])->first();
-                $collection->benefactors()->create([
-                    'user_id' => $bUM->id,
-                    'share' => $benefactorData['share'],
-                ]);
-            }
-            if (!is_null($request->categories)) {
-                $categories = Category::whereIn('public_id', array_unique($request->categories))->get();
-            } else {
-                $categories = [];
-            }
-            
-            foreach ($categories as $category) {
-                $collection->categories()->attach($category->id);
-            }
-
-            if (isset($request->contents) && !is_null($request->contents) && is_array($request->contents)) {
-                $contents = Content::whereIn('public_id', array_unique($request->contents))->get();
-                foreach ($contents as $content) {
-                    //ensure the user owns the content
-                    if ($content->user_id === $user->id) {
-                        $collection->contents()->attach($content->id);
-                    }
-                }
-            }
-            
-
-            if (isset($request->collections) && !is_null($request->collections) && is_array($request->collections)) {
-                $collections = Collection::whereIn('public_id', array_unique($request->collections))->get();
-                foreach ($collections as $childCollection) {
-                    //ensure the user owns the collection
-                    if ($childCollection->user_id === $user->id ) {
-                        $collection->childCollections()->attach($childCollection->id);
-                    }
-                }
-            }
-
-            //add price
-            if (isset($request->price)) {
-                $price = $collection->prices()->create([
-                    'public_id' => uniqid(rand()),
-                    'amount' => $request->price,
-                    'interval' => 'one-off',
-                    'interval_amount' => 1,
-                    'currency' => 'USD',
-                ]);
-
-                if (isset($request->price_interval)) {
-                    $price->interval = $request->price_interval;
-                    $price->save();
-                }
-
-                if (isset($request->price_interval_amount) && $request->price_interval_amount > 0) {
-                    $price->interval_amount = $request->price_interval_amount;
-                    $price->save();
-                }
-            }
-    
-
-            $storage = new Storage('cloudinary');
-            if ($request->hasFile('cover')) {
-                $response = $storage->upload($request->file('cover')->getRealPath(), 'collections/' . $collection->public_id . '/cover');
-                $collection->assets()->create([
-                    'public_id' => uniqid(rand()),
-                    'storage_provider' => 'cloudinary',
-                    'storage_provider_id' => $response['storage_provider_id'],
-                    'url' => $response['url'],
-                    'purpose' => 'cover',
-                    'asset_type' => 'image',
-                    'mime_type' => $request->file('cover')->getMimeType(),
-                ]);
-            }
-            $collection->cover = $collection->cover();
-            $collection->contents = $collection->contents()->get();
-            $collection->prices = $collection->prices()->get();
-            $collection->categories = $collection->categories()->get();
-            $collection->benefactors = $collection->benefactors()->with('user')->get();
-            return $this->respondWithSuccess("Collection has been created successfully.", [
-                'collection' => $collection,
-            ]);
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+		}
     }
 
     public function update(Request $request, $public_id)

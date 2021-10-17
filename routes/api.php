@@ -221,6 +221,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'digiverses'], function () {
             Route::post('/', 'CollectionController@createDigiverse');
+            Route::get('/{id}', 'CollectionController@getDigiverse');
         });
 
         Route::group(['prefix' => 'reviews'], function () {
