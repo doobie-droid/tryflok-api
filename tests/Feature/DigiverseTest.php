@@ -122,4 +122,14 @@ class DigiverseTest extends TestCase
         ]);
         $this->assertTrue($digiverse->benefactors()->count() === 1);
     }
+
+    public function testCreateDigiverseDoesNotWorksWithoutCorrectData()
+    {
+        $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
+        $this->be($user);
+        $testData = DigiverseMock::UNSEEDED_DIGIVERSE;
+        $testData['cover']['asset_id'] = '263ec55f-2bfc-4259-a66d-08ceed037f74';
+        $response = $this->json('POST', '/api/v1/digiverses',  $testData);
+        $response->assertStatus(400);
+    }
 }
