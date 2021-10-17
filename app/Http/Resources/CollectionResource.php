@@ -26,7 +26,6 @@ class CollectionResource extends JsonResource
             'owner' => new UserResource($this->owner),
             'prices' => $this->prices,
             'tags' => $this->tags,
-            'collections' => self::collection($this->whenLoaded('childCollections')),
             'contents' => ContentResource::collection($this->whenLoaded('contents')),
         ]);
     }
