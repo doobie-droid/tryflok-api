@@ -167,6 +167,110 @@ class DigiverseTest extends TestCase
 
         $digiverse = Collection::where('title', DigiverseMock::UNSEEDED_DIGIVERSE['title'])->first();
         $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}");
-        $response->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
+        $response->assertStatus(200)->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
+    }
+
+    public function testUpdateDigiverseWithCorrectDataWorks()
+    {
+        $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
+        $this->be($user);
+
+        $oldCoverAsset = Asset::create([
+            'url' => 'https://d14qbv6p3sxwfx.cloudfront.net/assets/NIDJyTFyaTcG1bDJ20211008/image/20211008GRZtNTbuzBJYK0FP.png',
+            'storage_provider' => 'public-s3',
+            'storage_provider_id' => 'assets/NIDJyTFyaTcG1bDJ2',
+            'asset_type' => 'image',
+            'mime_type' => 'image/png',
+        ]);
+
+        $request = DigiverseMock::UNSEEDED_DIGIVERSE;
+        $request['cover']['asset_id'] = $oldCoverAsset->id;
+        $response = $this->json('POST', '/api/v1/digiverses', $request);
+        $response->assertStatus(200);
+
+        $digiverse = Collection::where('title', DigiverseMock::UNSEEDED_DIGIVERSE['title'])->first();
+
+        $newCoverAsset = Asset::create([
+            'url' => 'https://d14qbv6p3sxwfx.cloudfront.net/assets/NIDJyTFyaTcG1bDJ20211008/image/20211008GRZtNTbuzBJYK0FP.png',
+            'storage_provider' => 'public-s3',
+            'storage_provider_id' => 'assets/NIDJyTFyaTcG1bDJ22',
+            'asset_type' => 'image',
+            'mime_type' => 'image/png',
+        ]);
+        $request['cover']['asset_id'] = $newCoverAsset->id;
+        $request['title'] = 'The first Digiverse Updated';
+        $request['description'] = 'Testing digiverse update';
+        $request['price'] = [
+            'id' => $digiverse->prices()->first()->id,
+            'amount' => 0,
+            'interval' => 'one-off',
+            'interval_amount' => 1,
+        ];
+        $request['tags'] = [
+            [
+                'action' => 'add',
+                'id' => '2186c1d6-fea2-4746-ac46-0e4f445f7c9e',
+            ],
+            [
+                'action' => 'remove',
+                'id' => '120566de-0361-4d66-b458-321d4ede62a9',
+            ],
+        ];
+        $request['is_available'] = 1;
+        $response = $this->json('PATCH', "/api/v1/digiverses/{$digiverse->id}", $request);
+        $response->assertStatus(200)->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
+        $this->assertDatabaseHas('collections', [
+            'id' => $digiverse->id,
+            'title' => $request['title'],
+            'description' => $request['description'],
+            'user_id' => $user->id,
+            'type' => 'digiverse',
+            'is_available' => 1,
+            'approved_by_admin' => 0,
+            'show_only_in_collections' => 0,
+            'views' => 0,
+        ]);
+
+        $this->assertDatabaseHas('taggables', [
+            'tag_id' => DigiverseMock::UNSEEDED_DIGIVERSE['tags'][0],
+            'taggable_type' => 'collection',
+            'taggable_id' => $digiverse->id,
+        ]);
+        $this->assertDatabaseMissing('taggables', [
+            'tag_id' => $request['tags'][1]['id'],
+            'taggable_type' => 'collection',
+            'taggable_id' => $digiverse->id,
+        ]);
+        $this->assertDatabaseHas('taggables', [
+            'tag_id' => $request['tags'][0]['id'],
+            'taggable_type' => 'collection',
+            'taggable_id' => $digiverse->id,
+        ]);
+
+        // validate cover was changed
+        $this->assertDatabaseHas('assetables', [
+            'assetable_type' => 'collection',
+            'assetable_id' => $digiverse->id,
+            'asset_id' => $newCoverAsset->id,
+            'purpose' => 'cover',
+        ]);
+        $this->assertDatabaseMissing('assetables', [
+            'assetable_type' => 'collection',
+            'assetable_id' => $digiverse->id,
+            'asset_id' => $oldCoverAsset->id,
+        ]);
+        $this->assertDatabaseMissing('assets', [
+            'id' => $oldCoverAsset->id,
+        ]);
+
+        //validate price changed
+        $this->assertDatabaseHas('prices', [
+            'priceable_type' => 'collection',
+            'priceable_id' => $digiverse->id,
+            'amount' => $request['price']['amount'],
+            'interval' => $request['price']['interval'],
+            'interval_amount' => $request['price']['interval_amount'],
+            'currency' => 'USD',
+        ]);
     }
 }

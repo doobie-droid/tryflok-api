@@ -22,6 +22,7 @@ class CreatePricesTable extends Migration
             $table->integer('interval_amount')->default(1);
             $table->foreignUuid('continent_id')->nullable();
             $table->foreignUuid('country_id')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

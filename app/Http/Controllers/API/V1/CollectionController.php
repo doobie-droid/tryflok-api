@@ -118,7 +118,82 @@ class CollectionController extends Controller
 
     public function updateDigiverse(Request $request, $id)
     {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:collections,id'],
+                'title' => ['sometimes', 'nullable', 'string'],
+                'description' => ['sometimes', 'nullable', 'string'],
+                'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'is_available' => ['sometimes', 'numeric', 'integer', 'regex:(0|1)'],
+                'price' => ['sometimes', 'nullable',],
+                'price.id' => ['sometimes', 'exists:prices,id'],
+                'price.amount' => ['sometimes', 'min:0', 'numeric'],
+                'price.interval' => ['sometimes', 'string', 'regex:(one-off|monthly)'],
+                'price.interval_amount' => ['sometimes', 'nullable', 'min:1', 'max:1', 'numeric', 'integer'],
+                'tags' => ['sometimes',],
+                'tags.*.id' => ['required', 'string', 'exists:tags,id'],
+                'tags.*.action' => ['required', 'string', 'regex:(add|remove)'],
+            ]);
 
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $user = $request->user();
+            $digiverse = Collection::where('id', $id)->first();
+            $digiverse->fill($request->only('title', 'description', 'is_available'));
+            $digiverse->save();
+
+            if (isset($request->price) && array_key_exists('id', $request->price)) {
+                $price = $digiverse->prices()->where('id', $request->price['id'])->first();
+
+                if (array_key_exists('amount', $request->price) && !is_null($request->price['amount'])) {
+                    $price->amount = $request->price['amount'];
+                }
+
+                if (array_key_exists('interval', $request->price) && !is_null($request->price['interval'])) {
+                    $price->interval = $request->price['interval'];
+                }
+
+                if (array_key_exists('interval_amount', $request->price) && !is_null($request->price['interval_amount'])) {
+                    $price->interval_amount = $request->price['interval_amount'];
+                }
+
+                $price->save();
+            }
+
+            if (!is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
+                $oldCover = $digiverse->cover()->first();
+                $digiverse->cover()->detach($oldCover->id);
+                $oldCover->delete();
+                $digiverse->cover()->attach($request->cover['asset_id'], [
+                    'id' => Str::uuid(),
+                    'purpose' => 'cover'
+                ]);
+            }
+
+            if (isset($request->tags) && is_array($request->tags)) {
+                foreach ($request->tags as $tag) {
+                    switch ($tag['action']) {
+                        case 'add':
+                            $digiverse->tags()->attach($tag['id'], [
+                                'id' => Str::uuid(),
+                            ]);
+                            break;
+                        case 'remove':
+                            $digiverse->tags()->detach($tag['id']);
+                            break;
+                    }
+                }
+            }
+            
+            return $this->respondWithSuccess("Digiverse updated successfully.", [
+                'digiverse' => new CollectionResource($digiverse),
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
     }
 
     public function update(Request $request, $public_id)
