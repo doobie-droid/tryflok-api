@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Constants\Permissions;
 use App\Constants\Roles;
 use App\Constants\Constants;
@@ -21,10 +22,77 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder;
 use App\Jobs\Collection\DispatchContentUserablesUpdate as DispatchContentUserablesUpdateJob;
 use App\Jobs\Collection\DispatchCollectionUserablesUpdate as DispatchCollectionUserablesUpdateJob;
+use App\Rules\AssetType as AssetTypeRule;
 use App\Http\Resources\CollectionResource;
 
 class CollectionController extends Controller
 {
+    public function createDigiverse(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'title' => ['required', 'string'],
+                'description' => ['required', 'string'],
+                'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'price' => ['required',],
+                'price.amount' => ['required', 'min:0', 'numeric'],
+                'price.interval' => ['required', 'string', 'regex:(one-off|monthly)'],
+                'price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
+                'tags' => ['sometimes',],
+                'tags.*' => ['required', 'string', 'exists:tags,id'],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $user = $request->user();
+            $digiverse = Collection::create([
+                'title' => $request->title,
+                'description' => $request->description,
+                'user_id' => $user->id,
+                'type' => 'digiverse',
+                'is_available' => 0,
+                'approved_by_admin' => 0,
+                'show_only_in_collections' => 0,
+                'views' => 0,
+            ]);
+
+            $digiverse->benefactors()->create([
+                'user_id' => $user->id,
+                'share' => 100,
+            ]);
+
+            $digiverse->prices()->create([
+                'amount' => $request->price['amount'],
+                'interval' => $request->price['interval'],
+                'interval_amount' => $request->price['interval_amount'],
+            ]);
+
+            if (isset($request->tags) && is_array($request->tags)) {
+                foreach ($request->tags as $tag_id) {
+                    $digiverse->tags()->attach($tag_id, [
+                        'id' => Str::uuid(),
+                    ]);
+                }
+            }
+            
+
+            if (!is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
+                $digiverse->cover()->attach($request->cover['asset_id'], [
+                    'id' => Str::uuid(),
+                    'purpose' => 'cover'
+                ]);
+            }
+
+            return $this->respondWithSuccess("Digiverse has been created successfully.", [
+                'digiverse' => new CollectionResource($digiverse),
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
     public function create(Request $request)
     {
         try {

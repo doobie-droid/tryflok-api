@@ -4,7 +4,6 @@ namespace Tests\MockData;
 
 class User {
     const SEEDED_SUPER_ADMIN = [
-        'public_id' => '131596146048b15766bcc',
         'name' => 'Super Admin',
         'username' => 'super_admin',
         'email' => 'user1@test.com',
@@ -13,7 +12,6 @@ class User {
     ];
 
     const SEEDED_ADMIN = [
-        'public_id' => '131596146048b15f66bcc',
         'name' => 'Flok Admin',
         'username' => 'flok_admin',
         'email' => 'user2@test.com',
@@ -22,7 +20,6 @@ class User {
     ];
 
     const SEEDED_USER = [
-        'public_id' => '17716066406048b15f7b9f4',
         'name' => 'User One',
         'username' => 'user_one',
         'email' => 'user3@test.com',
@@ -31,7 +28,6 @@ class User {
     ];
 
     const SEEDED_CREATOR = [
-        'public_id' => '17846499426048b15f22584',
         'name' => 'Creator One',
         'username' => 'creator_one',
         'email' => 'user4@test.com',
@@ -40,7 +36,6 @@ class User {
     ];
 
     const SEEDED_CREATOR_2 = [
-        'public_id' => '17846499426048a15f22584',
         'name' => 'Creator Two',
         'username' => 'creator_two',
         'email' => 'user6@test.com',
@@ -49,7 +44,6 @@ class User {
     ];
 
     const SEEDED_CREATOR_3 = [
-        'public_id' => '17846499426048c15f22584',
         'name' => 'Creator Three',
         'username' => 'creator_three',
         'email' => 'user7@test.com',
@@ -58,7 +52,6 @@ class User {
     ];
 
     const SEEDED_CREATOR_4 = [
-        'public_id' => '17846499426048d15f22584',
         'name' => 'Creator Four',
         'username' => 'creator_four',
         'email' => 'user8@test.com',

@@ -21,10 +21,7 @@ class Tag extends Model
      *
      * @var array
      */
-    protected $hidden = [
-        'id',
-        'pivot',
-    ];
+    protected $hidden = [];
 
     protected $guard_name = 'api';
 

@@ -219,6 +219,10 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('/{public_id}/cover', 'CollectionController@updateCover');
         });
 
+        Route::group(['prefix' => 'digiverses'], function () {
+            Route::post('/', 'CollectionController@createDigiverse');
+        });
+
         Route::group(['prefix' => 'reviews'], function () {
             Route::post('/', 'ReviewController@create');
         });
