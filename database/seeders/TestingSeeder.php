@@ -20,6 +20,7 @@ class TestingSeeder extends Seeder
         $this->call(TagsTableSeeder::class);
         $this->call(LanguagesTableSeeder::class);
         $this->call(AssetsTableSeeder::class);
+        $this->call(CollectionsTableSeeder::class);
         // $this->call(ContentSeeder::class);
         // $this->call(ReviewsTableSeeder::class);
     }

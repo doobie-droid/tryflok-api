@@ -23,11 +23,14 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
+            'id' => $this->faker->unique()->uuid,
             'name' => $this->faker->name,
             'email' => $this->faker->unique()->safeEmail,
-            'email_verified_at' => now(),
+            'username' => $this->faker->username,
+            'bio' => $this->faker->sentence($nbWords = 20, $variableNbWords = true),
+            'email_verified' => 1,
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-            'remember_token' => Str::random(10),
+            'referral_id' => strtoupper(Str::random(6)) . "-" . date('Ymd'),
         ];
     }
 
@@ -40,7 +43,7 @@ class UserFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'email_verified_at' => null,
+                'email_verified' => 0,
             ];
         });
     }

@@ -13,6 +13,7 @@ use App\Models\Collection;
 use App\Models\Benefactor;
 use App\Models\Tag;
 use App\Models\Asset;
+use App\Constants\Roles;
 
 class DigiverseTest extends TestCase
 {
@@ -65,15 +66,10 @@ class DigiverseTest extends TestCase
 
     public function testCreateDigiverseWorksWithCorrectData()
     {
-        $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
+        $user = User::factory()->create();
+        $user->assignRole(Roles::USER);
         $this->be($user);
-        $coverAsset = Asset::create([
-            'url' => 'https://d14qbv6p3sxwfx.cloudfront.net/assets/NIDJyTFyaTcG1bDJ20211008/image/20211008GRZtNTbuzBJYK0FP.png',
-            'storage_provider' => 'public-s3',
-            'storage_provider_id' => 'assets/NIDJyTFyaTcG1bDJ2',
-            'asset_type' => 'image',
-            'mime_type' => 'image/png',
-        ]);
+        $coverAsset = Asset::factory()->create();
 
         $request = DigiverseMock::UNSEEDED_DIGIVERSE;
         $request['cover']['asset_id'] = $coverAsset->id;
@@ -139,26 +135,23 @@ class DigiverseTest extends TestCase
 
     public function testCreateDigiverseDoesNotWorksWithoutCorrectData()
     {
-        $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
+        $user = User::factory()->create();
+        $user->assignRole(Roles::USER);
         $this->be($user);
         $testData = DigiverseMock::UNSEEDED_DIGIVERSE;
-        $testData['cover']['asset_id'] = '263ec55f-2bfc-4259-a66d-08ceed037f74';
+        $cover = Asset::factory()->video()->create();
+        $testData['cover']['asset_id'] = $cover->id;
         $response = $this->json('POST', '/api/v1/digiverses',  $testData);
         $response->assertStatus(400);
     }
 
     public function testRetrieveDigiverseWorks()
     {
-        $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
+        $user = User::factory()->create();
+        $user->assignRole(Roles::USER);
         $this->be($user);
 
-        $coverAsset = Asset::create([
-            'url' => 'https://d14qbv6p3sxwfx.cloudfront.net/assets/NIDJyTFyaTcG1bDJ20211008/image/20211008GRZtNTbuzBJYK0FP.png',
-            'storage_provider' => 'public-s3',
-            'storage_provider_id' => 'assets/NIDJyTFyaTcG1bDJ2',
-            'asset_type' => 'image',
-            'mime_type' => 'image/png',
-        ]);
+        $coverAsset = Asset::factory()->create();
 
         $request = DigiverseMock::UNSEEDED_DIGIVERSE;
         $request['cover']['asset_id'] = $coverAsset->id;
@@ -175,13 +168,7 @@ class DigiverseTest extends TestCase
         $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
         $this->be($user);
 
-        $oldCoverAsset = Asset::create([
-            'url' => 'https://d14qbv6p3sxwfx.cloudfront.net/assets/NIDJyTFyaTcG1bDJ20211008/image/20211008GRZtNTbuzBJYK0FP.png',
-            'storage_provider' => 'public-s3',
-            'storage_provider_id' => 'assets/NIDJyTFyaTcG1bDJ2',
-            'asset_type' => 'image',
-            'mime_type' => 'image/png',
-        ]);
+        $oldCoverAsset = Asset::factory()->create();
 
         $request = DigiverseMock::UNSEEDED_DIGIVERSE;
         $request['cover']['asset_id'] = $oldCoverAsset->id;
@@ -190,13 +177,7 @@ class DigiverseTest extends TestCase
 
         $digiverse = Collection::where('title', DigiverseMock::UNSEEDED_DIGIVERSE['title'])->first();
 
-        $newCoverAsset = Asset::create([
-            'url' => 'https://d14qbv6p3sxwfx.cloudfront.net/assets/NIDJyTFyaTcG1bDJ20211008/image/20211008GRZtNTbuzBJYK0FP.png',
-            'storage_provider' => 'public-s3',
-            'storage_provider_id' => 'assets/NIDJyTFyaTcG1bDJ22',
-            'asset_type' => 'image',
-            'mime_type' => 'image/png',
-        ]);
+        $newCoverAsset = Asset::factory()->create();
         $request['cover']['asset_id'] = $newCoverAsset->id;
         $request['title'] = 'The first Digiverse Updated';
         $request['description'] = 'Testing digiverse update';
