@@ -9,7 +9,7 @@ use App\Models\Price;
 use App\Models\User;
 use Tests\MockData\User as UserMock;
 
-class CollectionsTableSeeder extends Seeder
+class DigiverseTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.

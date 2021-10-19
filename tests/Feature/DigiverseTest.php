@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 use Tests\MockData\User as UserMock;
 use Tests\MockData\Digiverse as DigiverseMock;
@@ -13,6 +14,7 @@ use App\Models\Collection;
 use App\Models\Benefactor;
 use App\Models\Tag;
 use App\Models\Asset;
+use App\Models\Price;
 use App\Constants\Roles;
 
 class DigiverseTest extends TestCase
@@ -151,14 +153,19 @@ class DigiverseTest extends TestCase
         $user->assignRole(Roles::USER);
         $this->be($user);
 
-        $coverAsset = Asset::factory()->create();
+        $digiverse = Collection::factory()
+        ->for($user, 'owner')
+        ->hasAttached(Asset::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+        ])
+        ->hasAttached(Tag::factory()->count(1), [
+            'id' => Str::uuid(),
+        ])
+        ->has(Price::factory()->subscription()->count(1))
+        ->create();
 
-        $request = DigiverseMock::UNSEEDED_DIGIVERSE;
-        $request['cover']['asset_id'] = $coverAsset->id;
-        $response = $this->json('POST', '/api/v1/digiverses', $request);
-        $response->assertStatus(200);
-
-        $digiverse = Collection::where('title', DigiverseMock::UNSEEDED_DIGIVERSE['title'])->first();
         $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}");
         $response->assertStatus(200)->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
     }
