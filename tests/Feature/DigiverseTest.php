@@ -66,7 +66,7 @@ class DigiverseTest extends TestCase
         ]
     ];
 
-    public function testCreateDigiverseWorksWithCorrectData()
+    public function test_create_digiverse_works_with_correct_data()
     {
         $user = User::factory()->create();
         $user->assignRole(Roles::USER);
@@ -135,7 +135,7 @@ class DigiverseTest extends TestCase
         $this->assertTrue($digiverse->benefactors()->count() === 1);
     }
 
-    public function testCreateDigiverseDoesNotWorksWithoutCorrectData()
+    public function test_create_digiverse_does_not_work_without_correct_data()
     {
         $user = User::factory()->create();
         $user->assignRole(Roles::USER);
@@ -147,7 +147,7 @@ class DigiverseTest extends TestCase
         $response->assertStatus(400);
     }
 
-    public function testRetrieveDigiverseWorks()
+    public function test_retrieve_digiverse_works()
     {
         $user = User::factory()->create();
         $user->assignRole(Roles::USER);
@@ -155,6 +155,7 @@ class DigiverseTest extends TestCase
 
         $digiverse = Collection::factory()
         ->for($user, 'owner')
+        ->digiverse()
         ->hasAttached(Asset::factory()->count(1),
         [
             'id' => Str::uuid(),
@@ -175,7 +176,7 @@ class DigiverseTest extends TestCase
         $response->assertStatus(200)->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
     }
 
-    public function testUpdateDigiverseWithCorrectDataWorks()
+    public function test_update_digiverse_with_correct_data_works()
     {
         $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
         $this->be($user);

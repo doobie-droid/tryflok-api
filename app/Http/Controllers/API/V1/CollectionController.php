@@ -33,7 +33,7 @@ class CollectionController extends Controller
             $validator = Validator::make($request->all(), [
                 'title' => ['required', 'string'],
                 'description' => ['required', 'string'],
-                'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'cover.asset_id' => ['required', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'price' => ['required',],
                 'price.amount' => ['required', 'min:0', 'numeric'],
                 'price.interval' => ['required', 'string', 'regex:(one-off|monthly)'],
@@ -77,13 +77,10 @@ class CollectionController extends Controller
                 }
             }
             
-
-            if (!is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
-                $digiverse->cover()->attach($request->cover['asset_id'], [
-                    'id' => Str::uuid(),
-                    'purpose' => 'cover'
-                ]);
-            }
+            $digiverse->cover()->attach($request->cover['asset_id'], [
+                'id' => Str::uuid(),
+                'purpose' => 'cover'
+            ]);
 
             return $this->respondWithSuccess("Digiverse has been created successfully.", [
                 'digiverse' => new CollectionResource($digiverse),

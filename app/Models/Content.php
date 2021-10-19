@@ -26,12 +26,7 @@ class Content extends Model
      *
      * @var array
      */
-    protected $hidden = [
-        'id',
-        'language_id',
-        'user_id',
-        'pivot',
-    ];
+    protected $hidden = [];
 
     protected $guard_name = 'api';
 
@@ -57,7 +52,7 @@ class Content extends Model
 
     public function assets()
     {
-        return $this->morphToMany(Asset::class, 'assetable');
+        return $this->morphToMany(Asset::class, 'assetable')->wherePivot('purpose', 'content-asset');
     }
 
     public function cover()
@@ -95,9 +90,9 @@ class Content extends Model
         return $this->morphMany(Userable::class, 'userable');
     }
 
-    public function categories()
+    public function tags()
     {
-        return $this->morphToMany(Category::class, 'categorable');
+        return $this->morphToMany(Tag::class, 'taggable');
     }
 
     public function carts()

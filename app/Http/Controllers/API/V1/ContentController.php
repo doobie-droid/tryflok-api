@@ -6,242 +6,107 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Constants\Permissions;
 use App\Constants\Roles;
 use App\Constants\Constants;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
+use App\Models\Collection;
 use App\Models\Content;
-use App\Models\Language;
 use App\Models\Price;
 use App\Models\Review;
 use App\Models\Userable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder;
-use App\Jobs\Content\Add as AddContentJob;
-use App\Jobs\Content\Edit as EditContentJob;
+use App\Rules\AssetType as AssetTypeRule;
 use App\Http\Resources\ContentResource;
-use App\Jobs\Dash as DashJob;
 
 class ContentController extends Controller
 {
-    public function dashVideoUpload(Request $request) {
-        try {
-            $validator = Validator::make($request->all(), [
-                'video' => ['required', 'file',],
-            ]);
-            $path = Storage::disk('public')->put('upload', $request->video);
-            DashJob::dispatch([
-                'resource_path' => public_path() . '/' . $path,
-            ]);
-            return $this->respondWithSuccess("Content has been queued for upload. It would be uploaded shortly");
-        } catch(\Exception $exception) {
-            Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
-    }
-
-    private function encryptData($message, $key)
-    {
-        $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-        file_put_contents(public_path() . '/ed/nonce', $nonce);
-        file_put_contents(public_path() . '/ed/nonce-base64', base64_encode($nonce));
-        file_put_contents(public_path() . '/ed/nonce-length', SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-
-        $crypt = sodium_crypto_secretbox(
-            $message,
-            $nonce,
-            $key
-        );
-        file_put_contents(public_path() . '/ed/crypt', $crypt);
-        file_put_contents(public_path() . '/ed/crypt-base64', base64_encode($crypt));
-        return base64_encode(
-            $nonce .
-            $crypt
-        );
-    }
-
-    private function decryptData($encrypted, $key)
-    {
-        $decoded = base64_decode($encrypted);
-        $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
-        $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, NULL, '8bit');
-
-        return sodium_crypto_secretbox_open(
-            $ciphertext,
-            $nonce,
-            $key
-        );
-    }
-
-    public function generateKey()
-    {
-        $keypair = sodium_crypto_box_keypair();
-        $publicKey = sodium_crypto_box_publickey($keypair);
-        return $this->respondWithSuccess("keys",[
-            //'private_plain' => $keypair,
-            'private_b64' => base64_encode($keypair),
-            //'public_plain' => $publicKey,
-            'public_b64' => base64_encode($publicKey),
-        ]);
-    }
-    public function testEncryption(Request $request)
-    {
-        $key = sodium_crypto_secretbox_keygen();
-        file_put_contents(public_path() . '/ed/key', $key);
-        file_put_contents(public_path() . '/ed/key-base64', base64_encode($key));
-        //original files
-        $imagePath = public_path() . '/ued/1.jpg';
-        $pdfPath = public_path() . '/ued/1.pdf';
-        $audioPath = public_path() . '/ued/canon.mp3';
-
-        //encrypted path
-        $encImagePath = public_path() . '/ed/1.imge';
-        $encPdfPath = public_path() . '/ed/1.pdfe';
-        $encAudioPath = public_path() . '/ed/1.aude';
-
-        //decrypted path
-        $decImagePath = public_path() . '/dd/1.jpg';
-        $decPdfPath = public_path() . '/dd/1.pdf';
-        $decAudioPath = public_path() . '/dd/1.mp3';
-
-        //generate base64 of assets
-        $image = file_get_contents($imagePath);
-        $imageB64 = base64_encode($image);
-
-       // $pdf = file_get_contents($pdfPath);
-       // $pdfB64 = base64_encode($pdf);
-
-       // $audio = file_get_contents($audioPath);
-       // $audioB64 = base64_encode($audio);
-           
-        //encrypt base64 string
-        $encImage = $this->encryptData($imageB64, $key);
-        //$encPdf = $this->encryptData($pdfB64, $key);
-       // $encAudio = $this->encryptData($audioB64, $key);
-
-        //save encrypted string to file
-        file_put_contents($encImagePath, $encImage);
-        //file_put_contents($encPdfPath, $encPdf);
-       // file_put_contents($encAudioPath, $encAudio);
-
-        //decrypt string
-        $decImageBase64 = $this->decryptData($encImage, $key);
-        //$decPdfBase64 = $this->decryptData($encPdf, $key);
-        //$decAudioBase64 = $this->decryptData($encAudio, $key);
-
-        //save decrypted to file
-        file_put_contents($decImagePath, base64_decode($decImageBase64));
-        //file_put_contents($decPdfPath, base64_decode($decPdfBase64));
-       // file_put_contents($decAudioPath, base64_decode($decAudioBase64));
-
-        return "Hello encryption";
-    }
-
     public function create(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
                 'title' => ['required', 'string'],
-                'summary' => ['sometimes', 'string'],
-                'price' => ['required', 'numeric', 'min:0', 'max:9999.99'],
-                'cover' => ['required', 'image', 'max:1024'],//1MB 
-                'type' => ['required', 'string', 'regex:(book|audio|video)'],
-                'audio' => ['required_if:type,audio', 'file', 'max:102400'],//100MB -- max of 1Hr of the highest quality audio.
-                'video' => ['required_if:type,video', 'file','max:4096000'],//4GB -- we would increase later when we get better creators on board
-                'format' => ['required_if:type,book', 'string', 'regex:(pdf|2d-image|3d-image)'],
-                'zip' => ['required_if:type,book', 'file', 'mimes:zip', 'max:102400'],//100MB - each page must not surpass 1MB and max of 100 pages (it's a children's book)
-                'categories' => ['sometimes', 'required'],
-                'categories.*' => ['sometimes', 'string','exists:categories,public_id'],
-                'parent_collection' => ['sometimes','required','exists:collections,public_id'],
-                'benefactors' => ['required'],
-                'benefactors.*.public_id' => ['required', 'exists:users,public_id'],
-                'is_available' => ['required', 'integer', 'regex:(0|1)'],
-                'show_only_in_collections' => ['required', 'integer', 'regex:(0|1)'],
+                'description' => ['sometimes', 'string'],
+                'digiverse_id' => ['required','exists:collections,id'],
+                'cover.asset_id' => ['required', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'price' => ['required',],
+                'price.amount' => ['required', 'min:0', 'numeric'],
+                'price.interval' => ['required', 'string', 'regex:(one-off|monthly)'],
+                'price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
+                'tags' => ['sometimes',],
+                'tags.*' => ['required', 'string', 'exists:tags,id'],
+                'type' => ['required', 'string', 'regex:(pdf|audio|video|newsletter|live-audio|live-video)'],
+                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)]
             ]);
 
             if ($validator->fails()) {
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
-            $reworkedBenefactors = [];
-            $totalShare = 0;
-            $creatorInBenefactorList = false;
-            foreach ($request->benefactors as $key => $data) {
-                if (array_key_exists("public_id", $data)) {
-                    $reworkedBenefactors["k" . $key]['public_id'] = $data['public_id'];
-                    if ($data['public_id'] === $request->user()->public_id) {
-                        $creatorInBenefactorList = true;
-                    }
-                }
-
-                if (array_key_exists("share", $data)) {
-                    $reworkedBenefactors["k" . $key]['share'] = $data['share'];
-                    $totalShare = bcadd($totalShare, $data['share'], 2);
-                }
-            }
-            //make sure that the share add up to 100
-            if ((int)$totalShare !== 100) {
-                return $this->respondBadRequest("Benefactor share numbers do not add up to 100");
-            }
-            //make sure the creator of this content/collection is included in benefactor list
-            if ($creatorInBenefactorList === false) {
-                return $this->respondBadRequest("Creator of content not included in benefactor list");
-            }
-            $reworkedBenefactors2 = [];
-            foreach ($reworkedBenefactors as $key => $data) {
-                $reworkedBenefactors2[] = $data;
+            $digiverse = Collection::where('id', $request->digiverse_id)->where('type', 'digiverse')->first();
+            if (is_null($digiverse)) {
+                return $this->respondBadRequest("The collection with ID {$request->digiverse_id} is not a digiverse");
             }
 
+            if ($request->type === 'newsletter') {
+                $digiverseNewsletterCount = $digiverse->contents()->where('type', 'newsletter')->count();
+                if ($digiverseNewsletterCount > 0) {
+                    return $this->respondBadRequest("This Digiverse already has a newsletter. Only one newsletter allowed per digiverse.");
+                }
+            }
             $user = $request->user();
-
-            $english = Cache::remember('languages:english', Constants::MONTH_CACHE_TIME, function () {
-                return Language::where('name', 'english')->first();
-            });
-
-            $coverPath = "";
-            if ($request->hasFile('cover'))
-            {
-                $path = Storage::disk('local')->put('uploads/covers', $request->cover);
-                $coverPath = storage_path() . "/app/" . $path;
-            } 
-            $uploadedFilePath = "";
-            switch ($request->type) {
-                case "book":
-                    $path = Storage::disk('local')->put('uploads/zips', $request->zip);
-                    $uploadedFilePath = storage_path() . "/app/" . $path;
-                    break;
-                case "audio":
-                    $path = Storage::disk('local')->put('uploads/audios', $request->audio);
-                    $uploadedFilePath = storage_path() . "/app/" . $path;
-                    break;
-                case "video":
-                    $path = Storage::disk('local')->put('uploads/videos', $request->video);
-                    $uploadedFilePath = storage_path() . "/app/" . $path;
-                    break;
-            }
-
-            AddContentJob::dispatch([
+            $content = Content::create([
                 'title' => $request->title,
-                'summary' => $request->summary,
-                'price' => $request->price,
+                'description' => $request->description,
+                'user_id' => $user->id,
                 'type' => $request->type,
-                'format' => $request->format,
-                'cover_path' => $coverPath,
-                'uploaded_file_path' => $uploadedFilePath,
-                'language' => $english,
-                'owner' => $user,
-                'categories' => $request->categories && is_array($request->categories)? array_unique($request->categories) : null,
-                'benefactors' => $reworkedBenefactors2,
-                'is_available' => $request->is_available,
-                'show_only_in_collections' => $request->show_only_in_collections,
-                'parent_collection' => $request->parent_collection,
+                'is_available' => 1,
+                'approved_by_admin' => 0,
+                'show_only_in_digiverses' => 1,
+                'views' => 0,
+            ]);
+
+            $digiverse->contents()->attach($content->id, [
+                'id' => Str::uuid(),
+            ]);
+
+            $content->benefactors()->create([
+                'user_id' => $user->id,
+                'share' => 100,
+            ]);
+
+            $content->prices()->create([
+                'amount' => $request->price['amount'],
+                'interval' => $request->price['interval'],
+                'interval_amount' => $request->price['interval_amount'],
+            ]);
+
+            $content->cover()->attach($request->cover['asset_id'], [
+                'id' => Str::uuid(),
+                'purpose' => 'cover',
             ]);
             
-            $this->setStatusCode(202);
-            return $this->respondWithSuccess("Content has been queued for upload. It would be uploaded shortly");
-
+            if (!is_null($request->asset_id)) {
+                $content->assets()->attach($request->asset_id, [
+                    'id' => Str::uuid(),
+                    'purpose' => 'content-asset',
+                ]);
+            }
+            
+            if (isset($request->tags) && is_array($request->tags)) {
+                foreach ($request->tags as $tag_id) {
+                    $content->tags()->attach($tag_id, [
+                        'id' => Str::uuid(),
+                    ]);
+                }
+            }
+            return $this->respondWithSuccess("Content has been created successfully", [
+                'content' => new ContentResource($content),
+            ]);
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
