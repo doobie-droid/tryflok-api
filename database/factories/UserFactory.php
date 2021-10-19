@@ -27,7 +27,7 @@ class UserFactory extends Factory
             'name' => $this->faker->name,
             'email' => $this->faker->unique()->safeEmail,
             'username' => $this->faker->username,
-            'bio' => $this->faker->sentence($nbWords = 20, $variableNbWords = true),
+            'bio' => $this->faker->sentence(20),
             'email_verified' => 1,
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'referral_id' => strtoupper(Str::random(6)) . "-" . date('Ymd'),

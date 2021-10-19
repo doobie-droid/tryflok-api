@@ -25,7 +25,7 @@ class CollectionFactory extends Factory
         return [
             'id' => $this->faker->unique()->uuid,
             'title' => $this->faker->unique()->sentence(4),
-            'description' => $this->faker->sentence($nbWords = 20, $variableNbWords = true),
+            'description' => $this->faker->sentence(40),
             'user_id' => User::factory(),
             'type' => 'digiverse',
             'is_available' => 1,
