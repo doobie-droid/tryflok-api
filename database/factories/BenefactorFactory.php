@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Benefactor;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BenefactorFactory extends Factory

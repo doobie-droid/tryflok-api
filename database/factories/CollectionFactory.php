@@ -24,7 +24,7 @@ class CollectionFactory extends Factory
     {
         return [
             'id' => $this->faker->unique()->uuid,
-            'title' => $this->faker->unique()->title,
+            'title' => $this->faker->unique()->sentence(4),
             'description' => $this->faker->sentence($nbWords = 20, $variableNbWords = true),
             'user_id' => User::factory(),
             'type' => 'digiverse',
@@ -40,6 +40,15 @@ class CollectionFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'is_available' => 0,
+            ];
+        });
+    }
+
+    public function digiverse()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'digiverse',
             ];
         });
     }

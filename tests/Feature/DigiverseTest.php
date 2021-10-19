@@ -164,6 +164,11 @@ class DigiverseTest extends TestCase
             'id' => Str::uuid(),
         ])
         ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user->id
+            ])
+        )
         ->create();
 
         $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}");
