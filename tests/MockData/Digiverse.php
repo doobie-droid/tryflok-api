@@ -19,4 +19,50 @@ class Digiverse {
             "asset_id" => "",
         ],
     ];
+
+    const STANDARD_DIGIVERSE_RESPONSE = [
+        'status_code',
+        'message',
+        'data' => [
+            'digiverse' => [
+                'id',
+                'title',
+                'description',
+                'owner' => [
+                    'id',
+                    'name',
+                    'email',
+                    'username',
+                ],
+                'type',
+                'is_available',
+                'approved_by_admin',
+                'show_only_in_collections',
+                'views',
+                'ratings_count',
+                'ratings_average',
+                'cover' => [
+                    'url',
+                    'asset_type',
+                    'encryption_key',
+                ],
+                'prices' => [
+                    [
+                        'id',
+                        'amount',
+                        'currency',
+                        'interval',
+                        'interval_amount'
+                    ]
+                ],
+                'tags' => [
+                    [
+                        'id',
+                        'type',
+                        'name',
+                    ]
+                ],
+            ]
+        ]
+    ];
 }

@@ -15,108 +15,11 @@ use App\Models\Tag;
 use App\Models\Asset;
 use App\Models\Price;
 use App\Constants\Roles;
+use Tests\MockData\Content as ContentMock;
 
 class CreateTest extends TestCase
 {
     use DatabaseTransactions;
-    const STANDARD_CONTENT_RESPONSE = [
-        'status_code',
-        'message',
-        'data' => [
-            'content' => [
-                'id',
-                'title',
-                'description',
-                'owner' => [
-                    'id',
-                    'name',
-                    'email',
-                    'username',
-                ],
-                'type',
-                'is_available',
-                'approved_by_admin',
-                'show_only_in_digiverses',
-                'views',
-                'ratings_count',
-                'ratings_average',
-                'cover' => [
-                    'url',
-                    'asset_type',
-                ],
-                'prices' => [
-                    [
-                        'id',
-                        'amount',
-                        'currency',
-                        'interval',
-                        'interval_amount'
-                    ]
-                ],
-                'tags' => [
-                    [
-                        'id',
-                        'type',
-                        'name',
-                    ]
-                ],
-                'assets' => [
-                    [
-                        'url',
-                        'asset_type',
-                        'encryption_key',
-                        'resolutions'
-                    ]
-                ]
-            ]
-        ]
-    ];
-
-    const CONTENT_WITH_NO_ASSET_RESPONSE = [
-        'status_code',
-        'message',
-        'data' => [
-            'content' => [
-                'id',
-                'title',
-                'description',
-                'owner' => [
-                    'id',
-                    'name',
-                    'email',
-                    'username',
-                ],
-                'type',
-                'is_available',
-                'approved_by_admin',
-                'show_only_in_digiverses',
-                'views',
-                'ratings_count',
-                'ratings_average',
-                'cover' => [
-                    'url',
-                    'asset_type',
-                ],
-                'prices' => [
-                    [
-                        'id',
-                        'amount',
-                        'currency',
-                        'interval',
-                        'interval_amount'
-                    ]
-                ],
-                'tags' => [
-                    [
-                        'id',
-                        'type',
-                        'name',
-                    ]
-                ],
-                'assets'
-            ]
-        ]
-    ];
 
     public function test_content_is_not_created_with_invalid_inputs()
     {
@@ -265,7 +168,7 @@ class CreateTest extends TestCase
             ],
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
-        $response->assertStatus(200)->assertJsonStructure(self::STANDARD_CONTENT_RESPONSE);
+        $response->assertStatus(200)->assertJsonStructure(ContentMock::STANDARD_CONTENT_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -367,7 +270,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(self::STANDARD_CONTENT_RESPONSE);
+        ->assertJsonStructure(ContentMock::STANDARD_CONTENT_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -471,7 +374,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(self::STANDARD_CONTENT_RESPONSE);
+        ->assertJsonStructure(ContentMock::STANDARD_CONTENT_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -573,7 +476,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(self::CONTENT_WITH_NO_ASSET_RESPONSE);
+        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -667,7 +570,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(self::CONTENT_WITH_NO_ASSET_RESPONSE);
+        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -761,7 +664,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(self::CONTENT_WITH_NO_ASSET_RESPONSE);
+        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],

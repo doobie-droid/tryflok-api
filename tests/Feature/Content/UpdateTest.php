@@ -15,108 +15,11 @@ use App\Models\Tag;
 use App\Models\Asset;
 use App\Models\Price;
 use App\Constants\Roles;
+use Tests\MockData\Content as ContentMock;
 
 class UpdateTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
-    const STANDARD_CONTENT_RESPONSE = [
-        'status_code',
-        'message',
-        'data' => [
-            'content' => [
-                'id',
-                'title',
-                'description',
-                'owner' => [
-                    'id',
-                    'name',
-                    'email',
-                    'username',
-                ],
-                'type',
-                'is_available',
-                'approved_by_admin',
-                'show_only_in_digiverses',
-                'views',
-                'ratings_count',
-                'ratings_average',
-                'cover' => [
-                    'url',
-                    'asset_type',
-                ],
-                'prices' => [
-                    [
-                        'id',
-                        'amount',
-                        'currency',
-                        'interval',
-                        'interval_amount'
-                    ]
-                ],
-                'tags' => [
-                    [
-                        'id',
-                        'type',
-                        'name',
-                    ]
-                ],
-                'assets' => [
-                    [
-                        'url',
-                        'asset_type',
-                        'encryption_key',
-                        'resolutions'
-                    ]
-                ]
-            ]
-        ]
-    ];
-
-    const CONTENT_WITH_NO_ASSET_RESPONSE = [
-        'status_code',
-        'message',
-        'data' => [
-            'content' => [
-                'id',
-                'title',
-                'description',
-                'owner' => [
-                    'id',
-                    'name',
-                    'email',
-                    'username',
-                ],
-                'type',
-                'is_available',
-                'approved_by_admin',
-                'show_only_in_digiverses',
-                'views',
-                'ratings_count',
-                'ratings_average',
-                'cover' => [
-                    'url',
-                    'asset_type',
-                ],
-                'prices' => [
-                    [
-                        'id',
-                        'amount',
-                        'currency',
-                        'interval',
-                        'interval_amount'
-                    ]
-                ],
-                'tags' => [
-                    [
-                        'id',
-                        'type',
-                        'name',
-                    ]
-                ],
-                'assets'
-            ]
-        ]
-    ];
 
     private function generateDataForTest($user)
     {
@@ -392,7 +295,7 @@ class UpdateTest extends TestCase
 
         $response = $this->json('PATCH', "/api/v1/contents/{$content->id}", $complete_request);
         $response->assertStatus(200)
-        ->assertJsonStructure(self::STANDARD_CONTENT_RESPONSE);
+        ->assertJsonStructure(ContentMock::STANDARD_CONTENT_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'id' => $content->id,

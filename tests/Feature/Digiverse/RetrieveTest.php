@@ -20,51 +20,6 @@ use Illuminate\Support\Str;
 class RetrieveTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
-    const STANDARD_DIGIVERSE_RESPONSE = [
-        'status_code',
-        'message',
-        'data' => [
-            'digiverse' => [
-                'id',
-                'title',
-                'description',
-                'owner' => [
-                    'id',
-                    'name',
-                    'email',
-                    'username',
-                ],
-                'type',
-                'is_available',
-                'approved_by_admin',
-                'show_only_in_collections',
-                'views',
-                'ratings_count',
-                'ratings_average',
-                'cover' => [
-                    'url',
-                    'asset_type',
-                    'encryption_key',
-                ],
-                'prices' => [
-                    [
-                        'id',
-                        'amount',
-                        'currency',
-                        'interval',
-                        'interval_amount'
-                    ]
-                ],
-                'tags' => [
-                    [
-                        'id',
-                        'type',
-                        'name',
-                    ]
-                ],
-            ]
-        ]
-    ];
 
     public function test_retrieve_digiverse_works()
     {
@@ -92,6 +47,6 @@ class RetrieveTest extends TestCase
         ->create();
 
         $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}");
-        $response->assertStatus(200)->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
+        $response->assertStatus(200)->assertJsonStructure(DigiverseMock::STANDARD_DIGIVERSE_RESPONSE);
     }
 }

@@ -20,51 +20,6 @@ use App\Constants\Roles;
 class CreateAndUpdateTest extends TestCase
 {
     use DatabaseTransactions;
-    const STANDARD_DIGIVERSE_RESPONSE = [
-        'status_code',
-        'message',
-        'data' => [
-            'digiverse' => [
-                'id',
-                'title',
-                'description',
-                'owner' => [
-                    'id',
-                    'name',
-                    'email',
-                    'username',
-                ],
-                'type',
-                'is_available',
-                'approved_by_admin',
-                'show_only_in_collections',
-                'views',
-                'ratings_count',
-                'ratings_average',
-                'cover' => [
-                    'url',
-                    'asset_type',
-                    'encryption_key',
-                ],
-                'prices' => [
-                    [
-                        'id',
-                        'amount',
-                        'currency',
-                        'interval',
-                        'interval_amount'
-                    ]
-                ],
-                'tags' => [
-                    [
-                        'id',
-                        'type',
-                        'name',
-                    ]
-                ],
-            ]
-        ]
-    ];
 
     public function test_create_digiverse_works_with_correct_data()
     {
@@ -77,7 +32,7 @@ class CreateAndUpdateTest extends TestCase
         $request['cover']['asset_id'] = $coverAsset->id;
         $response = $this->json('POST', '/api/v1/digiverses', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
+        ->assertJsonStructure(DigiverseMock::STANDARD_DIGIVERSE_RESPONSE);
 
         $this->assertDatabaseHas('collections', [
             'title' => DigiverseMock::UNSEEDED_DIGIVERSE['title'],
@@ -183,7 +138,7 @@ class CreateAndUpdateTest extends TestCase
         ];
         $request['is_available'] = 1;
         $response = $this->json('PATCH', "/api/v1/digiverses/{$digiverse->id}", $request);
-        $response->assertStatus(200)->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
+        $response->assertStatus(200)->assertJsonStructure(DigiverseMock::STANDARD_DIGIVERSE_RESPONSE);
         $this->assertDatabaseHas('collections', [
             'id' => $digiverse->id,
             'title' => $request['title'],

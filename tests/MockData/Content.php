@@ -82,4 +82,103 @@ class Content {
         'language_id' => 40,
         'is_available' => 1,
     ];
+
+    const STANDARD_CONTENT_RESPONSE = [
+        'status_code',
+        'message',
+        'data' => [
+            'content' => [
+                'id',
+                'title',
+                'description',
+                'owner' => [
+                    'id',
+                    'name',
+                    'email',
+                    'username',
+                ],
+                'type',
+                'is_available',
+                'approved_by_admin',
+                'show_only_in_digiverses',
+                'views',
+                'ratings_count',
+                'ratings_average',
+                'cover' => [
+                    'url',
+                    'asset_type',
+                ],
+                'prices' => [
+                    [
+                        'id',
+                        'amount',
+                        'currency',
+                        'interval',
+                        'interval_amount'
+                    ]
+                ],
+                'tags' => [
+                    [
+                        'id',
+                        'type',
+                        'name',
+                    ]
+                ],
+                'assets' => [
+                    [
+                        'url',
+                        'asset_type',
+                        'encryption_key',
+                        'resolutions'
+                    ]
+                ]
+            ]
+        ]
+    ];
+
+    const CONTENT_WITH_NO_ASSET_RESPONSE = [
+        'status_code',
+        'message',
+        'data' => [
+            'content' => [
+                'id',
+                'title',
+                'description',
+                'owner' => [
+                    'id',
+                    'name',
+                    'email',
+                    'username',
+                ],
+                'type',
+                'is_available',
+                'approved_by_admin',
+                'show_only_in_digiverses',
+                'views',
+                'ratings_count',
+                'ratings_average',
+                'cover' => [
+                    'url',
+                    'asset_type',
+                ],
+                'prices' => [
+                    [
+                        'id',
+                        'amount',
+                        'currency',
+                        'interval',
+                        'interval_amount'
+                    ]
+                ],
+                'tags' => [
+                    [
+                        'id',
+                        'type',
+                        'name',
+                    ]
+                ],
+                'assets'
+            ]
+        ]
+    ];
 }
