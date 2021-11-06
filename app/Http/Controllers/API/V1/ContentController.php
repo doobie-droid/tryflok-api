@@ -173,6 +173,7 @@ class ContentController extends Controller
             if (!is_null($request->asset_id)) {
                 $oldAsset = $content->assets()->first();
                 $content->assets()->detach($oldAsset->id);
+                $oldAsset->resolutions()->delete();
                 $oldAsset->delete();
                 $content->assets()->attach($request->asset_id, [
                     'id' => Str::uuid(),
