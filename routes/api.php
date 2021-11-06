@@ -209,7 +209,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'contents'], function () {
             Route::post('/', 'ContentController@create');
-            Route::post('/{public_id}', 'ContentController@update');//ideally, this should be PUT but php has an issue with collecting files from PUT
+            Route::patch('/{id}', 'ContentController@update');
             Route::get('/{public_id}/assets', 'ContentController@getAssets');
         });
 

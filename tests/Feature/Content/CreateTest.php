@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Content;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -16,7 +16,7 @@ use App\Models\Asset;
 use App\Models\Price;
 use App\Constants\Roles;
 
-class ContentTest extends TestCase
+class CreateTest extends TestCase
 {
     use DatabaseTransactions;
     const STANDARD_CONTENT_RESPONSE = [
@@ -136,10 +136,9 @@ class ContentTest extends TestCase
             'type' => 'audio',
             'asset_id' => $audioAsset->id,
             'digiverse_id' => $digiverse->id,
+            'is_available' => 1,
             'price' => [
                 'amount' => 10,
-                'interval' => 'one-off',
-                'interval_amount' => 1,
             ],
             'tags' => [
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
@@ -220,10 +219,9 @@ class ContentTest extends TestCase
             'description' => 'Content description',
             'type' => 'newsletter',
             'digiverse_id' => $digiverse->id,
+            'is_available' => 1,
             'price' => [
                 'amount' => 10,
-                'interval' => 'one-off',
-                'interval_amount' => 1,
             ],
             'tags' => [
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
@@ -254,10 +252,9 @@ class ContentTest extends TestCase
             'type' => 'video',
             'asset_id' => $videoAsset->id,
             'digiverse_id' => $digiverse->id,
+            'is_available' => 1,
             'price' => [
                 'amount' => 10,
-                'interval' => 'one-off',
-                'interval_amount' => 1,
             ],
             'tags' => [
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
@@ -323,8 +320,8 @@ class ContentTest extends TestCase
             'priceable_type' => 'content',
             'priceable_id' => $content->id,
             'amount' => $request['price']['amount'],
-            'interval' => $request['price']['interval'],
-            'interval_amount' => $request['price']['interval_amount'],
+            'interval' => 'one-off',
+            'interval_amount' => 1,
             'currency' => 'USD',
         ]);
         $this->assertTrue($content->prices()->count() === 1);
@@ -356,10 +353,9 @@ class ContentTest extends TestCase
             'type' => 'audio',
             'asset_id' => $audioAsset->id,
             'digiverse_id' => $digiverse->id,
+            'is_available' => 1,
             'price' => [
                 'amount' => 10,
-                'interval' => 'one-off',
-                'interval_amount' => 1,
             ],
             'tags' => [
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
@@ -428,8 +424,8 @@ class ContentTest extends TestCase
             'priceable_type' => 'content',
             'priceable_id' => $content->id,
             'amount' => $request['price']['amount'],
-            'interval' => $request['price']['interval'],
-            'interval_amount' => $request['price']['interval_amount'],
+            'interval' => 'one-off',
+            'interval_amount' => 1,
             'currency' => 'USD',
         ]);
         $this->assertTrue($content->prices()->count() === 1);
@@ -461,10 +457,9 @@ class ContentTest extends TestCase
             'type' => 'pdf',
             'asset_id' => $pdfAsset->id,
             'digiverse_id' => $digiverse->id,
+            'is_available' => 1,
             'price' => [
                 'amount' => 10,
-                'interval' => 'one-off',
-                'interval_amount' => 1,
             ],
             'tags' => [
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
@@ -533,8 +528,8 @@ class ContentTest extends TestCase
             'priceable_type' => 'content',
             'priceable_id' => $content->id,
             'amount' => $request['price']['amount'],
-            'interval' => $request['price']['interval'],
-            'interval_amount' => $request['price']['interval_amount'],
+            'interval' => 'one-off',
+            'interval_amount' => 1,
             'currency' => 'USD',
         ]);
         $this->assertTrue($content->prices()->count() === 1);
@@ -564,10 +559,9 @@ class ContentTest extends TestCase
             'description' => 'Content description',
             'type' => 'newsletter',
             'digiverse_id' => $digiverse->id,
+            'is_available' => 1,
             'price' => [
                 'amount' => 0,
-                'interval' => 'one-off',
-                'interval_amount' => 1,
             ],
             'tags' => [
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
@@ -628,8 +622,8 @@ class ContentTest extends TestCase
             'priceable_type' => 'content',
             'priceable_id' => $content->id,
             'amount' => $request['price']['amount'],
-            'interval' => $request['price']['interval'],
-            'interval_amount' => $request['price']['interval_amount'],
+            'interval' => 'one-off',
+            'interval_amount' => 1,
             'currency' => 'USD',
         ]);
         $this->assertTrue($content->prices()->count() === 1);
@@ -659,10 +653,9 @@ class ContentTest extends TestCase
             'description' => 'Content description',
             'type' => 'live-audio',
             'digiverse_id' => $digiverse->id,
+            'is_available' => 1,
             'price' => [
                 'amount' => 0,
-                'interval' => 'one-off',
-                'interval_amount' => 1,
             ],
             'tags' => [
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
@@ -723,8 +716,8 @@ class ContentTest extends TestCase
             'priceable_type' => 'content',
             'priceable_id' => $content->id,
             'amount' => $request['price']['amount'],
-            'interval' => $request['price']['interval'],
-            'interval_amount' => $request['price']['interval_amount'],
+            'interval' => 'one-off',
+            'interval_amount' => 1,
             'currency' => 'USD',
         ]);
         $this->assertTrue($content->prices()->count() === 1);
@@ -754,10 +747,9 @@ class ContentTest extends TestCase
             'description' => 'Content description',
             'type' => 'live-video',
             'digiverse_id' => $digiverse->id,
+            'is_available' => 1,
             'price' => [
                 'amount' => 0,
-                'interval' => 'one-off',
-                'interval_amount' => 1,
             ],
             'tags' => [
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
@@ -818,8 +810,8 @@ class ContentTest extends TestCase
             'priceable_type' => 'content',
             'priceable_id' => $content->id,
             'amount' => $request['price']['amount'],
-            'interval' => $request['price']['interval'],
-            'interval_amount' => $request['price']['interval_amount'],
+            'interval' => 'one-off',
+            'interval_amount' => 1,
             'currency' => 'USD',
         ]);
         $this->assertTrue($content->prices()->count() === 1);

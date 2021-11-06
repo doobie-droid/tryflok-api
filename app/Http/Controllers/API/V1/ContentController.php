@@ -29,18 +29,17 @@ class ContentController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'title' => ['required', 'string'],
+                'title' => ['required', 'string', 'max: 200'],
                 'description' => ['sometimes', 'string'],
                 'digiverse_id' => ['required','exists:collections,id'],
                 'cover.asset_id' => ['required', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'price' => ['required',],
                 'price.amount' => ['required', 'min:0', 'numeric'],
-                'price.interval' => ['required', 'string', 'regex:(one-off|monthly)'],
-                'price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
                 'tags' => ['sometimes',],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
                 'type' => ['required', 'string', 'regex:(pdf|audio|video|newsletter|live-audio|live-video)'],
-                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)]
+                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
+                'is_available' => ['required', 'integer', 'min:0', 'max:1'],
             ]);
 
             if ($validator->fails()) {
@@ -64,7 +63,7 @@ class ContentController extends Controller
                 'description' => $request->description,
                 'user_id' => $user->id,
                 'type' => $request->type,
-                'is_available' => 1,
+                'is_available' => $request->is_available,
                 'approved_by_admin' => 0,
                 'show_only_in_digiverses' => 1,
                 'views' => 0,
@@ -81,8 +80,8 @@ class ContentController extends Controller
 
             $content->prices()->create([
                 'amount' => $request->price['amount'],
-                'interval' => $request->price['interval'],
-                'interval_amount' => $request->price['interval_amount'],
+                'interval' => 'one-off',
+                'interval_amount' => 1,
             ]);
 
             $content->cover()->attach($request->cover['asset_id'], [
@@ -113,144 +112,108 @@ class ContentController extends Controller
 		} 
     }
 
-    public function update(Request $request, $public_id)
+    public function update(Request $request, $id)
     {
         try {
-            $validator = Validator::make(array_merge($request->all(), ['id' => $public_id]), [
-                'id' => ['required', 'string', 'exists:contents,public_id'],
-                'title' => ['sometimes', 'nullable', 'string'],
-                'summary' => ['sometimes','nullable', 'string'],
-                'price' => ['sometimes','nullable', 'numeric', 'min:0', 'max:9999.99'],
-                'cover' => ['sometimes','nullable', 'image', 'max:1024'],//1MB
-                'type' => ['required_with:zip,audio,video', 'string', 'regex:(book|audio|video)'],
-                'audio' => ['sometimes', 'nullable', 'file', 'max:102400'],//100MB  - 1 hour of max audio quality
-                'video' => ['sometimes', 'nullable', 'file', 'max:4096000'],//4GB
-                'format' => ['required_with:zip', 'string', 'regex:(pdf|2d-image|3d-image)'],
-                'zip' => ['sometimes', 'nullable', 'mimes:zip', 'max:102400'],//100MB - each page must not surpass 1MB and max of 100 pages
-                'categories' => ['sometimes', 'nullable'],
-                'categories.*.action' => ['required', 'string', 'regex:(add|remove)'],
-                'categories.*.public_id' => ['required', 'string','exists:categories,public_id'],
-                'benefactors' => ['sometimes', 'nullable'],
-                'benefactors.*.action' => ['required', 'string', 'regex:(add|remove|update)'],
-                'benefactors.*.public_id' => ['required', 'exists:users,public_id'],
-                'is_available' => ['sometimes', 'nullable', 'integer', 'regex:(0|1)'],
-                'show_only_in_collections' => ['sometimes', 'nullable', 'integer', 'regex:(0|1)'],
+            $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'title' => ['sometimes', 'nullable', 'string', 'max:200', 'min:1'],
+                'description' => ['sometimes', 'nullable', 'string',],
+                'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'price' => ['sometimes', 'nullable'],
+                'price.amount' => ['sometimes', 'nullable', 'min:0', 'numeric'],
+                'tags' => ['sometimes',],
+                'tags.*.id' => ['required', 'string', 'exists:tags,id'],
+                'tags.*.action' => ['required', 'string', 'regex:(add|remove)'],
+                'is_available' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
             ]);
 
-            if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            if ($validator1->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
             }
 
             //make sure user owns content
-            $content = Content::where('public_id', $public_id)->where('user_id', $request->user()->id)->first();
+            $content = Content::where('id', $id)->where('user_id', $request->user()->id)->first();
             if (is_null($content)) {
                 return $this->respondBadRequest("You do not have permission to update this content");
             }
 
-            //validate benefactors
-            $currentBenefactors = $content->benefactors()->get();
-            $benefactorsToAdd = [];
-            $benefactorsToUpdate = [];
-            $benefactorsToDelete = [];
-            if (isset($request->benefactors) && is_array($request->benefactors)) {
-                $sum = 0;
-                foreach ($currentBenefactors as $benefactor) {
-                    $found = false;
-                    foreach ($request->benefactors as $requestBenefactor) {
-                        //if found
-                        if ($benefactor->user->public_id === $requestBenefactor['public_id']) {
-                            $found = true;
-                            if ($requestBenefactor['action'] === 'update') {
-                                if (!array_key_exists('share', $requestBenefactor)){
-                                    return $this->respondBadRequest("[share] is required if benefactor is being updated. Missing share detected for benefator with public_id [" . $requestBenefactor['public_id'] . "]" );
-                                }
-                                $benefactorsToUpdate[] = ['benefactor' => $benefactor, 'share' => $requestBenefactor['share']];
-                                $sum = bcadd($sum,$requestBenefactor['share'],6);
-                            }
-                            if ($requestBenefactor['action'] === 'remove') {
-                                $benefactorsToDelete[] = $benefactor;
-                            }
-                        }
-                    }
-                    if (!$found) {
-                        $sum = bcadd($sum,$benefactor->share,6);
-                    }
-                }
-                //loop through request benefactors and add the ones that are to be added
-                foreach ($request->benefactors as $requestBenefactor) {
-                    if ($requestBenefactor['action'] === 'add') {
-                        if (!array_key_exists('share', $requestBenefactor)){
-                            return $this->respondBadRequest("[share] is required if benefactor is being added. Missing share detected for benefator with public_id [" . $requestBenefactor['public_id'] . "]" );
-                        }
-                        $benefactorsToAdd[] = $requestBenefactor;
-                        $sum = bcadd($sum,$requestBenefactor['share'],6);
-                    }
-                }
-
-                $sum = (int) $sum;
-                if ($sum !== 100) {
-                    return $this->respondBadRequest("Benefactors sum does not add up to 100. " . $sum . " gotten instead" );
-                }
+            $validator2 =  Validator::make(array_merge($request->all()), [
+                'asset_id' => ['sometimes', 'nullable', 'exists:assets,id', new AssetTypeRule($content->type)],
+            ]);
+            if ($validator2->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator2->errors()->toArray());
             }
 
             $user = $request->user();
-
-            $english = Cache::remember('languages:english', Constants::MONTH_CACHE_TIME, function () {
-                return Language::where('name', 'english')->first();
-            });
-
-            $coverPath = "";
-            if ($request->hasFile('cover'))
-            {
-                $path = Storage::disk('local')->put('uploads/covers', $request->cover);
-                $coverPath = storage_path() . "/app/" . $path;
-            } 
-            $uploadedFilePath = "";
-            switch ($request->type) {
-                case "book":
-                    if ($request->hasFile('zip'))
-                    {
-                        $path = Storage::disk('local')->put('uploads/zips', $request->zip);
-                        $uploadedFilePath = storage_path() . "/app/" . $path;
-                    } 
-                    break;
-                case "audio":
-                    if ($request->hasFile('audio'))
-                    {
-                        $path = Storage::disk('local')->put('uploads/audios', $request->audio);
-                        $uploadedFilePath = storage_path() . "/app/" . $path;
-                    } 
-                    break;
-                case "video":
-                    if ($request->hasFile('video'))
-                    {
-                        $path = Storage::disk('local')->put('uploads/videos', $request->video);
-                        $uploadedFilePath = storage_path() . "/app/" . $path;
-                    } 
-                    break;
+            if (!is_null($request->title)) {
+                $content->title = $request->title;
+            }
+    
+            if (!is_null($request->description)) {
+                $content->description = $request->description;
+            }
+    
+            if (!is_null($request->is_available)) {
+                $content->is_available = $request->is_available;
             }
 
-            EditContentJob::dispatch([
-                'content' => $content,
-                'title' => isset($request->title) ? $request->title : NULL,
-                'summary' => isset($request->summary) ? $request->summary : NULL,
-                'price' => isset($request->price) ? $request->price : NULL,
-                'type' => isset($request->type) ? $request->type : NULL,
-                'format' => isset($request->format) ? $request->format : NULL,
-                'cover_path' => $coverPath,
-                'uploaded_file_path' => $uploadedFilePath,
-                'language' => $english,
-                'owner' => $user,
-                'categories' => isset($request->categories) ? $request->categories : NULL,
-                'benefactors_to_add' => $benefactorsToAdd,
-                'benefactors_to_update' => $benefactorsToUpdate,
-                'benefactors_to_delete' => $benefactorsToDelete,
-                'is_available' => isset($request->is_available) ? $request->is_available : NULL,
-                'show_only_in_collections' => isset($request->show_only_in_collections) ? $request->show_only_in_collections : NULL,
-            ]);
+            $content->save();
+
+            if (!is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
+                $oldCover = $content->cover()->first();
+                $content->cover()->detach($oldCover->id);
+                $oldCover->delete();
+                $content->cover()->attach($request->cover['asset_id'], [
+                    'id' => Str::uuid(),
+                    'purpose' => 'cover',
+                ]);
+            }
+
+            if (!is_null($request->asset_id)) {
+                $oldAsset = $content->assets()->first();
+                $content->assets()->detach($oldAsset->id);
+                $oldAsset->delete();
+                $content->assets()->attach($request->asset_id, [
+                    'id' => Str::uuid(),
+                    'purpose' => 'content-asset',
+                ]);
+            }
+
+            if (!is_null($request->tags) && is_array($request->tags)) {
+                foreach ($request->tags as $tagData) {
+                    if ($tagData['action'] === 'add') {
+                        $content->tags()
+                        ->syncWithoutDetaching([$tagData['id'] => [
+                                'id' => Str::uuid(),
+                            ]
+                        ]);
+                    }
+    
+                    if ($tagData['action'] === 'remove') {
+                        $content->tags()->detach($tagData['id']);
+                    }
+                }
+            }
             
-            $this->setStatusCode(202);
-            return $this->respondWithSuccess("Content has been queued for update. It would be uploaded shortly");
+            if (!is_null($request->price)) {
+                $price = $content->prices()->first();
+                if (is_null($price)) {
+                    $content->prices()->create([
+                        'amount' => $request->price['amount'],
+                        'interval' => 'one-off',
+                        'interval_amount' => 1,
+                    ]);
+                } else {
+                    $price->amount = $request->price['amount'];
+                    $price->save();
+                }
+            }
+            
+            $this->setStatusCode(200);
+            return $this->respondWithSuccess("Content has been updated successfully", [
+                'content' => new ContentResource($content),
+            ]);
 
         } catch(\Exception $exception) {
             Log::error($exception);
