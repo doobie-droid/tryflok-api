@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Digiverse;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -17,7 +17,7 @@ use App\Models\Asset;
 use App\Models\Price;
 use App\Constants\Roles;
 
-class DigiverseTest extends TestCase
+class CreateAndUpdateTest extends TestCase
 {
     use DatabaseTransactions;
     const STANDARD_DIGIVERSE_RESPONSE = [
@@ -145,35 +145,6 @@ class DigiverseTest extends TestCase
         $testData['cover']['asset_id'] = $cover->id;
         $response = $this->json('POST', '/api/v1/digiverses',  $testData);
         $response->assertStatus(400);
-    }
-
-    public function test_retrieve_digiverse_works()
-    {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
-        $this->be($user);
-
-        $digiverse = Collection::factory()
-        ->for($user, 'owner')
-        ->digiverse()
-        ->hasAttached(Asset::factory()->count(1),
-        [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-        ])
-        ->hasAttached(Tag::factory()->count(1), [
-            'id' => Str::uuid(),
-        ])
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
-        ->create();
-
-        $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}");
-        $response->assertStatus(200)->assertJsonStructure(self::STANDARD_DIGIVERSE_RESPONSE);
     }
 
     public function test_update_digiverse_with_correct_data_works()
