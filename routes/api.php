@@ -114,17 +114,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::group(['prefix' => 'contents'], function () {
         Route::get('/', 'ContentController@getAll');
-        Route::post('test-dash', 'ContentController@dashVideoUpload');
-        Route::get('test-enc', 'ContentController@generateKey');
-        Route::get('/{public_id}', 'ContentController@getSingle');
+        Route::get('/{id}', 'ContentController@getSingle');
         Route::get('/{public_id}/reviews', 'ContentController@getReviews');
         Route::get('/{public_id}/free-assets', 'ContentController@getFreeAssets');
     });
 
-    Route::group(['prefix' => 'collections'], function () {
-        Route::get('/', 'CollectionController@getAll');
-        Route::get('/{public_id}', 'CollectionController@getSingle');
-        Route::get('/{public_id}/reviews', 'CollectionController@getReviews');
+    Route::group(['prefix' => 'digiverses'], function () {
+        Route::get('/{id}', 'CollectionController@getDigiverse');
+        Route::get('/{id}/reviews', 'CollectionController@getReviews');
     });
 
     Route::group(['prefix' => 'users'], function () {
@@ -213,15 +210,8 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::get('/{public_id}/assets', 'ContentController@getAssets');
         });
 
-        Route::group(['prefix' => 'collections'], function () {
-            Route::post('/', 'CollectionController@create');
-            Route::post('/{public_id}', 'CollectionController@update');
-            Route::post('/{public_id}/cover', 'CollectionController@updateCover');
-        });
-
         Route::group(['prefix' => 'digiverses'], function () {
             Route::post('/', 'CollectionController@createDigiverse');
-            Route::get('/{id}', 'CollectionController@getDigiverse');
             Route::patch('/{id}', 'CollectionController@updateDigiverse');
         });
 

@@ -21,7 +21,7 @@ class UpdateTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
 
-    private function generateDataForTest($user)
+    private function generateSingleContent($user)
     {
         $tag1 = Tag::factory()->create();
         $tag2 = Tag::factory()->create();
@@ -83,7 +83,7 @@ class UpdateTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole(Roles::USER);
         $this->be($user);
-        $testData = $this->generateDataForTest($user);
+        $testData = $this->generateSingleContent($user);
         $content = $testData['content'];
 
         $coverAsset = Asset::factory()->create();
@@ -259,7 +259,7 @@ class UpdateTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole(Roles::USER);
         $this->be($user);
-        $test_data = $this->generateDataForTest($user);
+        $test_data = $this->generateSingleContent($user);
         $content = $test_data['content'];
         $old_asset_id = $test_data['asset']->id;
         $old_cover_id = $test_data['cover']->id;

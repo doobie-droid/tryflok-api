@@ -212,10 +212,37 @@ class ContentController extends Controller
             }
             
             $this->setStatusCode(200);
-            return $this->respondWithSuccess("Content has been updated successfully", [
+            return $this->respondWithSuccess('Content has been updated successfully', [
                 'content' => new ContentResource($content),
             ]);
 
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		} 
+    }
+
+    public function getSingle(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = 0;
+            } else {
+                $user_id = $request->user()->id;
+            }
+            
+            $content = Content::where('id', $id)->first();
+            return $this->respondWithSuccess('Content retrieved successfully',[
+                'content' => new ContentResource($content),
+            ]);
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
@@ -383,44 +410,6 @@ class ContentController extends Controller
                 $reviews = $content->reviews()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, array('*'), 'page', $page);
             return $this->respondWithSuccess("Reviews retrieved successfully",[
                 'reviews' => $reviews,
-            ]);
-        } catch(\Exception $exception) {
-            Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
-    }
-
-    public function getSingle(Request $request, $public_id)
-    {
-        try {
-            $validator = Validator::make(['public_id' => $public_id], [
-                'public_id' => ['required', 'string', 'exists:contents,public_id'],
-            ]);
-
-            if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
-            }
-
-            if ($request->user() == NULL || $request->user()->id == NULL) {
-                $user_id = 0;
-            } else {
-                $user_id = $request->user()->id;
-            }
-            
-            $content = Content::where('public_id', $public_id)->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                }
-            ])->withAvg([
-                'ratings' => function($query)
-                {
-                    $query->where('rating', '>', 0);
-                }
-            ], 'rating')->with('cover')->with('approvalRequest')->with('categories','benefactors', 'benefactors.user')->with('prices', 'prices.continent', 'prices.country')->with('owner', 'owner.profile_picture')->with(['userables' => function ($query) use ($user_id) {
-                $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
-            }])->first();
-            return $this->respondWithSuccess("Content retrieved successfully",[
-                'content' => new ContentResource($content),
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);
