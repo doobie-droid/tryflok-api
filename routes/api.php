@@ -120,6 +120,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
+        Route::get('/', 'CollectionController@getAll');
         Route::get('/{id}', 'CollectionController@getDigiverse');
         Route::get('/{id}/reviews', 'CollectionController@getReviews');
     });
