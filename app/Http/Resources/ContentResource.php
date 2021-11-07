@@ -19,9 +19,8 @@ class ContentResource extends JsonResource
         $parent = parent::toArray($request);
         return array_merge($parent, [
             'cover' => !is_null($this->cover) ? $this->cover->first() : null,
-            'ratings' => $this->ratings_avg_rating,
-            'ratings_count' => $this->ratings->where('rating', '>', 0)->count(),
-            'ratings_average' => $this->ratings->where('rating', '>', 0)->avg('rating'),
+            'ratings_count' => $this->ratings_count,
+            'ratings_average' => $this->ratings_avg_rating,
             'prices' => $this->prices,
             'tags' => $this->tags,
             'owner' => new UserResource($this->owner),

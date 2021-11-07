@@ -19,6 +19,7 @@ class CollectionResource extends JsonResource
         $parent = parent::toArray($request);
         unset($parent["child_collections"]);
         return array_merge($parent , [
+            'ratings_count' => $this->ratings_count,
             'ratings_average' => $this->ratings_avg_rating,
             'cover' => !is_null($this->cover) ? $this->cover->first() : null,
             'owner' => new UserResource($this->owner),

@@ -103,6 +103,20 @@ class ContentController extends Controller
                     ]);
                 }
             }
+
+            $content = Content::where('id', $content->id)
+            ->withCount([
+                'ratings' => function ($query) {
+                    $query->where('rating', '>', 0);
+                }
+            ])->withAvg([
+                'ratings' => function($query)
+                {
+                    $query->where('rating', '>', 0);
+                }
+            ], 'rating')
+            ->first();
+
             return $this->respondWithSuccess("Content has been created successfully", [
                 'content' => new ContentResource($content),
             ]);
@@ -133,7 +147,18 @@ class ContentController extends Controller
             }
 
             //make sure user owns content
-            $content = Content::where('id', $id)->where('user_id', $request->user()->id)->first();
+            $content = Content::where('id', $id)->where('user_id', $request->user()->id)
+            ->withCount([
+                'ratings' => function ($query) {
+                    $query->where('rating', '>', 0);
+                }
+            ])->withAvg([
+                'ratings' => function($query)
+                {
+                    $query->where('rating', '>', 0);
+                }
+            ], 'rating')
+            ->first();
             if (is_null($content)) {
                 return $this->respondBadRequest("You do not have permission to update this content");
             }
@@ -239,7 +264,23 @@ class ContentController extends Controller
                 $user_id = $request->user()->id;
             }
             
-            $content = Content::where('id', $id)->first();
+            $content = Content::where('id', $id)
+            ->withCount([
+                'ratings' => function ($query) {
+                    $query->where('rating', '>', 0);
+                }
+            ])->withAvg([
+                'ratings' => function($query)
+                {
+                    $query->where('rating', '>', 0);
+                }
+            ], 'rating')
+            ->with([
+                'userables' => function ($query) use ($user_id) {
+                    $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                },
+            ])
+            ->first();
             return $this->respondWithSuccess('Content retrieved successfully',[
                 'content' => new ContentResource($content),
             ]);
@@ -247,6 +288,131 @@ class ContentController extends Controller
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
 		} 
+    }
+
+    public function getDigiverseContents(Request $request, $digiverse_id)
+    {
+        try {
+            $page = $request->query('page', 1);
+            $limit = $request->query('limit', 10);
+
+            $keyword = urldecode($request->query('keyword', ''));
+            $keywords = explode(" ", $keyword);
+            $keywords = array_diff($keywords, ['']);
+
+            $types = $request->query('types', '');
+            $types = explode(",", urldecode($types));
+            $types = array_diff($types, [""]);
+
+            $tags = $request->query('tags', '');
+            $tags = explode(",", urldecode($tags));
+            $tags = array_diff($tags, ['']);
+
+            $creators = $request->query('creators', '');
+            $creators = explode(",", urldecode($creators));
+            $creators = array_diff($creators, ['']);
+
+            $maxPrice = $request->query('max_price', -1);
+            $minPrice = $request->query('min_price', 0);
+
+            $orderBy = $request->query('order_by', 'created_at');
+            $orderDirection = $request->query('order_direction', 'asc');
+
+            $max_items_count = Constants::MAX_ITEMS_LIMIT;
+            $validator = Validator::make([
+                'id' => $digiverse_id,
+                'page' => $page,
+                'limit' => $limit,
+                'keyword' => $keyword,
+                'tags' => $tags,
+                'creators' => $creators,
+                'max_price' => $maxPrice,
+                'min_price' => $minPrice,
+                'order_by' => $orderBy,
+                'order_direction' => $orderDirection,
+                'type' => $types,
+            ], [
+                'id' => ['required', 'string', 'exists:collections,id'],
+                'page' => ['required', 'integer', 'min:1',],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
+                'keyword' => ['sometimes', 'string', 'max:200',],
+                'max_price' => ['required', 'integer', 'min:-1',],
+                'min_price' => ['required', 'integer', 'min:0',],
+                'order_by' => ['required', 'string', 'regex:(created_at|price|views|reviews)'],
+                'order_direction' => ['required', 'string', 'regex:(asc|desc)'],
+                'types' => ['sometimes',],
+                'type.*' => ['required', 'string',],
+                'tags' => ['sometimes',],
+                'tags.*' => ['required', 'string', 'exists:tags,id',],
+                'creators' => ['sometimes',],
+                'creators.*' => ['required', 'string', 'exists:users,id',],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+            $digiverse = Collection::where('id', $request->digiverse_id)->first();
+            $contents = $digiverse->contents()->where('is_available', 1)->where('approved_by_admin', 1);
+
+            foreach ($keywords as $keyword) {
+                $contents = $contents->where(function ($query) use ($keyword) {
+                    $query->where('title', 'LIKE', "%{$keyword}%")
+                    ->orWhere('description', 'LIKE', "%{$keyword}%");
+                });
+            }
+
+            if (!empty($types)) {
+                $contents = $contents->whereIn('type', $types );
+            }
+
+            if (!empty($tags)) {
+                $contents = $contents->whereHas('tags', function (Builder $query) use ($tags) {
+                    $query->whereIn('tags.id', $tags);
+                });
+            }
+
+            if (!empty($creators)) {
+                $contents = $contents->whereIn('user_id', $creators );
+            }
+
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = 0;
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            $contents = $contents
+            ->withCount([
+                'ratings' => function ($query) {
+                    $query->where('rating', '>', 0);
+                }
+            ])->withAvg([
+                'ratings' => function($query)
+                {
+                    $query->where('rating', '>', 0);
+                }
+            ], 'rating')
+            ->with('cover')
+            ->with('owner','owner.profile_picture')
+            ->with('tags')
+            ->with('prices')
+            ->with([
+                'userables' => function ($query) use ($user_id) {
+                    $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                },
+            ])->orderBy('contents.created_at', 'desc')
+            ->paginate($limit, array('*'), 'page', $page);
+
+            return $this->respondWithSuccess('Contents retrieved successfully',[
+                'contents' => ContentResource::collection($contents),
+                'current_page' => $contents->currentPage(),
+                'items_per_page' => $contents->perPage(),
+                'total' => $contents->total(),
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
     }
 
     public function getAll(Request $request)

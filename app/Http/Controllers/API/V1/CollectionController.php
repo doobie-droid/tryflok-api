@@ -114,6 +114,12 @@ class CollectionController extends Controller
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = 0;
+            } else {
+                $user_id = $request->user()->id;
+            }
+
             $digiverse = Collection::where('id', $id)
             ->withCount([
                 'ratings' => function ($query) {
@@ -125,6 +131,11 @@ class CollectionController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
+            ->with([
+                'userables' => function ($query) use ($user_id) {
+                    $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                },
+            ])
             ->first();
             return $this->respondWithSuccess("Digiverse retrieved successfully.", [
                 'digiverse' => new CollectionResource($digiverse),
@@ -342,7 +353,7 @@ class CollectionController extends Controller
 		} 
     }
 
-    public function getUserCreatedCollections(Request $request, $user_public_id)
+    public function getUserCreatedDigiverses(Request $request, $user_public_id)
     {
         try {
             $user = User::where('public_id', $user_public_id)->first();

@@ -51,7 +51,7 @@ class RetrieveTest extends TestCase
         $response->assertStatus(200)->assertJsonStructure(DigiverseMock::STANDARD_DIGIVERSE_RESPONSE);
     }
 
-    public function test_retrieve_all_digiverses_fail_with_invalid_parameters()
+    public function test_retrieve_all_digiverses_fails_with_invalid_parameters()
     {
         $response = $this->json('GET', "/api/v1/digiverses?page=ere");
         $response->assertStatus(400)

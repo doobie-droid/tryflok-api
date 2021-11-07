@@ -52,7 +52,7 @@ class UpdateTest extends TestCase
             Collection::factory()->digiverse(),
             [
                 'id' => Str::uuid(),
-            ],
+            ]
         )
         ->has(Price::factory()->state([
             'amount' => 10,

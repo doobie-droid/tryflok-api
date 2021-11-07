@@ -113,7 +113,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'contents'], function () {
-        Route::get('/', 'ContentController@getAll');
         Route::get('/{id}', 'ContentController@getSingle');
         Route::get('/{public_id}/reviews', 'ContentController@getReviews');
         Route::get('/{public_id}/free-assets', 'ContentController@getFreeAssets');
@@ -122,6 +121,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::group(['prefix' => 'digiverses'], function () {
         Route::get('/', 'CollectionController@getAll');
         Route::get('/{id}', 'CollectionController@getDigiverse');
+        Route::get('/{digiverse_id}/contents', 'ContentController@getDigiverseContents');
         Route::get('/{id}/reviews', 'CollectionController@getReviews');
     });
 
