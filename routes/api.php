@@ -102,7 +102,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
         $tags = \App\Models\Tag::where('name', 'LIKE', '%' . $search . '%')->orderBy('name')->paginate($limit, array('*'), 'page', $page);
         return response()->json([
-            "message" => "Categories retrieved successfully",
+            "message" => "Tags retrieved successfully",
             "data" => [
                 "categories" => TagResource::collection($tags),
                 'current_page' => $tags->currentPage(),
