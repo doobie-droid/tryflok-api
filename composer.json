@@ -6,11 +6,6 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
-        "ext-bcmath": "*",
-        "ext-sodium": "*",
-        "ext-gd": "*",
-        "ext-pcntl": "*",
-        "ext-exif": "*",
         "aminyazdanpanah/php-ffmpeg-video-streaming": "^1.2",
         "aws/aws-sdk-php": "^3.192",
         "fideloper/proxy": "^4.4",
