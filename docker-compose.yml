@@ -17,7 +17,7 @@ services:
       - redis
       - mysql
     volumes:
-      - ./:/var/www
+      - ./:/home/flok/app
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
       - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
       - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
