@@ -16,7 +16,7 @@ class UserResourceWithSensitive extends JsonResource
     {
         return array_merge(parent::toArray($request), [
             'roles' => $this->whenLoaded('roles'),
-            'profile_picture' => $this->whenLoaded('profile_picture'),
+            'profile_picture' => !is_null($this->profile_picture) ? $this->profile_picture->first() : null,
             'wallet' => $this->whenLoaded('wallet'),
         ]);
     }

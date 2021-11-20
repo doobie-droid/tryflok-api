@@ -32,6 +32,7 @@ use Aws\CloudFront\CloudFrontClient;
 use Aws\Exception\AwsException;
 use App\Http\Resources\NotificationResource;
 use App\Constants\Constants;
+use App\Rules\AssetType as AssetTypeRule;
 
 class UserController extends Controller
 {
@@ -134,10 +135,11 @@ class UserController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all()), [
                 'name' => ['sometimes', 'nullable', 'string', ],
-                'email' => ['sometimes', 'nullable', 'email', 'unique:users,email', ],
+                'email' => ['sometimes', 'nullable', 'email',],
+                'username' => ['sometimes', 'nullable', 'regex:/^[A-Za-z0-9_]*$/',],
                 'dob' => ['sometimes', 'nullable', 'date'],
-                'profile_picture' => ['sometimes', 'nullable', 'image', ],
-                'creator_bio' => ['sometimes', 'nullable', 'string'],
+                'profile_picture' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'bio' => ['sometimes', 'nullable', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -146,7 +148,7 @@ class UserController extends Controller
 
             $user = $request->user();
 
-            $user->update($request->only(['name', 'email', 'dob', 'creator_bio']));
+            $user->update($request->only(['name', 'email', 'dob', 'bio']));
             if (!is_null($request->email)) {
                 $user->email_token = Str::random(16);
                 $user->email_verified = 0;
@@ -154,27 +156,22 @@ class UserController extends Controller
                 event(new ConfirmEmailEvent($user));
             }
 
-            if ($request->hasFile('profile_picture')) {
-                //check if the user has an already existing profile photo
-                $profilePicture = $user->profilePicture();
-                //if they do, delete
-                if (!is_null($profilePicture)) {
-                    if ($profilePicture->storage_provider === 'cloudinary') {
-                        $storage = new Storage($profilePicture->storage_provider);
-                        $storage->delete($profilePicture->storage_provider_id);
-                    }
-                    $profilePicture->forceDelete();
+            if (!is_null($request->username)) {
+                $user->email_token = Str::random(16);
+                $user->email_verified = 0;
+                $user->save();
+                event(new ConfirmEmailEvent($user));
+            }
+
+            if (!is_null($request->profile_picture)) {
+                $oldPicture = $user->profile_picture()->first();
+                if (!is_null($oldPicture)) {
+                    $user->profile_picture()->detach($oldPicture->id);
+                    $oldPicture->delete();
                 }
-                //add new image
-                $storage = new Storage('cloudinary');
-                $uploadedImageData = $storage->upload($request->file('profile_picture')->getRealPath(),'users/profile');
-                $user->assets()->create([
-                    'storage_provider' => 'cloudinary',
-                    'storage_provider_id' => $uploadedImageData['storage_provider_id'],
-                    'url' => $uploadedImageData['url'],
+                $user->profile_picture()->attach($request->profile_picture, [
+                    'id' => Str::uuid(),
                     'purpose' => 'profile-picture',
-                    'asset_type' => 'image',
-                    'mime_type' => $request->file('profile_picture')->getMimeType(),
                 ]);
             }
             $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $user->id)->first();

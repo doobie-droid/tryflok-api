@@ -75,7 +75,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function profile_picture()
     {
-        return $this->morphToMany(Asset::class, 'assetable')->where('purpose', 'profile-picture');
+        return $this->morphToMany(Asset::class, 'assetable')->wherePivot('purpose', 'profile-picture');
     }
 
     public function referrer()
