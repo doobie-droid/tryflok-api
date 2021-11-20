@@ -196,7 +196,7 @@ class WalletController extends Controller
                 'total_fees' => 0,
                 'user' => $request->user()->toArray(),
                 'provider' => 'wallet',
-                'provider_id' => $transaction->public_id,
+                'provider_id' => $transaction->id,
                 'items' => $request->items,
             ]);
             $this->setStatusCode(202);
