@@ -483,7 +483,13 @@ class ContentController extends Controller
             $digiverse = Collection::where('id', $request->digiverse_id)->first();
             $contents = $digiverse->contents();
 
-            if ($request->user()->id !== $digiverse->user_id) {
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            if ($user_id !== $digiverse->user_id) {
                 $contents = $contents->where('is_available', 1);
             }
 
