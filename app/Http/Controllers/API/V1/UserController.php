@@ -863,7 +863,7 @@ class UserController extends Controller
                         POLICY;
             $result = $cloudFrontClient->getSignedCookie([
                 'policy' => $policy,
-                'private_key' => join_path(storage_path('app'), env('AWS_CLOUDFRONT_KEY_FILENAME')),
+                'private_key' => base64_decode(env('AWS_CLOUDFRONT_PRIVATE_KEY')),
                 'key_pair_id' => env('AWS_CLOUDFRONT_KEY_ID'),
             ]);
             $cookies = '';
