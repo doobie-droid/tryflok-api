@@ -211,7 +211,8 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('/{id}', 'ContentController@update');
             Route::get('/{public_id}/assets', 'ContentController@getAssets');
 
-            Route::post('/{id}/issue', 'ContentController@createIssue');
+            Route::post('/{id}/issues', 'ContentController@createIssue');
+            Route::patch('/{id}/issues', 'ContentController@updateIssue');
         });
 
         Route::group(['prefix' => 'digiverses'], function () {
