@@ -164,17 +164,38 @@ class PaymentController extends Controller
 
             $validator = Validator::make($request->input(), [
                 'items' => ['required',],
-                'items.*.public_id' => ['required', 'string', ],
+                'items.*.id' => ['required', 'string', ],
                 'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
                 'items.*.price' => ['required',],
                 'items.*.price.amount' => ['required', 'numeric',],
-                'items.*.price.public_id' => ['required', 'string',],
+                'items.*.price.id' => ['required', 'string',],
                 'items.*.price.interval' => ['required', 'string', 'regex:(year|month|week|day|one-off)',],
                 'items.*.price.interval_amount' => ['required', 'numeric',],
             ]);
 
             if ($validator->fails()) {
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+            //check that Item is actually free. That means it's collection will also be free if it is a content
+            $itemsThatCanBeAddedForFree = [];
+            foreach ($request->items as $item) {
+                if ($item['type'] === 'content') {
+                    $itemModel = Content::where('id', $item['id'])->first();
+                    if (!is_null($itemModel)) {
+                        $digivierse = $itemModel->collections()->first();
+                        $digiversePrice = $digivierse->prices()->first();
+                        $itemPrice = $itemModel->prices()->first();
+                        if ($digiversePrice->amount === 0 && $itemPrice->amount === 0) {
+                            $itemsThatCanBeAddedForFree[] = $item;
+                        }
+                    }
+                } else {
+                    $itemModel = Collection::where('id', $item['id'])->first();
+                    $itemPrice = $itemModel->prices()->first();
+                    if ($itemPrice->amount === 0) {
+                        $itemsThatCanBeAddedForFree[] = $item;
+                    }
+                }
             }
 
             PurchaseJob::dispatch([
@@ -183,7 +204,7 @@ class PaymentController extends Controller
                 'user' => $request->user()->toArray(),
                 'provider' => 'local',
                 'provider_id' => 'FREE-' . Str::random(6),
-                'items' => $request->items,
+                'items' => $itemsThatCanBeAddedForFree,
             ]);
             $this->setStatusCode(202);
             return $this->respondWithSuccess("Item queued to be added to user's library.");
