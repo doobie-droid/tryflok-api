@@ -212,7 +212,8 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::get('/{public_id}/assets', 'ContentController@getAssets');
 
             Route::post('/{id}/issues', 'ContentController@createIssue');
-            Route::patch('/{id}/issues', 'ContentController@updateIssue');
+            Route::put('/{id}/issues', 'ContentController@updateIssue');
+            Route::patch('/{id}/issues', 'ContentController@publishIssue');
             Route::get('/{id}/issues', 'ContentController@getIssues');
 
             Route::post('/{id}/subscription', 'ContentController@subscribeToContent');

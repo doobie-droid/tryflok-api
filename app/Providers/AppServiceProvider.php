@@ -46,6 +46,8 @@ class AppServiceProvider extends ServiceProvider
             'category' => 'App\Models\Category',
             'cart' => 'App\Models\Cart',
             'tag' => 'App\Models\Tag',
+            'content_issue' => 'App\Models\ContentIssue',
+            'notification' => 'App\Models\Notification',
         ]);
     }
 }

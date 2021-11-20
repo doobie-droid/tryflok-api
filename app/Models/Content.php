@@ -60,6 +60,11 @@ class Content extends Model
         return $this->morphMany(Payment::class, 'paymentable');
     }
 
+    public function notifiers()
+    {
+        return $this->morphMany(Notification::class, 'notificable');
+    }
+
     public function assets()
     {
         return $this->morphToMany(Asset::class, 'assetable')->wherePivot('purpose', 'content-asset');

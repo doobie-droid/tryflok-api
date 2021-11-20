@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Rules\AssetType as AssetTypeRule;
 use App\Http\Resources\ContentResource;
 use App\Http\Resources\ContentIssueResource;
+use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
 
 class ContentController extends Controller
 {
@@ -256,7 +257,6 @@ class ContentController extends Controller
                 'id' => ['required', 'string', 'exists:contents,id',],
                 'title' => ['required', 'string', 'max:200', 'min:1',],
                 'description' => ['required', 'string',],
-                'is_available' => ['required', 'nullable', 'integer', 'min:0', 'max:1',],
             ]);
 
             if ($validator1->fails()) {
@@ -275,7 +275,7 @@ class ContentController extends Controller
             $issue = $content->issues()->create([
                 'title' => $request->title,
                 'description' => $request->description,
-                'is_available' => $request->is_available,
+                'is_available' => 0,
             ]);
 
             return $this->respondWithSuccess('Issue has been created successfully', [
@@ -294,7 +294,6 @@ class ContentController extends Controller
                 'issue_id' => ['required', 'string', 'exists:content_issues,id',],
                 'title' => ['sometimes', 'nullable', 'string', 'max:200', 'min:1',],
                 'description' => ['sometimes', 'nullable', 'string',],
-                'is_available' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1',],
             ]);
 
             if ($validator1->fails()) {
@@ -319,14 +318,49 @@ class ContentController extends Controller
             if (!is_null($request->description)) {
                 $issue->description = $request->description;
             }
-    
-            if (!is_null($request->is_available)) {
-                $issue->is_available = $request->is_available;
-            }
 
             $issue->save();
 
             return $this->respondWithSuccess('Issue has been updated successfully', [
+                'issue' => $issue,
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
+
+    public function publishIssue(Request $request, $id) {
+        try {
+            $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id',],
+                'issue_id' => ['required', 'string', 'exists:content_issues,id',],
+            ]);
+
+            if ($validator1->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->where('user_id', $request->user()->id)->first();
+            if (is_null($content)) {
+                return $this->respondBadRequest("You do not have permission to create an issue for this content");
+            }
+
+            if ($content->type !== 'newsletter') {
+                return $this->respondBadRequest("Issues can only be created or updated for newletters");
+            }
+            
+            $issue = $content->issues()->where('id', $request->issue_id)->first();
+
+            if ($issue->is_available !== 1) {
+                $issue->is_available = 1;
+                $issue->save();
+                DispatchSubscribersNotificationJob::dispatch([
+                    'content' => $content,
+                ]);
+            }
+            
+            return $this->respondWithSuccess('Issue has been published successfully', [
                 'issue' => $issue,
             ]);
         } catch(\Exception $exception) {

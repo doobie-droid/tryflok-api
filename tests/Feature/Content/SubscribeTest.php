@@ -19,6 +19,7 @@ use Tests\MockData\Content as ContentMock;
 
 class SubscribeTest extends TestCase
 {
+    use DatabaseTransactions, WithFaker;
     /**
      * A basic feature test example.
      *
