@@ -135,7 +135,6 @@ class UserController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all()), [
                 'name' => ['sometimes', 'nullable', 'string', ],
-                'email' => ['sometimes', 'nullable', 'email',],
                 'username' => ['sometimes', 'nullable', 'regex:/^[A-Za-z0-9_]*$/',],
                 'dob' => ['sometimes', 'nullable', 'date'],
                 'profile_picture' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
@@ -145,22 +144,20 @@ class UserController extends Controller
             if ($validator->fails()) {
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
+            if (isset($request->username) && !is_null($request->username)) {
+                $test_username = User::where('username', $request->username)->first();
+                if (!is_null($test_username) && $test_username->id !== $request->user()->id) {
+                    return $this->respondBadRequest("Username is already taken");
+                }
+            }
 
             $user = $request->user();
 
             $user->update($request->only(['name', 'email', 'dob', 'bio']));
-            if (!is_null($request->email)) {
-                $user->email_token = Str::random(16);
-                $user->email_verified = 0;
-                $user->save();
-                event(new ConfirmEmailEvent($user));
-            }
 
             if (!is_null($request->username)) {
-                $user->email_token = Str::random(16);
-                $user->email_verified = 0;
+                $user->username = $request->username;
                 $user->save();
-                event(new ConfirmEmailEvent($user));
             }
 
             if (!is_null($request->profile_picture)) {
