@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\Subscriptions\EndSubscriptions::class,
         Commands\Payments\CheckPayoutTransferStatus::class,
+        Commands\Payments\GeneratePayout::class,
     ];
 
     /**
@@ -27,6 +28,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('flok:check-payout-transfer-status')->everyTwoMinutes();
         $schedule->command('flok:end-subscriptions')->hourly();
+        $schedule->command('flok:generate-payouts')->monthly();
     }
 
     /**

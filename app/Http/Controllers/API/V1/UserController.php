@@ -22,7 +22,6 @@ use App\Models\PaymentAccount;
 use App\Models\Payout;
 use App\Models\Notification;
 use App\Events\User\ConfirmEmail as ConfirmEmailEvent;
-use App\Jobs\User\Payout as PayoutJob;
 use PragmaRX\Countries\Package\Countries as PragmarxCountries;
 use App\Jobs\Payment\Payout as PayoutToCreatorJob;
 use Illuminate\Database\Eloquent\Builder;
@@ -526,47 +525,6 @@ class UserController extends Controller
                 'otp' => $otp,
             ]);
         } catch(\Exception $exception) {
-            Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
-    }
-
-    public function requestPayout(Request $request)
-    {
-        try {
-
-            $start = Configuration::where('name', 'payout-start')->first();
-            $startDate = Carbon::createFromFormat('Y-m-d',  $start->value); 
-            $end = Configuration::where('name', 'payout-end')->first();
-            $endDate = Carbon::createFromFormat('Y-m-d',  $end->value); 
-           
-            if (!now()->between($startDate, $endDate)) {
-                return $this->respondBadRequest("You can only request for payouts whithin the payout period that happens once a month. The next payout period is " . $startDate->format('l, jS \\of F, Y') . ' to ' . $endDate->format('l, jS \\of F, Y'));
-            }
-
-            $lastPayout = $request->user()->payouts()->latest()->first();
-            if (!is_null($lastPayout)) {
-                $countSales = $request->user()->sales()->whereDate('created_at', '>', $lastPayout->end)->count();
-                if ($countSales == 0) {
-                    return $this->respondBadRequest("You have not made any sales since last payout so you cannot request a payout");
-                }
-                $start = clone $lastPayout->end;
-            } else {
-                $firstSale = $request->user()->sales()->first();
-                if (is_null($firstSale)) {
-                    return $this->respondBadRequest("You have not made any sales yet so you cannot request a payout");
-                }
-                $start = clone $firstSale->created_at;
-            }
-
-            PayoutJob::dispatch([
-                "start" => $start,
-                "user" => $request->user(),
-            ]);
-            $this->setStatusCode(202);
-            return $this->respondWithSuccess("Your payout request has been received, it will be displayed in your payouts shortly.");
-
-        }  catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
 		}
