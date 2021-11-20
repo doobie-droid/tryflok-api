@@ -140,11 +140,11 @@ class WalletController extends Controller
         try {
             $validator = Validator::make($request->input(), [
                 'items' => ['required',],
-                'items.*.public_id' => ['required', 'string', ],
+                'items.*.id' => ['required', 'string', ],
                 'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
                 'items.*.price' => ['required',],
                 'items.*.price.amount' => ['required', 'numeric',],
-                'items.*.price.public_id' => ['required', 'string','exists:prices,public_id'],
+                'items.*.price.id' => ['required', 'string','exists:prices,id'],
                 'items.*.price.interval' => ['sometimes', 'nullable', 'string', 'regex:(month|one-off)',],
                 'items.*.price.interval_amount' => ['sometimes', 'nullable', 'numeric',],
             ]);
@@ -155,15 +155,15 @@ class WalletController extends Controller
 
             $total_amount_in_dollars = 0;
             foreach ($request->items as $item) {
-                $price = Price::where('public_id', $item['price']['public_id'])->first();
+                $price = Price::where('id', $item['price']['id'])->first();
                 //validate that the content or collection exists
                 $itemModel = NULL;
                 switch ($item['type']) {
                     case 'content':
-                        $itemModel = Content::where('public_id', $item['public_id'])->first();
+                        $itemModel = Content::where('id', $item['id'])->first();
                         break;
                     case 'collection':
-                        $itemModel = Collection::where('public_id', $item['public_id'])->first();
+                        $itemModel = Collection::where('id', $item['id'])->first();
                         break;
                 }
                 if (is_null($itemModel)) {
@@ -183,7 +183,6 @@ class WalletController extends Controller
 
             $newWalletBalance = bcsub($request->user()->wallet->balance, $total_amount_in_akc, 2);
             $transaction = WalletTransaction::create([
-                'public_id' => uniqid(rand()),
                 'wallet_id' => $request->user()->wallet->id,
                 'amount' => $total_amount_in_akc,
                 'balance' => $newWalletBalance,
