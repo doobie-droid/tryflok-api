@@ -354,75 +354,106 @@ class CollectionController extends Controller
 		} 
     }
 
-    public function getUserCreatedDigiverses(Request $request, $user_public_id)
+    public function getUserCreatedDigiverses(Request $request)
     {
         try {
-            $user = User::where('public_id', $user_public_id)->first();
-            if (is_null($user)) {
-                return $this->respondBadRequest("Invalid user ID supplied");
-            }
-            $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
-            $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
-            if ($limit > Constants::MAX_ITEMS_LIMIT) {
-                $limit = Constants::MAX_ITEMS_LIMIT;
-            }
-            $title = urldecode($request->query('title', ''));
-            $categories = $request->query('categories', '');
-            $types = $request->query('type','');
-            $freeItems = $request->query('free', 0);
+            $page = $request->query('page', 1);
+            $limit = $request->query('limit', 10);
 
-                if ($categories != "") {
-                    $categories = explode(",", urldecode($categories));
-                    $categories = array_diff($categories, [""]);//get rid of empty values
-                    $collections = $user->collectionsCreated()->whereHas('categories', function (Builder $query) use ($categories) {
-                        $query->whereIn('name', $categories);
-                    })->where('title', 'LIKE', '%' . $title . '%');
-                } else {
-                    $collections = $user->collectionsCreated()->where('title', 'LIKE', '%' . $title . '%');
+            $keyword = urldecode($request->query('keyword', ''));
+            $keywords = explode(" ", $keyword);
+            $keywords = array_diff($keywords, ['']);
+
+            $tags = $request->query('tags', '');
+            $tags = explode(",", urldecode($tags));
+            $tags = array_diff($tags, ['']);
+
+            $maxPrice = $request->query('max_price', -1);
+            $minPrice = $request->query('min_price', 0);
+
+            $orderBy = $request->query('order_by', 'created_at');
+            $orderDirection = $request->query('order_direction', 'asc');
+
+            $max_items_count = Constants::MAX_ITEMS_LIMIT;
+            $validator = Validator::make([
+                'page' => $page,
+                'limit' => $limit,
+                'keyword' => $keyword,
+                'tags' => $tags,
+                'max_price' => $maxPrice,
+                'min_price' => $minPrice,
+                'order_by' => $orderBy,
+                'order_direction' => $orderDirection,
+            ], [
+                'page' => ['required', 'integer', 'min:1',],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
+                'keyword' => ['sometimes', 'string', 'max:200',],
+                'max_price' => ['required', 'integer', 'min:-1',],
+                'min_price' => ['required', 'integer', 'min:0',],
+                'order_by' => ['required', 'string', 'regex:(created_at|price|views|reviews)'],
+                'order_direction' => ['required', 'string', 'regex:(asc|desc)'],
+                'tags' => ['sometimes',],
+                'tags.*' => ['required', 'string', 'exists:tags,id',],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $digiverses = Collection::where('type', 'digiverse')->where('user_id', $request->user()->id);
+
+            foreach ($keywords as $keyword) {
+                $digiverses = $digiverses->where(function ($query) use ($keyword) {
+                    $query->where('title', 'LIKE', "%{$keyword}%")
+                    ->orWhere('description', 'LIKE', "%{$keyword}%");
+                });
+            }
+
+            if (!empty($tags)) {
+                $digiverses = $digiverses->whereHas('tags', function (Builder $query) use ($tags) {
+                    $query->whereIn('tags.id', $tags);
+                });
+            }
+
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = 0;
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            $digiverses = $digiverses
+            ->withCount([
+                'ratings' => function ($query) {
+                    $query->where('rating', '>', 0);
                 }
-    
-                if ($freeItems == 1) {
-                    $collections = $collections->whereHas('prices', function (Builder $query) {
-                        $query->where('amount', 0);
-                    });
+            ])->withAvg([
+                'ratings' => function($query)
+                {
+                    $query->where('rating', '>', 0);
                 }
-    
-                if ($request->user() == NULL || $request->user()->id == NULL) {
-                    $collections = $collections->where('is_available', 1)->where('show_only_in_collections', 0)->where('approved_by_admin', 1);
-                } else {
-                    if ($request->user()->id !== $user->id) {
-                        $collections = $collections->where('is_available', 1)->where('show_only_in_collections', 0)->where('approved_by_admin', 1);
-                    }
-                }
-    
-                if ($types != "") {
-                    $types = explode(",", urldecode($types));
-                    $types = array_diff($types, [""]);//get rid of empty values
-                    $collections = $collections->whereIn('type', $types);
-                } 
-    
-                $collections = $collections->withCount([
-                    'ratings' => function ($query) {
-                        $query->where('rating', '>', 0);
-                    }
-                ])->withAvg([
-                    'ratings' => function($query)
-                    {
-                        $query->where('rating', '>', 0);
-                    }
-                ], 'rating')->with('cover')->with('approvalRequest')->with('owner','owner.profile_picture')->with('categories')->with('prices', 'prices.continent', 'prices.country')->orderBy('created_at', 'desc')->paginate($limit, array('*'), 'page', $page);
-            
-            return $this->respondWithSuccess("Collections retrieved successfully",[
-                'collections' => CollectionResource::collection($collections),
-                'current_page' => $collections->currentPage(),
-                'items_per_page' => $collections->perPage(),
-                'total' => $collections->total(),
+            ], 'rating')
+            ->with('cover')
+            ->with('owner','owner.profile_picture')
+            ->with('tags')
+            ->with('prices')
+            ->with([
+                'userables' => function ($query) use ($user_id) {
+                    $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                },
+            ])->orderBy('collections.created_at', 'desc')
+            ->paginate($limit, array('*'), 'page', $page);
+
+            return $this->respondWithSuccess('Digiverses retrieved successfully',[
+                'digiverses' => CollectionResource::collection($digiverses),
+                'current_page' => $digiverses->currentPage(),
+                'items_per_page' => $digiverses->perPage(),
+                'total' => $digiverses->total(),
             ]);
 
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+		}
     }
 
     public function getReviews(Request $request, $public_id)

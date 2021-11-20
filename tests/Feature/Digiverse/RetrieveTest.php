@@ -431,4 +431,252 @@ class RetrieveTest extends TestCase
         ]);
         $this->assertTrue(count($response->getData()->data->digiverses) === 3);
     }
+
+    public function test_retrieve_all_created_digiverses_works_with_correct_parameters()
+    {
+        $user1 = User::factory()->create();
+        $user1->assignRole(Roles::USER);
+        $this->be($user1);
+
+        $tag1 = Tag::factory()->create();
+        $tag2 = Tag::factory()->create();
+        $tag3 = Tag::factory()->create();
+
+        $digiverse1 = Collection::factory()
+        ->state([
+            'title' => 'title1',
+        ])
+        ->for($user1, 'owner')
+        ->digiverse()
+        ->unavailable()
+        ->hasAttached(Asset::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+        ])
+        ->hasAttached($tag1, [
+            'id' => Str::uuid(),
+        ])
+        ->hasAttached($tag2, [
+            'id' => Str::uuid(),
+        ])
+        ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user1->id
+            ])
+        )
+        ->create();
+        $digiverse2 = Collection::factory()
+        ->state([
+            'title' => 'title2',
+        ])
+        ->for($user1, 'owner')
+        ->digiverse()
+        ->unavailable()
+        ->hasAttached(Asset::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+        ])
+        ->hasAttached($tag1, [
+            'id' => Str::uuid(),
+        ])
+        ->hasAttached($tag3, [
+            'id' => Str::uuid(),
+        ])
+        ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user1->id
+            ])
+        )
+        ->create();
+        $digiverse3 = Collection::factory()
+        ->state([
+            'title' => 'title3',
+        ])
+        ->for($user1, 'owner')
+        ->digiverse()
+        ->unavailable()
+        ->hasAttached(Asset::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+        ])
+        ->hasAttached($tag3, [
+            'id' => Str::uuid(),
+        ])
+        ->hasAttached($tag2, [
+            'id' => Str::uuid(),
+        ])
+        ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user1->id
+            ])
+        )
+        ->create();
+
+        $digiverse4 = Collection::factory()
+        ->state([
+            'description' => 'title1',
+        ])
+        ->for($user1, 'owner')
+        ->digiverse()
+        ->unavailable()
+        ->hasAttached(Asset::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+        ])
+        ->hasAttached($tag1, [
+            'id' => Str::uuid(),
+        ])
+        ->hasAttached($tag2, [
+            'id' => Str::uuid(),
+        ])
+        ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user1->id
+            ])
+        )
+        ->create();
+        $digiverse5 = Collection::factory()
+        ->state([
+            'description' => 'title2',
+        ])
+        ->for($user1, 'owner')
+        ->digiverse()
+        ->unavailable()
+        ->hasAttached(Asset::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+        ])
+        ->hasAttached($tag1, [
+            'id' => Str::uuid(),
+        ])
+        ->hasAttached($tag3, [
+            'id' => Str::uuid(),
+        ])
+        ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user1->id
+            ])
+        )
+        ->create();
+        $digiverse6 = Collection::factory()
+        ->state([
+            'description' => 'title3',
+        ])
+        ->for($user1, 'owner')
+        ->digiverse()
+        ->unavailable()
+        ->hasAttached(Asset::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+        ])
+        ->hasAttached($tag3, [
+            'id' => Str::uuid(),
+        ])
+        ->hasAttached($tag2, [
+            'id' => Str::uuid(),
+        ])
+        ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user1->id
+            ])
+        )
+        ->create();
+
+        // when no filtering is set
+        $response = $this->json('GET', '/api/v1/account/digiverses?page=1&limit=10');
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            'status',
+            'message',
+            'data' => [
+                'digiverses' => [
+                    DigiverseMock::STANDARD_DIGIVERSE_RESPONSE['data']['digiverse'],
+                ],
+                'current_page',
+                'items_per_page',
+                'total',
+            ]
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse1->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse2->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse3->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse4->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse5->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse6->id
+        ]);
+
+        // when two tags are specified
+        $response = $this->json('GET', "/api/v1/account/digiverses?page=1&limit=10&tags={$tag1->id},{$tag2->id},{$tag3->id}");
+        $response->assertStatus(200)
+        ->assertJsonFragment([
+            'id' => $digiverse1->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse2->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse3->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse4->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse5->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse6->id
+        ]);
+        $this->assertTrue(count($response->getData()->data->digiverses) === 6);
+
+        // when a single tag is specified
+        $response = $this->json('GET', "/api/v1/account/digiverses?page=1&limit=10&tags={$tag1->id},");
+        $response->assertStatus(200)
+        ->assertJsonFragment([
+            'id' => $digiverse1->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse2->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse4->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse5->id
+        ]);
+        $this->assertTrue(count($response->getData()->data->digiverses) === 4);
+
+        // when filtering is done by keyword
+        $response = $this->json('GET', '/api/v1/account/digiverses?page=1&limit=10&keyword=title1');
+        $response->assertStatus(200)
+        ->assertJsonFragment([
+            'id' => $digiverse1->id
+        ])
+        ->assertJsonFragment([
+            'id' => $digiverse4->id
+        ]);
+        $this->assertTrue(count($response->getData()->data->digiverses) === 2);
+    }
 }
