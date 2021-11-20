@@ -127,9 +127,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::group(['prefix' => 'users'], function () {
         Route::get('{public_id}', 'UserController@getSingle');
-        Route::get('{user_public_id}/contents', 'ContentController@getUserCreatedContents');
-        Route::get('{user_public_id}/collections', 'CollectionController@getUserCreatedCollections');
-        Route::get('{user_public_id}/wishlist', 'UserController@getWishlist');
     });
 
     Route::group(['prefix' => 'analytics'], function () {
@@ -137,11 +134,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'payments'], function () {
-        //Route::post('/paystack', 'PaymentController@paystackWebhook');
-        //Route::post('/test', 'PaymentController@testPaymentWebhook');
         Route::get('/flutterwave/banks', 'PaymentController@getFlutterwaveBanks');
         Route::get('/flutterwave/banks/branches', 'PaymentController@getFlutterwaveBankBranches');
-        //Route::post('/providers', 'PaymentController@processPaymentForProviders');
         Route::get('/stripe/connect', 'UserController@addStripePaymentAccount');
     });
 });
@@ -186,11 +180,12 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('/fund-wallet', 'WalletController@fundWallet');
             Route::post('/wallet-pay', 'WalletController@payViaWallet');
             Route::get('/wallet-transactions', 'WalletController@getTransactions');
-            Route::post('/profile', 'UserController@updateBasicData');//ideally, this should be PUT but php has an issue with collecting files from PUT
+            Route::post('/profile', 'UserController@updateBasicData');
             Route::put('/password', 'UserController@updatePassword');
             Route::patch('/token', 'UserController@refreshToken');
             Route::post('/wishlist', 'UserController@addItemsToWishList');
             Route::delete('/wishlist', 'UserController@removeItemsFromWishlist');
+            Route::get('/wishlist', 'UserController@getWishlist');
             Route::get('/purchased-items', 'UserController@getPurchasedItems');
             Route::post('/cart', 'UserController@addItemsToCart');
             Route::delete('/cart', 'UserController@removeItemsFromCart');

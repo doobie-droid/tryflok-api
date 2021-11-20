@@ -716,6 +716,9 @@ class ContentController extends Controller
             $content = Content::where('public_id', $public_id)->first();
             $freePrice = $content->prices()->where('amount', 0)->first();
             //check if user owns this content if it is not free
+            // content is free, ensure it's associated digiverse is also free before you display it's assets $freeContent
+            // if content is not free, check that the user has purchased the content $purchasedContent
+            // check that user has content via digiverse $purchasedParent
             $userable = Userable::where('user_id',  $request->user()->id)->where('userable_type', 'content')->where('userable_id', $content->id)->where('status', 'available')->first();
             if (is_null($freePrice) && $content->user_id !== $request->user()->id && !$request->user()->hasRole(Roles::ADMIN) && !$request->user()->hasRole(Roles::SUPER_ADMIN)) {
                 if (is_null($userable)) {

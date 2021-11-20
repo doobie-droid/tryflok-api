@@ -229,7 +229,12 @@ class UserController extends Controller
                 }
             }
 
-            return $this->respondWithSuccess("Items successfully added to wishlist");
+            $wishlist = Userable::where('user_id', $request->user()->id)->where('status', 'wishlist')->with('userable', 'userable.prices', 'userable.prices.continent', 'userable.prices.country', 'userable.tags', 'userable.cover')->get();
+
+            return $this->respondWithSuccess("Items successfully added to wishlist",
+            [
+                'wishlist' => $wishlist,
+            ]);
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
@@ -269,26 +274,26 @@ class UserController extends Controller
                     $wishlistItem->delete();
                 }
             }
-            return $this->respondWithSuccess("Items successfully removed from wishlist");
+
+            $wishlist = Userable::where('user_id', $request->user()->id)->where('status', 'wishlist')->with('userable', 'userable.prices', 'userable.prices.continent', 'userable.prices.country', 'userable.tags', 'userable.cover')->get();
+
+            return $this->respondWithSuccess("Items successfully removed from wishlist",
+            [
+                'wishlist' => $wishlist,
+            ]);
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
 		}
     }
 
-    public function getWishlist(Request $request, $id)
+    public function getWishlist(Request $request)
     {
         try {
-            $user = User::where('id', $id)->first();
-            if (is_null($user)) {
-                return $this->respondBadRequest("Invalid user ID supplied");
-            }
-
-            $wishlist = Userable::where('user_id', $user->id)->where('status', 'wishlist')->with('userable', 'userable.prices', 'userable.prices.continent', 'userable.prices.country', 'userable.categories', 'userable.cover')->get();
+            $wishlist = Userable::where('user_id', $request->user()->id)->where('status', 'wishlist')->with('userable', 'userable.prices', 'userable.prices.continent', 'userable.prices.country', 'userable.tags', 'userable.cover')->get();
 
             return $this->respondWithSuccess("Wishlist retrieved successfully", [
                 'wishlist' => $wishlist,
-                'user' => new UserResource($user),
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);
@@ -379,7 +384,7 @@ class UserController extends Controller
         try {
             $items = Userable::where('user_id', $request->user()->id)->where(function ($query) {
                 $query->where('status', 'available')->orWhere('status', 'subscription-ended')->orWhere('status', 'content-deleted');
-            })->with('userable', 'userable.cover','userable.prices', 'userable.prices.continent', 'userable.prices.country', 'userable.categories')->with('subscription')->get();
+            })->with('userable', 'userable.cover','userable.prices', 'userable.prices.continent', 'userable.prices.country', 'userable.tags')->with('subscription')->get();
 
             return $this->respondWithSuccess("Items retrieved successfully", [
                 'items' => $items,
@@ -397,7 +402,7 @@ class UserController extends Controller
                 'items' => ['required',],
                 'items.*.id' => ['required', 'string', ],
                 'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
-                'items.*.quantity' => ['sometimes', 'required', 'numeric', 'min:1',],
+                'items.*.quantity' => ['sometimes', 'required', 'numeric', 'min:1', 'max:1'],
             ]);
 
             if ($validator->fails()) {
@@ -431,7 +436,7 @@ class UserController extends Controller
                 }
             }
 
-            $items = $request->user()->carts()->with('cartable', 'cartable.prices', 'cartable.prices.continent', 'cartable.prices.country', 'cartable.categories', 'cartable.cover')->where('checked_out', 0)->get();
+            $items = $request->user()->carts()->with('cartable', 'cartable.prices', 'cartable.prices.continent', 'cartable.prices.country', 'cartable.tags', 'cartable.cover')->where('checked_out', 0)->get();
 
             foreach ($items as $key => $item) {
                 if (is_null($item->cartable)) {
@@ -451,7 +456,7 @@ class UserController extends Controller
     public function getCartItems(Request $request)
     {
         try {
-            $items = $request->user()->carts()->with('cartable', 'cartable.cover', 'cartable.prices', 'cartable.prices.continent', 'cartable.prices.country', 'cartable.categories')->where('checked_out', 0)->get();
+            $items = $request->user()->carts()->with('cartable', 'cartable.cover', 'cartable.prices', 'cartable.prices.continent', 'cartable.prices.country', 'cartable.tags')->where('checked_out', 0)->get();
 
             return $this->respondWithSuccess("Cart items retrieved successfully",[
                 'cart' => $items,
@@ -496,7 +501,7 @@ class UserController extends Controller
                 }
             }
 
-            $items = $request->user()->carts()->with('cartable', 'cartable.cover', 'cartable.prices', 'cartable.prices.continent', 'cartable.prices.country', 'cartable.categories')->where('checked_out', 0)->get();
+            $items = $request->user()->carts()->with('cartable', 'cartable.cover', 'cartable.prices', 'cartable.prices.continent', 'cartable.prices.country', 'cartable.tags')->where('checked_out', 0)->get();
 
             return $this->respondWithSuccess("Cart items deleted successfully",[
                 'cart' => $items,
@@ -657,7 +662,6 @@ class UserController extends Controller
 
             return $this->respondWithSuccess("Payoutment account created successfully",[
                 'payment_account' => $paymentAccount,
-                'payment_accounts' => $request->user()->paymentAccounts()->get(),
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);
@@ -728,8 +732,8 @@ class UserController extends Controller
 
             $account_links = \Stripe\AccountLink::create([
                 'account' => $stripeAccount->identifier,
-                'refresh_url' => env('BACKEND_URL', 'https://api.akiddie.com.ng/') . 'api/v1/payments/stripe/connect?id=' . $user->id . '&country=' . $country,
-                'return_url' => env('CREATOR_URL', 'https://creators.akiddie.com.ng/') . 'creator/' . $user->id . '/account',
+                'refresh_url' => env('BACKEND_URL', 'https://api.tryflok.com/') . 'api/v1/payments/stripe/connect?id=' . $user->id . '&country=' . $country,
+                'return_url' => env('FRONTEND_URL', 'https://tryflok.com/') . 'user/' . $user->id . '/account',
                 'type' => 'account_onboarding',
             ]);
             
