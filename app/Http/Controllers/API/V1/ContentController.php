@@ -560,6 +560,24 @@ class ContentController extends Controller
 		}
     }
 
+    public function getSingleIssue(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make([
+                'id' => $id,
+            ], [
+                'id' => ['required', 'string', 'exists:issues,id'],
+            ]);
+            $issue = ContentIssue::where('id', $id)->first();
+            return $this->respondWithSuccess('Issue retrieved successfully',[
+                'issue' => new ContentIssueResource($issue),
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
+
     public function getReviews(Request $request, $public_id)
     {
         try {
