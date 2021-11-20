@@ -68,18 +68,18 @@ class UserController extends Controller
 		} 
     }
 
-    public function getSingle(Request $request, $public_id)
+    public function getSingle(Request $request, $id)
     {
         try {
-            $validator = Validator::make(['public_id' => $public_id], [
-                'public_id' => ['required', 'string', 'exists:users,public_id'],
+            $validator = Validator::make(['id' => $id], [
+                'id' => ['required', 'string', 'exists:users,id'],
             ]);
 
             if ($validator->fails()) {
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
-            $user = User::with('roles', 'profile_picture')->where('public_id', $public_id)->first();
+            $user = User::with('roles', 'profile_picture')->where('id', $id)->first();
             return $this->respondWithSuccess("User retrieved successfully", [
                 'user' => new UserResource($user),
             ]);
@@ -92,7 +92,7 @@ class UserController extends Controller
     public function getAccount(Request $request)
     {
         try {
-            $user = User::with('roles', 'profile_picture', 'wallet')->where('public_id', $request->user()->public_id)->first();
+            $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $request->user()->id)->first();
             return $this->respondWithSuccess("Account retrieved successfully", [
                 'user' => new UserResourceWithSensitive($user),
             ]);
@@ -169,7 +169,6 @@ class UserController extends Controller
                 $storage = new Storage('cloudinary');
                 $uploadedImageData = $storage->upload($request->file('profile_picture')->getRealPath(),'users/profile');
                 $user->assets()->create([
-                    'public_id' => uniqid(rand()),
                     'storage_provider' => 'cloudinary',
                     'storage_provider_id' => $uploadedImageData['storage_provider_id'],
                     'url' => $uploadedImageData['url'],
@@ -202,7 +201,7 @@ class UserController extends Controller
         try {
             $validator = Validator::make($request->input(), [
                 'items' => ['required',],
-                'items.*.public_id' => ['required', 'string', ],
+                'items.*.id' => ['required', 'string', ],
                 'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
             ]);
 
@@ -214,10 +213,10 @@ class UserController extends Controller
                 $itemModel = NULL;
                 switch ($item['type']) {
                     case 'content':
-                        $itemModel = Content::where('public_id', $item['public_id'])->first();
+                        $itemModel = Content::where('id', $item['id'])->first();
                         break;
                     case 'collection':
-                        $itemModel = Collection::where('public_id', $item['public_id'])->first();
+                        $itemModel = Collection::where('id', $item['id'])->first();
                         break;
                 }
 
@@ -248,7 +247,7 @@ class UserController extends Controller
         try {
             $validator = Validator::make($request->input(), [
                 'items' => ['required',],
-                'items.*.public_id' => ['required', 'string', ],
+                'items.*.id' => ['required', 'string', ],
                 'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
             ]);
 
@@ -260,10 +259,10 @@ class UserController extends Controller
                 $itemModel = NULL;
                 switch ($item['type']) {
                     case 'content':
-                        $itemModel = Content::where('public_id', $item['public_id'])->first();
+                        $itemModel = Content::where('id', $item['id'])->first();
                         break;
                     case 'collection':
-                        $itemModel = Collection::where('public_id', $item['public_id'])->first();
+                        $itemModel = Collection::where('id', $item['id'])->first();
                         break;
                 }
 
@@ -283,10 +282,10 @@ class UserController extends Controller
 		}
     }
 
-    public function getWishlist(Request $request, $user_public_id)
+    public function getWishlist(Request $request, $id)
     {
         try {
-            $user = User::where('public_id', $user_public_id)->first();
+            $user = User::where('id', $id)->first();
             if (is_null($user)) {
                 return $this->respondBadRequest("Invalid user ID supplied");
             }
@@ -303,16 +302,16 @@ class UserController extends Controller
 		}
     }
 
-    public function getSales(Request $request, $user_public_id)
+    public function getSales(Request $request, $user_id)
     {
         try {
-            $user = User::where('public_id', $user_public_id)->first();
+            $user = User::where('id', $user_id)->first();
             if (is_null($user)) {
                 return $this->respondBadRequest("Invalid user ID supplied");
             }
 
             if (
-                $request->user()->public_id !== $user_public_id &&
+                $request->user()->id !== $user_id &&
                 !$request->user()->hasRole(Roles::ADMIN) &&
                 !$request->user()->hasRole(Roles::SUPER_ADMIN)
             ) {
@@ -402,7 +401,7 @@ class UserController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'items' => ['required',],
-                'items.*.public_id' => ['required', 'string', ],
+                'items.*.id' => ['required', 'string', ],
                 'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
                 'items.*.quantity' => ['sometimes', 'required', 'numeric', 'min:1',],
             ]);
@@ -415,10 +414,10 @@ class UserController extends Controller
                 $itemModel = NULL;
                 switch ($item['type']) {
                     case 'content':
-                        $itemModel = Content::where('public_id', $item['public_id'])->first();
+                        $itemModel = Content::where('id', $item['id'])->first();
                         break;
                     case 'collection':
-                        $itemModel = Collection::where('public_id', $item['public_id'])->first();
+                        $itemModel = Collection::where('id', $item['id'])->first();
                         break;
                 }
                 if (is_null($itemModel)) {
@@ -429,7 +428,6 @@ class UserController extends Controller
                 ->where('cartable_type', $item['type'])->where('checked_out', 0)->first();
                 if (is_null($cartItem)) {
                     Cart::create([
-                        'public_id' => uniqid(rand()),
                         'user_id' => $request->user()->id,
                         'cartable_id' => $itemModel->id,
                         'cartable_type' => $item['type'],
@@ -475,7 +473,7 @@ class UserController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'items' => ['required',],
-                'items.*.public_id' => ['required', 'string', ],
+                'items.*.id' => ['required', 'string', ],
                 'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
             ]);
 
@@ -487,10 +485,10 @@ class UserController extends Controller
                 $itemModel = NULL;
                 switch ($item['type']) {
                     case 'content':
-                        $itemModel = Content::where('public_id', $item['public_id'])->first();
+                        $itemModel = Content::where('id', $item['id'])->first();
                         break;
                     case 'collection':
-                        $itemModel = Collection::where('public_id', $item['public_id'])->first();
+                        $itemModel = Collection::where('id', $item['id'])->first();
                         break;
                 }
                 if (is_null($itemModel)) {
@@ -639,7 +637,6 @@ class UserController extends Controller
             }
 
             $accountData = [
-                'public_id' => uniqid(rand()),
                 'identifier' => $request->identifier,
                 'provider' => $request->provider,
                 'country_code' => $request->country_code,
@@ -677,7 +674,7 @@ class UserController extends Controller
     public function addStripePaymentAccount(Request $request)
     {
         try {
-            $user = User::where('public_id', $request->query('public_id'))->first();
+            $user = User::where('id', $request->query('id'))->first();
             $country = strtoupper($request->query('country', 'US'));
             if (is_null($user)) {
                 return $this->respondBadRequest("User does not exist");
@@ -710,7 +707,6 @@ class UserController extends Controller
                 ]);
             
                 $accountData = [
-                    'public_id' => uniqid(rand()),
                     'identifier' => $account->id,
                     'provider' => 'stripe',
                     'country_code' => $country,
@@ -738,8 +734,8 @@ class UserController extends Controller
 
             $account_links = \Stripe\AccountLink::create([
                 'account' => $stripeAccount->identifier,
-                'refresh_url' => env('BACKEND_URL', 'https://api.akiddie.com.ng/') . 'api/v1/payments/stripe/connect?public_id=' . $user->public_id . '&country=' . $country,
-                'return_url' => env('CREATOR_URL', 'https://creators.akiddie.com.ng/') . 'creator/' . $user->public_id . '/account',
+                'refresh_url' => env('BACKEND_URL', 'https://api.akiddie.com.ng/') . 'api/v1/payments/stripe/connect?id=' . $user->id . '&country=' . $country,
+                'return_url' => env('CREATOR_URL', 'https://creators.akiddie.com.ng/') . 'creator/' . $user->id . '/account',
                 'type' => 'account_onboarding',
             ]);
             
@@ -768,15 +764,15 @@ class UserController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'accounts' => ['required',],
-                'accounts.*' => ['required', 'string', 'exists:payment_accounts,public_id'],
+                'accounts.*' => ['required', 'string', 'exists:payment_accounts,id'],
             ]);
 
             if ($validator->fails()) {
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
-            foreach ($request->accounts as $account_public_id) {
-                $accountModel = PaymentAccount::where('public_id', $account_public_id)->where('user_id', $request->user()->id)->first();
+            foreach ($request->accounts as $account_id) {
+                $accountModel = PaymentAccount::where('id', $account_id)->where('user_id', $request->user()->id)->first();
                 $accountModel->delete();
             }
 
@@ -793,19 +789,19 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make(array_merge($request->all()), [
-                'payout_public_id' => ['required', 'string', 'exists:payouts,public_id'],
-                'payment_account_public_id' => ['required', 'string', 'exists:payment_accounts,public_id', ],
+                'payout_id' => ['required', 'string', 'exists:payouts,id'],
+                'payment_account_id' => ['required', 'string', 'exists:payment_accounts,id', ],
             ]);
 
             if ($validator->fails()) {
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
-            $payout = Payout::where('public_id', $request->payout_public_id)->where('user_id', $request->user()->id)->first();
+            $payout = Payout::where('id', $request->payout_id)->where('user_id', $request->user()->id)->first();
             if (is_null($payout)) {
                 return $this->respondBadRequest("The payout provided does not belong to you");
             }
 
-            $payment_account = PaymentAccount::where('public_id', $request->payment_account_public_id)->where('user_id', $request->user()->id)->first();
+            $payment_account = PaymentAccount::where('id', $request->payment_account_id)->where('user_id', $request->user()->id)->first();
             if (is_null($payment_account)) {
                 return $this->respondBadRequest("The payment account provided does not belong to you");
             }
