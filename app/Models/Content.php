@@ -35,6 +35,11 @@ class Content extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function issues()
+    {
+        return $this->hasMany(ContentIssue::class, 'content_id');
+    }
+
     public function prices()
     {
         return $this->morphMany(Price::class, 'priceable');
