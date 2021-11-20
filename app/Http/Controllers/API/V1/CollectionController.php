@@ -136,6 +136,7 @@ class CollectionController extends Controller
                     $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
                 },
             ])
+            ->with('contents')
             ->first();
             return $this->respondWithSuccess("Digiverse retrieved successfully.", [
                 'digiverse' => new CollectionResource($digiverse),

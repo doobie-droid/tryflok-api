@@ -14,6 +14,7 @@ use App\Models\Tag;
 use App\Models\Asset;
 use App\Models\Price;
 use App\Constants\Roles;
+use App\Models\Content;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use App\Constants\Constants;
@@ -45,10 +46,14 @@ class RetrieveTest extends TestCase
                 'user_id' => $user->id
             ])
         )
+        ->hasAttached(Content::factory()->count(1), 
+        [
+            'id' => Str::uuid(),
+        ])
         ->create();
 
         $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}");
-        $response->assertStatus(200)->assertJsonStructure(DigiverseMock::STANDARD_DIGIVERSE_RESPONSE);
+        $response->assertStatus(200)->assertJsonStructure(DigiverseMock::STANDARD_DIGIVERSE_RESPONSE_WITH_CONTENTS);
     }
 
     public function test_retrieve_all_digiverses_fails_with_invalid_parameters()
