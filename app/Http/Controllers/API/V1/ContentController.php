@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder;
 use App\Rules\AssetType as AssetTypeRule;
 use App\Http\Resources\ContentResource;
+use App\Http\Resources\ContentIssueResource;
 
 class ContentController extends Controller
 {
@@ -498,6 +499,60 @@ class ContentController extends Controller
                 'current_page' => $contents->currentPage(),
                 'items_per_page' => $contents->perPage(),
                 'total' => $contents->total(),
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
+
+    public function getIssues(Request $request, $id)
+    {
+        try {
+            $page = $request->query('page', 1);
+            $limit = $request->query('limit', 10);
+
+            $keyword = urldecode($request->query('keyword', ''));
+            $keywords = explode(" ", $keyword);
+            $keywords = array_diff($keywords, ['']);
+
+            $max_items_count = Constants::MAX_ITEMS_LIMIT;
+
+            $validator = Validator::make([
+                'id' => $id,
+                'page' => $page,
+                'limit' => $limit,
+                'keyword' => $keyword,
+            ], [
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'page' => ['required', 'integer', 'min:1',],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
+                'keyword' => ['sometimes', 'string', 'max:200',],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+            $content = Content::where('id', $id)->first();
+            $issues = $content->issues();
+            if ($request->user()->id !== $content->user_id) {
+                $issues = $issues->where('is_avaialble', 1);
+            }
+
+            foreach ($keywords as $keyword) {
+                $issues = $issues->where(function ($query) use ($keyword) {
+                    $query->where('title', 'LIKE', "%{$keyword}%")
+                    ->orWhere('description', 'LIKE', "%{$keyword}%");
+                });
+            }
+
+            $issues = $issues->orderBy('content_issues.created_at', 'desc')
+            ->paginate($limit, array('*'), 'page', $page);
+            return $this->respondWithSuccess('Issues retrieved successfully',[
+                'issues' => ContentIssueResource::collection($issues),
+                'current_page' => $issues->currentPage(),
+                'items_per_page' => $issues->perPage(),
+                'total' => $issues->total(),
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);
