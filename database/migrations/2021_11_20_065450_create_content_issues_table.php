@@ -14,9 +14,10 @@ class CreateContentIssuesTable extends Migration
     public function up()
     {
         Schema::create('content_issues', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('content_id');
             $table->string('title');
-            $table->longText('description')->nullable();
+            $table->longText('description');
             $table->boolean('is_available')->default(0);
             $table->unsignedBigInteger('views')->default(0);
             $table->timestamps();

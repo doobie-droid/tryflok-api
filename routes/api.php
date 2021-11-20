@@ -210,6 +210,8 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('/', 'ContentController@create');
             Route::patch('/{id}', 'ContentController@update');
             Route::get('/{public_id}/assets', 'ContentController@getAssets');
+
+            Route::post('/{id}/issue', 'ContentController@createIssue');
         });
 
         Route::group(['prefix' => 'digiverses'], function () {

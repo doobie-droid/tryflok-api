@@ -181,4 +181,22 @@ class Content {
             ]
         ]
     ];
+
+    const ISSUE_STRUCTURE = [
+        'id',
+        'title',
+        'description',
+    ];
+
+    const STANDARD_ISSUE_RESPONSE = [
+        'status_code',
+        'message',
+        'data' => [
+            'issue' => [
+                'id',
+                'title',
+                'description',
+            ]
+        ]
+    ];
 }

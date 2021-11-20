@@ -235,8 +235,7 @@ class ContentController extends Controller
                     $price->save();
                 }
             }
-            
-            $this->setStatusCode(200);
+
             return $this->respondWithSuccess('Content has been updated successfully', [
                 'content' => new ContentResource($content),
             ]);
@@ -245,6 +244,43 @@ class ContentController extends Controller
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
 		} 
+    }
+
+    public function createIssue(Request $request, $id) {
+        try {
+            $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id',],
+                'title' => ['required', 'string', 'max:200', 'min:1',],
+                'description' => ['required', 'string',],
+                'is_available' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1',],
+            ]);
+
+            if ($validator1->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->where('user_id', $request->user()->id)->first();
+            if (is_null($content)) {
+                return $this->respondBadRequest("You do not have permission to create an issue for this content");
+            }
+
+            if ($content->type !== 'newsletter') {
+                return $this->respondBadRequest("Issues can only be created for newletters");
+            }
+            
+            $issue = $content->issues()->create([
+                'title' => $request->title,
+                'description' => str_replace("\n", "", $request->description),
+                'is_available' => $request->is_available,
+            ]);
+
+            return $this->respondWithSuccess('Issue has been created successfully', [
+                'issue' => $issue,
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
     }
 
     public function getSingle(Request $request, $id)
@@ -280,6 +316,7 @@ class ContentController extends Controller
                     $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
                 },
             ])
+            ->with('issues')
             ->first();
             return $this->respondWithSuccess('Content retrieved successfully',[
                 'content' => new ContentResource($content),
