@@ -101,25 +101,6 @@ class EndSubscription implements ShouldQueue
         //renew of subscription failed, go ahead to end subscription
         $parentUserable->status = 'subscription-ended';
         $parentUserable->save();
-        //I do not check for userable type as only collections can be subscribed to
-        $item = Collection::where('id', $parentUserable->userable_id)->first();
-        foreach ($item->contents as $content) {
-            UpdateContentUserableJob::dispatch([
-                'content' => $content,
-                'user' => $parentUserable->user,
-                'parent_userable' => $parentUserable,
-                'status' => 'subscription-ended',
-            ]);
-        }
-        //handle item's collections in userables
-        foreach ($item->childCollections as $collection) {
-            UpdateCollectionUserable::dispatch([
-                'collection' => $collection,
-                'parent_userable' => $parentUserable,
-                'user' => $parentUserable->user,
-                'status' => 'subscription-ended',
-            ]);
-        }
     }
 
     public function failed(\Throwable $exception)
