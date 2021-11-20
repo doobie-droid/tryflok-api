@@ -167,10 +167,10 @@ class PaymentController extends Controller
                 'items.*.id' => ['required', 'string', ],
                 'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
                 'items.*.price' => ['required',],
-                'items.*.price.amount' => ['required', 'numeric',],
+                'items.*.price.amount' => ['required', 'numeric', 'min:0', 'max:0'],
                 'items.*.price.id' => ['required', 'string',],
-                'items.*.price.interval' => ['required', 'string', 'regex:(year|month|week|day|one-off)',],
-                'items.*.price.interval_amount' => ['required', 'numeric',],
+                'items.*.price.interval' => ['required', 'string', 'regex:(monthly|one-off)',],
+                'items.*.price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer',],
             ]);
 
             if ($validator->fails()) {
