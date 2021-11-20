@@ -64,4 +64,43 @@ class SubscribeTest extends TestCase
         ]);
         $this->assertTrue($newsletter->subscribers()->count() === 1);
     }
+
+    public function test_unsubscribe_from_content_works()
+    {
+        $user = User::factory()->create();
+        $user->assignRole(Roles::USER);
+        $this->be($user);
+        $digiverse = Collection::factory()
+        ->for($user, 'owner')
+        ->digiverse()
+        ->create();
+        $newsletter = Content::factory()->state([
+            'type' => 'newsletter',
+            'user_id' => $user->id,
+        ])
+        ->hasAttached(
+            $digiverse
+            ,
+            [
+                'id' => Str::uuid(),
+            ]
+        )
+        ->create();
+
+        $response = $this->json('POST', "/api/v1/contents/{$newsletter->id}/subscription");
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('content_subscriber', [
+            'content_id' => $newsletter->id,
+            'user_id' => $user->id,
+        ]);
+        $this->assertTrue($newsletter->subscribers()->count() === 1);
+        
+        $response = $this->json('DELETE', "/api/v1/contents/{$newsletter->id}/subscription");
+        $response->assertStatus(200);
+        $this->assertDatabaseMissing('content_subscriber', [
+            'content_id' => $newsletter->id,
+            'user_id' => $user->id,
+        ]);
+        $this->assertTrue($newsletter->subscribers()->count() === 0);
+    }
 }

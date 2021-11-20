@@ -629,6 +629,10 @@ class ContentController extends Controller
             if ($validator->fails()) {
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
+
+            $content = Content::where('id', $id)->first();
+            $content->subscribers()->detach([$request->user()->id]);
+            return $this->respondWithSuccess('You have successfully unsubscribed');
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
