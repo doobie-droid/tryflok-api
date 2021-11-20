@@ -214,6 +214,9 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('/{id}/issues', 'ContentController@createIssue');
             Route::patch('/{id}/issues', 'ContentController@updateIssue');
             Route::get('/{id}/issues', 'ContentController@getIssues');
+
+            Route::post('/{id}/subscription', 'ContentController@subscribeToContent');
+            Route::delete('/{id}/subscription', 'ContentController@unsubscribeFromContent');
         });
 
         Route::group(['prefix' => 'issues'], function () {

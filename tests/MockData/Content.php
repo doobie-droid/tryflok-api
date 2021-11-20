@@ -104,6 +104,7 @@ class Content {
                 'views',
                 'ratings_count',
                 'ratings_average',
+                'subscribers_count',
                 'cover' => [
                     'url',
                     'asset_type',

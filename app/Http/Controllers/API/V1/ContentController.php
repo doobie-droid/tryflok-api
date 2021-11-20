@@ -107,6 +107,7 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $content->id)
+            ->withCount('subscribers')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -150,6 +151,7 @@ class ContentController extends Controller
 
             //make sure user owns content
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)
+            ->withCount('subscribers')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -345,12 +347,13 @@ class ContentController extends Controller
             }
 
             if ($request->user() == NULL || $request->user()->id == NULL) {
-                $user_id = 0;
+                $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
             
             $content = Content::where('id', $id)
+            ->withCount('subscribers')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -364,6 +367,11 @@ class ContentController extends Controller
             ->with([
                 'userables' => function ($query) use ($user_id) {
                     $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                },
+            ])
+            ->with([
+                'subscribers' => function ($query) use ($user_id) {
+                    $query->where('users.id',  $user_id);
                 },
             ])
             ->with('issues')
@@ -473,6 +481,7 @@ class ContentController extends Controller
             }
 
             $contents = $contents
+            ->withCount('subscribers')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -568,10 +577,58 @@ class ContentController extends Controller
             ], [
                 'id' => ['required', 'string', 'exists:issues,id'],
             ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
             $issue = ContentIssue::where('id', $id)->first();
             return $this->respondWithSuccess('Issue retrieved successfully',[
                 'issue' => new ContentIssueResource($issue),
             ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
+
+    public function subscribeToContent(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make([
+                'id' => $id,
+            ], [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+            $content->subscribers()->syncWithoutDetaching([$request->user()->id => [
+                    'id' => Str::uuid(),
+                ]
+            ]);
+            return $this->respondWithSuccess('You have been successfully subscribed');
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
+
+    public function unsubscribeFromContent(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make([
+                'id' => $id,
+            ], [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
