@@ -10,9 +10,14 @@ use App\Models\User;
 use App\Models\Userable;
 use App\Models\Content;
 use App\Models\Collection;
+use App\Models\Price;
+use App\Models\Benefactor;
 use App\Jobs\Payment\Purchase as PurchaseJob;
 use Tests\MockData\Content as MockContent;
 use Tests\MockData\Collection as MockCollection;
+use Illuminate\Support\Str;
+use App\Constants\Roles;
+use App\Constants\Constants;
 
 class PurchaseTest extends TestCase
 {
@@ -24,252 +29,213 @@ class PurchaseTest extends TestCase
      */
     public function test_purchase_works()
     {
-        $users = User::all();
-        $creator = User::find(4);
-        $collection = Collection::where('public_id', MockCollection::SEEDED_COLLECTION_WITH_SUB['public_id'])->first();
-        $content = Content::where('public_id', MockContent::SEEDED_UNPAID_IMAGE_BOOK['public_id'])->first();
-        $i = 0;
-        foreach ($users as $user) {
-            PurchaseJob::dispatch([
-                'total_amount' => '4000',
-                'total_fees' => '40',
-                'provider' => 'local',
-                'provider_id' => 'test',
-                'user' => $user->toArray(),
-                'items' => [
-                    [
-                        "public_id" => $collection->public_id,
-                        "type" => "collection",
-                        "price" => [
-                            "public_id" => $collection->prices()->first()->public_id,
-                            "amount" => "2000.000",
-                            "interval" => "month",
-                            "interval_amount" => "1",
-                        ],
-                    ],
-                    [
-                        "public_id" => $content->public_id,
-                        "type" => "content",
-                        "price" => [
-                            "public_id" => $content->prices()->first()->public_id,
-                            "amount" => "2000.000",
-                            "interval" => "one-off",
-                            "interval_amount" => "0",
-                        ],
+        $creator = User::factory()->create();
+        $creator->assignRole(Roles::USER);
+        $buyer = User::factory()->create();
+        $buyer->assignRole(Roles::USER);
+        $free_digiverse = Collection::factory()
+        ->for($creator, 'owner')
+        ->digiverse()
+        ->has(Price::factory()
+            ->subscription()
+            ->state([
+            'amount' => 0,
+            ])
+            ->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $creator->id
+            ])
+        )
+        ->create();
+
+        $free_content_in_free_digiverse = Content::factory()
+        ->for($creator, 'owner')
+        ->has(Price::factory()->state([
+            'amount' => 0,
+        ])->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $creator->id
+            ])
+        )
+        ->create();
+
+        $paid_content_in_free_digiverse = Content::factory()
+        ->for($creator, 'owner')
+        ->has(Price::factory()->state([
+            'amount' => 100,
+        ])->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $creator->id
+            ])
+        )
+        ->create();
+
+        $paid_digiverse = Collection::factory()
+        ->for($creator, 'owner')
+        ->digiverse()
+        ->has(Price::factory()->subscription()->state([
+            'amount' => 100,
+        ])->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $creator->id
+            ])
+        )
+        ->create();
+
+        PurchaseJob::dispatch([
+            'total_amount' => 200,
+            'total_fees' => 0,
+            'provider' => 'wallet',
+            'provider_id' => Str::uuid(),
+            'user' => $buyer->toArray(),
+            'items' => [
+                [
+                    "id" => $paid_digiverse->id,
+                    "type" => "collection",
+                    "price" => [
+                        "id" => $paid_digiverse->prices()->first()->id,
+                        "amount" => $paid_digiverse->prices()->first()->amount,
+                        "interval" => "monthly",
+                        "interval_amount" => 1,
                     ],
                 ],
-            ]);
+                [
+                    "id" => $free_content_in_free_digiverse->id,
+                    "type" => "content",
+                    "price" => [
+                        "id" => $free_content_in_free_digiverse->prices()->first()->id,
+                        "amount" => 0,
+                        "interval" => "one-off",
+                        "interval_amount" => 1,
+                    ],
+                ],
+                [
+                    "id" => $paid_content_in_free_digiverse->id,
+                    "type" => "content",
+                    "price" => [
+                        "id" => $paid_content_in_free_digiverse->prices()->first()->id,
+                        "amount" => $paid_content_in_free_digiverse->prices()->first()->amount,
+                        "interval" => "one-off",
+                        "interval_amount" => 1,
+                    ],
+                ],
+            ],
+        ]);
 
-            $i++;
-            if ($i > 2) {
-                break;
-            }
-        }
+        $this->assertDatabaseHas('payments', [
+            'payer_id' => $buyer->id,
+            'payee_id' => $creator->id,
+            'amount' => 100,
+            'payment_processor_fee' => 0,
+            'paymentable_type' => 'collection',
+            'paymentable_id' => $paid_digiverse->id,
+        ]);
+        $this->assertDatabaseHas('payments', [
+            'payer_id' => $buyer->id,
+            'payee_id' => $creator->id,
+            'amount' => 100,
+            'payment_processor_fee' => 0,
+            'paymentable_type' => 'content',
+            'paymentable_id' => $paid_content_in_free_digiverse->id,
+        ]);
+        $this->assertDatabaseHas('payments', [
+            'payer_id' => $buyer->id,
+            'payee_id' => $creator->id,
+            'amount' => 0,
+            'payment_processor_fee' => 0,
+            'paymentable_type' => 'content',
+            'paymentable_id' => $free_content_in_free_digiverse->id,
+        ]);
 
-        $i = 0;
-        foreach ($users as $user) {
-            //check a payment exist for content and collection
-            $this->assertDatabaseHas('payments', [
-                'payer_id' => $user->id,
-                'payee_id' => $creator->id,
-                'amount' => '2000',
-                'payment_processor_fee' => '20',
-                'paymentable_type' => 'collection',
-                'paymentable_id' => $collection->id,
-            ]);
-            $this->assertDatabaseHas('payments', [
-                'payer_id' => $user->id,
-                'payee_id' => $creator->id,
-                'amount' => '2000',
-                'payment_processor_fee' => '20',
-                'paymentable_type' => 'content',
-                'paymentable_id' => $content->id,
-            ]);
-            //check that sales for benefactors of this prodict was logged
-            $net_amount = bcsub(2000, 20, 6);
-            $platform_share = bcdiv(bcmul($net_amount, 30,6),100,6);
-            $creator_share = bcdiv(bcmul($net_amount, 70,6),100,6);
-            foreach ($collection->benefactors as $benefactor) {
-                $this->assertDatabaseHas('sales', [
-                    'saleable_type' => 'collection',
-                    'saleable_id' => $collection->id,
-                    'amount' => 2000,
-                    'payment_processor_fee' => 20,
-                    'platform_share' => $platform_share,
-                    'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share,6),100,6),
-                    'referral_bonus' => 0,
-                ]);
-            }
-            foreach ($content->benefactors as $benefactor) {
-                $this->assertDatabaseHas('sales', [
-                    'saleable_type' => 'content',
-                    'saleable_id' => $content->id,
-                    'amount' => 2000,
-                    'payment_processor_fee' => 20,
-                    'platform_share' => $platform_share,
-                    'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share,6),100,6),
-                    'referral_bonus' => 0,
-                ]);
-            }
-            //check that the referrer was logged if referrer present
-            if ($collection->owner->referrer()->exists()) {
-                $this->assertDatabaseHas('sales', [
-                    'saleable_type' => 'collection',
-                    'saleable_id' => $collection->id,
-                    'amount' => 2000,
-                    'payment_processor_fee' => 20,
-                    'platform_share' => $platform_share,
-                    'benefactor_share' => 0,
-                    'referral_bonus' => bcdiv(bcmul($platform_share, 2.5,6),100,6),
-                ]);
+        $this->assertDatabaseHas('sales', [
+            'user_id' => $creator->id,
+            'saleable_type' => 'collection',
+            'saleable_id' => $paid_digiverse->id,
+            'amount' => 100,
+            'payment_processor_fee' => 0,
+            'platform_share' => bcdiv(bcmul(100, Constants::PLATFORM_SHARE,6),100,2),
+            'benefactor_share' => bcdiv(bcmul(100, Constants::CREATOR_SHARE,6),100,2),
+            'referral_bonus' => 0,
+        ]);
 
-                $this->assertDatabaseHas('sales', [
-                    'saleable_type' => 'content',
-                    'saleable_id' => $content->id,
-                    'amount' => 2000,
-                    'payment_processor_fee' => 20,
-                    'platform_share' => $platform_share,
-                    'benefactor_share' => 0,
-                    'referral_bonus' => bcdiv(bcmul($platform_share, 2.5,6),100,6),
-                ]);
-            }
+        $this->assertDatabaseHas('sales', [
+            'user_id' => $creator->id,
+            'saleable_type' => 'content',
+            'saleable_id' => $paid_content_in_free_digiverse->id,
+            'amount' => 100,
+            'payment_processor_fee' => 0,
+            'platform_share' => bcdiv(bcmul(100, Constants::PLATFORM_SHARE,6),100,2),
+            'benefactor_share' => bcdiv(bcmul(100, Constants::CREATOR_SHARE,6),100,2),
+            'referral_bonus' => 0,
+        ]);
 
-            //if it is a subscription payment check that the subcription was created (this also checks item was logged in userable)
-            $collectionUserable = Userable::where('user_id', $user->id)->whereNull('parent_id')->where('userable_type', 'collection')->where('userable_id', $collection->id)->where('status', 'available')->first();
-            $this->assertFalse(is_null($collectionUserable));
-            $this->assertDatabaseHas('subscriptions', [
-                'subscriptionable_type' => 'collection',
-                'subscriptionable_id' => $collection->id,
-                'userable_id' => $collectionUserable->id,
-                'price_id' => $collection->prices()->first()->id,
-            ]);
-            $contentUserable = Userable::where('user_id', $user->id)->whereNull('parent_id')->where('userable_type', 'content')->where('userable_id', $content->id)->where('status', 'available')->first();
-            $this->assertFalse(is_null($contentUserable));
-            $this->assertDatabaseMissing('subscriptions', [
-                'subscriptionable_type' => 'content',
-                'subscriptionable_id' => $content->id,
-                'userable_id' => $contentUserable->id,
-                'price_id' => $content->prices()->first()->id,
-            ]);
-            //check that children were userables
-            $sub1 = Collection::where('public_id', MockCollection::SEEDED_SUB_COLLECTION_1_LEVEL_1['public_id'])->first();
-            $sub2 = Collection::where('public_id', MockCollection::SEEDED_SUB_COLLECTION_2_LEVEL_1['public_id'])->first();
-            $sub1Child1 = Collection::where('public_id', MockCollection::SEEDED_SUB_COLLECTION_1_LEVEL_1_CHILD_1['public_id'])->first();
-            $sub1Child2 = Collection::where('public_id', MockCollection::SEEDED_SUB_COLLECTION_1_LEVEL_1_CHILD_2['public_id'])->first();
-            $sub2Child1 = Collection::where('public_id', MockCollection::SEEDED_SUB_COLLECTION_2_LEVEL_1_CHILD_1['public_id'])->first();
-            $sub2Child2 = Collection::where('public_id', MockCollection::SEEDED_SUB_COLLECTION_2_LEVEL_1_CHILD_2['public_id'])->first();
-            //ensure children for parent collection are in userables
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $collectionUserable->id,
-                'status' => 'available',
-                'userable_type' => 'content',
-                'userable_id' => 1,
-            ]);
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $collectionUserable->id,
-                'status' => 'available',
-                'userable_type' => 'collection',
-                'userable_id' => $sub1->id,
-            ]);
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $collectionUserable->id,
-                'status' => 'available',
-                'userable_type' => 'collection',
-                'userable_id' => $sub2->id,
-            ]);
-            //check that sub1's children were logged
-            $sub1Userable = Userable::where('user_id', $user->id)->where('parent_id', $collectionUserable->id)->where('userable_type', 'collection')->where('userable_id', $sub1->id)->where('status', 'available')->first();
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $sub1Userable->id,
-                'status' => 'available',
-                'userable_type' => 'content',
-                'userable_id' => 1,
-            ]);
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $sub1Userable->id,
-                'status' => 'available',
-                'userable_type' => 'collection',
-                'userable_id' => $sub1Child1->id,
-            ]);
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $sub1Userable->id,
-                'status' => 'available',
-                'userable_type' => 'collection',
-                'userable_id' => $sub1Child2->id,
-            ]);
-            //check that the content for sub1 child 1 was logged in userables
-            $sub1Child1Userable = Userable::where('user_id', $user->id)->where('parent_id', $sub1Userable->id)->where('userable_type', 'collection')->where('userable_id', $sub1Child1->id)->where('status', 'available')->first();
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $sub1Child1Userable->id,
-                'status' => 'available',
-                'userable_type' => 'content',
-                'userable_id' => 1,
-            ]);
+        $this->assertDatabaseHas('sales', [
+            'user_id' => $creator->id,
+            'saleable_type' => 'content',
+            'saleable_id' => $free_content_in_free_digiverse->id,
+            'amount' => 0,
+            'payment_processor_fee' => 0,
+            'platform_share' => bcdiv(bcmul(0, Constants::PLATFORM_SHARE,6),100,2),
+            'benefactor_share' => bcdiv(bcmul(0, Constants::CREATOR_SHARE,6),100,2),
+            'referral_bonus' => 0,
+        ]);
 
-            //check that the content for sub1 child 2 was logged in userables
-            $sub1Child2Userable = Userable::where('user_id', $user->id)->where('parent_id', $sub1Userable->id)->where('userable_type', 'collection')->where('userable_id', $sub1Child2->id)->where('status', 'available')->first();
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $sub1Child2Userable->id,
-                'status' => 'available',
-                'userable_type' => 'content',
-                'userable_id' => 1,
-            ]);
+        $this->assertDatabaseHas('carts', [
+            'cartable_type' => 'content',
+            'cartable_id' => $free_content_in_free_digiverse->id,
+            'user_id' => $buyer->id,
+            'checked_out' => 1,
+            'status' => 'completed',
+            'quantity' => 1,
+        ]);
 
-            //check that sub2's children were logged
-            $sub2Userable = Userable::where('user_id', $user->id)->where('parent_id', $collectionUserable->id)->where('userable_type', 'collection')->where('userable_id', $sub2->id)->where('status', 'available')->first();
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $sub2Userable->id,
-                'status' => 'available',
-                'userable_type' => 'content',
-                'userable_id' => 1,
-            ]);
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $sub2Userable->id,
-                'status' => 'available',
-                'userable_type' => 'collection',
-                'userable_id' => $sub2Child1->id,
-            ]);
-            $this->assertDatabaseHas('userables', [
-                'user_id' => $user->id,
-                'parent_id' => $sub2Userable->id,
-                'status' => 'available',
-                'userable_type' => 'collection',
-                'userable_id' => $sub2Child2->id,
-            ]);
-             //check that the content for sub2 child 1 was logged in userables
-             $sub2Child1Userable = Userable::where('user_id', $user->id)->where('parent_id', $sub2Userable->id)->where('userable_type', 'collection')->where('userable_id', $sub2Child1->id)->where('status', 'available')->first();
-             $this->assertDatabaseHas('userables', [
-                 'user_id' => $user->id,
-                 'parent_id' => $sub2Child1Userable->id,
-                 'status' => 'available',
-                 'userable_type' => 'content',
-                 'userable_id' => 1,
-             ]);
- 
-             //check that the content for sub1 child 2 was logged in userables
-             $sub2Child2Userable = Userable::where('user_id', $user->id)->where('parent_id', $sub2Userable->id)->where('userable_type', 'collection')->where('userable_id', $sub2Child2->id)->where('status', 'available')->first();
-             $this->assertDatabaseHas('userables', [
-                 'user_id' => $user->id,
-                 'parent_id' => $sub2Child2Userable->id,
-                 'status' => 'available',
-                 'userable_type' => 'content',
-                 'userable_id' => 1,
-             ]);
+        $this->assertDatabaseHas('carts', [
+            'cartable_type' => 'content',
+            'cartable_id' => $paid_content_in_free_digiverse->id,
+            'user_id' => $buyer->id,
+            'checked_out' => 1,
+            'status' => 'completed',
+            'quantity' => 1,
+        ]);
 
-            $i++;
-            if ($i > 2) {
-                break;
-            }
-        }
+        $this->assertDatabaseHas('carts', [
+            'cartable_type' => 'collection',
+            'cartable_id' => $paid_digiverse->id,
+            'user_id' => $buyer->id,
+            'checked_out' => 1,
+            'status' => 'completed',
+            'quantity' => 1,
+        ]);
+
+        $collectionUserable = Userable::where('user_id', $buyer->id)->whereNull('parent_id')->where('userable_type', 'collection')->where('userable_id', $paid_digiverse->id)->where('status', 'available')->first();
+        $this->assertFalse(is_null($collectionUserable));
+        $this->assertDatabaseHas('subscriptions', [
+            'subscriptionable_type' => 'collection',
+            'subscriptionable_id' => $paid_digiverse->id,
+            'userable_id' => $collectionUserable->id,
+            'price_id' => $paid_digiverse->prices()->first()->id,
+        ]);
+
+        $contentUserable1 = Userable::where('user_id', $buyer->id)->whereNull('parent_id')->where('userable_type', 'content')->where('userable_id', $paid_content_in_free_digiverse->id)->where('status', 'available')->first();
+        $this->assertFalse(is_null($contentUserable1));
+        $this->assertDatabaseMissing('subscriptions', [
+            'subscriptionable_type' => 'content',
+            'subscriptionable_id' => $paid_content_in_free_digiverse->id,
+            'userable_id' => $contentUserable1->id,
+            'price_id' => $paid_content_in_free_digiverse->prices()->first()->id,
+        ]);
+
+        $contentUserable2 = Userable::where('user_id', $buyer->id)->whereNull('parent_id')->where('userable_type', 'content')->where('userable_id', $free_content_in_free_digiverse->id)->where('status', 'available')->first();
+        $this->assertFalse(is_null($contentUserable2));
+        $this->assertDatabaseMissing('subscriptions', [
+            'subscriptionable_type' => 'content',
+            'subscriptionable_id' => $free_content_in_free_digiverse->id,
+            'userable_id' => $contentUserable2->id,
+            'price_id' => $free_content_in_free_digiverse->prices()->first()->id,
+        ]);
     }
 }

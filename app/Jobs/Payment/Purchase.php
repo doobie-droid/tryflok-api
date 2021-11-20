@@ -19,6 +19,7 @@ use App\Models\Subscription;
 use App\Models\Cart;
 use App\Jobs\Userables\UpdateContentUserable as UpdateContentUserableJob;
 use App\Jobs\Userables\UpdateCollectionUserable as UpdateCollectionUserable;
+use App\Constants\Constants;
 
 class Purchase implements ShouldQueue
 {
@@ -42,20 +43,20 @@ class Purchase implements ShouldQueue
     public function handle()
     {
         //get model of related objects
-        $payer = User::where('public_id', $this->data['user']['public_id'])->first();
+        $payer = User::where('id', $this->data['user']['id'])->first();
         if (is_null($payer)) {
             //in case model was deleted
-            Log::error("Could not complete the transaction because cuser does not exist or invalid public_id supplied");
+            Log::error("Could not complete the transaction because user does not exist or invalid id supplied");
             Log::error($this->data);
             return;
         }
         foreach ($this->data['items'] as $item) {
             switch ($item['type']) {
                 case 'content':
-                    $itemModel = Content::where('public_id', $item['public_id'])->first();
+                    $itemModel = Content::where('id', $item['id'])->first();
                     break;
                 case 'collection':
-                    $itemModel = Collection::where('public_id', $item['public_id'])->first();
+                    $itemModel = Collection::where('id', $item['id'])->first();
                     break;
                 default:
                     Log::error("Could not complete the transaction because item type was not specified");
@@ -65,15 +66,15 @@ class Purchase implements ShouldQueue
 
             if (is_null($itemModel)) {
                 //in case model was deleted
-                Log::error("Could not complete the transaction because content has been deleted or invalid public_id supplied");
+                Log::error("Could not complete the transaction because content has been deleted or invalid id supplied");
                 Log::error($item);
                 continue;
             }
 
-            $price = Price::where('public_id', $item['price']['public_id'])->first();
+            $price = Price::where('id', $item['price']['id'])->first();
             if (is_null($price)) {
                 //in case model was deleted
-                Log::error("Could not complete the transaction because price has been deleted or invalid public_id supplied");
+                Log::error("Could not complete the transaction because price has been deleted or invalid id supplied");
                 Log::error($item);
                 continue;
             }
@@ -93,7 +94,6 @@ class Purchase implements ShouldQueue
                 $cartItem->save();
             } else {
                 Cart::create([
-                    'public_id' => uniqid(rand()),
                     'user_id' => $payer->id,
                     'cartable_id' => $itemModel->id,
                     'cartable_type' => $item['type'],
@@ -115,16 +115,16 @@ class Purchase implements ShouldQueue
 
             //record sales for the benefactors of this item
             $net_amount = $amount;
-            $platform_share = bcdiv(bcmul($net_amount, 25,6),100,6);
-            $creator_share = bcdiv(bcmul($net_amount, 75,6),100,6);
+            $platform_share = bcdiv(bcmul($net_amount, Constants::PLATFORM_SHARE,6),100,2);
+            $creator_share = bcdiv(bcmul($net_amount, Constants::CREATOR_SHARE,6),100,2);
             foreach ($itemModel->benefactors as $benefactor) {
                 $benefactor->user->sales()->create([
                     'saleable_type' => $item['type'],
                     'saleable_id' => $itemModel->id,
                     'amount' => $amount,
                     'payment_processor_fee' => $fee,
-                    'platform_share' => bcsub($platform_share, $fee, 6),
-                    'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share,6),100,6),
+                    'platform_share' => bcsub($platform_share, $fee, 2),
+                    'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share,6),100,2),
                     'referral_bonus' => 0,
                 ]);
             }
@@ -137,7 +137,7 @@ class Purchase implements ShouldQueue
                     'payment_processor_fee' => $fee,
                     'platform_share' => bcsub($platform_share, $fee, 6),
                     'benefactor_share' => 0,
-                    'referral_bonus' => bcdiv(bcmul(bcsub($platform_share, $fee, 6), 2.5,6),100,6),
+                    'referral_bonus' => bcdiv(bcmul(bcsub($platform_share, $fee, 6), 2.5,6),100,2),
                 ]);
             }
 
@@ -156,40 +156,18 @@ class Purchase implements ShouldQueue
                 $parentUserable->status = 'available';
                 $parentUserable->save();
             }
-            
-            //add children of collection to userable
-            if ($item['type'] === 'collection') {
-                //handle the item's contents in userables
-                foreach ($itemModel->contents as $content) {
-                    UpdateContentUserableJob::dispatch([
-                        'content' => $content,
-                        'user' => $payer,
-                        'parent_userable' => $parentUserable,
-                        'status' => 'available',
-                    ]);
-                }
-                //handle item's collections in userables
-                foreach ($itemModel->childCollections as $collection) {
-                    UpdateCollectionUserable::dispatch([
-                        'collection' => $collection,
-                        'parent_userable' => $parentUserable,
-                        'user' => $payer,
-                        'status' => 'available',
-                    ]);
-                }
-            }
+
             //if subscription create subscription record
-            if ($price->interval  === 'month' || $price->interval  === 'year'){
+            if ($item['type'] === 'collection' && $price->interval  === 'monthly'){
                 $start = now();
                 $cloneOfStart = clone $start;
-                $end = $cloneOfStart->add($price->interval_amount, $price->interval);
+                $end = $cloneOfStart->add($price->interval_amount, 'month');
                 $itemModel->subscriptions()->create([
-                    'public_id' => uniqid(rand()),
                     'userable_id' => $parentUserable->id,
                     'price_id' => $price->id,
                     'start' => $start,
                     'end' => $end,
-                    'auto_renew' => 1,
+                    'auto_renew' => 0,
                 ]);
             } 
         }
