@@ -352,7 +352,11 @@ class ContentController extends Controller
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
             $digiverse = Collection::where('id', $request->digiverse_id)->first();
-            $contents = $digiverse->contents()->where('is_available', 1)->where('approved_by_admin', 1);
+            $contents = $digiverse->contents();
+
+            if ($request->user()->id !== $digiverse->user_id) {
+                $contents = $contents->where('is_available', 1)->where('approved_by_admin', 1);
+            }
 
             foreach ($keywords as $keyword) {
                 $contents = $contents->where(function ($query) use ($keyword) {
