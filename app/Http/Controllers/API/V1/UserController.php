@@ -20,6 +20,7 @@ use App\Models\Cart;
 use App\Models\Configuration;
 use App\Models\PaymentAccount;
 use App\Models\Payout;
+use App\Models\Notification;
 use App\Events\User\ConfirmEmail as ConfirmEmailEvent;
 use App\Jobs\User\Payout as PayoutJob;
 use PragmaRX\Countries\Package\Countries as PragmarxCountries;
@@ -29,6 +30,8 @@ use App\Http\Resources\UserResourceWithSensitive;
 use \Carbon\Carbon;
 use Aws\CloudFront\CloudFrontClient;
 use Aws\Exception\AwsException;
+use App\Http\Resources\NotificationResource;
+use App\Constants\Constants;
 
 class UserController extends Controller
 {
@@ -327,6 +330,55 @@ class UserController extends Controller
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
 		} 
+    }
+
+    public function getNotifications(Request $request)
+    {
+        try {
+            $page = $request->query('page', 1);
+            $limit = $request->query('limit', 10);
+
+            $max_items_count = Constants::MAX_ITEMS_LIMIT;
+            $validator = Validator::make([
+                'page' => $page,
+                'limit' => $limit,
+            ], [
+                'page' => ['required', 'integer', 'min:1',],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $notifications = $request->user()->notifications()->orderBy('notifications.created_at', 'desc')
+            ->paginate($limit, array('*'), 'page', $page);
+
+            return $this->respondWithSuccess('Notifications retrieved successfully',[
+                'notifications' => NotificationResource::collection($notifications),
+                'current_page' => $notifications->currentPage(),
+                'items_per_page' => $notifications->perPage(),
+                'total' => $notifications->total(),
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		} 
+    }
+
+    public function markAllNotificationsAsRead(Request $request) {
+        try {
+            $notifications = $request->user()->notifications()->where('viewed', 0)->get();
+            foreach ($notifications as $notification) {
+                $notification->viewed = 1;
+                $notification->save();
+            }
+
+            return $this->respondWithSuccess('Notifications have been successfully marked as read');
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
     }
 
     public function getPurchasedItems(Request $request)
