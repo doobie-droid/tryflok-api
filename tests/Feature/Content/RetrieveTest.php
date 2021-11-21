@@ -87,7 +87,7 @@ class RetrieveTest extends TestCase
         $test_data = $this->generateSingleContent($user);
         $content = $test_data['content'];
         $response = $this->json('GET', "/api/v1/contents/{$content->id}");
-        $response->assertStatus(200)->assertJsonStructure(ContentMock::STANDARD_CONTENT_RESPONSE);
+        $response->assertStatus(200)->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
     }
 
     public function test_retrieve_all_digiverse_contents_fails_with_invalid_parameters()
@@ -393,7 +393,7 @@ class RetrieveTest extends TestCase
             'message',
             'data' => [
                 'contents' => [
-                    ContentMock::STANDARD_CONTENT_RESPONSE['data']['content'],
+                    ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE['data']['content'],
                 ],
                 'current_page',
                 'items_per_page',

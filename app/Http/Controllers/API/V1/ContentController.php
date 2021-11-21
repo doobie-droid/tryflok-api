@@ -404,6 +404,7 @@ class ContentController extends Controller
             }
             
             $content = Content::where('id', $id)
+            ->with('prices', 'cover', 'owner', 'tags')
             ->withCount('subscribers')
             ->withCount([
                 'ratings' => function ($query) {

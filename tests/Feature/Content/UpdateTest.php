@@ -295,7 +295,7 @@ class UpdateTest extends TestCase
 
         $response = $this->json('PATCH', "/api/v1/contents/{$content->id}", $complete_request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::STANDARD_CONTENT_RESPONSE);
+        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'id' => $content->id,
