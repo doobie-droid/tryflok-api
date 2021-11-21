@@ -168,7 +168,7 @@ class CreateTest extends TestCase
             ],
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
-        $response->assertStatus(200)->assertJsonStructure(ContentMock::STANDARD_CONTENT_RESPONSE);
+        $response->assertStatus(200)->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -270,7 +270,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::STANDARD_CONTENT_RESPONSE);
+        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -374,7 +374,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::STANDARD_CONTENT_RESPONSE);
+        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -583,6 +583,20 @@ class CreateTest extends TestCase
             'views' => 0,
         ]);
         $content = Content::where('title', $request['title'])->first();
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'live_status',
+            'value' => 'inactive',
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'channel_name',
+            'value' => "{$content->id}-" . date('Ymd'),
+        ]);
 
         // content is attached to collection
         $this->assertDatabaseHas('collection_content', [

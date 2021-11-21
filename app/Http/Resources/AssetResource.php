@@ -16,7 +16,7 @@ class AssetResource extends JsonResource
     {
         $parent = parent::toArray($request);
         return array_merge($parent, [
-            'resolutions' => !is_null($this->resolutions) ? $this->resolutions: [],
+            'resolutions' => $this->whenLoaded('resolutions'),
         ]);
     }
 }

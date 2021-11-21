@@ -72,6 +72,19 @@ class ContentController extends Controller
                 'views' => 0,
             ]);
 
+            if ($content->type === 'live-audio' || $content->type === 'live-video') {
+                $content->metas()->createMany([
+                    [
+                        'key' => 'live_status',
+                        'value' => 'inactive',
+                    ],
+                    [
+                        'key' => 'channel_name',
+                        'value' => "{$content->id}-" . date('Ymd'),
+                    ],
+                ]);
+            }
+
             $digiverse->contents()->attach($content->id, [
                 'id' => Str::uuid(),
             ]);
@@ -108,7 +121,9 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $content->id)
+            ->with('prices', 'cover', 'owner', 'tags')
             ->withCount('subscribers')
+            ->with('metas')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -152,7 +167,9 @@ class ContentController extends Controller
 
             //make sure user owns content
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)
+            ->with('prices', 'cover', 'owner', 'tags')
             ->withCount('subscribers')
+            ->with('metas')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -409,6 +426,7 @@ class ContentController extends Controller
                 },
             ])
             ->with('issues')
+            ->with('metas')
             ->first();
             return $this->respondWithSuccess('Content retrieved successfully',[
                 'content' => new ContentResource($content),

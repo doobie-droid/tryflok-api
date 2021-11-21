@@ -17,14 +17,23 @@ class CollectionResource extends JsonResource
     public function toArray($request)
     {
         $parent = parent::toArray($request);
-        unset($parent["child_collections"]);
         return array_merge($parent , [
             'ratings_count' => $this->ratings_count,
             'ratings_average' => $this->ratings_avg_rating,
-            'cover' => !is_null($this->cover) ? $this->cover->first() : null,
-            'owner' => new UserResource($this->owner),
-            'prices' => $this->prices,
-            'tags' => $this->tags,
+            'cover' => $this->getCover(),
+            'owner' => new UserResource($this->whenLoaded('owner')),
+            'prices' => $this->whenLoaded('prices'),
+            'tags' => $this->whenLoaded('tags'),
         ]);
+    }
+
+    private function getCover()
+    {
+        $cover = $this->whenLoaded('cover');
+        if (!is_null($cover)) {
+            return $this->cover->first();
+        }
+
+        return null;
     }
 }
