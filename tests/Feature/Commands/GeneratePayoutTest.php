@@ -15,7 +15,7 @@ class GeneratePayoutTest extends TestCase
 {
 
     use DatabaseTransactions, WithFaker;
-    // $this->faker->randomFloat(2, 5, 100)
+
     public function test_generate_payout_works()
     {
         $user1 = User::factory()->create();

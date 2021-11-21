@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
 
 class WalletFactory extends Factory
 {
@@ -17,7 +18,7 @@ class WalletFactory extends Factory
             'id' => $this->faker->unique()->uuid,
             'walletable_type' => 'user',
             'walletable_id' => User::factory(),
-            'balance' => '500000',
+            'balance' => 500000,
         ];
     }
 }

@@ -62,11 +62,10 @@ class EndSubscription implements ShouldQueue
                     break;
             }
             $user_wallet_balance = (float) $user->wallet->balance;//wallet is in AKC
-            $item_price = (float) $price->amount * 100;//converting dollars to AKC.
+            $item_price = (float) bcmul($price->amount, 100, 6);//converting dollars to AKC.
             if (($item_price < $user_wallet_balance) && !is_null($item)){
                 $newWalletBalance = bcsub($user->wallet->balance, $item_price, 2);
                 $transaction = WalletTransaction::create([
-                    'public_id' => uniqid(rand()),
                     'wallet_id' => $user->wallet->id,
                     'amount' => $item_price,
                     'balance' => $newWalletBalance,
@@ -80,12 +79,13 @@ class EndSubscription implements ShouldQueue
                     'total_fees' => 0,
                     'user' => $user->toArray(),
                     'provider' => 'wallet',
-                    'provider_id' => $transaction->public_id,
+                    'provider_id' => $transaction->id,
                     'items' => [
                         [
-                            'public_id' => $item->public_id,
+                            'id' => $item->id,
                             'type' => $this->subscription->subscriptionable_type,
                             'price' => [
+                                'id' => $price->id,
                                 'amount' => $price->amount,
                                 'interval' => $price->interval,
                                 'interval_amount' => $price->interval_amount,
