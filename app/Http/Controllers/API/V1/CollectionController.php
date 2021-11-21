@@ -82,7 +82,9 @@ class CollectionController extends Controller
                 'purpose' => 'cover'
             ]);
 
-            $digiverse = Collection::where('id', $digiverse->id)->withCount([
+            $digiverse = Collection::where('id', $digiverse->id)
+            ->with('prices', 'cover', 'owner', 'owner.profile_picture', 'tags')
+            ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
@@ -121,6 +123,7 @@ class CollectionController extends Controller
             }
 
             $digiverse = Collection::where('id', $id)
+            ->with('prices', 'cover', 'owner', 'owner.profile_picture', 'tags')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -136,7 +139,6 @@ class CollectionController extends Controller
                     $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
                 },
             ])
-            ->with('contents')
             ->first();
             return $this->respondWithSuccess("Digiverse retrieved successfully.", [
                 'digiverse' => new CollectionResource($digiverse),
@@ -173,6 +175,7 @@ class CollectionController extends Controller
 
             $user = $request->user();
             $digiverse = Collection::where('id', $id)
+            ->with('prices', 'cover', 'owner', 'tags')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -330,7 +333,7 @@ class CollectionController extends Controller
                 }
             ], 'rating')
             ->with('cover')
-            ->with('owner','owner.profile_picture')
+            ->with('owner', 'owner.profile_picture')
             ->with('tags')
             ->with('prices')
             ->with([

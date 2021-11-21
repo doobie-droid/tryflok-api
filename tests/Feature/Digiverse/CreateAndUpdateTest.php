@@ -104,7 +104,7 @@ class CreateAndUpdateTest extends TestCase
 
     public function test_update_digiverse_with_correct_data_works()
     {
-        $user = User::where('username', UserMock::SEEDED_USER['username'])->first();
+        $user = User::factory()->create();
         $this->be($user);
 
         $oldCoverAsset = Asset::factory()->create();

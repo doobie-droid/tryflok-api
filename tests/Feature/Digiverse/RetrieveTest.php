@@ -53,7 +53,7 @@ class RetrieveTest extends TestCase
         ->create();
 
         $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}");
-        $response->assertStatus(200)->assertJsonStructure(DigiverseMock::STANDARD_DIGIVERSE_RESPONSE_WITH_CONTENTS);
+        $response->assertStatus(200)->assertJsonStructure(DigiverseMock::STANDARD_DIGIVERSE_RESPONSE);
     }
 
     public function test_retrieve_all_digiverses_fails_with_invalid_parameters()
