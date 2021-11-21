@@ -132,7 +132,8 @@ class Content {
                         'encryption_key',
                         'resolutions'
                     ]
-                ]
+                ],
+                'metas'
             ]
         ]
     ];
@@ -158,6 +159,7 @@ class Content {
                 'views',
                 'ratings_count',
                 'ratings_average',
+                'subscribers_count',
                 'cover' => [
                     'url',
                     'asset_type',
@@ -178,7 +180,7 @@ class Content {
                         'name',
                     ]
                 ],
-                'assets'
+                'metas',
             ]
         ]
     ];

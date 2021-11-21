@@ -65,6 +65,11 @@ class Content extends Model
         return $this->morphMany(Notification::class, 'notificable');
     }
 
+    public function metas()
+    {
+        return $this->morphMany(Meta::class, 'metaable');
+    }
+
     public function assets()
     {
         return $this->morphToMany(Asset::class, 'assetable')->wherePivot('purpose', 'content-asset');
