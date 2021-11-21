@@ -757,6 +757,21 @@ class ContentController extends Controller
                 return $this->respondBadRequest("Live broadcasts can only be joined for live content types");
             }
 
+            $status =  $content->metas()->where('key', 'live_status')->first();
+            if ($status->value !== 'active') {
+                return $this->respondBadRequest("You cannot join a broadcast that has been not started");
+            }
+
+            $channel = $content->metas()->where('key', 'channel_name')->first();
+            $expires = time() + (24 * 60 * 60); // let token last for 24hrs
+            $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, 0, AgoraRtcToken::ROLE_ATTENDEE, $expires);
+
+            return $this->respondWithSuccess('Channel joined successfully', [
+                'token' => $token,
+                'channel_name' => $channel->value,
+                'uid' => 0,
+            ]);
+
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
