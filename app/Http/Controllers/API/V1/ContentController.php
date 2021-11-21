@@ -26,6 +26,8 @@ use App\Http\Resources\ContentResource;
 use App\Http\Resources\ContentIssueResource;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
 use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
+use Aws\CloudFront\CloudFrontClient;
+use Aws\Exception\AwsException;
 
 class ContentController extends Controller
 {
@@ -836,68 +838,62 @@ class ContentController extends Controller
 		} 
     }
 
-    public function getAssets(Request $request, $public_id)
+    public function getAssets(Request $request, $id)
     {
         try {
-            $validator = Validator::make(['public_id' => $public_id], [
-                'public_id' => ['required', 'string', 'exists:contents,public_id'],
+            $validator = Validator::make(['id' => $id], [
+                'id' => ['required', 'string', 'exists:contents,id'],
             ]);
 
             if ($validator->fails()) {
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
            
-            $content = Content::where('public_id', $public_id)->first();
-            $freePrice = $content->prices()->where('amount', 0)->first();
-            //check if user owns this content if it is not free
-            // content is free, ensure it's associated digiverse is also free before you display it's assets $freeContent
-            // if content is not free, check that the user has purchased the content $purchasedContent
-            // check that user has content via digiverse $purchasedParent
-            $userable = Userable::where('user_id',  $request->user()->id)->where('userable_type', 'content')->where('userable_id', $content->id)->where('status', 'available')->first();
-            if (is_null($freePrice) && $content->user_id !== $request->user()->id && !$request->user()->hasRole(Roles::ADMIN) && !$request->user()->hasRole(Roles::SUPER_ADMIN)) {
-                if (is_null($userable)) {
-                    $this->setStatusCode(402);
-                    return $this->respondBadRequest("You do not have permission to view this paid content as you have not purchased it or are not subscribed to it.");
-                }
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
             }
-            //only admins or creators can access this via web
-            if ($request->user()->id !== $content->user_id && !$request->user()->hasRole(Roles::ADMIN) && !$request->user()->hasRole(Roles::SUPER_ADMIN)  && trim($request->header('User-Agent')) !== 'Dart/2.10 (dart:io)') {
-                return $this->respondBadRequest("An error occurred");
-            }
-            
-            return $this->respondWithSuccess("Assets retrieved successfully",[
-                'assets' => $content->assets()->with('resolutions')->where('purpose', '<>', 'cover')->get(),
-            ]);
-        } catch(\Exception $exception) {
-            Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
-    }
 
-    public function getFreeAssets(Request $request, $public_id)
-    {
-        try {
-            $validator = Validator::make(['public_id' => $public_id], [
-                'public_id' => ['required', 'string', 'exists:contents,public_id'],
+            $content = Content::where('id', $id)->first();
+            
+            if (!$content->isFree() && !$content->userHasPaid($user_id)) {
+                return $this->respondBadRequest("You are not permitted to view the assets of this content");
+            }
+            // get signed cookies
+            $cloudFrontClient = new CloudFrontClient([
+                'profile' => 'default',
+                'version' => '2014-11-06',
+                'region' => 'us-east-1'
             ]);
 
-            if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            $expires = time() + (2 * 60 * 60); //2 hours from now(in seconds)
+            $resource = env('PRIVATE_AWS_CLOUDFRONT_URL') . '/*';
+            $policy = <<<POLICY
+                        {
+                            "Statement": [
+                                {
+                                    "Resource": "{$resource}",
+                                    "Condition": {
+                                        "DateLessThan": {"AWS:EpochTime": {$expires}}
+                                    }
+                                }
+                            ]
+                        }
+                        POLICY;
+            $result = $cloudFrontClient->getSignedCookie([
+                'policy' => $policy,
+                'private_key' => base64_decode(env('AWS_CLOUDFRONT_PRIVATE_KEY')),
+                'key_pair_id' => env('AWS_CLOUDFRONT_KEY_ID'),
+            ]);
+            $cookies = '';
+            foreach ($result as $key => $value) {
+                $cookies = $cookies . $key . '=' . $value . ';';
             }
-           
-            $content = Content::where('public_id', $public_id)->first();
-            $freePrice = $content->prices()->where('amount', 0)->first();
-            if (is_null($freePrice)) {
-                $this->setStatusCode(402);
-                return $this->respondBadRequest("You do not have permission to view this paid content as you have not purchased it or are not subscribed to it.");
-            }
-            //only admins or creators can access this via web
-            if ($request->user()->id !== $content->user_id && !$request->user()->hasRole(Roles::ADMIN) && !$request->user()->hasRole(Roles::SUPER_ADMIN)  && trim($request->header('User-Agent')) !== 'Dart/2.10 (dart:io)') {
-                return $this->respondBadRequest("An error occurred");
-            }
-            
             return $this->respondWithSuccess("Assets retrieved successfully",[
-                'assets' => $content->assets()->where('purpose', '<>', 'cover')->get(),
+                'assets' => $content->assets()->with('resolutions')->wherePivot('purpose', 'content-asset')->get(),
+                'cookies' => $cookies,
+                'cookies_expire' => $expires
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);

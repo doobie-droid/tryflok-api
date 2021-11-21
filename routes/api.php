@@ -114,8 +114,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::group(['prefix' => 'contents'], function () {
         Route::get('/{id}', 'ContentController@getSingle');
-        Route::get('/{public_id}/reviews', 'ContentController@getReviews');
-        Route::get('/{public_id}/free-assets', 'ContentController@getFreeAssets');
+        Route::get('/{id}/reviews', 'ContentController@getReviews');
+        Route::get('/{id}/assets', 'ContentController@getAssets');
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
@@ -126,7 +126,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'users'], function () {
-        Route::get('{public_id}', 'UserController@getSingle');
+        Route::get('{id}', 'UserController@getSingle');
     });
 
     Route::group(['prefix' => 'analytics'], function () {
@@ -205,7 +205,6 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'contents'], function () {
             Route::post('/', 'ContentController@create');
             Route::patch('/{id}', 'ContentController@update');
-            Route::get('/{public_id}/assets', 'ContentController@getAssets');
 
             Route::post('/{id}/issues', 'ContentController@createIssue');
             Route::put('/{id}/issues', 'ContentController@updateIssue');

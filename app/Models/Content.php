@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\Uuid;
+use Illuminate\Database\Eloquent\Builder;
 
 class Content extends Model
 {
@@ -123,5 +124,33 @@ class Content extends Model
     public function collections()
     {
         return $this->belongsToMany(Collection::class);
+    }
+
+    public function isFree()
+    {
+        $freePriceCount = $this->prices()->where('amount', 0)->count();
+        $parentPaidPriceCount = $this->collections()->whereHas('prices', function (Builder $query) {
+            $query->where('amount', '>', 0);
+        })->count();
+        $grandParentPaidPriceCount = $this->collections()->whereHas('parentCollections', function (Builder $query) {
+            $query->whereHas('prices', function (Builder $query) {
+                $query->where('amount', '>', 0);
+            });
+        })->count();
+       return $freePriceCount > 0 && $parentPaidPriceCount === 0 && $grandParentPaidPriceCount === 0;
+    }
+
+    public function userHasPaid($user_id)
+    {
+        $userablesCount = $this->userables()->where('status', 'available')->where('user_id', $user_id)->count();
+        $parentUserablesCount = $this->collections()->whereHas('userables', function (Builder $query) use ($user_id) {
+            $query->where('status', 'available')->where('user_id', $user_id);
+        })->count();
+        $grandParentUserablesCount = $this->collections()->whereHas('parentCollections', function (Builder $query) use ($user_id) {
+            $query->whereHas('userables', function (Builder $query) use ($user_id) {
+                $query->where('status', 'available')->where('user_id', $user_id);
+            });
+        })->count();
+        return $userablesCount > 0 || $parentUserablesCount > 0 || $grandParentUserablesCount > 0;
     }
 }
