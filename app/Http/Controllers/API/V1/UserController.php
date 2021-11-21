@@ -767,8 +767,8 @@ class UserController extends Controller
             }
 
             //make sure request was not made in the last six hours
-            if (!is_null($payout->last_payment_request) && $payout->last_payment_request->gt(now()->subHours(6))) {
-                return $this->respondBadRequest("You need to wait 6 hours to make another cashout request for this payout");
+            if (!is_null($payout->last_payment_request) && $payout->last_payment_request->gt(now()->subHours(12))) {
+                return $this->respondBadRequest("You need to wait for at least 12 hours to make another cashout request for this payout");
             }
             //dispatch to payment provider to payout
             if ($payment_account->provider === "manual") {
