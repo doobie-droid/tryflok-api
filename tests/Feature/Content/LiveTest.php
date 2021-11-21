@@ -122,4 +122,59 @@ class LiveTest extends TestCase
             'value' => 'active',
         ]);
     }
+
+    public function test_join_live_does_not_work_if_channel_not_started()
+    {
+        $user = User::factory()->create();
+        $this->be($user);
+        $user2 = User::factory()->create();
+        $content = Content::factory()
+        ->for($user2, 'owner')
+        ->liveAudio()
+        ->create();
+        $content->metas()->createMany([
+            [
+                'key' => 'live_status',
+                'value' => 'inactive',
+            ],
+            [
+                'key' => 'channel_name',
+                'value' => "{$content->id}-" . date('Ymd'),
+            ],
+        ]);
+
+        $response = $this->json('PATCH', "/api/v1/contents/{$content->id}/live");
+        $response->assertStatus(400);
+    }
+
+    public function test_join_live_does_works()
+    {
+        $user = User::factory()->create();
+        $this->be($user);
+        $user2 = User::factory()->create();
+        $content = Content::factory()
+        ->for($user2, 'owner')
+        ->liveAudio()
+        ->create();
+        $content->metas()->createMany([
+            [
+                'key' => 'live_status',
+                'value' => 'active',
+            ],
+            [
+                'key' => 'channel_name',
+                'value' => "{$content->id}-" . date('Ymd'),
+            ],
+        ]);
+
+        $response = $this->json('PATCH', "/api/v1/contents/{$content->id}/live");
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'token',
+                'channel_name',
+                'uid'
+            ]
+        ]);
+    }
 }
