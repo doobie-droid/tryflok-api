@@ -25,6 +25,7 @@ use App\Rules\AssetType as AssetTypeRule;
 use App\Http\Resources\ContentResource;
 use App\Http\Resources\ContentIssueResource;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
+use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
 
 class ContentController extends Controller
 {
@@ -692,6 +693,93 @@ class ContentController extends Controller
             $content = Content::where('id', $id)->first();
             $content->subscribers()->detach([$request->user()->id]);
             return $this->respondWithSuccess('You have successfully unsubscribed');
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
+
+    public function startLive(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make([
+                'id' => $id,
+            ], [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+            if ($content->type !== 'live-video' && $content->type !== 'live-audio') {
+                return $this->respondBadRequest("Live broadcasts can only be started for live content types");
+            }
+
+            if ($content->user_id !== $request->user()->id) {
+                return $this->respondBadRequest("Only the creator can start the live broadcast");
+            }
+
+            $channel = $content->metas()->where('key', 'channel_name')->first();
+            $status =  $content->metas()->where('key', 'live_status')->first();
+            $expires = time() + (24 * 60 * 60); // let token last for 24hrs
+            $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
+            
+            $status->value = 'active';
+            $status->save();
+            return $this->respondWithSuccess('Channel started successfully', [
+                'token' => $token,
+                'channel_name' => $channel->value,
+                'uid' => 0,
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
+
+    public function joinLive(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make([
+                'id' => $id,
+            ], [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+            if ($content->type !== 'live-video' && $content->type !== 'live-audio') {
+                return $this->respondBadRequest("Live broadcasts can only be joined for live content types");
+            }
+
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
+
+    public function endLive(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make([
+                'id' => $id,
+            ], [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+            if ($content->type !== 'live-video' && $content->type !== 'live-audio') {
+                return $this->respondBadRequest("Live broadcasts can only be ended for live content types");
+            }
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");

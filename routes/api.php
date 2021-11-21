@@ -191,7 +191,6 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::delete('/cart', 'UserController@removeItemsFromCart');
             Route::get('/cart', 'UserController@getCartItems');
             Route::get('/auth-otp', 'UserController@generateAuthOtp');
-            Route::post('/payout', 'UserController@requestPayout');
             Route::get('/payout', 'UserController@getPayouts');
             Route::patch('/payout', 'UserController@cashoutPayout');
             Route::post('/payment-account', 'UserController@addPaymentAccount');
@@ -215,6 +214,10 @@ Route::group(['middleware' => 'auth:api'], function () {
 
             Route::post('/{id}/subscription', 'ContentController@subscribeToContent');
             Route::delete('/{id}/subscription', 'ContentController@unsubscribeFromContent');
+
+            Route::post('/{id}/live', 'ContentController@startLive');
+            Route::patch('/{id}/live', 'ContentController@joinLive');
+            Route::delete('/{id}/live', 'ContentController@endLive');
         });
 
         Route::group(['prefix' => 'issues'], function () {

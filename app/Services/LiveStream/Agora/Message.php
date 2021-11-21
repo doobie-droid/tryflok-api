@@ -10,8 +10,7 @@ class Message {
     {
         $this->salt = rand(0, 100000);
 
-        $date = new DateTime("now", new DateTimeZone('UTC'));
-        $this->ts = $date->getTimestamp() + 24 * 3600;
+        $this->ts = time() + (24 * 3600);
 
         $this->privileges = array();
     }
