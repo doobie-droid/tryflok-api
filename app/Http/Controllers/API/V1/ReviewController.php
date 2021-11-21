@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Review;
 use App\Models\Content;
 use App\Models\Collection;
+use App\Constants\Constants;
 
 class ReviewController extends Controller
 {
@@ -20,8 +21,8 @@ class ReviewController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'public_id' => ['required', 'string', ],
-                'type' => ['required', 'string', 'regex:(content|collection)',],
+                'id' => ['required', 'string', ],
+                'type' => ['required', 'string', 'regex:(content|collection|review)',],
                 'rating' => ['sometimes', 'required', 'numeric', 'min:1', 'max:5'],
                 'comment' => ['sometimes', 'required', 'string', ],
             ]);
@@ -34,10 +35,13 @@ class ReviewController extends Controller
 
             switch ($request->type) {
                 case 'content':
-                    $itemModel = Content::where('public_id', $request->public_id)->first();
+                    $itemModel = Content::where('id', $request->id)->first();
                     break;
                 case 'collection':
-                    $itemModel = Collection::where('public_id', $request->public_id)->first();
+                    $itemModel = Collection::where('id', $request->id)->first();
+                    break;
+                case 'review':
+                    $itemModel = Review::where('id', $request->id)->first();
                     break;
             }
 
@@ -55,7 +59,6 @@ class ReviewController extends Controller
             } else {
                 //it is null, create
                 $review = $itemModel->reviews()->create([
-                    'public_id' => uniqid(rand()),
                     'user_id' => $request->user()->id,
                     'comment' => $request->comment,
                     'rating' => $request->rating,
@@ -71,11 +74,34 @@ class ReviewController extends Controller
 		} 
     }
 
+    public function getReviews(Request $request, $id)
+    {
+        try {
+            $review = Review::where('id', $id)->first();
+            if (is_null($review)) {
+                return $this->respondBadRequest("Invalid review ID supplied");
+            }
+            $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
+            $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
+            if ($limit > Constants::MAX_ITEMS_LIMIT) {
+                $limit = Constants::MAX_ITEMS_LIMIT;
+            }
+
+                $reviews = $review->reviews()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, array('*'), 'page', $page);
+            return $this->respondWithSuccess("Reviews retrieved successfully",[
+                'reviews' => $reviews,
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		} 
+    }
+
     public function addViews(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
-                'public_id' => ['required', 'string', ],
+                'id' => ['required', 'string', ],
                 'type' => ['required', 'string', 'regex:(content|collection)',],
             ]);
 
@@ -87,10 +113,10 @@ class ReviewController extends Controller
 
             switch ($request->type) {
                 case 'content':
-                    $itemModel = Content::where('public_id', $request->public_id)->first();
+                    $itemModel = Content::where('id', $request->id)->first();
                     break;
                 case 'collection':
-                    $itemModel = Collection::where('public_id', $request->public_id)->first();
+                    $itemModel = Collection::where('id', $request->id)->first();
                     break;
             }
 

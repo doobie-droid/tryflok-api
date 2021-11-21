@@ -125,6 +125,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('/{id}/reviews', 'CollectionController@getReviews');
     });
 
+    Route::group(['prefix' => 'reviews'], function () {
+        Route::get('/{id}/reviews', 'ReviewController@getReviews');
+    });
+
     Route::group(['prefix' => 'users'], function () {
         Route::get('{id}', 'UserController@getSingle');
     });

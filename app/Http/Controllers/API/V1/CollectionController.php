@@ -458,10 +458,10 @@ class CollectionController extends Controller
 		}
     }
 
-    public function getReviews(Request $request, $public_id)
+    public function getReviews(Request $request, $id)
     {
         try {
-            $collection = Collection::where('public_id', $public_id)->first();
+            $collection = Collection::where('id', $id)->first();
             if (is_null($collection)) {
                 return $this->respondBadRequest("Invalid collection ID supplied");
             }

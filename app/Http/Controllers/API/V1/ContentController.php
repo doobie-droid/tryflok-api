@@ -815,10 +815,10 @@ class ContentController extends Controller
 		}
     }
 
-    public function getReviews(Request $request, $public_id)
+    public function getReviews(Request $request, $id)
     {
         try {
-            $content = Content::where('public_id', $public_id)->first();
+            $content = Content::where('id', $id)->first();
             if (is_null($content)) {
                 return $this->respondBadRequest("Invalid content ID supplied");
             }
