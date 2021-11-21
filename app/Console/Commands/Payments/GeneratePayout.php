@@ -41,11 +41,13 @@ class GeneratePayout extends Command
     public function handle()
     {
         User::whereHas('sales', function (Builder $query) {
-            $query->where('added_to_payout', 0)->where('benefactor_share', '>', 0);
-        })->chunk(100000, function ($user) {
-            PayoutJob::dispatch([
-                'user' => $user,
-            ]);
+            $query->where('added_to_payout', 0);
+        })->chunk(100000, function ($users) {
+            foreach ($users as $user) {
+                PayoutJob::dispatch([
+                    'user' => $user,
+                ]);
+            }
         });
         return Command::SUCCESS;
     }
