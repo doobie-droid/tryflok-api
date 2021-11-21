@@ -728,6 +728,7 @@ class ContentController extends Controller
             
             $status->value = 'active';
             $status->save();
+            // TO DO: notifty followers that live has started
             return $this->respondWithSuccess('Channel started successfully', [
                 'token' => $token,
                 'channel_name' => $channel->value,
@@ -795,6 +796,17 @@ class ContentController extends Controller
             if ($content->type !== 'live-video' && $content->type !== 'live-audio') {
                 return $this->respondBadRequest("Live broadcasts can only be ended for live content types");
             }
+
+            if ($content->user_id !== $request->user()->id) {
+                return $this->respondBadRequest("Only the creator can start the live broadcast");
+            }
+
+            $channel = $content->metas()->where('key', 'channel_name')->first();
+            $status =  $content->metas()->where('key', 'live_status')->first();
+            
+            $status->value = 'inactive';
+            $status->save();
+            return $this->respondWithSuccess('Channel ended successfully');
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
