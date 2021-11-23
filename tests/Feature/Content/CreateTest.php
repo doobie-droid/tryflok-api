@@ -550,7 +550,6 @@ class CreateTest extends TestCase
         ->digiverse()
         ->for($user, 'owner')
         ->create();
-        $coverAsset = Asset::factory()->create();
         $request = [
             'title' => 'A content ' . date('YmdHis'),
             'description' => 'Content description',
@@ -564,13 +563,10 @@ class CreateTest extends TestCase
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
-            'cover' => [
-                'asset_id' => $coverAsset->id,
-            ],
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
+        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_COVER_AND_ASSET_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -619,15 +615,6 @@ class CreateTest extends TestCase
         ]);
         $this->assertTrue($content->tags()->where('tags.id', $request['tags'][1])->count() === 1);
 
-        //validate cover was attached
-        $this->assertDatabaseHas('assetables', [
-            'assetable_type' => 'content',
-            'assetable_id' => $content->id,
-            'asset_id' => $coverAsset->id,
-            'purpose' => 'cover',
-        ]);
-        $this->assertTrue($content->cover()->count() === 1);
-
         //validate price was created
         $this->assertDatabaseHas('prices', [
             'priceable_type' => 'content',
@@ -658,7 +645,6 @@ class CreateTest extends TestCase
         ->digiverse()
         ->for($user, 'owner')
         ->create();
-        $coverAsset = Asset::factory()->create();
         $request = [
             'title' => 'A content ' . date('YmdHis'),
             'description' => 'Content description',
@@ -672,13 +658,10 @@ class CreateTest extends TestCase
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
-            'cover' => [
-                'asset_id' => $coverAsset->id,
-            ],
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
+        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_COVER_AND_ASSET_RESPONSE);
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -712,15 +695,6 @@ class CreateTest extends TestCase
             'taggable_id' => $content->id,
         ]);
         $this->assertTrue($content->tags()->where('tags.id', $request['tags'][1])->count() === 1);
-
-        //validate cover was attached
-        $this->assertDatabaseHas('assetables', [
-            'assetable_type' => 'content',
-            'assetable_id' => $content->id,
-            'asset_id' => $coverAsset->id,
-            'purpose' => 'cover',
-        ]);
-        $this->assertTrue($content->cover()->count() === 1);
 
         //validate price was created
         $this->assertDatabaseHas('prices', [

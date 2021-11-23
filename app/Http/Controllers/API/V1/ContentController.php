@@ -38,7 +38,7 @@ class ContentController extends Controller
                 'title' => ['required', 'string', 'max: 200'],
                 'description' => ['sometimes', 'string'],
                 'digiverse_id' => ['required','exists:collections,id'],
-                'cover.asset_id' => ['required', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'cover.asset_id' => ['required_if:type,pdf,audio,video,newsletter', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'price' => ['required',],
                 'price.amount' => ['required', 'min:0', 'numeric'],
                 'tags' => ['sometimes',],
@@ -103,10 +103,12 @@ class ContentController extends Controller
                 'interval_amount' => 1,
             ]);
 
-            $content->cover()->attach($request->cover['asset_id'], [
-                'id' => Str::uuid(),
-                'purpose' => 'cover',
-            ]);
+            if (!is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
+                $content->cover()->attach($request->cover['asset_id'], [
+                    'id' => Str::uuid(),
+                    'purpose' => 'cover',
+                ]);
+            }
             
             if (!is_null($request->asset_id)) {
                 $content->assets()->attach($request->asset_id, [
