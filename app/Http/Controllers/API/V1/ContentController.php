@@ -859,7 +859,7 @@ class ContentController extends Controller
 
             $content = Content::where('id', $id)->first();
             
-            if (!$content->isFree() && !$content->userHasPaid($user_id)) {
+            if (!$content->isFree() && !$content->userHasPaid($user_id) && !($content->user_id == $user_id)) {
                 return $this->respondBadRequest("You are not permitted to view the assets of this content");
             }
             // get signed cookies
