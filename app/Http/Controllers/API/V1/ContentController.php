@@ -769,6 +769,10 @@ class ContentController extends Controller
                 return $this->respondBadRequest("Live broadcasts can only be joined for live content types");
             }
 
+            if (!$content->isFree() && !$content->userHasPaid($user_id) && !($content->user_id == $user_id)) {
+                return $this->respondBadRequest("You do not have access to this live because you have not purchased it");
+            }
+
             $status =  $content->metas()->where('key', 'live_status')->first();
             if ($status->value !== 'active') {
                 return $this->respondBadRequest("You cannot join a broadcast that has been not started");
