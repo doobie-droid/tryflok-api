@@ -88,6 +88,10 @@ class ContentController extends Controller
                     [
                         'key' => 'live_token',
                         'value' => '',
+                    ],
+                    [
+                        'key' => 'join_count',
+                        'value' => 0,
                     ]
                 ]);
             }
@@ -736,6 +740,9 @@ class ContentController extends Controller
             $token = $content->metas()->where('key', 'live_token')->first();
             $token->value = $agora_token;
             $token->save();
+            $join_count = $content->metas()->where('key', 'join_count')->first();
+            $join_count->value = (int)$join_count->value + 1;
+            $join_count->save();
 
             $status->value = 'active';
             $status->save();
@@ -780,13 +787,17 @@ class ContentController extends Controller
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
             $token = $content->metas()->where('key', 'live_token')->first();
+            $join_count = $content->metas()->where('key', 'join_count')->first();
+            $uid = $join_count->value;
+            $join_count->value = (int)$join_count->value + 1;
+            $join_count->save();
             //$expires = time() + (24 * 60 * 60); // let token last for 24hrs
             //$token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, 0, AgoraRtcToken::ROLE_ATTENDEE, $expires);
 
             return $this->respondWithSuccess('Channel joined successfully', [
                 'token' => $token->value,
                 'channel_name' => $channel->value,
-                'uid' => 0,
+                'uid' => $uid,
             ]);
 
         } catch(\Exception $exception) {
@@ -817,11 +828,14 @@ class ContentController extends Controller
                 return $this->respondBadRequest("Only the creator can start the live broadcast");
             }
 
-            $channel = $content->metas()->where('key', 'channel_name')->first();
+            $join_count = $content->metas()->where('key', 'join_count')->first();
+            $join_count->value = 0;
+            $join_count->save();
             $status =  $content->metas()->where('key', 'live_status')->first();
             
             $status->value = 'inactive';
             $status->save();
+            //remove live from other people's userable
             return $this->respondWithSuccess('Channel ended successfully');
         } catch(\Exception $exception) {
             Log::error($exception);
