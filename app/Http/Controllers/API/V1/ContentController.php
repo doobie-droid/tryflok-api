@@ -735,13 +735,24 @@ class ContentController extends Controller
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
             $status =  $content->metas()->where('key', 'live_status')->first();
+            $token = $content->metas()->where('key', 'live_token')->first();
+            $join_count = $content->metas()->where('key', 'join_count')->first();
+            //ensure that the live has not been started before
+            if ($status->value === "active") {
+                return $this->respondWithSuccess('Channel started successfully', [
+                    'token' => $token->value,
+                    'channel_name' => $channel->value,
+                    'uid' => 0,
+                ]);
+            }
+
             $expires = time() + (24 * 60 * 60); // let token last for 24hrs
             $agora_token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
-            $token = $content->metas()->where('key', 'live_token')->first();
+
             $token->value = $agora_token;
             $token->save();
-            $join_count = $content->metas()->where('key', 'join_count')->first();
-            $join_count->value = (int)$join_count->value + 1;
+            
+            $join_count->value = 1;
             $join_count->save();
 
             $status->value = 'active';
