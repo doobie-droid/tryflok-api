@@ -786,16 +786,16 @@ class ContentController extends Controller
             }
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
-            $token = $content->metas()->where('key', 'live_token')->first();
+            //$token = $content->metas()->where('key', 'live_token')->first();
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
             $join_count->value = (int)$join_count->value + 1;
             $join_count->save();
-            //$expires = time() + (24 * 60 * 60); // let token last for 24hrs
-            //$token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, 0, AgoraRtcToken::ROLE_ATTENDEE, $expires);
+            $expires = time() + (24 * 60 * 60); // let token last for 24hrs
+            $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, $uid, AgoraRtcToken::ROLE_ATTENDEE, $expires);
 
             return $this->respondWithSuccess('Channel joined successfully', [
-                'token' => $token->value,
+                'token' => $token,
                 'channel_name' => $channel->value,
                 'uid' => $uid,
             ]);
