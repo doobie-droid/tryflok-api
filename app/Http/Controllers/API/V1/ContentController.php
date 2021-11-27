@@ -803,7 +803,7 @@ class ContentController extends Controller
             return $this->respondWithSuccess('Channel joined successfully', [
                 'token' => $token,
                 'channel_name' => $channel->value,
-                'uid' => $uid,
+                'uid' => (int)$uid,
             ]);
 
         } catch(\Exception $exception) {
