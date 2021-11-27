@@ -85,6 +85,10 @@ class ContentController extends Controller
                         'key' => 'channel_name',
                         'value' => "{$content->id}-" . date('Ymd'),
                     ],
+                    [
+                        'key' => 'live_token',
+                        'value' => '',
+                    ]
                 ]);
             }
 
@@ -728,13 +732,16 @@ class ContentController extends Controller
             $channel = $content->metas()->where('key', 'channel_name')->first();
             $status =  $content->metas()->where('key', 'live_status')->first();
             $expires = time() + (24 * 60 * 60); // let token last for 24hrs
-            $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
-            
+            $agora_token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
+            $token = $content->metas()->where('key', 'live_token')->first();
+            $token->value = $agora_token;
+            $token->save();
+
             $status->value = 'active';
             $status->save();
             // TO DO: notifty followers that live has started
             return $this->respondWithSuccess('Channel started successfully', [
-                'token' => $token,
+                'token' => $token->value,
                 'channel_name' => $channel->value,
                 'uid' => 0,
             ]);
@@ -768,11 +775,12 @@ class ContentController extends Controller
             }
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
-            $expires = time() + (24 * 60 * 60); // let token last for 24hrs
-            $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, 0, AgoraRtcToken::ROLE_ATTENDEE, $expires);
+            $token = $content->metas()->where('key', 'live_token')->first();
+            //$expires = time() + (24 * 60 * 60); // let token last for 24hrs
+            //$token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, 0, AgoraRtcToken::ROLE_ATTENDEE, $expires);
 
             return $this->respondWithSuccess('Channel joined successfully', [
-                'token' => $token,
+                'token' => $token->value,
                 'channel_name' => $channel->value,
                 'uid' => 0,
             ]);

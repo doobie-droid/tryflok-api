@@ -17,7 +17,7 @@ class CreateMetasTable extends Migration
             $table->uuid('id')->primary();
             $table->uuidMorphs('metaable');
             $table->string('key');
-            $table->string('value');
+            $table->string('value')->nullable();
             $table->timestamps();
         });
     }
