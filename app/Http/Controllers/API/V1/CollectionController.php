@@ -140,10 +140,10 @@ class CollectionController extends Controller
                 },
             ])
             ->first();
+            $digiverse->content_types_available = $digiverse->contentTypesAvailable();
             return $this->respondWithSuccess("Digiverse retrieved successfully.", [
                 'digiverse' => new CollectionResource($digiverse),
             ]);
-
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
