@@ -776,6 +776,12 @@ class ContentController extends Controller
                 return $this->respondBadRequest("Live broadcasts can only be joined for live content types");
             }
 
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
             if (!$content->isFree() && !$content->userHasPaid($user_id) && !($content->user_id == $user_id)) {
                 return $this->respondBadRequest("You do not have access to this live because you have not purchased it");
             }
