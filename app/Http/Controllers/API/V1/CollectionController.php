@@ -36,7 +36,7 @@ class CollectionController extends Controller
                 'cover.asset_id' => ['required', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'price' => ['required',],
                 'price.amount' => ['required', 'min:0', 'numeric'],
-                'price.interval' => ['required', 'string', 'regex:(monthly)'],
+                'price.interval' => ['required', 'string', 'regex:(one-off|monthly)'],
                 'price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
                 'tags' => ['sometimes',],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],

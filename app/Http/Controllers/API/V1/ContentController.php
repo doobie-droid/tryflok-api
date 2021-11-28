@@ -25,6 +25,7 @@ use App\Rules\AssetType as AssetTypeRule;
 use App\Http\Resources\ContentResource;
 use App\Http\Resources\ContentIssueResource;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
+use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
 use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
 use Aws\CloudFront\CloudFrontClient;
 use Aws\Exception\AwsException;
@@ -64,6 +65,19 @@ class ContentController extends Controller
                 }
             }
             $user = $request->user();
+            if ($request->type === 'live-audio') {
+                $live_audio_count = Content::where('type', 'live-audio')->count();
+                if ($live_audio_count > 0) {
+                    return $this->respondBadRequest("You can only create one live audio");
+                }
+            }
+            if ($request->type ===  'live-video') {
+                $live_video_count = Content::where('type', 'live-video')->count();
+                if ($live_video_count > 0) {
+                    return $this->respondBadRequest("You can only create one live video");
+                }
+            }
+
             $content = Content::create([
                 'title' => $request->title,
                 'description' => $request->description,
@@ -757,7 +771,14 @@ class ContentController extends Controller
 
             $status->value = 'active';
             $status->save();
-            // TO DO: notifty followers that live has started
+            
+            DispatchNotificationToFollowersJob::dispatch([
+                'notificable_id' => $content->id,
+                'notificable_type' => 'content',
+                'user' => $request->user(),
+                'message' => "{$request->user()->username} has started a new live",
+            ]);
+
             return $this->respondWithSuccess('Channel started successfully', [
                 'token' => $token->value,
                 'channel_name' => $channel->value,
@@ -802,6 +823,11 @@ class ContentController extends Controller
                 return $this->respondBadRequest("You cannot join a broadcast that has been not started");
             }
 
+            $content->subscribers()->syncWithoutDetaching([$request->user()->id => [
+                    'id' => Str::uuid(),
+                ]
+            ]);
+
             $channel = $content->metas()->where('key', 'channel_name')->first();
             $token = $content->metas()->where('key', 'live_token')->first();
             $join_count = $content->metas()->where('key', 'join_count')->first();
@@ -817,6 +843,32 @@ class ContentController extends Controller
                 'uid' => (int)$uid,
             ]);
 
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
+
+    public function leaveLive(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make([
+                'id' => $id,
+            ], [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+            if ($content->type !== 'live-video' && $content->type !== 'live-audio') {
+                return $this->respondBadRequest("Live broadcasts can only be left for live content types");
+            }
+            $content->subscribers()->detach([$request->user()->id]);
+
+            return $this->respondWithSuccess('Channel left successfully');
         } catch(\Exception $exception) {
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
@@ -852,7 +904,7 @@ class ContentController extends Controller
             
             $status->value = 'inactive';
             $status->save();
-            //remove live from other people's userable
+            //To DO: remove live from other people's userable
             return $this->respondWithSuccess('Channel ended successfully');
         } catch(\Exception $exception) {
             Log::error($exception);

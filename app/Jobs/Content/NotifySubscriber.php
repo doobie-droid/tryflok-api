@@ -8,8 +8,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
-class NotifiySubscriber implements ShouldQueue
+class NotifySubscriber implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     public $content, $subscriber;
@@ -31,6 +32,7 @@ class NotifiySubscriber implements ShouldQueue
      */
     public function handle()
     {
+        // TO DO: do websocket and firebase push notifications
         $this->subscriber->notifications()->create([
             'message' => "A new issue has been released for {$this->content->title}",
             'notificable_type' => 'content',

@@ -8,13 +8,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Jobs\Content\NotifySubscriber as NotifySubscriberJob;
 use Illuminate\Support\Facades\Log;
 
-class DispatchSubscribersNotification implements ShouldQueue
+class NotifyFollower implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $content;
+    public $message, $notificable_type, $notificable_id, $follower;
     /**
      * Create a new job instance.
      *
@@ -22,7 +21,10 @@ class DispatchSubscribersNotification implements ShouldQueue
      */
     public function __construct($data)
     {
-        $this->content = $data['content'];
+        $this->message = $data['message'];
+        $this->notificable_type = $data['notificable_type'];
+        $this->notificable_id = $data['notificable_id'];
+        $this->follower = $data['follower'];
     }
 
     /**
@@ -32,19 +34,11 @@ class DispatchSubscribersNotification implements ShouldQueue
      */
     public function handle()
     {
-        $content = $this->content;
-        $this->content->subscribers()->chunk(100000, function ($users) use ($content) {
-            foreach ($users as $user) {
-                NotifiySubscriberJob::dispatch([
-                    'subscriber' => $user,
-                    'content' => $content,
-                ]);
-            }
-        });
-    }
-
-    public function failed(\Throwable $exception)
-    {
-        Log::error($exception);
+        // TO DO: do websocket and firebase push notifications
+        $this->follower->notifications()->create([
+            'message' => $this->message,
+            'notificable_type' => $this->notificable_type,
+            'notificable_id' => $this->notificable_id,
+        ]);
     }
 }

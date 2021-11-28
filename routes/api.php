@@ -222,6 +222,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
             Route::post('/{id}/live', 'ContentController@startLive');
             Route::patch('/{id}/live', 'ContentController@joinLive');
+            Route::patch('/{id}/leave-live', 'ContentController@leaveLive');
             Route::delete('/{id}/live', 'ContentController@endLive');
         });
 
