@@ -38,22 +38,41 @@ class UserController extends Controller
     public function getAll(Request $request)
     {
         try {
-            $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
-            $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
-            $search = urldecode($request->query('search', ''));
-            $role = urldecode($request->query('role', ''));
+            $page = $request->query('page', 1);
+            $limit = $request->query('limit', 10);
+            $keyword = urldecode($request->query('keyword', ''));
+            $keywords = explode(" ", $keyword);
+            $keywords = array_diff($keywords, ['']);
 
-            $users = User::where(function ($query) use ($search) {
-                $query->where('name', 'LIKE', '%' . $search . '%')->orWhere('email', 'LIKE', $search . '%');
+            $max_items_count = Constants::MAX_ITEMS_LIMIT;
+            $validator = Validator::make([
+                'page' => $page,
+                'limit' => $limit,
+                'keyword' => $keyword,
+            ], [
+                'page' => ['required', 'integer', 'min:1',],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
+                'keyword' => ['sometimes', 'string', 'max:200',],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $users = User::whereHas('roles', function (Builder $query) {
+                $query->where('name', Roles::USER);
             });
-            
-            if ($role != "" && !is_null($role)) {
-                $users = $users->whereHas('roles', function (Builder $query) use ($role) {
-                    $query->where('name', $role);
+
+            foreach ($keywords as $keyword) {
+                $users = $users->where(function ($query) use ($keyword) {
+                    $query->where('name', 'LIKE', "%{$keyword}%")
+                    ->orWhere('username', 'LIKE', "%{$keyword}%");
                 });
             }
            
-            $users = $users->with('roles', 'profile_picture')->orderBy('created_at', 'asc')
+            $users = $users->with('roles', 'profile_picture')
+            ->withCount('followers', 'following')
+            ->orderBy('created_at', 'asc')
             ->paginate($limit, array('*'), 'page', $page);
 
             return $this->respondWithSuccess("Users retrieved successfully",[
@@ -79,7 +98,7 @@ class UserController extends Controller
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
-            $user = User::with('roles', 'profile_picture')->where('id', $id)->first();
+            $user = User::with('roles', 'profile_picture')->withCount('followers', 'following')->where('id', $id)->first();
             return $this->respondWithSuccess("User retrieved successfully", [
                 'user' => new UserResource($user),
             ]);
@@ -87,6 +106,58 @@ class UserController extends Controller
             Log::error($exception);
 			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
 		} 
+    }
+
+    public function followUser(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => ['required', 'string', 'exists:users,id'],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $user = User::where('id', $id)->first();
+            $user->followers()->syncWithoutDetaching([
+                $request->user()->id => [
+                    'id' => Str::uuid(),
+                ]
+            ]);
+
+            $user = User::with('roles', 'profile_picture')->withCount('followers', 'following')->where('id', $user->id)->first();
+            return $this->respondWithSuccess("You have successfully followed this user", [
+                'user' => new UserResource($user),
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
+    }
+
+    public function unfollowUser(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => ['required', 'string', 'exists:users,id'],
+            ]);
+
+            if ($validator->fails()) {
+				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            }
+
+            $user = User::where('id', $id)->first();
+            $user->followers()->detach($request->user()->id);
+
+            $user = User::with('roles', 'profile_picture')->withCount('followers', 'following')->where('id', $user->id)->first();
+            return $this->respondWithSuccess("You have successfully followed this user", [
+                'user' => new UserResource($user),
+            ]);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+		}
     }
 
     public function getAccount(Request $request)

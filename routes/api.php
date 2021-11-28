@@ -130,6 +130,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'users'], function () {
+        Route::get('/', 'UserController@getAll');
         Route::get('{id}', 'UserController@getSingle');
     });
 
@@ -169,7 +170,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'users',], function () {
-            Route::get('/', 'UserController@getAll');
+            Route::patch('{id}/follow', 'UserController@followUser');
+            Route::patch('{id}/unfollow', 'UserController@unfollowUser');
             Route::get('{user_public_id}/sales', 'UserController@getSales');
         });
 

@@ -162,4 +162,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->morphOne(Wallet::class, 'walletable');
     }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'followers', 'user_id', 'follower_id');
+    }
+
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'user_id');
+    }
 }
