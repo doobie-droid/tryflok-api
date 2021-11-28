@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Otp;
+use App\Models\NotificationToken;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Notifications\User\ForgotPassword as ForgotPasswordNotification;
 use Illuminate\Support\Facades\Mail;
@@ -33,6 +34,7 @@ class AuthController extends Controller
 				'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
 				'password' => ['required', 'string', 'confirmed'],
                 'referral_id' => ['sometimes', 'nullable','string', 'exists:users,referral_id'],
+                'firebase_token' => ['sometimes', 'nullable','string',],
 			]);
 			
 			if ($validator->fails()) {
@@ -53,6 +55,12 @@ class AuthController extends Controller
                 $referrer = User::where('referral_id', $request->referral_id)->first();
                 $user->referrer_id = $referrer->id;
                 $user->save();
+            }
+
+            if (!is_null($request->firebase_token)) {
+                $user->notificationTokens()->create([
+                    'token' => $request->firebase_token,
+                ]);
             }
 
             event(new ConfirmEmailEvent($user));
@@ -82,6 +90,7 @@ class AuthController extends Controller
                 'id_token' => ['required_if:provider,google,apple', 'string',],
                 'sign_in_type' => ['required', 'string', 'regex:(register|login)',],
                 'sign_in_source' => ['required_if:provider,google', 'string', 'regex:(ios|android)',],
+                'firebase_token' => ['sometimes', 'nullable','string',],
 			]);
 
             if ($validator->fails()) {
@@ -144,6 +153,15 @@ class AuthController extends Controller
                 $user->wallet()->create([]);
             }
 
+            if (!is_null($request->firebase_token)) {
+                $token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
+                if (is_null($token)) {
+                    $user->notificationTokens()->create([
+                        'token' => $request->firebase_token,
+                    ]);
+                }
+            }
+
             $token = JWTAuth::fromUser($user);
             $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $user->id)->first();
             return $this->respondWithSuccess("Registration successful", [
@@ -162,6 +180,7 @@ class AuthController extends Controller
             $validator = Validator::make($request->all(), [
 				'username' => ['required', 'string', 'max:255'],
 				'password' => ['required', 'string',],
+                'firebase_token' => ['sometimes', 'nullable','string',],
 			]);
 			
 			if ($validator->fails()) {
@@ -176,6 +195,15 @@ class AuthController extends Controller
                     $user->wallet()->create([]);
                 }
                 $user = User::with('roles', 'profile_picture', 'wallet')->where('id', Auth::user()->id)->first();
+
+                if (!is_null($request->firebase_token)) {
+                    $token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
+                    if (is_null($token)) {
+                        $user->notificationTokens()->create([
+                            'token' => $request->firebase_token,
+                        ]);
+                    }
+                }
 				return $this->respondWithSuccess("Login successful", [
 					'user' => new UserResourceWithSensitive($user),
 					'token' => $token,
@@ -249,6 +277,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'token' => ['required', 'string'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'firebase_token' => ['sometimes', 'nullable','string',],
         ]);
         if ($validator->fails()) {
             return $this->respondBadRequest("Invalid or missing input fields",  $validator->errors()->toArray());
@@ -260,6 +289,14 @@ class AuthController extends Controller
             $user->password_token = null;
             $user->save();
             $token = JWTAuth::fromUser($user);
+            if (!is_null($request->firebase_token)) {
+                $token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
+                if (is_null($token)) {
+                    $user->notificationTokens()->create([
+                        'token' => $request->firebase_token,
+                    ]);
+                }
+            }
             return $this->respondWithSuccess("Password reset successfully", [
                 'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
