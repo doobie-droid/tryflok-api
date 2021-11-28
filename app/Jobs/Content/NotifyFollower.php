@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use \GuzzleHttp\Client;
 
 class NotifyFollower implements ShouldQueue
 {
@@ -34,11 +35,33 @@ class NotifyFollower implements ShouldQueue
      */
     public function handle()
     {
-        // TO DO: do websocket and firebase push notifications
         $this->follower->notifications()->create([
             'message' => $this->message,
             'notificable_type' => $this->notificable_type,
             'notificable_id' => $this->notificable_id,
         ]);
+
+        $client = new Client();
+        $url = "https://fcm.googleapis.com/fcm/send";
+        $authorization_key = env('FCM_SERVER_KEY');
+        foreach ($this->follower->notificationTokens as $notification_token) {
+            $client->post($url,  [
+                'headers' => [
+                    'Authorization' => "key={$authorization_key}",
+                ],
+                'json' => [
+                    "token" => $notification_token->token,
+                    "notification" => [
+                        "title" => 'New Content From Creator',
+                        "body" => $this->message,
+                    ],
+                    "data" => [
+                        "message" => $this->message,
+                        "notificable_type" => $this->notificable_type,
+                        "notificable_id" => $this->notificable_id,
+                    ]
+                ],
+            ]);
+        }
     }
 }
