@@ -58,6 +58,10 @@ class ContentController extends Controller
                 return $this->respondBadRequest("The collection with ID {$request->digiverse_id} is not a digiverse");
             }
 
+            if ($digiverse->user_id !== $request->user()->id) {
+                return $this->respondBadRequest("You cannot to this digiverse because you do not own it");
+            }
+
             if ($request->type === 'newsletter') {
                 $digiverseNewsletterCount = $digiverse->contents()->where('type', 'newsletter')->count();
                 if ($digiverseNewsletterCount > 0) {
