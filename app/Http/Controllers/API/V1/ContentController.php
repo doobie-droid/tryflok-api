@@ -26,6 +26,7 @@ use App\Http\Resources\ContentResource;
 use App\Http\Resources\ContentIssueResource;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
+use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJob;
 use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
 use Aws\CloudFront\CloudFrontClient;
 use Aws\Exception\AwsException;
@@ -908,7 +909,10 @@ class ContentController extends Controller
             
             $status->value = 'inactive';
             $status->save();
-            //To DO: remove live from other people's userable
+            
+            DispatchDisableLiveUserableJob::dispatch([
+                'live_content' => $content,
+            ]);
             return $this->respondWithSuccess('Channel ended successfully');
         } catch(\Exception $exception) {
             Log::error($exception);
