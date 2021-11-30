@@ -70,7 +70,7 @@ class ContentController extends Controller
                 }
             }
             $user = $request->user();
-            if ($request->type === 'live-audio') {
+            /*if ($request->type === 'live-audio') {
                 $live_audio_count = Content::where('type', 'live-audio')->count();
                 if ($live_audio_count > 0) {
                     return $this->respondBadRequest("You can only create one live audio");
@@ -81,7 +81,7 @@ class ContentController extends Controller
                 if ($live_video_count > 0) {
                     return $this->respondBadRequest("You can only create one live video");
                 }
-            }
+            }*/
 
             $content = Content::create([
                 'title' => $request->title,
