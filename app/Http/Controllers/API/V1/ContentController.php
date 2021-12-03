@@ -636,7 +636,7 @@ class ContentController extends Controller
             $content = Content::where('id', $id)->first();
             $issues = $content->issues();
             if ($request->user()->id !== $content->user_id) {
-                $issues = $issues->where('is_avaialble', 1);
+                $issues = $issues->where('is_available', 1);
             }
 
             foreach ($keywords as $keyword) {
