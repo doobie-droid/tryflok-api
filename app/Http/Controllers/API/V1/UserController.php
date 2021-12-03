@@ -69,8 +69,22 @@ class UserController extends Controller
                     ->orWhere('username', 'LIKE', "%{$keyword}%");
                 });
             }
+
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
            
             $users = $users->with('roles', 'profile_picture')
+            ->with([
+                'followers' => function ($query) use ($user_id) {
+                    $query->where('users.id',  $user_id);
+                },
+                'following' => function ($query) use ($user_id) {
+                    $query->where('users.id',  $user_id);
+                },
+            ])
             ->withCount('followers', 'following')
             ->orderBy('created_at', 'asc')
             ->paginate($limit, array('*'), 'page', $page);
@@ -98,7 +112,22 @@ class UserController extends Controller
 				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
-            $user = User::with('roles', 'profile_picture')->withCount('followers', 'following')->where('id', $id)->first();
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+           
+            $user = User::with('roles', 'profile_picture')
+            ->with([
+                'followers' => function ($query) use ($user_id) {
+                    $query->where('users.id',  $user_id);
+                },
+                'following' => function ($query) use ($user_id) {
+                    $query->where('users.id',  $user_id);
+                },
+            ])
+            ->withCount('followers', 'following')->where('id', $id)->first();
             return $this->respondWithSuccess("User retrieved successfully", [
                 'user' => new UserResource($user),
             ]);
@@ -126,7 +155,24 @@ class UserController extends Controller
                 ]
             ]);
 
-            $user = User::with('roles', 'profile_picture')->withCount('followers', 'following')->where('id', $user->id)->first();
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            $user = User::with('roles', 'profile_picture')
+            ->with([
+                'followers' => function ($query) use ($user_id) {
+                    $query->where('users.id',  $user_id);
+                },
+                'following' => function ($query) use ($user_id) {
+                    $query->where('users.id',  $user_id);
+                },
+            ])
+            ->withCount('followers', 'following')
+            ->where('id', $user->id)
+            ->first();
             return $this->respondWithSuccess("You have successfully followed this user", [
                 'user' => new UserResource($user),
             ]);
@@ -150,7 +196,24 @@ class UserController extends Controller
             $user = User::where('id', $id)->first();
             $user->followers()->detach($request->user()->id);
 
-            $user = User::with('roles', 'profile_picture')->withCount('followers', 'following')->where('id', $user->id)->first();
+            if ($request->user() == NULL || $request->user()->id == NULL) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            $user = User::with('roles', 'profile_picture')
+            ->with([
+                'followers' => function ($query) use ($user_id) {
+                    $query->where('users.id',  $user_id);
+                },
+                'following' => function ($query) use ($user_id) {
+                    $query->where('users.id',  $user_id);
+                },
+            ])
+            ->withCount('followers', 'following')
+            ->where('id', $user->id)
+            ->first();
             return $this->respondWithSuccess("You have successfully followed this user", [
                 'user' => new UserResource($user),
             ]);
