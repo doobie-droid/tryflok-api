@@ -108,9 +108,9 @@ class ApprovalController extends Controller
 
             return $this->respondWithSuccess("Approval requests retrieved successfully", [
                 'approval_requests' => ApprovalResource::collection($approval_requests),
-                'current_page' => $approval_requests->currentPage(),
-                'items_per_page' => $approval_requests->perPage(),
-                'total' => $approval_requests->total(),
+                'current_page' => (int) $approval_requests->currentPage(),
+                'items_per_page' => (int) $approval_requests->perPage(),
+                'total' => (int) $approval_requests->total(),
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);
@@ -230,9 +230,9 @@ class ApprovalController extends Controller
 
             return $this->respondWithSuccess("Approvals retrieved successfully", [
                 'approval_requests' => ApprovalResource::collection($approval_requests),
-                'current_page' => $approval_requests->currentPage(),
-                'items_per_page' => $approval_requests->perPage(),
-                'total' => $approval_requests->total(),
+                'current_page' => (int) $approval_requests->currentPage(),
+                'items_per_page' => (int) $approval_requests->perPage(),
+                'total' => (int) $approval_requests->total(),
             ]);
 
         } catch(\Exception $exception) {

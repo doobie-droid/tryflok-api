@@ -596,9 +596,9 @@ class ContentController extends Controller
 
             return $this->respondWithSuccess('Contents retrieved successfully',[
                 'contents' => ContentResource::collection($contents),
-                'current_page' => $contents->currentPage(),
-                'items_per_page' => $contents->perPage(),
-                'total' => $contents->total(),
+                'current_page' => (int) $contents->currentPage(),
+                'items_per_page' => (int) $contents->perPage(),
+                'total' => (int) $contents->total(),
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);
@@ -650,9 +650,9 @@ class ContentController extends Controller
             ->paginate($limit, array('*'), 'page', $page);
             return $this->respondWithSuccess('Issues retrieved successfully',[
                 'issues' => ContentIssueResource::collection($issues),
-                'current_page' => $issues->currentPage(),
-                'items_per_page' => $issues->perPage(),
-                'total' => $issues->total(),
+                'current_page' => (int) $issues->currentPage(),
+                'items_per_page' => (int) $issues->perPage(),
+                'total' => (int) $issues->total(),
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);

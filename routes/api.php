@@ -85,9 +85,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
             "message" => "Categories retrieved successfully",
             "data" => [
                 "categories" => CategoryResource::collection($categories),
-                'current_page' => $categories->currentPage(),
-                'items_per_page' => $categories->perPage(),
-                'total' => $categories->total(),
+                'current_page' => (int) $categories->currentPage(),
+                'items_per_page' => (int) $categories->perPage(),
+                'total' => (int) $categories->total(),
             ]
         ]);
     });
@@ -105,9 +105,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
             "message" => "Tags retrieved successfully",
             "data" => [
                 "categories" => TagResource::collection($tags),
-                'current_page' => $tags->currentPage(),
-                'items_per_page' => $tags->perPage(),
-                'total' => $tags->total(),
+                'current_page' => (int) $tags->currentPage(),
+                'items_per_page' => (int) $tags->perPage(),
+                'total' => (int) $tags->total(),
             ]
         ]);
     });

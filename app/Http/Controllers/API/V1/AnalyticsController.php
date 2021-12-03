@@ -60,9 +60,9 @@ class AnalyticsController extends Controller
 
             return $this->respondWithSuccess("Trending retrieved successfully", [
                 'trending' => TrendingResource::collection($reviews),
-                'current_page' => $reviews->currentPage(),
-                'items_per_page' => $reviews->perPage(),
-                'total' => $reviews->total(),
+                'current_page' => (int) $reviews->currentPage(),
+                'items_per_page' => (int) $reviews->perPage(),
+                'total' => (int) $reviews->total(),
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);

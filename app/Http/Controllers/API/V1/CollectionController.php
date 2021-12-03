@@ -345,9 +345,9 @@ class CollectionController extends Controller
 
             return $this->respondWithSuccess('Digiverses retrieved successfully',[
                 'digiverses' => CollectionResource::collection($digiverses),
-                'current_page' => $digiverses->currentPage(),
-                'items_per_page' => $digiverses->perPage(),
-                'total' => $digiverses->total(),
+                'current_page' => (int) $digiverses->currentPage(),
+                'items_per_page' => (int) $digiverses->perPage(),
+                'total' => (int) $digiverses->total(),
             ]);
 
         } catch(\Exception $exception) {
@@ -447,9 +447,9 @@ class CollectionController extends Controller
 
             return $this->respondWithSuccess('Digiverses retrieved successfully',[
                 'digiverses' => CollectionResource::collection($digiverses),
-                'current_page' => $digiverses->currentPage(),
-                'items_per_page' => $digiverses->perPage(),
-                'total' => $digiverses->total(),
+                'current_page' => (int) $digiverses->currentPage(),
+                'items_per_page' => (int) $digiverses->perPage(),
+                'total' => (int) $digiverses->total(),
             ]);
 
         } catch(\Exception $exception) {

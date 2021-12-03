@@ -77,9 +77,9 @@ class UserController extends Controller
 
             return $this->respondWithSuccess("Users retrieved successfully",[
                 'users' => UserResource::collection($users),
-                'current_page' => $users->currentPage(),
-                'items_per_page' => $users->perPage(),
-                'total' => $users->total(),
+                'current_page' => (int) $users->currentPage(),
+                'items_per_page' => (int) $users->perPage(),
+                'total' => (int) $users->total(),
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);
@@ -424,9 +424,9 @@ class UserController extends Controller
 
             return $this->respondWithSuccess('Notifications retrieved successfully',[
                 'notifications' => NotificationResource::collection($notifications),
-                'current_page' => $notifications->currentPage(),
-                'items_per_page' => $notifications->perPage(),
-                'total' => $notifications->total(),
+                'current_page' => (int) $notifications->currentPage(),
+                'items_per_page' => (int) $notifications->perPage(),
+                'total' => (int) $notifications->total(),
             ]);
         } catch(\Exception $exception) {
             Log::error($exception);
