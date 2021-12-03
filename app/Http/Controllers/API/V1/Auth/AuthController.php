@@ -154,8 +154,8 @@ class AuthController extends Controller
             }
 
             if (!is_null($request->firebase_token)) {
-                $token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
-                if (is_null($token)) {
+                $firebase_token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
+                if (is_null($firebase_token)) {
                     $user->notificationTokens()->create([
                         'token' => $request->firebase_token,
                     ]);
@@ -197,8 +197,8 @@ class AuthController extends Controller
                 $user = User::with('roles', 'profile_picture', 'wallet')->where('id', Auth::user()->id)->first();
 
                 if (!is_null($request->firebase_token)) {
-                    $token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
-                    if (is_null($token)) {
+                    $firebase_token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
+                    if (is_null($firebase_token)) {
                         $user->notificationTokens()->create([
                             'token' => $request->firebase_token,
                         ]);
@@ -290,8 +290,8 @@ class AuthController extends Controller
             $user->save();
             $token = JWTAuth::fromUser($user);
             if (!is_null($request->firebase_token)) {
-                $token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
-                if (is_null($token)) {
+                $firebase_token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
+                if (is_null($firebase_token)) {
                     $user->notificationTokens()->create([
                         'token' => $request->firebase_token,
                     ]);
