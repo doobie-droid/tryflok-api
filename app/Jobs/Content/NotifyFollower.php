@@ -50,7 +50,7 @@ class NotifyFollower implements ShouldQueue
                     'Authorization' => "key={$authorization_key}",
                 ],
                 'json' => [
-                    "token" => $notification_token->token,
+                    "to" => $notification_token->token,
                     "notification" => [
                         "title" => 'New Content From Creator',
                         "body" => $this->message,

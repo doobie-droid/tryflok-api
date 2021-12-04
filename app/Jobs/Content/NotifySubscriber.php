@@ -49,7 +49,7 @@ class NotifySubscriber implements ShouldQueue
                     'Authorization' => "key={$authorization_key}",
                 ],
                 'json' => [
-                    "token" => $notification_token->token,
+                    "to" => $notification_token->token,
                     "notification" => [
                         "title" => 'Newsletter Release',
                         "body" => $message,
