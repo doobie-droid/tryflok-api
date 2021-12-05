@@ -24,18 +24,17 @@ jobs:
       - checkout
 
       - run: sudo apt update
-      - run: cp .env.example .env
       - run: sudo apt-get install -y zlib1g-dev libsqlite3-dev
       - run: sudo apt-get install -y libpng-dev libjpeg62-turbo-dev
-      - run: sudo apt-get update && apt-get install -y git curl libonig-dev libxml2-dev libzip-dev zip unzip
+      - run: sudo apt-get update && sudo apt-get install -y git curl libonig-dev libxml2-dev libzip-dev zip unzip
       - run: sudo apt-get install -y ffmpeg
-      - run: pecl install -o -f redis &&  rm -rf /tmp/pear &&  docker-php-ext-enable redis
-      - run: sudo apt-get clean && rm -rf /var/lib/apt/lists/*
+      - run: sudo pecl install -o -f redis &&  rm -rf /tmp/pear &&  docker-php-ext-enable redis
+      - run: sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
       - run: sudo apt-get update
       - run: sudo apt install libsodium-dev
       - run: docker-php-ext-configure sodium
       - run: docker-php-ext-install sodium
-      - run: pecl install -f libsodium
+      - run: sudo pecl install -f libsodium
       - run: docker-php-ext-enable sodium
       - run: docker-php-ext-install pdo_mysql
       - run: docker-php-ext-install pcntl
@@ -59,6 +58,7 @@ jobs:
           key: v1-dependencies-{{ checksum "composer.json" }}
           paths:
             - ./vendor
+      - run: cp .env.example .env
       - run: php artisan key:generate
       - run: php artisan migrate:fresh
       - run: php artisan db:seed --class=TestingSeeder
