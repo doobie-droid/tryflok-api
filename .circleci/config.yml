@@ -28,7 +28,7 @@ jobs:
       - run: sudo apt-get install -y libpng-dev libjpeg62-turbo-dev
       - run: sudo apt-get update && sudo apt-get install -y git curl libonig-dev libxml2-dev libzip-dev zip unzip
       - run: sudo apt-get install -y ffmpeg
-      - run: sudo pecl install -o -f redis &&  rm -rf /tmp/pear &&  docker-php-ext-enable redis
+      - run: sudo pecl install -o -f redis &&  sudo rm -rf /tmp/pear &&  docker-php-ext-enable redis
       - run: sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
       - run: sudo apt-get update
       - run: sudo apt install libsodium-dev
