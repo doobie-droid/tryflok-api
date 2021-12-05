@@ -9,7 +9,7 @@
 			<tr>
 				<td class="content-cell" style="word-break: break-word; font-family: &quot;Nunito Sans&quot;, Helvetica, Arial, sans-serif; font-size: 16px; padding: 45px;">
 					<div class="f-fallback">
-						<h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left;" align="left">Hello, {{$user['name']}}!</h1>
+						<h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left;" align="left">Hello, {{ $user['name'] }}!</h1>
 						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">We are conducting a survey on how to serve you better. Please click the link below to take the survey.</p>
 						<!-- Action -->
 						<table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; -premailer-width: 100%; -premailer-cellpadding: 0; -premailer-cellspacing: 0; text-align: center; margin: 30px auto; padding: 0;">
@@ -27,9 +27,9 @@
 								</td>
 							</tr>
 						</table>
-						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you have any questions, feel free to <a href="mailto:contact@akiddie.com.ng" style="color: #276db8;">send us an email</a>.</p>
+						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you have any questions, feel free to <a href="mailto:contact@tryflok.com" style="color: #276db8;">send us an email</a>.</p>
 						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">Thanks,
-							<br />Akiddie</p>
+							<br />Flok</p>
 						<!-- Sub copy -->
 						<table class="body-sub" role="presentation" style="margin-top: 25px; padding-top: 25px; border-top-width: 1px; border-top-color: #EAEAEC; border-top-style: solid;">
 							<tr>

@@ -9,14 +9,14 @@
 			<tr>
 				<td class="content-cell" style="word-break: break-word; font-family: &quot;Nunito Sans&quot;, Helvetica, Arial, sans-serif; font-size: 16px; padding: 45px;">
 					<div class="f-fallback">
-						<h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left;" align="left">Welcome, {{$user['name']}}!</h1>
+						<h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left;" align="left">Welcome, {{ $user['name'] }}!</h1>
 						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">Thanks for joining Flok. 
-						You have been added as a member of <b>{{$group['name']}}</b> and we are truly happy to have you. To show that, we have given you a one month free trial on our platform.</p>
+						You have been added as a member of <b>{{ $group['name'] }}</b> and we are truly happy to have you. To show that, we have given you a one month free trial on our platform.</p>
 						<p>Please log into your account and change your password. Details are provided below</p>
 						<p>
-							<b>Email:</b> {{$user['email']}}</br>
-							<b>Password:</b> {{$password}}</br>
-							<b>URL:</b> <a href="{{ env('FRONTEND_URL') }}/login">{{ env('FRONTEND_URL') }}</a>
+							<b>Email:</b> {{ $user['email'] }}</br>
+							<b>Password:</b> {{ $password }}</br>
+							<b>URL:</b> <a href="{{ config('flok.frontend_url') }}/login">{{ config('flok.frontend_url') }}</a>
 						</p>
 						<p> To activate your profile, please confirm your email:</p>
 						<!-- Action -->
@@ -28,14 +28,14 @@
 									<table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
 										<tr>
 											<td align="center" style="word-break: break-word; font-family: &quot;Nunito Sans&quot;, Helvetica, Arial, sans-serif; font-size: 16px;">
-												<a href="{{ env('FRONTEND_URL') . 'email/verify/new/' . $user['email_token']}}" class="f-fallback button" target="_blank" style="color: #FFF; border-color: #276db8; border-style: solid; border-width: 10px 18px; background-color: #276db8; display: inline-block; text-decoration: none; border-radius: 3px; box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16); -webkit-text-size-adjust: none; box-sizing: border-box;">Confirm your email</a>
+												<a href="{{ config('flok.frontend_url') . 'email/verify/new/' . $user['email_token'] }}" class="f-fallback button" target="_blank" style="color: #FFF; border-color: #276db8; border-style: solid; border-width: 10px 18px; background-color: #276db8; display: inline-block; text-decoration: none; border-radius: 3px; box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16); -webkit-text-size-adjust: none; box-sizing: border-box;">Confirm your email</a>
 											</td>
 										</tr>
 									</table>
 								</td>
 							</tr>
 						</table>
-						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you have any questions, feel free to <a href="mailto:contact@akiddie.com.ng" style="color: #276db8;">send us an email</a>.</p>
+						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you have any questions, feel free to <a href="mailto:contact@tryflok.com" style="color: #276db8;">send us an email</a>.</p>
 						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">Thanks,
 							<br />Flok</p>
 						<!-- Sub copy -->
@@ -43,7 +43,7 @@
 							<tr>
 								<td style="word-break: break-word; font-family: &quot;Nunito Sans&quot;, Helvetica, Arial, sans-serif; font-size: 16px;">
 									<p class="f-fallback sub" style="font-size: 13px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you’re having trouble with the button above, copy and paste the URL below into your web browser.</p>
-									<p class="f-fallback sub" style="font-size: 13px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">{{ env('FRONTEND_URL') . 'email/verify/new/' . $user['email_token']}}</p>
+									<p class="f-fallback sub" style="font-size: 13px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">{{ config('flok.frontend_url') . 'email/verify/new/' . $user['email_token'] }}</p>
 								</td>
 							</tr>
 						</table>

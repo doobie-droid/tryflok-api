@@ -11,7 +11,7 @@
 					<div class="f-fallback">
 						<h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left;" align="left">Welcome,</h1>
 						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">Thanks for joining Flok. 
-						Your {{strtolower($group['type'])}}, <b>{{$group['name']}}</b> , has successfully been onboarded to Flok. We are very grateful for your partnership.
+						Your {{ strtolower($group['type']) }}, <b>{{$group['name']}}</b> , has successfully been onboarded to Flok. We are very grateful for your partnership.
 						</p>
 				
 						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you have any questions, feel free to <a href="mailto:contact@akiddie.com.ng" style="color: #276db8;">send us an email</a>.</p>
