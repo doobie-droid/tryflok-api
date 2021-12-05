@@ -42,7 +42,7 @@ class Purchase implements ShouldQueue
      */
     public function handle()
     {
-        $stripe = new StripePayment();
+        $stripe = new StripePayment;
         $req = $stripe->chargeViaToken($this->amount, $this->provider_response['id']);
         if (($req->status === 'succeeded' && $req->paid === true)) {
             //Stripe for USD deals in cents

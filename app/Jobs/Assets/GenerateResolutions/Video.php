@@ -51,7 +51,7 @@ class Video implements ShouldQueue
         $resource = $ffmpeg->open($this->filepath);
         $localTempFolder = join_path(storage_path(), '/app/hls', $this->asset->id, 'video');
         $hlsKeyName = $this->filename . '.key';
-        $baseUrl = join_path(env('PRIVATE_AWS_CLOUDFRONT_URL'), $this->folder);
+        $baseUrl = join_path(config('services.cloudfront.private_url'), $this->folder);
         //$fullFilename = join_path('contents', $this->content->public_id, 'book', $filename);
 
         $hlsenc = $resource->hls()

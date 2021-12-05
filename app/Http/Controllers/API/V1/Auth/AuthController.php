@@ -101,10 +101,10 @@ class AuthController extends Controller
             //verify the request
             switch ($request->provider) {
                 case 'google':
-                    $iosAppClientId = env('GOOGLE_IOS_CLIENT_ID');
-                    $androidAppClientId = env('GOOGLE_ANDROID_CLIENT_ID');
+                    $iosAppClientId = config('services.google.ios_client_id');
+                    $androidAppClientId = config('services.google.android_client_id');
                     $client_id = $request->sign_in_source == 'ios' ? $iosAppClientId : $androidAppClientId;
-                    $client = new \Google_Client(['client_id' => $client_id ]);
+                    $client = new Google_Client(['client_id' => $client_id ]);
                     $payload = $client->verifyIdToken($request->id_token);
                     if ($payload) {
                         $socialIsValid = true;

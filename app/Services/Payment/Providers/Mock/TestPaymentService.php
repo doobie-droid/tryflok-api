@@ -28,7 +28,7 @@ class TestPaymentService implements PaymentInterface
                     'slug' => 'test-bank-2',
                     'code' => '002',
                 ],
-            ]
+            ],
         ], 200)->getData();
     }
 
@@ -63,9 +63,9 @@ class TestPaymentService implements PaymentInterface
                 'customer_code' => 'CUS_hdhye17yj8qd2tx',
                 'first_name' => 'BoJack',
                 'last_name' => 'Horseman',
-                'email' => 'bojack@horseman.com'
+                'email' => 'bojack@horseman.com',
                 ],
-            ]
+            ],
         ], 200)->getData();
     }
 
@@ -100,7 +100,7 @@ class TestPaymentService implements PaymentInterface
                 'transfer_code' => 'trCd09Opl',
                 'reference' => 'pol0Dr34',
                 'amount' => $transferData['amount'] ,
-            ]
+            ],
         ], 400)->getData();
     }
 
@@ -117,7 +117,7 @@ class TestPaymentService implements PaymentInterface
             'data' => [
                 'reference' => 'ref902837',
                 'status' => 'success',
-            ]
+            ],
         ], 200)->getData();
     }
 }

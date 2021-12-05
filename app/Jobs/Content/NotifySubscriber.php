@@ -44,9 +44,9 @@ class NotifySubscriber implements ShouldQueue
             'notificable_id' => $this->content->id,
         ]);
 
-        $client = new Client();
+        $client = new Client;
         $url = 'https://fcm.googleapis.com/fcm/send';
-        $authorization_key = env('FCM_SERVER_KEY');
+        $authorization_key = config('services.google.fcm_server_key');
         foreach ($this->subscriber->notificationTokens as $notification_token) {
             $client->post($url, [
                 'headers' => [
@@ -63,7 +63,7 @@ class NotifySubscriber implements ShouldQueue
                         'notificable_type' => 'content',
                         'notificable_id' => $this->content->id,
                     ],
-                ]
+                ],
             ]);
         }
     }

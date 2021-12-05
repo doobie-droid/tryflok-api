@@ -48,7 +48,7 @@ class CheckPayoutTransferStatus implements ShouldQueue
 
     private function handleFlutterwaveCheck()
     {
-        $flutterwave = new Flutterwave();
+        $flutterwave = new Flutterwave;
         $resp = $flutterwave->getTransferStatus($this->payout->reference);
         if (strtolower($resp->data->status) === 'successfull' && $resp->data->is_approved === 1) {
             $this->payout->claimed = 1;
@@ -58,7 +58,7 @@ class CheckPayoutTransferStatus implements ShouldQueue
 
     private function handleStripeCheck()
     {
-        $stripe = new Stripe();
+        $stripe = new Stripe;
         $resp = $stripe->getTransferStatus($this->payout->reference);
         if (isset($resp->reversed) && $resp->destination === false) {
             $this->payout->claimed = 1;

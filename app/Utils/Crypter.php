@@ -4,16 +4,6 @@ namespace App\Utils;
 
 class Crypter
 {
-    private static function symmetricalKey()
-    {
-        return base64_decode(env('SYMMETRICAL_ENCRYPTION_KEY'));
-    }
-
-    private static function privateKey()
-    {
-        return base64_decode(env('ASYMMETRICAL_PRIVATE_KEY'));
-    }
-
     /**
      * Encrypts the message using someone else's key
      *
@@ -96,7 +86,17 @@ class Crypter
         );
     }
 
-    /**
+    private static function symmetricalKey()
+    {
+        return base64_decode(config('encryption.symmetrical.key'));
+    }
+
+    private static function privateKey()
+    {
+        return base64_decode(config('encryption.asymmetrical.private_key'));
+    }
+
+        /**
      * @param String $encrypted -  base64 encode of the encrypted data
      *
      * @return String

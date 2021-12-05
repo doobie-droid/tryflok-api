@@ -62,7 +62,7 @@ class WalletController extends Controller
                     }
                     break;
                 case 'stripe':
-                    $stripe = new StripePayment();
+                    $stripe = new StripePayment;
                     $amount_in_dollars = bcdiv($request->amount_in_cents, 100, 2);
                     $expected_akc_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
                     $min_variation = $expected_akc_based_on_amount - bcmul($expected_akc_based_on_amount, bcdiv(3, 100, 2), 2);

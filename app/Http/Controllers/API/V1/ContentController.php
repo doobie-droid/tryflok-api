@@ -101,7 +101,7 @@ class ContentController extends Controller
                     [
                         'key' => 'join_count',
                         'value' => 0,
-                    ]
+                    ],
                 ]);
             }
 
@@ -149,11 +149,11 @@ class ContentController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ], 'rating')
             ->first();
 
@@ -194,11 +194,11 @@ class ContentController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ], 'rating')
             ->first();
             if (is_null($content)) {
@@ -252,9 +252,10 @@ class ContentController extends Controller
                 foreach ($request->tags as $tagData) {
                     if ($tagData['action'] === 'add') {
                         $content->tags()
-                        ->syncWithoutDetaching([$tagData['id'] => [
+                        ->syncWithoutDetaching([
+                            $tagData['id'] => [
                                 'id' => Str::uuid(),
-                            ]
+                            ],
                         ]);
                     }
 
@@ -431,11 +432,11 @@ class ContentController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ], 'rating')
             ->with([
                 'userables' => function ($query) use ($user_id) {
@@ -565,11 +566,11 @@ class ContentController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ], 'rating')
             ->with('cover')
             ->with('owner', 'owner.profile_picture')
@@ -685,9 +686,10 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $id)->first();
-            $content->subscribers()->syncWithoutDetaching([$request->user()->id => [
+            $content->subscribers()->syncWithoutDetaching([
+                $request->user()->id => [
                     'id' => Str::uuid(),
-                ]
+                ],
             ]);
             return $this->respondWithSuccess('You have been successfully subscribed');
         } catch (\Exception $exception) {
@@ -754,7 +756,7 @@ class ContentController extends Controller
             }
 
             $expires = time() + (24 * 60 * 60); // let token last for 24hrs
-            $agora_token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
+            $agora_token = AgoraRtcToken::buildTokenWithUid(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
 
             $token->value = $agora_token;
             $token->save();
@@ -769,7 +771,7 @@ class ContentController extends Controller
                 'notificable_id' => $content->id,
                 'notificable_type' => 'content',
                 'user' => $request->user(),
-                'message' => "{$request->user()->username} has started a new live",
+                'message' => `{$request->user()->username} has started a new live`,
             ]);
 
             return $this->respondWithSuccess('Channel started successfully', [
@@ -816,9 +818,10 @@ class ContentController extends Controller
                 return $this->respondBadRequest('You cannot join a broadcast that has been not started');
             }
 
-            $content->subscribers()->syncWithoutDetaching([$request->user()->id => [
+            $content->subscribers()->syncWithoutDetaching([
+                $request->user()->id => [
                     'id' => Str::uuid(),
-                ]
+                ],
             ]);
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
@@ -956,11 +959,11 @@ class ContentController extends Controller
             $cloudFrontClient = new CloudFrontClient([
                 'profile' => 'default',
                 'version' => '2014-11-06',
-                'region' => 'us-east-1'
+                'region' => 'us-east-1',
             ]);
 
             $expires = time() + (2 * 60 * 60); //2 hours from now(in seconds)
-            $resource = env('PRIVATE_AWS_CLOUDFRONT_URL') . '/*';
+            $resource = config('services.cloudfront.private_url') . '/*';
             $policy = <<<POLICY
                         {
                             "Statement": [
@@ -975,8 +978,8 @@ class ContentController extends Controller
                         POLICY;
             $result = $cloudFrontClient->getSignedCookie([
                 'policy' => $policy,
-                'private_key' => base64_decode(env('AWS_CLOUDFRONT_PRIVATE_KEY')),
-                'key_pair_id' => env('AWS_CLOUDFRONT_KEY_ID'),
+                'private_key' => base64_decode(config('services.cloudfront.private_key')),
+                'key_pair_id' => config('services.cloudfront.key_id'),
             ]);
             $cookies = '';
             foreach ($result as $key => $value) {
@@ -985,7 +988,7 @@ class ContentController extends Controller
             return $this->respondWithSuccess('Assets retrieved successfully', [
                 'assets' => $content->assets()->with('resolutions')->wherePivot('purpose', 'content-asset')->get(),
                 'cookies' => $cookies,
-                'cookies_expire' => $expires
+                'cookies_expire' => $expires,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);

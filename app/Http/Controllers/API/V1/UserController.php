@@ -25,6 +25,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use PragmaRX\Countries\Package\Countries as PragmarxCountries;
+use Stripe\Account as StripeAccount;
+use Stripe\AccountLink as StripeAccountLink;
+use Stripe\Stripe;
+use Stripe\StripeClient;
 
 class UserController extends Controller
 {
@@ -145,7 +149,7 @@ class UserController extends Controller
             $user->followers()->syncWithoutDetaching([
                 $request->user()->id => [
                     'id' => Str::uuid(),
-                ]
+                ],
             ]);
 
             if ($request->user() == null || $request->user()->id == null) {
@@ -697,7 +701,7 @@ class UserController extends Controller
             }
 
             //make sure a valid country code was supplied
-            $countries = new PragmarxCountries();
+            $countries = new PragmarxCountries;
             $country = $countries->where('cca2', $request->country_code)->first();
             if (is_null($country)) {
                 return $this->respondBadRequest('Invalid country code supplied');
@@ -773,7 +777,7 @@ class UserController extends Controller
                 return $this->respondBadRequest('Country is not supported for Stripe Payouts. Permitted countries are United States (US), United Kingdom (GB), Canada (CA), Australia (AU), India (IN), and France (FR)');
             }
 
-            $countries = new PragmarxCountries();
+            $countries = new PragmarxCountries;
             $currency = '';
             if ($countries->where('cca2', $country)->count() === 0) {
                 return $this->respondBadRequest('Invalid country code supplied');
@@ -785,9 +789,9 @@ class UserController extends Controller
 
             //first check if user already has stripe setup
             $stripeAccount = $user->paymentAccounts()->where('provider', 'stripe')->first();
-            \Stripe\Stripe::setApiKey(config('payment.providers.stripe.secret_key'));
+            Stripe::setApiKey(config('payment.providers.stripe.secret_key'));
             if (is_null($stripeAccount)) {
-                $account = \Stripe\Account::create([
+                $account = StripeAccount::create([
                     'country' => $country,
                     'type' => 'express',
                     'email' => $user->email,
@@ -803,10 +807,10 @@ class UserController extends Controller
             } else {
                 if ($country !== $stripeAccount->country_code) {
                     //delete the account
-                    $stripe = new \Stripe\StripeClient(config('payment.providers.stripe.secret_key'));
+                    $stripe = new StripeClient(config('payment.providers.stripe.secret_key'));
                     $stripe->accounts->delete($stripeAccount->identifier, []);
                     //create a new one
-                    $account = \Stripe\Account::create([
+                    $account = StripeAccount::create([
                         'country' => $country,
                         'type' => 'express',
                         'email' => $user->email,
@@ -819,10 +823,10 @@ class UserController extends Controller
                 }
             }
 
-            $account_links = \Stripe\AccountLink::create([
+            $account_links = StripeAccountLink::create([
                 'account' => $stripeAccount->identifier,
-                'refresh_url' => env('BACKEND_URL', 'https://api.tryflok.com/') . 'api/v1/payments/stripe/connect?id=' . $user->id . '&country=' . $country,
-                'return_url' => env('FRONTEND_URL', 'https://tryflok.com/') . 'user/' . $user->id . '/account',
+                'refresh_url' => config('flok.backend_url') . 'api/v1/payments/stripe/connect?id=' . $user->id . '&country=' . $country,
+                'return_url' => config('flok.frontend_url') . 'user/' . $user->id . '/account',
                 'type' => 'account_onboarding',
             ]);
 
@@ -931,11 +935,11 @@ class UserController extends Controller
             $cloudFrontClient = new CloudFrontClient([
                 'profile' => 'default',
                 'version' => '2014-11-06',
-                'region' => 'us-east-1'
+                'region' => 'us-east-1',
             ]);
 
             $expires = time() + (2 * 60 * 60); //2 hours from now(in seconds)
-            $resource = env('PRIVATE_AWS_CLOUDFRONT_URL') . '/*';
+            $resource = config('services.cloudfront.private_url') . '/*';
             $policy = <<<POLICY
                         {
                             "Statement": [
@@ -950,8 +954,8 @@ class UserController extends Controller
                         POLICY;
             $result = $cloudFrontClient->getSignedCookie([
                 'policy' => $policy,
-                'private_key' => base64_decode(env('AWS_CLOUDFRONT_PRIVATE_KEY')),
-                'key_pair_id' => env('AWS_CLOUDFRONT_KEY_ID'),
+                'private_key' => base64_decode(config('services.cloudfront.private_key')),
+                'key_pair_id' => config('services.cloudfront.key_id'),
             ]);
             $cookies = '';
             foreach ($result as $key => $value) {
@@ -959,7 +963,7 @@ class UserController extends Controller
             }
             return $this->respondWithSuccess('Cookies retrieved successfully', [
                 'cookies' => $cookies,
-                'expires' => $expires
+                'expires' => $expires,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);

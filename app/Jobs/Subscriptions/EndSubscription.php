@@ -89,8 +89,8 @@ class EndSubscription implements ShouldQueue
                                 'amount' => $price->amount,
                                 'interval' => $price->interval,
                                 'interval_amount' => $price->interval_amount,
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
                 ]);
                 //TO DO: mail user that their auto-renewal was succesful

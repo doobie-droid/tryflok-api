@@ -40,7 +40,7 @@ class Purchase implements ShouldQueue
      */
     public function handle()
     {
-        $flutterwave = new FlutterwavePayment();
+        $flutterwave = new FlutterwavePayment;
         $req = $flutterwave->verifyTransaction($this->provider_response['transaction_id']);
         if (($req->status === 'success' && $req->data->status === 'successful')) {
             PurchaseJob::dispatch([

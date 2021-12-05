@@ -68,7 +68,7 @@ class CollectionController extends Controller
 
             $digiverse->cover()->attach($request->cover['asset_id'], [
                 'id' => Str::uuid(),
-                'purpose' => 'cover'
+                'purpose' => 'cover',
             ]);
 
             $digiverse = Collection::where('id', $digiverse->id)
@@ -76,11 +76,11 @@ class CollectionController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ], 'rating')
             ->first();
 
@@ -115,11 +115,11 @@ class CollectionController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ], 'rating')
             ->with([
                 'userables' => function ($query) use ($user_id) {
@@ -166,11 +166,11 @@ class CollectionController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ], 'rating')
             ->first();
             $digiverse->fill($request->only('title', 'description', 'is_available'));
@@ -200,7 +200,7 @@ class CollectionController extends Controller
                 $oldCover->delete();
                 $digiverse->cover()->attach($request->cover['asset_id'], [
                     'id' => Str::uuid(),
-                    'purpose' => 'cover'
+                    'purpose' => 'cover',
                 ]);
             }
 
@@ -311,11 +311,11 @@ class CollectionController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ], 'rating')
             ->with('cover')
             ->with('owner', 'owner.profile_picture')
@@ -411,11 +411,11 @@ class CollectionController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ], 'rating')
             ->with('cover')
             ->with('owner', 'owner.profile_picture')
@@ -488,11 +488,11 @@ class CollectionController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
-                }
+                },
             ], 'rating')
             ->with('benefactors', 'benefactors.user')
             ->with('cover')
@@ -500,39 +500,41 @@ class CollectionController extends Controller
             ->with('owner', 'owner.profile_picture')
             ->with('categories')
             ->with('prices', 'prices.continent', 'prices.country')
-            ->with(['userables' => function ($query) use ($user_id) {
-                $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
-            }])
+            ->with([
+                'userables' => function ($query) use ($user_id) {
+                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
+                },
+            ])
             ->with('owner')
             ->with([
                 'contents' => function ($query) {
                     $query->withCount([
                         'ratings' => function ($query) {
                             $query->where('rating', '>', 0);
-                        }
+                        },
                     ])
                     ->withAvg([
                         'ratings' => function ($query) {
                             $query->where('rating', '>', 0);
-                        }
+                        },
                     ], 'rating')
                     ->with('categories', 'owner', 'cover', 'owner.profile_picture');
-                }
+                },
             ])
             ->with([
                 'childCollections' => function ($query) {
                     $query->withCount([
                         'ratings' => function ($query) {
                             $query->where('rating', '>', 0);
-                        }
+                        },
                     ])
                     ->withAvg([
                         'ratings' => function ($query) {
                             $query->where('rating', '>', 0);
-                        }
+                        },
                     ], 'rating')
                     ->with('categories', 'owner', 'cover', 'owner.profile_picture');
-                }
+                },
             ])
             ->first();
 

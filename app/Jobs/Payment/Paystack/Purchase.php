@@ -40,7 +40,7 @@ class Purchase implements ShouldQueue
      */
     public function handle()
     {
-        $paystack = new PaystackPayment();
+        $paystack = new PaystackPayment;
         $req = $paystack->verifyTransaction($this->provider_response['reference']);
         if ((($req->status === true || $req->status === 'true') && $req->data->status === 'success')) {
             PurchaseJob::dispatch([

@@ -25,7 +25,7 @@ class PaymentController extends Controller
             if (! in_array(strtolower($country_code), $allowed_country_codes)) {
                 return $this->respondBadRequest('Country is not supported for Flutterwave Payouts');
             }
-            $flutterwave = new Flutterwave();
+            $flutterwave = new Flutterwave;
             $resp = $flutterwave->getBanks(['country_code' => $country_code]);
             return $this->respondWithSuccess('Banks retrieved successfully', [
                 'banks' => $resp->data,
@@ -40,7 +40,7 @@ class PaymentController extends Controller
     {
         try {
             $id = $request->query('id');
-            $flutterwave = new Flutterwave();
+            $flutterwave = new Flutterwave;
             $resp = $flutterwave->getBankBranch($id);
             if (isset($resp->status) && $resp->status === 'success') {
                 return $this->respondWithSuccess('Bank branches retrieved successfully', [

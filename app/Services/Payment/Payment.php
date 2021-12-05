@@ -32,22 +32,22 @@ class Payment implements PaymentInterface
      */
     public function createPaystackDriver()
     {
-        return new Paystack();
+        return new Paystack;
     }
 
     public function createFlutterwaveDriver()
     {
-        return new Flutterwave();
+        return new Flutterwave;
     }
 
     public function createStripeDriver()
     {
-        return new Stripe();
+        return new Stripe;
     }
 
     public function createAppleDriver()
     {
-        return new ApplePay();
+        return new ApplePay;
     }
     /**
      * Create Instance of Test Driver
@@ -56,7 +56,7 @@ class Payment implements PaymentInterface
      */
     public function createTestDriver()
     {
-        return new TestPaymentService();
+        return new TestPaymentService;
     }
     /**
      * Functions that adher to the App\Services\Payment\PaymentInterface
@@ -130,7 +130,7 @@ class Payment implements PaymentInterface
         $driver = $this->driver ?: $this->getDefaultDriver();
 
         if (is_null($driver)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'Unable to resolve NULL driver for [%s].',
                 static::class
             ));
@@ -162,6 +162,6 @@ class Payment implements PaymentInterface
             return $this->$method();
         }
 
-        throw new \InvalidArgumentException("Driver [$driver] not supported.");
+        throw new InvalidArgumentException("Driver [{$driver}] not supported.");
     }
 }

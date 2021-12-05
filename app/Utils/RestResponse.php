@@ -61,8 +61,8 @@ trait RestResponse
                 'total_count'  => $items->total(),
                 'total_pages'  => $items->lastPage(),
                 'current_page' => $items->currentPage(),
-                'limit'        => $items->perPage()
-            ]
+                'limit'        => $items->perPage(),
+            ],
         ]);
         return $this->respond($data, $headers);
     }
@@ -82,7 +82,7 @@ trait RestResponse
             'message'     => $message,
             'status'    => true,
             'status_code' => $this->getStatusCode(),
-            'data' => $data
+            'data' => $data,
         ], $headers);
     }
 
@@ -101,7 +101,7 @@ trait RestResponse
             'status' => false,
             'message'     => $message,
             'errors' => $data,
-            'status_code' => $this->getStatusCode()
+            'status_code' => $this->getStatusCode(),
         ], $headers);
     }
     public function respondWithFile($filePath, $fileName, $headers = [ ])

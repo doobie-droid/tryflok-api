@@ -30,4 +30,28 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'cloudfront' => [
+        'key_id' => env('AWS_CLOUDFRONT_KEY_ID'),
+        'private_key' => env('AWS_CLOUDFRONT_PRIVATE_KEY'),
+        'public_url' => env('PUBLIC_AWS_CLOUDFRONT_URL'),
+        'private_url' => env('PRIVATE_AWS_CLOUDFRONT_URL'),
+    ],
+
+    'google' => [
+        'ios_client_id' => env('GOOGLE_IOS_CLIENT_ID'),
+        'android_client_id' => env('GOOGLE_ANDROID_CLIENT_ID'),
+        'fcm_server_key' => env('FCM_SERVER_KEY'),
+    ],
+
+    'apple' => [
+        'pay_secret_key' => env('APPLE_PAY_SECRET_KEY'),
+        'pay_public_key' => env('APPLE_PAY_PUBLIC_KEY'),
+        'api_url' => env('APPLE_API_URL'),
+    ],
+
+    'agora' => [
+        'id' => env('AGORA_APP_ID'),
+        'certificate' => env('AGORA_APP_CERTIFICATE'),
+    ],
+
 ];

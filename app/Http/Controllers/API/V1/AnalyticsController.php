@@ -38,18 +38,18 @@ class AnalyticsController extends Controller
                     ->withCount([
                         'ratings' => function ($query) {
                             $query->where('rating', '>', 0);
-                        }
+                        },
                     ])->withAvg([
                         'ratings' => function ($query) {
                             $query->where('rating', '>', 0);
-                        }
+                        },
                     ], 'rating')
                     ->with([
                         'userables' => function ($query) use ($user_id) {
                             $query->where('user_id', $user_id)->where('status', 'available');
                         },
                     ]);
-                }
+                },
             ])
             ->groupBy('reviewable_type', 'reviewable_id')
             ->orderBy('rating', 'DESC')

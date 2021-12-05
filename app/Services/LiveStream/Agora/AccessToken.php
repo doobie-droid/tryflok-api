@@ -23,7 +23,37 @@ class AccessToken
 
     public function __construct()
     {
-        $this->message = new Message();
+        $this->message = new Message;
+    }
+
+    public static function init($appID, $appCertificate, $channelName, $uid)
+    {
+        $accessToken = new AccessToken;
+
+        if (
+            ! $accessToken->is_nonempty_string('appID', $appID) ||
+            ! $accessToken->is_nonempty_string('appCertificate', $appCertificate) ||
+            ! $accessToken->is_nonempty_string('channelName', $channelName)
+        ) {
+            return null;
+        }
+
+        $accessToken->appID = $appID;
+        $accessToken->appCertificate = $appCertificate;
+        $accessToken->channelName = $channelName;
+
+        $accessToken->setUid($uid);
+        $accessToken->message = new Message;
+        return $accessToken;
+    }
+
+    public static function initWithToken($token, $appCertificate, $channel, $uid)
+    {
+        $accessToken = new AccessToken;
+        if (! $accessToken->extract($token, $appCertificate, $channel, $uid)) {
+            return null;
+        }
+        return $accessToken;
     }
 
     public function setUid($uid)
@@ -42,36 +72,6 @@ class AccessToken
         }
         echo $name . ' check failed, should be a non-empty string';
         return false;
-    }
-
-    public static function init($appID, $appCertificate, $channelName, $uid)
-    {
-        $accessToken = new AccessToken();
-
-        if (
-            ! $accessToken->is_nonempty_string('appID', $appID) ||
-            ! $accessToken->is_nonempty_string('appCertificate', $appCertificate) ||
-            ! $accessToken->is_nonempty_string('channelName', $channelName)
-        ) {
-            return null;
-        }
-
-        $accessToken->appID = $appID;
-        $accessToken->appCertificate = $appCertificate;
-        $accessToken->channelName = $channelName;
-
-        $accessToken->setUid($uid);
-        $accessToken->message = new Message();
-        return $accessToken;
-    }
-
-    public static function initWithToken($token, $appCertificate, $channel, $uid)
-    {
-        $accessToken = new AccessToken();
-        if (! $accessToken->extract($token, $appCertificate, $channel, $uid)) {
-            return null;
-        }
-        return $accessToken;
     }
 
     public function addPrivilege($key, $expireTimestamp)
@@ -115,7 +115,7 @@ class AccessToken
         $msg = substr($content, $pos, $msgLen);
 
         $this->appID = $appid;
-        $message = new Message();
+        $message = new Message;
         $message->unpackContent($msg);
         $this->message = $message;
 

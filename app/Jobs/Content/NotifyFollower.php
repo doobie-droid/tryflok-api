@@ -46,9 +46,9 @@ class NotifyFollower implements ShouldQueue
             'notificable_id' => $this->notificable_id,
         ]);
 
-        $client = new Client();
+        $client = new Client;
         $url = 'https://fcm.googleapis.com/fcm/send';
-        $authorization_key = env('FCM_SERVER_KEY');
+        $authorization_key = config('services.google.fcm_server_key');
         foreach ($this->follower->notificationTokens as $notification_token) {
             $client->post($url, [
                 'headers' => [
@@ -64,7 +64,7 @@ class NotifyFollower implements ShouldQueue
                         'message' => $this->message,
                         'notificable_type' => $this->notificable_type,
                         'notificable_id' => $this->notificable_id,
-                    ]
+                    ],
                 ],
             ]);
         }
