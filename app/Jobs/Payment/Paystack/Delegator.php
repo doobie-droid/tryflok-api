@@ -16,6 +16,7 @@ class Delegator implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $data;
     /**
      * Create a new job instance.
@@ -66,7 +67,7 @@ class Delegator implements ShouldQueue
             $data['items'] = $this->data['data']['metadata']['payment_data']['items'];
             PurchaseJob::dispatch($data);
         } else {
-            Log::error("Could not complete the transaction. Meta data is NULL");
+            Log::error('Could not complete the transaction. Meta data is NULL');
             Log::error($this->data);
         }
     }

@@ -34,7 +34,7 @@ class UserController extends Controller
             $page = $request->query('page', 1);
             $limit = $request->query('limit', 10);
             $keyword = urldecode($request->query('keyword', ''));
-            $keywords = explode(" ", $keyword);
+            $keywords = explode(' ', $keyword);
             $keywords = array_diff($keywords, ['']);
 
             $max_items_count = Constants::MAX_ITEMS_LIMIT;
@@ -49,7 +49,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $users = User::whereHas('roles', function (Builder $query) {
@@ -80,9 +80,9 @@ class UserController extends Controller
             ])
             ->withCount('followers', 'following')
             ->orderBy('created_at', 'asc')
-            ->paginate($limit, array('*'), 'page', $page);
+            ->paginate($limit, ['*'], 'page', $page);
 
-            return $this->respondWithSuccess("Users retrieved successfully", [
+            return $this->respondWithSuccess('Users retrieved successfully', [
                 'users' => UserResource::collection($users),
                 'current_page' => (int) $users->currentPage(),
                 'items_per_page' => (int) $users->perPage(),
@@ -90,7 +90,7 @@ class UserController extends Controller
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -102,7 +102,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             if ($request->user() == null || $request->user()->id == null) {
@@ -121,12 +121,12 @@ class UserController extends Controller
                 },
             ])
             ->withCount('followers', 'following')->where('id', $id)->first();
-            return $this->respondWithSuccess("User retrieved successfully", [
+            return $this->respondWithSuccess('User retrieved successfully', [
                 'user' => new UserResource($user),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -138,7 +138,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $user = User::where('id', $id)->first();
@@ -166,12 +166,12 @@ class UserController extends Controller
             ->withCount('followers', 'following')
             ->where('id', $user->id)
             ->first();
-            return $this->respondWithSuccess("You have successfully followed this user", [
+            return $this->respondWithSuccess('You have successfully followed this user', [
                 'user' => new UserResource($user),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -183,7 +183,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $user = User::where('id', $id)->first();
@@ -207,12 +207,12 @@ class UserController extends Controller
             ->withCount('followers', 'following')
             ->where('id', $user->id)
             ->first();
-            return $this->respondWithSuccess("You have successfully followed this user", [
+            return $this->respondWithSuccess('You have successfully followed this user', [
                 'user' => new UserResource($user),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -220,12 +220,12 @@ class UserController extends Controller
     {
         try {
             $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $request->user()->id)->first();
-            return $this->respondWithSuccess("Account retrieved successfully", [
+            return $this->respondWithSuccess('Account retrieved successfully', [
                 'user' => new UserResourceWithSensitive($user),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -238,7 +238,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $user = $request->user();
 
@@ -246,13 +246,13 @@ class UserController extends Controller
                 $user->password = Hash::make($request->password);
                 $user->save();
                 $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $user->id)->first();
-                return $this->respondWithSuccess("Password changed successfully", ['user' => new UserResourceWithSensitive($user)]);
+                return $this->respondWithSuccess('Password changed successfully', ['user' => new UserResourceWithSensitive($user)]);
             } else {
-                return $this->respondBadRequest("Password provided is not correct.");
+                return $this->respondBadRequest('Password provided is not correct.');
             }
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -268,12 +268,12 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-            if (isset($request->username) && !is_null($request->username)) {
+            if (isset($request->username) && ! is_null($request->username)) {
                 $test_username = User::where('username', $request->username)->first();
-                if (!is_null($test_username) && $test_username->id !== $request->user()->id) {
-                    return $this->respondBadRequest("Username is already taken");
+                if (! is_null($test_username) && $test_username->id !== $request->user()->id) {
+                    return $this->respondBadRequest('Username is already taken');
                 }
             }
 
@@ -281,14 +281,14 @@ class UserController extends Controller
 
             $user->update($request->only(['name', 'email', 'dob', 'bio']));
 
-            if (!is_null($request->username)) {
+            if (! is_null($request->username)) {
                 $user->username = $request->username;
                 $user->save();
             }
 
-            if (!is_null($request->profile_picture)) {
+            if (! is_null($request->profile_picture)) {
                 $oldPicture = $user->profile_picture()->first();
-                if (!is_null($oldPicture)) {
+                if (! is_null($oldPicture)) {
                     $user->profile_picture()->detach($oldPicture->id);
                     $oldPicture->delete();
                 }
@@ -298,19 +298,19 @@ class UserController extends Controller
                 ]);
             }
             $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $user->id)->first();
-            return $this->respondWithSuccess("User updated successfully", [
+            return $this->respondWithSuccess('User updated successfully', [
                 'user' => new UserResourceWithSensitive($user),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
     public function refreshToken(Request $request)
     {
         $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $request->user()->id)->first();
-        return $this->respondWithSuccess("Token refreshed successfully", [
+        return $this->respondWithSuccess('Token refreshed successfully', [
             'user' => new UserResourceWithSensitive($user),
             'token' => auth()->refresh(),
         ]);
@@ -326,7 +326,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             foreach ($request->items as $item) {
@@ -358,14 +358,14 @@ class UserController extends Controller
             $wishlist = Userable::where('user_id', $request->user()->id)->where('status', 'wishlist')->with('userable', 'userable.prices', 'userable.prices.continent', 'userable.prices.country', 'userable.tags', 'userable.cover')->get();
 
             return $this->respondWithSuccess(
-                "Items successfully added to wishlist",
+                'Items successfully added to wishlist',
                 [
                 'wishlist' => $wishlist,
-            ]
+                ]
             );
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -379,7 +379,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             foreach ($request->items as $item) {
@@ -398,7 +398,7 @@ class UserController extends Controller
                 }
                 //ensure the user has not purchased the item or added it already
                 $wishlistItem = Userable::where('user_id', $request->user()->id)->where('userable_type', $item['type'])->where('userable_id', $itemModel->id)->first();
-                if (!is_null($wishlistItem)) {
+                if (! is_null($wishlistItem)) {
                     $wishlistItem->delete();
                 }
             }
@@ -406,14 +406,14 @@ class UserController extends Controller
             $wishlist = Userable::where('user_id', $request->user()->id)->where('status', 'wishlist')->with('userable', 'userable.prices', 'userable.prices.continent', 'userable.prices.country', 'userable.tags', 'userable.cover')->get();
 
             return $this->respondWithSuccess(
-                "Items successfully removed from wishlist",
+                'Items successfully removed from wishlist',
                 [
                 'wishlist' => $wishlist,
-            ]
+                ]
             );
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -422,12 +422,12 @@ class UserController extends Controller
         try {
             $wishlist = Userable::where('user_id', $request->user()->id)->where('status', 'wishlist')->with('userable', 'userable.prices', 'userable.prices.continent', 'userable.prices.country', 'userable.tags', 'userable.cover')->get();
 
-            return $this->respondWithSuccess("Wishlist retrieved successfully", [
+            return $this->respondWithSuccess('Wishlist retrieved successfully', [
                 'wishlist' => $wishlist,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -436,13 +436,13 @@ class UserController extends Controller
         try {
             $user = User::where('id', $user_id)->first();
             if (is_null($user)) {
-                return $this->respondBadRequest("Invalid user ID supplied");
+                return $this->respondBadRequest('Invalid user ID supplied');
             }
 
             if (
                 $request->user()->id !== $user_id &&
-                !$request->user()->hasRole(Roles::ADMIN) &&
-                !$request->user()->hasRole(Roles::SUPER_ADMIN)
+                ! $request->user()->hasRole(Roles::ADMIN) &&
+                ! $request->user()->hasRole(Roles::SUPER_ADMIN)
             ) {
                 return $this->respondBadRequest("You do not have permission to view this user's sales");
             }
@@ -450,13 +450,13 @@ class UserController extends Controller
             $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
             $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
 
-            $sales = $user->sales()->with('saleable')->orderBy('created_at', 'desc')->paginate($limit, array('*'), 'page', $page);
-            return $this->respondWithSuccess("Sales retrieved successfully", [
+            $sales = $user->sales()->with('saleable')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
+            return $this->respondWithSuccess('Sales retrieved successfully', [
                 'sales' => $sales,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -476,11 +476,11 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $notifications = $request->user()->notifications()->orderBy('notifications.created_at', 'desc')
-            ->paginate($limit, array('*'), 'page', $page);
+            ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Notifications retrieved successfully', [
                 'notifications' => NotificationResource::collection($notifications),
@@ -490,7 +490,7 @@ class UserController extends Controller
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -506,7 +506,7 @@ class UserController extends Controller
             return $this->respondWithSuccess('Notifications have been successfully marked as read');
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -517,12 +517,12 @@ class UserController extends Controller
                 $query->where('status', 'available')->orWhere('status', 'subscription-ended')->orWhere('status', 'content-deleted');
             })->with('userable', 'userable.cover', 'userable.prices', 'userable.prices.continent', 'userable.prices.country', 'userable.tags')->with('subscription')->get();
 
-            return $this->respondWithSuccess("Items retrieved successfully", [
+            return $this->respondWithSuccess('Items retrieved successfully', [
                 'items' => $items,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -537,7 +537,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             foreach ($request->items as $item) {
@@ -575,12 +575,12 @@ class UserController extends Controller
                     $items->forget($key);
                 }
             }
-            return $this->respondWithSuccess("Cart items added successfully", [
+            return $this->respondWithSuccess('Cart items added successfully', [
                 'cart' => $items,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -589,12 +589,12 @@ class UserController extends Controller
         try {
             $items = $request->user()->carts()->with('cartable', 'cartable.cover', 'cartable.prices', 'cartable.prices.continent', 'cartable.prices.country', 'cartable.tags')->where('checked_out', 0)->get();
 
-            return $this->respondWithSuccess("Cart items retrieved successfully", [
+            return $this->respondWithSuccess('Cart items retrieved successfully', [
                 'cart' => $items,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -608,7 +608,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             foreach ($request->items as $item) {
@@ -627,19 +627,19 @@ class UserController extends Controller
                 $cartItem = Cart::where('user_id', $request->user()->id)
                 ->where('cartable_id', $itemModel->id)
                 ->where('cartable_type', $item['type'])->where('checked_out', 0)->first();
-                if (!is_null($cartItem)) {
+                if (! is_null($cartItem)) {
                     $cartItem->delete();
                 }
             }
 
             $items = $request->user()->carts()->with('cartable', 'cartable.cover', 'cartable.prices', 'cartable.prices.continent', 'cartable.prices.country', 'cartable.tags')->where('checked_out', 0)->get();
 
-            return $this->respondWithSuccess("Cart items deleted successfully", [
+            return $this->respondWithSuccess('Cart items deleted successfully', [
                 'cart' => $items,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -653,12 +653,12 @@ class UserController extends Controller
                 'expires_at' => now()->addSeconds(60),
             ]);
 
-            return $this->respondWithSuccess("Otp retrieved successfully", [
+            return $this->respondWithSuccess('Otp retrieved successfully', [
                 'otp' => $otp,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -668,13 +668,13 @@ class UserController extends Controller
             $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
             $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
 
-            $payouts = $request->user()->payouts()->orderBy('created_at', 'desc')->paginate($limit, array('*'), 'page', $page);
-            return $this->respondWithSuccess("Payouts retrieved successfully", [
+            $payouts = $request->user()->payouts()->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
+            return $this->respondWithSuccess('Payouts retrieved successfully', [
                 'payouts' => $payouts,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -693,14 +693,14 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             //make sure a valid country code was supplied
             $countries = new PragmarxCountries();
             $country = $countries->where('cca2', $request->country_code)->first();
             if (is_null($country)) {
-                return $this->respondBadRequest("Invalid country code supplied");
+                return $this->respondBadRequest('Invalid country code supplied');
             }
             //make sure a valid currency code was supplied
             $validCurrency = false;
@@ -710,8 +710,8 @@ class UserController extends Controller
                     break;
                 }
             }
-            if (!$validCurrency) {
-                return $this->respondBadRequest("Invalid currency code supplied");
+            if (! $validCurrency) {
+                return $this->respondBadRequest('Invalid currency code supplied');
             }
 
             if ($request->provider === 'flutterwave' && in_array($request->country_code, ['GH', 'UG', 'TZ'])) {
@@ -721,7 +721,7 @@ class UserController extends Controller
                 ]);
 
                 if ($validator->fails()) {
-                    return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                    return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
                 }
             }
 
@@ -732,30 +732,30 @@ class UserController extends Controller
                 'currency_code' => $request->currency_code,
             ];
 
-            if (!is_null($request->bank_name)) {
+            if (! is_null($request->bank_name)) {
                 $accountData['bank_name'] = $request->bank_name;
             }
 
-            if (!is_null($request->bank_code)) {
+            if (! is_null($request->bank_code)) {
                 $accountData['bank_code'] = $request->bank_code;
             }
 
-            if (!is_null($request->branch_code)) {
+            if (! is_null($request->branch_code)) {
                 $accountData['branch_code'] = $request->branch_code;
             }
 
-            if (!is_null($request->branch_name)) {
+            if (! is_null($request->branch_name)) {
                 $accountData['branch_name'] = $request->branch_name;
             }
 
             $paymentAccount = $request->user()->paymentAccounts()->create($accountData);
 
-            return $this->respondWithSuccess("Payoutment account created successfully", [
+            return $this->respondWithSuccess('Payoutment account created successfully', [
                 'payment_account' => $paymentAccount,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -765,18 +765,18 @@ class UserController extends Controller
             $user = User::where('id', $request->query('id'))->first();
             $country = strtoupper($request->query('country', 'US'));
             if (is_null($user)) {
-                return $this->respondBadRequest("User does not exist");
+                return $this->respondBadRequest('User does not exist');
             }
 
             $allowed_country_codes = ['us', 'gb', 'ca', 'au', 'fr', 'in'];
-            if (!in_array(strtolower($country), $allowed_country_codes)) {
-                return $this->respondBadRequest("Country is not supported for Stripe Payouts. Permitted countries are United States (US), United Kingdom (GB), Canada (CA), Australia (AU), India (IN), and France (FR)");
+            if (! in_array(strtolower($country), $allowed_country_codes)) {
+                return $this->respondBadRequest('Country is not supported for Stripe Payouts. Permitted countries are United States (US), United Kingdom (GB), Canada (CA), Australia (AU), India (IN), and France (FR)');
             }
 
             $countries = new PragmarxCountries();
             $currency = '';
             if ($countries->where('cca2', $country)->count() === 0) {
-                return $this->respondBadRequest("Invalid country code supplied");
+                return $this->respondBadRequest('Invalid country code supplied');
             }
             foreach ($countries->where('cca2', $country)->first()->currencies as $countryCurrency) {
                 $currency = $countryCurrency;
@@ -829,7 +829,7 @@ class UserController extends Controller
             return redirect()->to($account_links->url);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -837,12 +837,12 @@ class UserController extends Controller
     public function getPaymentAccount(Request $request)
     {
         try {
-            return $this->respondWithSuccess("Payoutment accounts retrieved successfully", [
+            return $this->respondWithSuccess('Payoutment accounts retrieved successfully', [
                 'payment_accounts' => $request->user()->paymentAccounts()->get(),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -855,7 +855,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             foreach ($request->accounts as $account_id) {
@@ -863,12 +863,12 @@ class UserController extends Controller
                 $accountModel->delete();
             }
 
-            return $this->respondWithSuccess("Payoutment accounts deleted successfully", [
+            return $this->respondWithSuccess('Payoutment accounts deleted successfully', [
                 'payment_accounts' => $request->user()->paymentAccounts()->get(),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -881,29 +881,29 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $payout = Payout::where('id', $request->payout_id)->where('user_id', $request->user()->id)->first();
             if (is_null($payout)) {
-                return $this->respondBadRequest("The payout provided does not belong to you");
+                return $this->respondBadRequest('The payout provided does not belong to you');
             }
 
             $payment_account = PaymentAccount::where('id', $request->payment_account_id)->where('user_id', $request->user()->id)->first();
             if (is_null($payment_account)) {
-                return $this->respondBadRequest("The payment account provided does not belong to you");
+                return $this->respondBadRequest('The payment account provided does not belong to you');
             }
 
             if ($payout->claimed === 1) {
-                return $this->respondBadRequest("This payout has already been claimed");
+                return $this->respondBadRequest('This payout has already been claimed');
             }
 
             //make sure request was not made in the last six hours
-            if (!is_null($payout->last_payment_request) && $payout->last_payment_request->gt(now()->subHours(12))) {
-                return $this->respondBadRequest("You need to wait for at least 12 hours to make another cashout request for this payout");
+            if (! is_null($payout->last_payment_request) && $payout->last_payment_request->gt(now()->subHours(12))) {
+                return $this->respondBadRequest('You need to wait for at least 12 hours to make another cashout request for this payout');
             }
             //dispatch to payment provider to payout
-            if ($payment_account->provider === "manual") {
-                $payout->handler = "manual";
+            if ($payment_account->provider === 'manual') {
+                $payout->handler = 'manual';
                 $payout->last_payment_request = now();
                 $payout->save();
             } else {
@@ -918,10 +918,10 @@ class UserController extends Controller
             }
 
             $this->setStatusCode(202);
-            return $this->respondWithSuccess("Details received successfully, you should receive your payout in the next 24 hours");
+            return $this->respondWithSuccess('Details received successfully, you should receive your payout in the next 24 hours');
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -957,13 +957,13 @@ class UserController extends Controller
             foreach ($result as $key => $value) {
                 $cookies = $cookies . $key . '=' . $value . ';';
             }
-            return $this->respondWithSuccess("Cookies retrieved successfully", [
+            return $this->respondWithSuccess('Cookies retrieved successfully', [
                 'cookies' => $cookies,
                 'expires' => $expires
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 }

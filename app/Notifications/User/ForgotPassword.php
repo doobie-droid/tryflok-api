@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notification;
 class ForgotPassword extends Notification
 {
     use Queueable;
+
     protected $user;
     /**
      * Create a new notification instance.
@@ -39,7 +40,7 @@ class ForgotPassword extends Notification
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage())->view('emails.user.forgot-password', ['user'=> $this->user])->subject('Reset Password');
+        return (new MailMessage())->view('emails.user.forgot-password', ['user' => $this->user])->subject('Reset Password');
     }
 
     /**

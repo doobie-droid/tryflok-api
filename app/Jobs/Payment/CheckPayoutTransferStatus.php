@@ -17,6 +17,7 @@ class CheckPayoutTransferStatus implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $payout;
     /**
      * Create a new job instance.
@@ -36,10 +37,10 @@ class CheckPayoutTransferStatus implements ShouldQueue
     public function handle()
     {
         switch ($this->payout->handler) {
-            case "flutterwave":
+            case 'flutterwave':
                 $this->handleFlutterwaveCheck();
                 break;
-            case "stripe":
+            case 'stripe':
                 $this->handleStripeCheck();
                 break;
         }
@@ -49,7 +50,7 @@ class CheckPayoutTransferStatus implements ShouldQueue
     {
         $flutterwave = new Flutterwave();
         $resp = $flutterwave->getTransferStatus($this->payout->reference);
-        if (strtolower($resp->data->status) === "successfull" && $resp->data->is_approved === 1) {
+        if (strtolower($resp->data->status) === 'successfull' && $resp->data->is_approved === 1) {
             $this->payout->claimed = 1;
             $this->payout->save();
         }

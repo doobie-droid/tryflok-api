@@ -13,7 +13,7 @@ class RtcTokenBuilder
 
     # appID: The App ID issued to you by Agora. Apply for a new App ID from
     #        Agora Dashboard if it is missing from your kit. See Get an App ID.
-    # appCertificate:	Certificate of the application that you registered in
+    # appCertificate:   Certificate of the application that you registered in
     #                  the Agora Dashboard. See Get an App Certificate.
     # channelName:Unique channel name for the AgoraRTC session in the string format
     # userAccount: The user account.
@@ -27,13 +27,15 @@ class RtcTokenBuilder
     {
         $token = AccessToken::init($appID, $appCertificate, $channelName, $userAccount);
         $privileges = AccessToken::PRIVILEGES;
-        $token->addPrivilege($privileges["kJoinChannel"], $privilegeExpireTs);
-        if (($role == RtcTokenBuilder::ROLE_ATTENDEE) ||
+        $token->addPrivilege($privileges['kJoinChannel'], $privilegeExpireTs);
+        if (
+            ($role == RtcTokenBuilder::ROLE_ATTENDEE) ||
             ($role == RtcTokenBuilder::ROLE_PUBLISHER) ||
-            ($role == RtcTokenBuilder::ROLE_ADMIN)) {
-            $token->addPrivilege($privileges["kPublishVideoStream"], $privilegeExpireTs);
-            $token->addPrivilege($privileges["kPublishAudioStream"], $privilegeExpireTs);
-            $token->addPrivilege($privileges["kPublishDataStream"], $privilegeExpireTs);
+            ($role == RtcTokenBuilder::ROLE_ADMIN)
+        ) {
+            $token->addPrivilege($privileges['kPublishVideoStream'], $privilegeExpireTs);
+            $token->addPrivilege($privileges['kPublishAudioStream'], $privilegeExpireTs);
+            $token->addPrivilege($privileges['kPublishDataStream'], $privilegeExpireTs);
         }
         return $token->build();
     }

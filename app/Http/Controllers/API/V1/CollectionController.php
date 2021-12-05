@@ -32,7 +32,7 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $user = $request->user();
@@ -84,12 +84,12 @@ class CollectionController extends Controller
             ], 'rating')
             ->first();
 
-            return $this->respondWithSuccess("Digiverse has been created successfully.", [
+            return $this->respondWithSuccess('Digiverse has been created successfully.', [
                 'digiverse' => new CollectionResource($digiverse),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -101,7 +101,7 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             if ($request->user() == null || $request->user()->id == null) {
@@ -128,12 +128,12 @@ class CollectionController extends Controller
             ])
             ->first();
             $digiverse->content_types_available = $digiverse->contentTypesAvailable();
-            return $this->respondWithSuccess("Digiverse retrieved successfully.", [
+            return $this->respondWithSuccess('Digiverse retrieved successfully.', [
                 'digiverse' => new CollectionResource($digiverse),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -157,7 +157,7 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $user = $request->user();
@@ -179,22 +179,22 @@ class CollectionController extends Controller
             if (isset($request->price) && array_key_exists('id', $request->price)) {
                 $price = $digiverse->prices()->where('id', $request->price['id'])->first();
 
-                if (array_key_exists('amount', $request->price) && !is_null($request->price['amount'])) {
+                if (array_key_exists('amount', $request->price) && ! is_null($request->price['amount'])) {
                     $price->amount = $request->price['amount'];
                 }
 
-                if (array_key_exists('interval', $request->price) && !is_null($request->price['interval'])) {
+                if (array_key_exists('interval', $request->price) && ! is_null($request->price['interval'])) {
                     $price->interval = $request->price['interval'];
                 }
 
-                if (array_key_exists('interval_amount', $request->price) && !is_null($request->price['interval_amount'])) {
+                if (array_key_exists('interval_amount', $request->price) && ! is_null($request->price['interval_amount'])) {
                     $price->interval_amount = $request->price['interval_amount'];
                 }
 
                 $price->save();
             }
 
-            if (!is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
+            if (! is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
                 $oldCover = $digiverse->cover()->first();
                 $digiverse->cover()->detach($oldCover->id);
                 $oldCover->delete();
@@ -219,12 +219,12 @@ class CollectionController extends Controller
                 }
             }
 
-            return $this->respondWithSuccess("Digiverse updated successfully.", [
+            return $this->respondWithSuccess('Digiverse updated successfully.', [
                 'digiverse' => new CollectionResource($digiverse),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -235,15 +235,15 @@ class CollectionController extends Controller
             $limit = $request->query('limit', 10);
 
             $keyword = urldecode($request->query('keyword', ''));
-            $keywords = explode(" ", $keyword);
+            $keywords = explode(' ', $keyword);
             $keywords = array_diff($keywords, ['']);
 
             $tags = $request->query('tags', '');
-            $tags = explode(",", urldecode($tags));
+            $tags = explode(',', urldecode($tags));
             $tags = array_diff($tags, ['']);
 
             $creators = $request->query('creators', '');
-            $creators = explode(",", urldecode($creators));
+            $creators = explode(',', urldecode($creators));
             $creators = array_diff($creators, ['']);
 
             $maxPrice = $request->query('max_price', -1);
@@ -278,7 +278,7 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $digiverses = Collection::where('type', 'digiverse')->where('is_available', 1)
@@ -291,13 +291,13 @@ class CollectionController extends Controller
                 });
             }
 
-            if (!empty($tags)) {
+            if (! empty($tags)) {
                 $digiverses = $digiverses->whereHas('tags', function (Builder $query) use ($tags) {
                     $query->whereIn('tags.id', $tags);
                 });
             }
 
-            if (!empty($creators)) {
+            if (! empty($creators)) {
                 $digiverses = $digiverses->whereIn('user_id', $creators);
             }
 
@@ -326,7 +326,7 @@ class CollectionController extends Controller
                     $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
             ])->orderBy('collections.created_at', 'desc')
-            ->paginate($limit, array('*'), 'page', $page);
+            ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Digiverses retrieved successfully', [
                 'digiverses' => CollectionResource::collection($digiverses),
@@ -336,7 +336,7 @@ class CollectionController extends Controller
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -347,11 +347,11 @@ class CollectionController extends Controller
             $limit = $request->query('limit', 10);
 
             $keyword = urldecode($request->query('keyword', ''));
-            $keywords = explode(" ", $keyword);
+            $keywords = explode(' ', $keyword);
             $keywords = array_diff($keywords, ['']);
 
             $tags = $request->query('tags', '');
-            $tags = explode(",", urldecode($tags));
+            $tags = explode(',', urldecode($tags));
             $tags = array_diff($tags, ['']);
 
             $maxPrice = $request->query('max_price', -1);
@@ -383,7 +383,7 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $digiverses = Collection::where('type', 'digiverse')->where('user_id', $request->user()->id);
@@ -395,7 +395,7 @@ class CollectionController extends Controller
                 });
             }
 
-            if (!empty($tags)) {
+            if (! empty($tags)) {
                 $digiverses = $digiverses->whereHas('tags', function (Builder $query) use ($tags) {
                     $query->whereIn('tags.id', $tags);
                 });
@@ -426,7 +426,7 @@ class CollectionController extends Controller
                     $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
             ])->orderBy('collections.created_at', 'desc')
-            ->paginate($limit, array('*'), 'page', $page);
+            ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Digiverses retrieved successfully', [
                 'digiverses' => CollectionResource::collection($digiverses),
@@ -436,7 +436,7 @@ class CollectionController extends Controller
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -445,7 +445,7 @@ class CollectionController extends Controller
         try {
             $collection = Collection::where('id', $id)->first();
             if (is_null($collection)) {
-                return $this->respondBadRequest("Invalid collection ID supplied");
+                return $this->respondBadRequest('Invalid collection ID supplied');
             }
             $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
             $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
@@ -453,17 +453,17 @@ class CollectionController extends Controller
                 $limit = Constants::MAX_ITEMS_LIMIT;
             }
 
-            $reviews = Cache::remember('request:collection#' . $collection->id . ':reviews:'  . url()->full(), Constants::MINUTE_CACHE_TIME * 5, function () use ($page, $limit, $request, $collection) {
-                $reviews = $collection->reviews()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, array('*'), 'page', $page);
+            $reviews = Cache::remember('request:collection#' . $collection->id . ':reviews:' . url()->full(), Constants::MINUTE_CACHE_TIME * 5, function () use ($page, $limit, $request, $collection) {
+                $reviews = $collection->reviews()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
                 return $reviews;
             });
 
-            return $this->respondWithSuccess("Reviews retrieved successfully", [
+            return $this->respondWithSuccess('Reviews retrieved successfully', [
                 'reviews' => $reviews,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -475,7 +475,7 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             if ($request->user() == null || $request->user()->id == null) {
@@ -536,12 +536,12 @@ class CollectionController extends Controller
             ])
             ->first();
 
-            return $this->respondWithSuccess("Collection retrieved successfully", [
+            return $this->respondWithSuccess('Collection retrieved successfully', [
                 'collection' => new CollectionResource($collection),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 }

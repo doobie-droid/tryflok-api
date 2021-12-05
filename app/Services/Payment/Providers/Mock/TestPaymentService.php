@@ -19,14 +19,14 @@ class TestPaymentService implements PaymentInterface
             'message' => 'Banks retrieved',
             'data' => [
                 [
-                    "name" => "Test Bank 1",
-                    "slug" => "test-bank-1",
-                    "code" => "001",
+                    'name' => 'Test Bank 1',
+                    'slug' => 'test-bank-1',
+                    'code' => '001',
                 ],
                 [
-                    "name" => "Test Bank 2",
-                    "slug" => "test-bank-2",
-                    "code" => "002",
+                    'name' => 'Test Bank 2',
+                    'slug' => 'test-bank-2',
+                    'code' => '002',
                 ],
             ]
         ], 200)->getData();
@@ -44,26 +44,26 @@ class TestPaymentService implements PaymentInterface
             'status' => true,
             'message' => 'Verification successful',
             'data' => [
-                "status" => "success",
-                "authorization" => [
-                    "authorization_code"=>"AUTH_8dfhjjdt",
-                    "card_type" => "visa",
-                    "last4" => "1381",
-                    "exp_month" => "08",
-                    "exp_year" => "2018",
-                    "bin" => "412345",
-                    "bank" => "TEST BANK",
-                    "channel" => "card",
-                    "signature" => "SIG_idyuhgd87dUYSHO92D",
-                    "reusable" => true,
-                    "country_code" => "NG",
+                'status' => 'success',
+                'authorization' => [
+                    'authorization_code' => 'AUTH_8dfhjjdt',
+                    'card_type' => 'visa',
+                    'last4' => '1381',
+                    'exp_month' => '08',
+                    'exp_year' => '2018',
+                    'bin' => '412345',
+                    'bank' => 'TEST BANK',
+                    'channel' => 'card',
+                    'signature' => 'SIG_idyuhgd87dUYSHO92D',
+                    'reusable' => true,
+                    'country_code' => 'NG',
                 ],
-                "customer" => [
-                    "id" => 84312,
-         "customer_code" => "CUS_hdhye17yj8qd2tx",
-         "first_name" => "BoJack",
-         "last_name" => "Horseman",
-         "email" => "bojack@horseman.com"
+                'customer' => [
+                    'id' => 84312,
+                'customer_code' => 'CUS_hdhye17yj8qd2tx',
+                'first_name' => 'BoJack',
+                'last_name' => 'Horseman',
+                'email' => 'bojack@horseman.com'
                 ],
             ]
         ], 200)->getData();

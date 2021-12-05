@@ -16,6 +16,7 @@ class Payout implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $payout;
     public $payment_account;
     /**
@@ -41,8 +42,8 @@ class Payout implements ShouldQueue
         $paymentProvider = new PaymentProvider($this->payment_account->provider);
         $resp = $paymentProvider->transferFundsToRecipient($this->payment_account, $amount);
         switch ($this->payment_account->provider) {
-            case "flutterwave":
-                if ($resp->status === "success") {
+            case 'flutterwave':
+                if ($resp->status === 'success') {
                     $this->payout->reference = $resp->data->id;
                     $this->payout->save();
                 } else {
@@ -52,7 +53,7 @@ class Payout implements ShouldQueue
                     //notify user that payout attempt failed
                 }
                 break;
-            case "stripe":
+            case 'stripe':
                 if (isset($resp->destination) && $resp->destination === $this->payment_account->identifier) {
                     $this->payout->reference = $resp->id;
                     $this->payout->claimed = 1;

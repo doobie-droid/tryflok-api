@@ -15,6 +15,7 @@ class NotifyFollower implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $message;
     public $notificable_type;
     public $notificable_id;
@@ -46,7 +47,7 @@ class NotifyFollower implements ShouldQueue
         ]);
 
         $client = new Client();
-        $url = "https://fcm.googleapis.com/fcm/send";
+        $url = 'https://fcm.googleapis.com/fcm/send';
         $authorization_key = env('FCM_SERVER_KEY');
         foreach ($this->follower->notificationTokens as $notification_token) {
             $client->post($url, [
@@ -54,15 +55,15 @@ class NotifyFollower implements ShouldQueue
                     'Authorization' => "key={$authorization_key}",
                 ],
                 'json' => [
-                    "to" => $notification_token->token,
-                    "notification" => [
-                        "title" => 'New Content From Creator',
-                        "body" => $this->message,
+                    'to' => $notification_token->token,
+                    'notification' => [
+                        'title' => 'New Content From Creator',
+                        'body' => $this->message,
                     ],
-                    "data" => [
-                        "message" => $this->message,
-                        "notificable_type" => $this->notificable_type,
-                        "notificable_id" => $this->notificable_id,
+                    'data' => [
+                        'message' => $this->message,
+                        'notificable_type' => $this->notificable_type,
+                        'notificable_id' => $this->notificable_id,
                     ]
                 ],
             ]);

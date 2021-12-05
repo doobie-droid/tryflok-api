@@ -16,6 +16,7 @@ class UpdateContentUserable implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $content;
     public $user;
     public $parentUserable;

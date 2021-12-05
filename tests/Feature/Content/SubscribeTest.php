@@ -13,7 +13,9 @@ use Tests\TestCase;
 
 class SubscribeTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use DatabaseTransactions;
+    use WithFaker;
+
     /**
      * A basic feature test example.
      *
@@ -33,8 +35,7 @@ class SubscribeTest extends TestCase
             'user_id' => $user->id,
         ])
         ->hasAttached(
-            $digiverse
-            ,
+            $digiverse,
             [
                 'id' => Str::uuid(),
             ]
@@ -49,7 +50,7 @@ class SubscribeTest extends TestCase
             'user_id' => $user->id,
         ]);
         $this->assertTrue($newsletter->subscribers()->count() === 1);
-        
+
         // assert not duplicate entry is made
         $response = $this->json('POST', "/api/v1/contents/{$newsletter->id}/subscription");
         $response->assertStatus(200);
@@ -74,8 +75,7 @@ class SubscribeTest extends TestCase
             'user_id' => $user->id,
         ])
         ->hasAttached(
-            $digiverse
-            ,
+            $digiverse,
             [
                 'id' => Str::uuid(),
             ]
@@ -89,7 +89,7 @@ class SubscribeTest extends TestCase
             'user_id' => $user->id,
         ]);
         $this->assertTrue($newsletter->subscribers()->count() === 1);
-        
+
         $response = $this->json('DELETE', "/api/v1/contents/{$newsletter->id}/subscription");
         $response->assertStatus(200);
         $this->assertDatabaseMissing('content_subscriber', [

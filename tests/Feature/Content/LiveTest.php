@@ -10,7 +10,9 @@ use Tests\TestCase;
 
 class LiveTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use DatabaseTransactions;
+    use WithFaker;
+
     /**
      * A basic feature test example.
      *

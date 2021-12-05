@@ -751,8 +751,8 @@ class LanguagesTableSeeder extends Seeder
 
         foreach ($languages as $code => $data) {
             Language::create([
-                "name" => $data->name,
-                "iso_code" => $code,
+                'name' => $data->name,
+                'iso_code' => $code,
             ]);
         }
     }

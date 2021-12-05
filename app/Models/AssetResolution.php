@@ -10,6 +10,7 @@ class AssetResolution extends Model
 {
     use HasFactory;
     use Uuid;
+
     /**
     * The attributes that are not mass assignable.
     *

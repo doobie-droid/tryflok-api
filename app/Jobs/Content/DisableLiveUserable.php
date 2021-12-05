@@ -15,6 +15,7 @@ class DisableLiveUserable implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $userable;
     /**
      * Create a new job instance.

@@ -22,6 +22,7 @@ class Purchase implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $data;
     /**
      * Create a new job instance.
@@ -44,7 +45,7 @@ class Purchase implements ShouldQueue
         $payer = User::where('id', $this->data['user']['id'])->first();
         if (is_null($payer)) {
             //in case model was deleted
-            Log::error("Could not complete the transaction because user does not exist or invalid id supplied");
+            Log::error('Could not complete the transaction because user does not exist or invalid id supplied');
             Log::error($this->data);
             return;
         }
@@ -57,14 +58,14 @@ class Purchase implements ShouldQueue
                     $itemModel = Collection::where('id', $item['id'])->first();
                     break;
                 default:
-                    Log::error("Could not complete the transaction because item type was not specified");
+                    Log::error('Could not complete the transaction because item type was not specified');
                     Log::error($item);
                     continue 2;
             }
 
             if (is_null($itemModel)) {
                 //in case model was deleted
-                Log::error("Could not complete the transaction because content has been deleted or invalid id supplied");
+                Log::error('Could not complete the transaction because content has been deleted or invalid id supplied');
                 Log::error($item);
                 continue;
             }
@@ -72,7 +73,7 @@ class Purchase implements ShouldQueue
             $price = Price::where('id', $item['price']['id'])->first();
             if (is_null($price)) {
                 //in case model was deleted
-                Log::error("Could not complete the transaction because price has been deleted or invalid id supplied");
+                Log::error('Could not complete the transaction because price has been deleted or invalid id supplied');
                 Log::error($item);
                 continue;
             }
@@ -86,7 +87,7 @@ class Purchase implements ShouldQueue
 
             //checkout item from cart
             $cartItem = Cart::where('cartable_type', $item['type'])->where('cartable_id', $itemModel->id)->where('user_id', $payer->id)->where('checked_out', 0)->first();
-            if (!is_null($cartItem)) {
+            if (! is_null($cartItem)) {
                 $cartItem->checked_out = 1;
                 $cartItem->status = 'completed';
                 $cartItem->save();

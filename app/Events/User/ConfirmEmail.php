@@ -14,6 +14,7 @@ class ConfirmEmail implements ShouldQueue
     use Dispatchable;
     use InteractsWithSockets;
     use SerializesModels;
+
     public $user;
     /**
      * Create a new event instance.

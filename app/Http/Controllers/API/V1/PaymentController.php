@@ -22,17 +22,17 @@ class PaymentController extends Controller
         try {
             $country_code = $request->query('country_code', 'NG');
             $allowed_country_codes = ['ng', 'gh', 'ug', 'tz'];
-            if (!in_array(strtolower($country_code), $allowed_country_codes)) {
-                return $this->respondBadRequest("Country is not supported for Flutterwave Payouts");
+            if (! in_array(strtolower($country_code), $allowed_country_codes)) {
+                return $this->respondBadRequest('Country is not supported for Flutterwave Payouts');
             }
             $flutterwave = new Flutterwave();
             $resp = $flutterwave->getBanks(['country_code' => $country_code]);
-            return $this->respondWithSuccess("Banks retrieved successfully", [
+            return $this->respondWithSuccess('Banks retrieved successfully', [
                 'banks' => $resp->data,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -42,16 +42,16 @@ class PaymentController extends Controller
             $id = $request->query('id');
             $flutterwave = new Flutterwave();
             $resp = $flutterwave->getBankBranch($id);
-            if (isset($resp->status) && $resp->status === "success") {
-                return $this->respondWithSuccess("Bank branches retrieved successfully", [
+            if (isset($resp->status) && $resp->status === 'success') {
+                return $this->respondWithSuccess('Bank branches retrieved successfully', [
                     'branches' => $resp->data,
                 ]);
             } else {
-                return $this->respondBadRequest("An invalid bank code was supplied");
+                return $this->respondBadRequest('An invalid bank code was supplied');
             }
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -77,24 +77,24 @@ class PaymentController extends Controller
 
     public function testPaymentWebhook(Request $request)
     {
-        if (!App::environment('testing') && !App::environment('local')) {
-            return $this->respondBadRequest("End-point is not available");
+        if (! App::environment('testing') && ! App::environment('local')) {
+            return $this->respondBadRequest('End-point is not available');
         }
         try {
             $paystack = new PaymentProvider('test');
             $req = $paystack->verifyTransaction($request->data['reference']);
-            if (($req->status && $req->data->status == "success")) {
+            if (($req->status && $req->data->status == 'success')) {
                 //delegate the process
                 PaystackDelegator::dispatch($request->input());
-                return $this->respondWithSuccess("Payment received successfully");
+                return $this->respondWithSuccess('Payment received successfully');
             } else {
-                Log::info("Invalid Transaction Was Attempted");
+                Log::info('Invalid Transaction Was Attempted');
                 Log::info($request);
-                return $this->respondBadRequest("Oops, an error occurred. Please try again later.");
+                return $this->respondBadRequest('Oops, an error occurred. Please try again later.');
             }
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -118,25 +118,25 @@ class PaymentController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             switch ($request->provider) {
-                case "paystack":
+                case 'paystack':
                     PaystackPurchaseHandler::dispatch([
                         'provider_response' => $request->provider_response,
                         'user' => $request->user,
                         'items' => $request->items,
                     ]);
                     break;
-                case "flutterwave":
+                case 'flutterwave':
                     FlutterwavePurchaseHandler::dispatch([
                         'provider_response' => $request->provider_response,
                         'user' => $request->user,
                         'items' => $request->items,
                     ]);
                     break;
-                case "stripe":
+                case 'stripe':
                     StripePurchaseHandler::dispatch([
                         'provider_response' => $request->provider_response,
                         'dollar_amount' => $request->stripe_dollar_amount,//is in cents
@@ -145,12 +145,12 @@ class PaymentController extends Controller
                     ]);
                     break;
                 default:
-                    return $this->respondBadRequest("Invalid provider specified");
+                    return $this->respondBadRequest('Invalid provider specified');
             }
-            return $this->respondWithSuccess("Payment received successfully");
+            return $this->respondWithSuccess('Payment received successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -169,14 +169,14 @@ class PaymentController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             //check that Item is actually free. That means it's collection will also be free if it is a content
             $itemsThatCanBeAddedForFree = [];
             foreach ($request->items as $item) {
                 if ($item['type'] === 'content') {
                     $itemModel = Content::where('id', $item['id'])->first();
-                    if (!is_null($itemModel)) {
+                    if (! is_null($itemModel)) {
                         $digivierse = $itemModel->collections()->first();
                         $digiversePrice = $digivierse->prices()->first();
                         $itemPrice = $itemModel->prices()->first();
@@ -205,7 +205,7 @@ class PaymentController extends Controller
             return $this->respondWithSuccess("Item queued to be added to user's library.");
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 }

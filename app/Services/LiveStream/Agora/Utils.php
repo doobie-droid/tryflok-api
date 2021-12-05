@@ -6,6 +6,6 @@ class Utils
 {
     public static function packString($value)
     {
-        return pack("v", strlen($value)) . $value;
+        return pack('v', strlen($value)) . $value;
     }
 }

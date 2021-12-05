@@ -30,8 +30,7 @@ class Crypter
             self::symmetricalKey()
         );
         return base64_encode(
-            $nonce .
-            $crypt
+            $nonce . $crypt
         );
     }
 
@@ -52,8 +51,7 @@ class Crypter
             base64_decode($key)
         );
         return base64_encode(
-            $nonce .
-            $crypt
+            $nonce . $crypt
         );
     }
 

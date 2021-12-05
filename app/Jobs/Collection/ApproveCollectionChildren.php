@@ -15,6 +15,7 @@ class ApproveCollectionChildren implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $collection;
     /**
      * Create a new job instance.

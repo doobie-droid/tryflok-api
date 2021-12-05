@@ -17,6 +17,7 @@ class Purchase implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $provider_response;
     public $user;
     public $items;
@@ -41,7 +42,7 @@ class Purchase implements ShouldQueue
     {
         $flutterwave = new FlutterwavePayment();
         $req = $flutterwave->verifyTransaction($this->provider_response['transaction_id']);
-        if (($req->status === "success" && $req->data->status === "successful")) {
+        if (($req->status === 'success' && $req->data->status === 'successful')) {
             PurchaseJob::dispatch([
                 'total_amount' => $req->data->amount,
                 'total_fees' => $req->data->app_fee,

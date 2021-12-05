@@ -17,6 +17,7 @@ class UpdateCollectionUserable implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $collection;
     public $user;
     public $parentUserable;

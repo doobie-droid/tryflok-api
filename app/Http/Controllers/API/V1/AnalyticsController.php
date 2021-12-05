@@ -53,9 +53,9 @@ class AnalyticsController extends Controller
             ])
             ->groupBy('reviewable_type', 'reviewable_id')
             ->orderBy('rating', 'DESC')
-            ->paginate($limit, array('*'), 'page', $page);
+            ->paginate($limit, ['*'], 'page', $page);
 
-            return $this->respondWithSuccess("Trending retrieved successfully", [
+            return $this->respondWithSuccess('Trending retrieved successfully', [
                 'trending' => TrendingResource::collection($reviews),
                 'current_page' => (int) $reviews->currentPage(),
                 'items_per_page' => (int) $reviews->perPage(),
@@ -63,7 +63,7 @@ class AnalyticsController extends Controller
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 }

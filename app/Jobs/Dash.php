@@ -16,6 +16,7 @@ class Dash implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $resource_path;
     public $timeout = 60;
     /**
@@ -51,12 +52,12 @@ class Dash implements ShouldQueue
         $resource = $ffmpeg->open($this->resource_path);
 
         $hlsenc = $resource->hls()
-        ->encryption(join_path(public_path(), "hls-encrypted/user-key"), join_path(env('BACKEND_URL'), "hls-encrypted/user-key"))
+        ->encryption(join_path(public_path(), 'hls-encrypted/user-key'), join_path(env('BACKEND_URL'), 'hls-encrypted/user-key'))
         ->setHlsTime(30)
         ->setHlsBaseUrl(join_path(env('BACKEND_URL'), 'hls-encrypted'))
         ->x264()
         ->autoGenerateRepresentations([480, 720, 1080, ]);
-        $hlsenc->save(join_path(public_path(), "hls-encrypted/hls.m3u8"));
+        $hlsenc->save(join_path(public_path(), 'hls-encrypted/hls.m3u8'));
 
         /* //generate admin version
          $admin_video = $ffmpeg->open(public_path() . '/upload/admin.mp4');

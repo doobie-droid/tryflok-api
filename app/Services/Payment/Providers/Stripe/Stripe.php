@@ -47,7 +47,7 @@ class Stripe extends API implements PaymentInterface
         'amount' => $amount_in_cents,
         'currency' => 'usd',
         'destination' => $transferData->identifier,
-       ]);
+        ]);
         return $response;
     }
 

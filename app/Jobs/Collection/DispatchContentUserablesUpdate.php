@@ -17,6 +17,7 @@ class DispatchContentUserablesUpdate implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $deleted_contents;
     public $collection;
     public $new_contents;

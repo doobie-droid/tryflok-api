@@ -17,6 +17,7 @@ class DispatchSubCollectionUserablesUpdate implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $deleted_collections;
     public $collection;
     public $new_collections;

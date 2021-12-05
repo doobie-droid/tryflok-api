@@ -19,19 +19,19 @@ class CategoryController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $category = Category::create([
                 'public_id' => uniqid(rand()),
                 'name' => $request->name,
             ]);
-            return $this->respondWithSuccess("Category created successfully.", [
+            return $this->respondWithSuccess('Category created successfully.', [
                 'category' => new CategoryResource($category),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -44,18 +44,18 @@ class CategoryController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $category = Category::where('public_id', $public_id)->first();
             $category->name = $request->name;
             $category->save();
 
-            return $this->respondWithSuccess("Category updated successfully.", [
+            return $this->respondWithSuccess('Category updated successfully.', [
                 'category' => new CategoryResource($category),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 }

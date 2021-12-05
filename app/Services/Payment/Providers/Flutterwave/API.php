@@ -89,7 +89,7 @@ abstract class API implements APIInterface
     public function execute($httpMethod, $url, array $parameters = [])
     {
         try {
-            $results = $this->getClient()->{$httpMethod}($url, ['json'=>$parameters]);
+            $results = $this->getClient()->{$httpMethod}($url, ['json' => $parameters]);
             $res  = json_decode((string)$results->getBody(), true);
             return response()->json($res)->getData();
         } catch (ClientException $exception) {
@@ -97,7 +97,7 @@ abstract class API implements APIInterface
                'status' => false,
                'status_code' => $exception->getCode(),
                'message' => $exception->getMessage(),
-           ])->getData();
+            ])->getData();
         }
     }
 
@@ -121,8 +121,8 @@ abstract class API implements APIInterface
     {
         $stack  = HandlerStack::create();
         $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
-            $request = $request->withHeader('Authorization', 'Bearer '. $this->secret);
-            $request= $request->withHeader('Content-Type', 'application/json');
+            $request = $request->withHeader('Authorization', 'Bearer ' . $this->secret);
+            $request = $request->withHeader('Content-Type', 'application/json');
             return $request;
         }));
 

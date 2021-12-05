@@ -91,7 +91,7 @@ class CreateAndUpdateTest extends TestCase
         $testData = DigiverseMock::UNSEEDED_DIGIVERSE;
         $cover = Asset::factory()->video()->create();
         $testData['cover']['asset_id'] = $cover->id;
-        $response = $this->json('POST', '/api/v1/digiverses',  $testData);
+        $response = $this->json('POST', '/api/v1/digiverses', $testData);
         $response->assertStatus(400);
     }
 

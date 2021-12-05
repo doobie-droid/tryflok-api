@@ -16,6 +16,7 @@ class Audio implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $asset;
     public $filepath;
     public $full_file_name;

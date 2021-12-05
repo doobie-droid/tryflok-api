@@ -2,21 +2,22 @@
 
 namespace Tests\MockData;
 
-class Digiverse {
+class Digiverse
+{
     const UNSEEDED_DIGIVERSE = [
-        "title" => "The first Digiverse",
-        "description" => "Testing digiverse creation",
-        "price" => [
-            "amount" => 100,
-            "interval" => "monthly",
-            "interval_amount" => 1,
+        'title' => 'The first Digiverse',
+        'description' => 'Testing digiverse creation',
+        'price' => [
+            'amount' => 100,
+            'interval' => 'monthly',
+            'interval_amount' => 1,
         ],
-        "tags" => [
-            "0e14760d-1d41-45aa-a820-87d6dc35f7ff", 
-            "120566de-0361-4d66-b458-321d4ede62a9"
+        'tags' => [
+            '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
+            '120566de-0361-4d66-b458-321d4ede62a9'
         ],
-        "cover" => [
-            "asset_id" => "",
+        'cover' => [
+            'asset_id' => '',
         ],
     ];
 

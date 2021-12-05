@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notification;
 class EmailConfirmation extends Notification
 {
     use Queueable;
+
     protected $user;
     /**
      * Create a new notification instance.
@@ -39,7 +40,7 @@ class EmailConfirmation extends Notification
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage())->view('emails.user.welcome', ['user'=> $this->user])->subject('Welcome');
+        return (new MailMessage())->view('emails.user.welcome', ['user' => $this->user])->subject('Welcome');
     }
 
     /**

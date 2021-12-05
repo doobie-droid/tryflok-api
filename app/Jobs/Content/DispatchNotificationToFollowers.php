@@ -16,6 +16,7 @@ class DispatchNotificationToFollowers implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $notificable_type;
     public $notificable_id;
     public $user;

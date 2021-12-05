@@ -16,6 +16,7 @@ class FundWallet implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     private $user;
     private $wallet;
     private $provider;

@@ -17,6 +17,7 @@ class Purchase implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $provider_response;
     public $user;
     public $items;
@@ -43,7 +44,7 @@ class Purchase implements ShouldQueue
     {
         $stripe = new StripePayment();
         $req = $stripe->chargeViaToken($this->amount, $this->provider_response['id']);
-        if (($req->status === "succeeded" && $req->paid === true)) {
+        if (($req->status === 'succeeded' && $req->paid === true)) {
             //Stripe for USD deals in cents
             //we process all Stripe transactoins in USD
             $amount = bcmul(bcdiv($req->amount, 100, 6), 450, 6);//450 is exchange rate of dollar to naira

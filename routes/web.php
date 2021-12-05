@@ -19,12 +19,12 @@ Route::get('/', function () {
 
 Route::get('/apple-app-site-association', function () {
     $obj = [
-        "applinks" => [
-            "apps" => [],
-            "details" => [
+        'applinks' => [
+            'apps' => [],
+            'details' => [
                 [
-                    "appID" => "DHG3RK7L57.com.flok.flok",
-                    "paths" => [ "*" ]
+                    'appID' => 'DHG3RK7L57.com.flok.flok',
+                    'paths' => [ '*' ]
                 ]
             ]
         ]

@@ -39,7 +39,7 @@ class CreateTest extends TestCase
                 'amount' => 10,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
+                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
             'cover' => [
@@ -122,7 +122,7 @@ class CreateTest extends TestCase
                 'amount' => 10,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
+                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
             'cover' => [
@@ -155,7 +155,7 @@ class CreateTest extends TestCase
                 'amount' => 10,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
+                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
             'cover' => [
@@ -256,7 +256,7 @@ class CreateTest extends TestCase
                 'amount' => 10,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
+                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
             'cover' => [
@@ -283,7 +283,7 @@ class CreateTest extends TestCase
          $this->assertDatabaseHas('collection_content', [
             'collection_id' => $digiverse->id,
             'content_id' => $content->id
-        ]);
+         ]);
         $this->assertTrue($digiverse->contents()->where('contents.id', $content->id)->count() === 1);
 
         //validate tags was attached
@@ -360,7 +360,7 @@ class CreateTest extends TestCase
                 'amount' => 10,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
+                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
             'cover' => [
@@ -387,7 +387,7 @@ class CreateTest extends TestCase
          $this->assertDatabaseHas('collection_content', [
             'collection_id' => $digiverse->id,
             'content_id' => $content->id
-        ]);
+         ]);
         $this->assertTrue($digiverse->contents()->where('contents.id', $content->id)->count() === 1);
 
         //validate tags was attached
@@ -462,7 +462,7 @@ class CreateTest extends TestCase
                 'amount' => 0,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
+                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
             'cover' => [
@@ -489,7 +489,7 @@ class CreateTest extends TestCase
          $this->assertDatabaseHas('collection_content', [
             'collection_id' => $digiverse->id,
             'content_id' => $content->id
-        ]);
+         ]);
         $this->assertTrue($digiverse->contents()->where('contents.id', $content->id)->count() === 1);
 
         //validate tags was attached
@@ -555,7 +555,7 @@ class CreateTest extends TestCase
                 'amount' => 0,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
+                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
         ];
@@ -650,7 +650,7 @@ class CreateTest extends TestCase
                 'amount' => 0,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 
+                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
         ];

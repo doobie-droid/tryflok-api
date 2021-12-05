@@ -13,17 +13,17 @@ class Message
 
         $this->ts = time() + (24 * 3600);
 
-        $this->privileges = array();
+        $this->privileges = [];
     }
 
     public function packContent()
     {
-        $buffer = unpack("C*", pack("V", $this->salt));
-        $buffer = array_merge($buffer, unpack("C*", pack("V", $this->ts)));
-        $buffer = array_merge($buffer, unpack("C*", pack("v", sizeof($this->privileges))));
+        $buffer = unpack('C*', pack('V', $this->salt));
+        $buffer = array_merge($buffer, unpack('C*', pack('V', $this->ts)));
+        $buffer = array_merge($buffer, unpack('C*', pack('v', sizeof($this->privileges))));
         foreach ($this->privileges as $key => $value) {
-            $buffer = array_merge($buffer, unpack("C*", pack("v", $key)));
-            $buffer = array_merge($buffer, unpack("C*", pack("V", $value)));
+            $buffer = array_merge($buffer, unpack('C*', pack('v', $key)));
+            $buffer = array_merge($buffer, unpack('C*', pack('V', $value)));
         }
         return $buffer;
     }
@@ -31,18 +31,18 @@ class Message
     public function unpackContent($msg)
     {
         $pos = 0;
-        $salt = unpack("V", substr($msg, $pos, 4))[1];
+        $salt = unpack('V', substr($msg, $pos, 4))[1];
         $pos += 4;
-        $ts = unpack("V", substr($msg, $pos, 4))[1];
+        $ts = unpack('V', substr($msg, $pos, 4))[1];
         $pos += 4;
-        $size = unpack("v", substr($msg, $pos, 2))[1];
+        $size = unpack('v', substr($msg, $pos, 2))[1];
         $pos += 2;
 
-        $privileges = array();
+        $privileges = [];
         for ($i = 0; $i < $size; $i++) {
-            $key = unpack("v", substr($msg, $pos, 2));
+            $key = unpack('v', substr($msg, $pos, 2));
             $pos += 2;
-            $value = unpack("V", substr($msg, $pos, 4));
+            $value = unpack('V', substr($msg, $pos, 4));
             $pos += 4;
             $privileges[$key[1]] = $value[1];
         }

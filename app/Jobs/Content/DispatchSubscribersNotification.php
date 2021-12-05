@@ -15,6 +15,7 @@ class DispatchSubscribersNotification implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $content;
     /**
      * Create a new job instance.

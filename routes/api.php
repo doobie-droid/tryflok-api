@@ -38,9 +38,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::get('/languages', function () {
         return response()->json([
-            "message" => "Languages retrieved successfully",
-            "data" => [
-                "languages" => Cache::rememberForever('request:languages', function () {
+            'message' => 'Languages retrieved successfully',
+            'data' => [
+                'languages' => Cache::rememberForever('request:languages', function () {
                     return \App\Models\Language::orderBy('name')->get();
                 }),
             ]
@@ -49,9 +49,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::get('/countries', function () {
         return response()->json([
-            "message" => "Countries retrieved successfully",
-            "data" => [
-                "countries" => Cache::rememberForever('request:countries', function () {
+            'message' => 'Countries retrieved successfully',
+            'data' => [
+                'countries' => Cache::rememberForever('request:countries', function () {
                     return \App\Models\Country::orderBy('name')->get();
                 }),
             ]
@@ -60,9 +60,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::get('/continents', function () {
         return response()->json([
-            "message" => "Continents retrieved successfully",
-            "data" => [
-                "continents" => Cache::rememberForever('request:continents', function () {
+            'message' => 'Continents retrieved successfully',
+            'data' => [
+                'continents' => Cache::rememberForever('request:continents', function () {
                     return \App\Models\Continent::orderBy('name')->get();
                 }),
             ]
@@ -77,11 +77,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         }
         $search = urldecode($request->query('search', ''));
 
-        $categories = \App\Models\Category::where('name', 'LIKE', '%' . $search . '%')->orderBy('name')->paginate($limit, array('*'), 'page', $page);
+        $categories = \App\Models\Category::where('name', 'LIKE', '%' . $search . '%')->orderBy('name')->paginate($limit, ['*'], 'page', $page);
         return response()->json([
-            "message" => "Categories retrieved successfully",
-            "data" => [
-                "categories" => CategoryResource::collection($categories),
+            'message' => 'Categories retrieved successfully',
+            'data' => [
+                'categories' => CategoryResource::collection($categories),
                 'current_page' => (int) $categories->currentPage(),
                 'items_per_page' => (int) $categories->perPage(),
                 'total' => (int) $categories->total(),
@@ -97,11 +97,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         }
         $search = urldecode($request->query('search', ''));
 
-        $tags = \App\Models\Tag::where('name', 'LIKE', '%' . $search . '%')->orderBy('name')->paginate($limit, array('*'), 'page', $page);
+        $tags = \App\Models\Tag::where('name', 'LIKE', '%' . $search . '%')->orderBy('name')->paginate($limit, ['*'], 'page', $page);
         return response()->json([
-            "message" => "Tags retrieved successfully",
-            "data" => [
-                "categories" => TagResource::collection($tags),
+            'message' => 'Tags retrieved successfully',
+            'data' => [
+                'categories' => TagResource::collection($tags),
                 'current_page' => (int) $tags->currentPage(),
                 'items_per_page' => (int) $tags->perPage(),
                 'total' => (int) $tags->total(),

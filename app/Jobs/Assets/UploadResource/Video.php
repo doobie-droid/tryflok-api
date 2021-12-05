@@ -16,6 +16,7 @@ class Video implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $asset;
     public $filepath;
     public $ts_files;

@@ -25,12 +25,12 @@ class SubscriptionController extends Controller
                 $query->where('user_id', $user_id);
             })->get();
 
-            return $this->respondWithSuccess("Subscriptions retrieved successfully", [
+            return $this->respondWithSuccess('Subscriptions retrieved successfully', [
                 'subscriptions' => $subscriptions,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -42,7 +42,7 @@ class SubscriptionController extends Controller
                 'auto_renew' => ['sometimes', 'required', 'numeric', 'integer', 'min:0', 'max:1'],
             ]);
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $user_id = $request->user()->id;
             $subscription = Subscription::with('subscriptionable', 'subscriptionable.cover', 'subscriptionable.owner', 'subscriptionable.prices', 'subscriptionable.prices.continent', 'subscriptionable.prices.country', 'subscriptionable.categories')->where('public_id', $public_id)->whereHas('userable', function (Builder $query) use ($user_id) {
@@ -50,21 +50,21 @@ class SubscriptionController extends Controller
             })->first();
 
             if (is_null($subscription)) {
-                return $this->respondBadRequest("You do not have permission to update this subscription");
+                return $this->respondBadRequest('You do not have permission to update this subscription');
             }
 
-            if (isset($request->auto_renew) && !is_null($request->auto_renew)) {
+            if (isset($request->auto_renew) && ! is_null($request->auto_renew)) {
                 $subscription->auto_renew = $request->auto_renew;
             }
 
             $subscription->save();
 
-            return $this->respondWithSuccess("Subscription updated successfully", [
+            return $this->respondWithSuccess('Subscription updated successfully', [
                 'subscription' => $subscription,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 }

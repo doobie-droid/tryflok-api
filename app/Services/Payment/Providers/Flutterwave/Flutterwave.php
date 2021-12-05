@@ -53,7 +53,7 @@ class Flutterwave extends API implements PaymentInterface
             'account_number' => $transferData->identifier,
             'account_bank' => $transferData->bank_code,
             'currency' => 'NGN',
-            'reference' => uniqid() . date("Ymd-His"),
+            'reference' => uniqid() . date('Ymd-His'),
         ];
 
         if (in_array($transferData->country_code, $need_branch_code)) {

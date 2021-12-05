@@ -2,7 +2,8 @@
 
 namespace Tests\MockData;
 
-class Content {
+class Content
+{
     const SEEDED_UNPAID_ONE_OFF_VIDEO = [
         'public_id' => '826963893606c9de73bc36',
         'title' => 'Unpaid One-Off Video Content',

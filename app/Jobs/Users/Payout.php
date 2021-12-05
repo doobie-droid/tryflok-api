@@ -15,6 +15,7 @@ class Payout implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $user;
     /**
      * Create a new job instance.

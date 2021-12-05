@@ -23,7 +23,7 @@ class UserResource extends JsonResource
     private function getProfilePicture()
     {
         $profile_picture = $this->whenLoaded('profile_picture');
-        if (!is_null($profile_picture)) {
+        if (! is_null($profile_picture)) {
             return $this->profile_picture->first();
         }
 

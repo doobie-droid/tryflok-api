@@ -24,7 +24,7 @@ class ReviewController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $itemModel = null;
@@ -42,13 +42,13 @@ class ReviewController extends Controller
             }
 
             if (is_null($itemModel)) {
-                return $this->respondBadRequest("Invalid public ID supplied for " . ucfirst($request->type));
+                return $this->respondBadRequest('Invalid public ID supplied for ' . ucfirst($request->type));
             }
 
             //check if a review has been submitted before
             $review = Review::where('user_id', $request->user()->id)->where('reviewable_type', $request->type)->where('reviewable_id', $itemModel->id)->first();
 
-            if (!is_null($review)) {
+            if (! is_null($review)) {
                 //not null, update
                 $review->fill($request->only(['rating', 'comment']));
                 $review->save();
@@ -61,12 +61,12 @@ class ReviewController extends Controller
                 ]);
             }
 
-            return $this->respondWithSuccess("Review recorded successfully", [
+            return $this->respondWithSuccess('Review recorded successfully', [
                 'review' => $review,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -75,7 +75,7 @@ class ReviewController extends Controller
         try {
             $review = Review::where('id', $id)->first();
             if (is_null($review)) {
-                return $this->respondBadRequest("Invalid review ID supplied");
+                return $this->respondBadRequest('Invalid review ID supplied');
             }
             $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
             $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
@@ -83,13 +83,13 @@ class ReviewController extends Controller
                 $limit = Constants::MAX_ITEMS_LIMIT;
             }
 
-            $reviews = $review->reviews()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, array('*'), 'page', $page);
-            return $this->respondWithSuccess("Reviews retrieved successfully", [
+            $reviews = $review->reviews()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
+            return $this->respondWithSuccess('Reviews retrieved successfully', [
                 'reviews' => $reviews,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -102,7 +102,7 @@ class ReviewController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $itemModel = null;
@@ -117,18 +117,18 @@ class ReviewController extends Controller
             }
 
             if (is_null($itemModel)) {
-                return $this->respondBadRequest("Invalid public ID supplied for " . ucfirst($request->type));
+                return $this->respondBadRequest('Invalid public ID supplied for ' . ucfirst($request->type));
             }
 
             $itemModel->views = $itemModel->views + 1;
             $itemModel->save();
 
-            return $this->respondWithSuccess("View recorded successfully", [
+            return $this->respondWithSuccess('View recorded successfully', [
                 'item' => $itemModel,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 }

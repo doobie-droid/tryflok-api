@@ -16,6 +16,7 @@ class NotifySubscriber implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $content;
     public $subscriber;
     /**
@@ -44,7 +45,7 @@ class NotifySubscriber implements ShouldQueue
         ]);
 
         $client = new Client();
-        $url = "https://fcm.googleapis.com/fcm/send";
+        $url = 'https://fcm.googleapis.com/fcm/send';
         $authorization_key = env('FCM_SERVER_KEY');
         foreach ($this->subscriber->notificationTokens as $notification_token) {
             $client->post($url, [
@@ -52,15 +53,15 @@ class NotifySubscriber implements ShouldQueue
                     'Authorization' => "key={$authorization_key}",
                 ],
                 'json' => [
-                    "to" => $notification_token->token,
-                    "notification" => [
-                        "title" => 'Newsletter Release',
-                        "body" => $message,
+                    'to' => $notification_token->token,
+                    'notification' => [
+                        'title' => 'Newsletter Release',
+                        'body' => $message,
                     ],
-                    "data" => [
-                        "message" => $message,
-                        "notificable_type" => 'content',
-                        "notificable_id" => $this->content->id,
+                    'data' => [
+                        'message' => $message,
+                        'notificable_type' => 'content',
+                        'notificable_id' => $this->content->id,
                     ],
                 ]
             ]);

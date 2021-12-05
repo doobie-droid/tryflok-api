@@ -21,6 +21,7 @@ class EndSubscription implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $subscription;
     /**
      * Create a new job instance.
@@ -43,7 +44,7 @@ class EndSubscription implements ShouldQueue
         $this->subscription->save();
         $parentUserable = Userable::where('id', $this->subscription->userable_id)->first();
         if (is_null($parentUserable)) {
-            Log::error("Invalid userable_id supplied");
+            Log::error('Invalid userable_id supplied');
             Log::error($this->subscription);
             return;
         }
@@ -53,16 +54,16 @@ class EndSubscription implements ShouldQueue
             $price = Price::where('id', $this->subscription->price_id)->first();
             $item = null;
             switch ($this->subscription->subscriptionable_type) {
-                case "collection":
+                case 'collection':
                     $item = Collection::where('id', $this->subscription->subscriptionable_id)->first();
                     break;
-                case "content":
+                case 'content':
                     $item = Content::where('id', $this->subscription->subscriptionable_id)->first();
                     break;
             }
             $user_wallet_balance = (float) $user->wallet->balance;//wallet is in AKC
             $item_price = (float) bcmul($price->amount, 100, 6);//converting dollars to AKC.
-            if (($item_price < $user_wallet_balance) && !is_null($item)) {
+            if (($item_price < $user_wallet_balance) && ! is_null($item)) {
                 $newWalletBalance = bcsub($user->wallet->balance, $item_price, 2);
                 $transaction = WalletTransaction::create([
                     'wallet_id' => $user->wallet->id,

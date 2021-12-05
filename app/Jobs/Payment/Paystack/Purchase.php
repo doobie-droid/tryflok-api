@@ -17,6 +17,7 @@ class Purchase implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $provider_response;
     public $user;
     public $items;
@@ -41,7 +42,7 @@ class Purchase implements ShouldQueue
     {
         $paystack = new PaystackPayment();
         $req = $paystack->verifyTransaction($this->provider_response['reference']);
-        if ((($req->status === true || $req->status === "true") && $req->data->status === "success")) {
+        if ((($req->status === true || $req->status === 'true') && $req->data->status === 'success')) {
             PurchaseJob::dispatch([
                 'total_amount' => $req->data->amount / 100,
                 'total_fees' => $req->data->fees / 100,

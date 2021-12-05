@@ -17,7 +17,8 @@ use Tests\TestCase;
 
 class UpdateTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use DatabaseTransactions;
+    use WithFaker;
 
     private function generateSingleContent($user)
     {
@@ -30,16 +31,20 @@ class UpdateTest extends TestCase
             'description' => 'description before update',
             'is_available' => 1,
         ])
-        ->hasAttached(Asset::factory()->audio()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'content-asset',
-        ])
-        ->hasAttached(Asset::factory()->count(1),
-        [
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover',
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -63,13 +68,13 @@ class UpdateTest extends TestCase
         $price = $content->prices()->first();
         $asset = $content->assets()->first();
         $cover = $content->cover()->first();
-        
+
         return [
             'content' => $content,
             'cover' => $cover,
             'asset' => $asset,
             'tags' => [
-                $tag1, 
+                $tag1,
                 $tag2,
             ],
             'price' => $price,
@@ -107,7 +112,7 @@ class UpdateTest extends TestCase
                 'asset_id' => $coverAsset->id,
             ],
         ];
-        // when wrong content ID is provided 
+        // when wrong content ID is provided
         $response = $this->json('PATCH', '/api/v1/contents/dfdferero9-2343s-2343', $complete_request);
         $response->assertStatus(400)
         ->assertJsonStructure([

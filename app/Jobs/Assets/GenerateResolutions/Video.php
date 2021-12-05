@@ -17,6 +17,7 @@ class Video implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $asset;
     public $filepath;
     public $folder;
@@ -49,7 +50,7 @@ class Video implements ShouldQueue
         $ffmpeg =  FFMpeg::create();
         $resource = $ffmpeg->open($this->filepath);
         $localTempFolder = join_path(storage_path(), '/app/hls', $this->asset->id, 'video');
-        $hlsKeyName = $this->filename . ".key";
+        $hlsKeyName = $this->filename . '.key';
         $baseUrl = join_path(env('PRIVATE_AWS_CLOUDFRONT_URL'), $this->folder);
         //$fullFilename = join_path('contents', $this->content->public_id, 'book', $filename);
 
@@ -59,7 +60,7 @@ class Video implements ShouldQueue
         ->setHlsBaseUrl($baseUrl)
         ->x264()
         ->autoGenerateRepresentations([480, 720, 1080, ]);
-        $hlsenc->save(join_path($localTempFolder, $this->filename . ".m3u8"));
+        $hlsenc->save(join_path($localTempFolder, $this->filename . '.m3u8'));
         // populate data
         unlink($this->filepath);
         $data = [
@@ -89,7 +90,7 @@ class Video implements ShouldQueue
                     if ($fileMeta['resolution'] === 'main') {
                         $data['filepath'] = join_path($localTempFolder, $generatedFilename);
                     } else {
-                        if (!array_key_exists($fileMeta['resolution'], $data['resolutions'])) {
+                        if (! array_key_exists($fileMeta['resolution'], $data['resolutions'])) {
                             $data['resolutions'][$fileMeta['resolution']] = [
                                 'resolution' => $fileMeta['resolution'],
                                 'filepath' => join_path($localTempFolder, $generatedFilename),
@@ -104,7 +105,7 @@ class Video implements ShouldQueue
                     if ($fileMeta['resolution'] === 'main') {
                         $data['ts_files'][] = join_path($localTempFolder, $generatedFilename);
                     } else {
-                        if (!array_key_exists($fileMeta['resolution'], $data['resolutions'])) {
+                        if (! array_key_exists($fileMeta['resolution'], $data['resolutions'])) {
                             $data['resolutions'][$fileMeta['resolution']] = [
                                 'resolution' => '',
                                 'filepath' => '',

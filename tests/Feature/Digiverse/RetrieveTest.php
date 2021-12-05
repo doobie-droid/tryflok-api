@@ -19,7 +19,8 @@ use Tests\TestCase;
 
 class RetrieveTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use DatabaseTransactions;
+    use WithFaker;
 
     public function test_retrieve_digiverse_works()
     {
@@ -30,11 +31,13 @@ class RetrieveTest extends TestCase
         $digiverse = Collection::factory()
         ->for($user, 'owner')
         ->digiverse()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached(Tag::factory()->count(1), [
             'id' => Str::uuid(),
         ])
@@ -44,10 +47,12 @@ class RetrieveTest extends TestCase
                 'user_id' => $user->id
             ])
         )
-        ->hasAttached(Content::factory()->count(1), 
-        [
+        ->hasAttached(
+            Content::factory()->count(1),
+            [
             'id' => Str::uuid(),
-        ])
+            ]
+        )
         ->create();
 
         $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}");
@@ -56,7 +61,7 @@ class RetrieveTest extends TestCase
 
     public function test_retrieve_all_digiverses_fails_with_invalid_parameters()
     {
-        $response = $this->json('GET', "/api/v1/digiverses?page=ere");
+        $response = $this->json('GET', '/api/v1/digiverses?page=ere');
         $response->assertStatus(400)
         ->assertJsonStructure([
             'status',
@@ -65,7 +70,7 @@ class RetrieveTest extends TestCase
                 'page'
             ]
         ]);
-        $response = $this->json('GET', "/api/v1/digiverses?page=-10");
+        $response = $this->json('GET', '/api/v1/digiverses?page=-10');
         $response->assertStatus(400)
         ->assertJsonStructure([
             'status',
@@ -75,7 +80,7 @@ class RetrieveTest extends TestCase
             ]
         ]);
 
-        $response = $this->json('GET', "/api/v1/digiverses?limit=ere");
+        $response = $this->json('GET', '/api/v1/digiverses?limit=ere');
         $response->assertStatus(400)
         ->assertJsonStructure([
             'status',
@@ -84,7 +89,7 @@ class RetrieveTest extends TestCase
                 'limit'
             ]
         ]);
-        $response = $this->json('GET', "/api/v1/digiverses?limit=-30");
+        $response = $this->json('GET', '/api/v1/digiverses?limit=-30');
         $response->assertStatus(400)
         ->assertJsonStructure([
             'status',
@@ -103,7 +108,7 @@ class RetrieveTest extends TestCase
                 'limit'
             ]
         ]);
-            
+
         $keyword_excess = Str::random(201);
         $response = $this->json('GET', "/api/v1/digiverses?keyword={$keyword_excess}");
         $response->assertStatus(400)
@@ -115,7 +120,7 @@ class RetrieveTest extends TestCase
             ]
         ]);
 
-        $response = $this->json('GET', "/api/v1/digiverses?tags=fdfr3-3434f-434,dfdrg-2323-frf");
+        $response = $this->json('GET', '/api/v1/digiverses?tags=fdfr3-3434f-434,dfdrg-2323-frf');
         $response->assertStatus(400)
         ->assertJsonStructure([
             'status',
@@ -125,7 +130,7 @@ class RetrieveTest extends TestCase
             ]
         ]);
 
-        $response = $this->json('GET', "/api/v1/digiverses?creators=fdfr3-3434f-434,dfdrg-2323-frf");
+        $response = $this->json('GET', '/api/v1/digiverses?creators=fdfr3-3434f-434,dfdrg-2323-frf');
         $response->assertStatus(400)
         ->assertJsonStructure([
             'status',
@@ -155,11 +160,13 @@ class RetrieveTest extends TestCase
         ])
         ->for($user1, 'owner')
         ->digiverse()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -179,11 +186,13 @@ class RetrieveTest extends TestCase
         ])
         ->for($user1, 'owner')
         ->digiverse()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -203,11 +212,13 @@ class RetrieveTest extends TestCase
         ])
         ->for($user1, 'owner')
         ->digiverse()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag3, [
             'id' => Str::uuid(),
         ])
@@ -228,11 +239,13 @@ class RetrieveTest extends TestCase
         ])
         ->for($user2, 'owner')
         ->digiverse()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -252,11 +265,13 @@ class RetrieveTest extends TestCase
         ])
         ->for($user2, 'owner')
         ->digiverse()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -276,11 +291,13 @@ class RetrieveTest extends TestCase
         ])
         ->for($user2, 'owner')
         ->digiverse()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag3, [
             'id' => Str::uuid(),
         ])
@@ -447,11 +464,13 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -472,11 +491,13 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -497,11 +518,13 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag3, [
             'id' => Str::uuid(),
         ])
@@ -523,11 +546,13 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -548,11 +573,13 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -573,11 +600,13 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
-        ->hasAttached(Asset::factory()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag3, [
             'id' => Str::uuid(),
         ])

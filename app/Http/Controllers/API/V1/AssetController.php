@@ -25,7 +25,7 @@ class AssetController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             switch ($request->type) {
@@ -46,7 +46,7 @@ class AssetController extends Controller
             return $response;
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -58,7 +58,7 @@ class AssetController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $assets = [];
             foreach ($request->file('files') as $file) {
@@ -67,7 +67,7 @@ class AssetController extends Controller
                 $originalName = $file->getClientOriginalName();
                 $ext = $file->getClientOriginalExtension();
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'image');
-                $fullFilename = join_path($folder, $filename . "." . $ext);
+                $fullFilename = join_path($folder, $filename . '.' . $ext);
                 $url = join_path(env('PUBLIC_AWS_CLOUDFRONT_URL'), $fullFilename);
 
                 $asset = Asset::create([
@@ -82,7 +82,7 @@ class AssetController extends Controller
                 $assets[] = $asset;
                 //delegate upload to job
                 $path = Storage::disk('local')->put('uploads/images', $file);
-                $uploadedFilePath = storage_path() . "/app/" . $path;
+                $uploadedFilePath = storage_path() . '/app/' . $path;
                 GenerateImageResolutionsJob::dispatch([
                     'asset' => $asset,
                     'filepath' => $uploadedFilePath,
@@ -93,7 +93,7 @@ class AssetController extends Controller
                 ]);
             }
 
-            return $this->respondWithSuccess("Assets have been created successfully.", [
+            return $this->respondWithSuccess('Assets have been created successfully.', [
                 'assets' => $assets,
             ]);
         } catch (\Exception $exception) {
@@ -101,7 +101,7 @@ class AssetController extends Controller
             foreach ($assets as $asset) {
                 $asset->delete();
             }
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -113,7 +113,7 @@ class AssetController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $assets = [];
             foreach ($request->file('files') as $file) {
@@ -122,7 +122,7 @@ class AssetController extends Controller
                 $originalName = $file->getClientOriginalName();
                 $ext = $file->getClientOriginalExtension();
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'video');
-                $fullFilename = join_path($folder, $filename . ".m3u8");
+                $fullFilename = join_path($folder, $filename . '.m3u8');
                 $url = join_path(env('PRIVATE_AWS_CLOUDFRONT_URL'), $fullFilename);
 
                 $asset = Asset::create([
@@ -137,7 +137,7 @@ class AssetController extends Controller
                 $assets[] = $asset;
                 //delegate upload to job
                 $path = Storage::disk('local')->put('uploads/videos', $file);
-                $uploadedFilePath = storage_path() . "/app/" . $path;
+                $uploadedFilePath = storage_path() . '/app/' . $path;
                 GenerateVideoResolutionsJob::dispatch([
                     'asset' => $asset,
                     'filepath' => $uploadedFilePath,
@@ -147,7 +147,7 @@ class AssetController extends Controller
                     'full_file_name' => $fullFilename,
                 ]);
             }
-            return $this->respondWithSuccess("Assets have been created successfully.", [
+            return $this->respondWithSuccess('Assets have been created successfully.', [
                 'assets' => $assets,
             ]);
         } catch (\Exception $exception) {
@@ -155,7 +155,7 @@ class AssetController extends Controller
             foreach ($assets as $asset) {
                 $asset->delete();
             }
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -167,7 +167,7 @@ class AssetController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $assets = [];
@@ -177,7 +177,7 @@ class AssetController extends Controller
                 $originalName = $file->getClientOriginalName();
                 $ext = $file->getClientOriginalExtension();
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'audio');
-                $fullFilename = join_path($folder, $filename . "." . $ext);
+                $fullFilename = join_path($folder, $filename . '.' . $ext);
                 $url = join_path(env('PRIVATE_AWS_CLOUDFRONT_URL'), $fullFilename);
 
                 $asset = Asset::create([
@@ -192,7 +192,7 @@ class AssetController extends Controller
                 $assets[] = $asset;
                 //delegate upload to job
                 $path = Storage::disk('local')->put('uploads/audio', $file);
-                $uploadedFilePath = storage_path() . "/app/" . $path;
+                $uploadedFilePath = storage_path() . '/app/' . $path;
                 GenerateAudioResolutionsJob::dispatch([
                     'asset' => $asset,
                     'filepath' => $uploadedFilePath,
@@ -200,7 +200,7 @@ class AssetController extends Controller
                 ]);
             }
 
-            return $this->respondWithSuccess("Assets have been created successfully.", [
+            return $this->respondWithSuccess('Assets have been created successfully.', [
                 'assets' => $assets,
             ]);
         } catch (\Exception $exception) {
@@ -208,7 +208,7 @@ class AssetController extends Controller
             foreach ($assets as $asset) {
                 $asset->delete();
             }
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -220,7 +220,7 @@ class AssetController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $assets = [];
 
@@ -230,7 +230,7 @@ class AssetController extends Controller
                 $originalName = $file->getClientOriginalName();
                 $ext = $file->getClientOriginalExtension();
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'pdf');
-                $fullFilename = join_path($folder, $filename . "." . $ext);
+                $fullFilename = join_path($folder, $filename . '.' . $ext);
                 $url = join_path(env('PRIVATE_AWS_CLOUDFRONT_URL'), $fullFilename);
 
                 $asset = Asset::create([
@@ -245,7 +245,7 @@ class AssetController extends Controller
                 $assets[] = $asset;
                 //delegate upload to job
                 $path = Storage::disk('local')->put('uploads/pdf', $file);
-                $uploadedFilePath = storage_path() . "/app/" . $path;
+                $uploadedFilePath = storage_path() . '/app/' . $path;
                 GeneratePdfResolutionsJob::dispatch([
                     'asset' => $asset,
                     'filepath' => $uploadedFilePath,
@@ -254,7 +254,7 @@ class AssetController extends Controller
                 ]);
             }
 
-            return $this->respondWithSuccess("Assets have been created successfully.", [
+            return $this->respondWithSuccess('Assets have been created successfully.', [
                 'assets' => $assets,
             ]);
         } catch (\Exception $exception) {
@@ -262,7 +262,7 @@ class AssetController extends Controller
             foreach ($assets as $asset) {
                 $asset->delete();
             }
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 }

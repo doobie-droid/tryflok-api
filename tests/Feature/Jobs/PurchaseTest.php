@@ -18,6 +18,7 @@ use Tests\TestCase;
 class PurchaseTest extends TestCase
 {
     use DatabaseTransactions;
+
     /**
      * A basic feature test example.
      *
@@ -90,33 +91,33 @@ class PurchaseTest extends TestCase
             'user' => $buyer->toArray(),
             'items' => [
                 [
-                    "id" => $paid_digiverse->id,
-                    "type" => "collection",
-                    "price" => [
-                        "id" => $paid_digiverse->prices()->first()->id,
-                        "amount" => $paid_digiverse->prices()->first()->amount,
-                        "interval" => "monthly",
-                        "interval_amount" => 1,
+                    'id' => $paid_digiverse->id,
+                    'type' => 'collection',
+                    'price' => [
+                        'id' => $paid_digiverse->prices()->first()->id,
+                        'amount' => $paid_digiverse->prices()->first()->amount,
+                        'interval' => 'monthly',
+                        'interval_amount' => 1,
                     ],
                 ],
                 [
-                    "id" => $free_content_in_free_digiverse->id,
-                    "type" => "content",
-                    "price" => [
-                        "id" => $free_content_in_free_digiverse->prices()->first()->id,
-                        "amount" => 0,
-                        "interval" => "one-off",
-                        "interval_amount" => 1,
+                    'id' => $free_content_in_free_digiverse->id,
+                    'type' => 'content',
+                    'price' => [
+                        'id' => $free_content_in_free_digiverse->prices()->first()->id,
+                        'amount' => 0,
+                        'interval' => 'one-off',
+                        'interval_amount' => 1,
                     ],
                 ],
                 [
-                    "id" => $paid_content_in_free_digiverse->id,
-                    "type" => "content",
-                    "price" => [
-                        "id" => $paid_content_in_free_digiverse->prices()->first()->id,
-                        "amount" => $paid_content_in_free_digiverse->prices()->first()->amount,
-                        "interval" => "one-off",
-                        "interval_amount" => 1,
+                    'id' => $paid_content_in_free_digiverse->id,
+                    'type' => 'content',
+                    'price' => [
+                        'id' => $paid_content_in_free_digiverse->prices()->first()->id,
+                        'amount' => $paid_content_in_free_digiverse->prices()->first()->amount,
+                        'interval' => 'one-off',
+                        'interval_amount' => 1,
                     ],
                 ],
             ],
@@ -153,8 +154,8 @@ class PurchaseTest extends TestCase
             'saleable_id' => $paid_digiverse->id,
             'amount' => 100,
             'payment_processor_fee' => 0,
-            'platform_share' => bcdiv(bcmul(100, Constants::PLATFORM_SHARE,6),100,2),
-            'benefactor_share' => bcdiv(bcmul(100, Constants::CREATOR_SHARE,6),100,2),
+            'platform_share' => bcdiv(bcmul(100, Constants::PLATFORM_SHARE, 6), 100, 2),
+            'benefactor_share' => bcdiv(bcmul(100, Constants::CREATOR_SHARE, 6), 100, 2),
             'referral_bonus' => 0,
         ]);
 
@@ -164,8 +165,8 @@ class PurchaseTest extends TestCase
             'saleable_id' => $paid_content_in_free_digiverse->id,
             'amount' => 100,
             'payment_processor_fee' => 0,
-            'platform_share' => bcdiv(bcmul(100, Constants::PLATFORM_SHARE,6),100,2),
-            'benefactor_share' => bcdiv(bcmul(100, Constants::CREATOR_SHARE,6),100,2),
+            'platform_share' => bcdiv(bcmul(100, Constants::PLATFORM_SHARE, 6), 100, 2),
+            'benefactor_share' => bcdiv(bcmul(100, Constants::CREATOR_SHARE, 6), 100, 2),
             'referral_bonus' => 0,
         ]);
 
@@ -175,8 +176,8 @@ class PurchaseTest extends TestCase
             'saleable_id' => $free_content_in_free_digiverse->id,
             'amount' => 0,
             'payment_processor_fee' => 0,
-            'platform_share' => bcdiv(bcmul(0, Constants::PLATFORM_SHARE,6),100,2),
-            'benefactor_share' => bcdiv(bcmul(0, Constants::CREATOR_SHARE,6),100,2),
+            'platform_share' => bcdiv(bcmul(0, Constants::PLATFORM_SHARE, 6), 100, 2),
+            'benefactor_share' => bcdiv(bcmul(0, Constants::CREATOR_SHARE, 6), 100, 2),
             'referral_bonus' => 0,
         ]);
 

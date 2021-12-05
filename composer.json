@@ -32,6 +32,7 @@
         "nunomaduro/collision": "^5.0",
         "phpunit/phpunit": "^9.3.3",
         "tightenco/tlint": "^6.2.1",
+        "tightenco/duster": "^0.3.2",
         "friendsofphp/php-cs-fixer": "^3.3"
     },
     "autoload": {

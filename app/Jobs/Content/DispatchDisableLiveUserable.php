@@ -16,6 +16,7 @@ class DispatchDisableLiveUserable implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $live_content;
     /**
      * Create a new job instance.

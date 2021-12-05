@@ -2,7 +2,8 @@
 
 namespace Tests\MockData;
 
-class Collection {
+class Collection
+{
     const SEEDED_UNPAID_COLLECTION = [
         'public_id' => '1867378820606c9e5ab27c6',
         'title' => 'Test Collection',

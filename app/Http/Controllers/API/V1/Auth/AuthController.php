@@ -35,7 +35,7 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $user = User::create([
@@ -45,16 +45,16 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'public_id' => uniqid(rand()),
                 'email_token' => Str::random(16),
-                'referral_id' => strtoupper(Str::random(6)) . "-" . date('Ymd'),
+                'referral_id' => strtoupper(Str::random(6)) . '-' . date('Ymd'),
             ]);
 
-            if (!is_null($request->referral_id)) {
+            if (! is_null($request->referral_id)) {
                 $referrer = User::where('referral_id', $request->referral_id)->first();
                 $user->referrer_id = $referrer->id;
                 $user->save();
             }
 
-            if (!is_null($request->firebase_token)) {
+            if (! is_null($request->firebase_token)) {
                 $user->notificationTokens()->create([
                     'token' => $request->firebase_token,
                 ]);
@@ -66,13 +66,13 @@ class AuthController extends Controller
             $user->wallet()->create([]);
             $token = JWTAuth::fromUser($user);
             $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $user->id)->first();
-            return $this->respondWithSuccess("Registration successful", [
+            return $this->respondWithSuccess('Registration successful', [
                 'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -91,7 +91,7 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $socialIsValid = false;
@@ -126,11 +126,11 @@ class AuthController extends Controller
                     }
                     break;
                 default:
-                    return $this->respondBadRequest("Invalid social media provider supplied");
+                    return $this->respondBadRequest('Invalid social media provider supplied');
             }
 
-            if (!$socialIsValid) {
-                return $this->respondBadRequest("An invalid token was supplied");
+            if (! $socialIsValid) {
+                return $this->respondBadRequest('An invalid token was supplied');
             }
 
             //check if user exists
@@ -143,14 +143,14 @@ class AuthController extends Controller
                     'password' => Hash::make(Str::random(8)),
                     'public_id' => uniqid(rand()),
                     'email_token' => Str::random(16),
-                    'referral_id' => strtoupper(Str::random(6)) . "-" . date('Ymd'),
+                    'referral_id' => strtoupper(Str::random(6)) . '-' . date('Ymd'),
                 ]);
                 event(new ConfirmEmailEvent($user));
                 $user->assignRole(Roles::USER);
                 $user->wallet()->create([]);
             }
 
-            if (!is_null($request->firebase_token)) {
+            if (! is_null($request->firebase_token)) {
                 $firebase_token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
                 if (is_null($firebase_token)) {
                     $user->notificationTokens()->create([
@@ -161,13 +161,13 @@ class AuthController extends Controller
 
             $token = JWTAuth::fromUser($user);
             $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $user->id)->first();
-            return $this->respondWithSuccess("Registration successful", [
+            return $this->respondWithSuccess('Registration successful', [
                 'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -181,7 +181,7 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             if (Auth::attempt(['email' => $request->username, 'password' => $request->password]) || Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
@@ -193,7 +193,7 @@ class AuthController extends Controller
                 }
                 $user = User::with('roles', 'profile_picture', 'wallet')->where('id', Auth::user()->id)->first();
 
-                if (!is_null($request->firebase_token)) {
+                if (! is_null($request->firebase_token)) {
                     $firebase_token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
                     if (is_null($firebase_token)) {
                         $user->notificationTokens()->create([
@@ -201,16 +201,16 @@ class AuthController extends Controller
                         ]);
                     }
                 }
-                return $this->respondWithSuccess("Login successful", [
+                return $this->respondWithSuccess('Login successful', [
                     'user' => new UserResourceWithSensitive($user),
                     'token' => $token,
                 ]);
             } else {
-                return $this->respondBadRequest("User credentials do not match our record");
+                return $this->respondBadRequest('User credentials do not match our record');
             }
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -222,30 +222,30 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $otp = Otp::where('code', $request->code)->where('purpose', 'authentication')->first();
 
             if (is_null($otp)) {
-                return $this->respondBadRequest("Invalid OTP provided");
+                return $this->respondBadRequest('Invalid OTP provided');
             }
 
             if ($otp->expires_at->lt(now())) {
-                return $this->respondBadRequest("Access code has expired");
+                return $this->respondBadRequest('Access code has expired');
             }
 
             $otp->expires_at = now();//expire the token since it has been used
             $otp->save();
             $token = JWTAuth::fromUser($otp->user);
             $user = User::with('roles', 'profile_picture', 'wallet')->where('public_id', $otp->user->public_id)->first();
-            return $this->respondWithSuccess("Login successful", [
+            return $this->respondWithSuccess('Login successful', [
                 'user' => new UserResourceWithSensitive($otp->user),
                 'token' => $token,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -255,7 +255,7 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
         ]);
         if ($validator->fails()) {
-            return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
         }
 
         $user = User::where('email', $request->email)->first();
@@ -276,7 +276,7 @@ class AuthController extends Controller
             'firebase_token' => ['sometimes', 'nullable','string',],
         ]);
         if ($validator->fails()) {
-            return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
         }
 
         $user = User::with('roles', 'profile_picture', 'wallet')->where('password_token', $request->token)->first();
@@ -285,7 +285,7 @@ class AuthController extends Controller
             $user->password_token = null;
             $user->save();
             $token = JWTAuth::fromUser($user);
-            if (!is_null($request->firebase_token)) {
+            if (! is_null($request->firebase_token)) {
                 $firebase_token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
                 if (is_null($firebase_token)) {
                     $user->notificationTokens()->create([
@@ -293,12 +293,12 @@ class AuthController extends Controller
                     ]);
                 }
             }
-            return $this->respondWithSuccess("Password reset successfully", [
+            return $this->respondWithSuccess('Password reset successfully', [
                 'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
             ]);
         } else {
-            return $this->respondBadRequest("Token has expired");
+            return $this->respondBadRequest('Token has expired');
         }
     }
 
@@ -309,9 +309,9 @@ class AuthController extends Controller
             $user->email_verified = 1;
             $user->email_token = '';
             $user->save();
-            return $this->respondWithSuccess("Email verified successfully", ['user' => new UserResourceWithSensitive($user), 'token' => JWTAuth::fromUser($user)]);
+            return $this->respondWithSuccess('Email verified successfully', ['user' => new UserResourceWithSensitive($user), 'token' => JWTAuth::fromUser($user)]);
         } else {
-            return $this->respondBadRequest("Token has expired");
+            return $this->respondBadRequest('Token has expired');
         }
     }
 }

@@ -19,7 +19,9 @@ use Tests\TestCase;
 
 class RetrieveTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use DatabaseTransactions;
+    use WithFaker;
+
     private function generateSingleContent($user)
     {
         $tag1 = Tag::factory()->create();
@@ -31,16 +33,20 @@ class RetrieveTest extends TestCase
             'description' => 'description before update',
             'is_available' => 1,
         ])
-        ->hasAttached(Asset::factory()->audio()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'content-asset',
-        ])
-        ->hasAttached(Asset::factory()->count(1),
-        [
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover',
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -64,13 +70,13 @@ class RetrieveTest extends TestCase
         $price = $content->prices()->first();
         $asset = $content->assets()->first();
         $cover = $content->cover()->first();
-        
+
         return [
             'content' => $content,
             'cover' => $cover,
             'asset' => $asset,
             'tags' => [
-                $tag1, 
+                $tag1,
                 $tag2,
             ],
             'price' => $price,
@@ -139,7 +145,7 @@ class RetrieveTest extends TestCase
                 'limit'
             ]
         ]);
-            
+
         $keyword_excess = Str::random(201);
         $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}/contents?keyword={$keyword_excess}");
         $response->assertStatus(400)
@@ -189,21 +195,27 @@ class RetrieveTest extends TestCase
             'title' => 'title1',
         ])
         ->for($user, 'owner')
-        ->hasAttached($digiverse,
-        [
+        ->hasAttached(
+            $digiverse,
+            [
             'id' => Str::uuid(),
-        ])
+            ]
+        )
         ->audio()
-        ->hasAttached(Asset::factory()->audio()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'content-asset',
-        ])
-        ->hasAttached(Asset::factory()->count(1),
-        [
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -222,21 +234,27 @@ class RetrieveTest extends TestCase
             'title' => 'title2',
         ])
         ->for($user, 'owner')
-        ->hasAttached($digiverse,
-        [
+        ->hasAttached(
+            $digiverse,
+            [
             'id' => Str::uuid(),
-        ])
+            ]
+        )
         ->audio()
-        ->hasAttached(Asset::factory()->audio()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'content-asset',
-        ])
-        ->hasAttached(Asset::factory()->count(1),
-        [
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -255,21 +273,27 @@ class RetrieveTest extends TestCase
             'title' => 'title3',
         ])
         ->for($user, 'owner')
-        ->hasAttached($digiverse,
-        [
+        ->hasAttached(
+            $digiverse,
+            [
             'id' => Str::uuid(),
-        ])
+            ]
+        )
         ->audio()
-        ->hasAttached(Asset::factory()->audio()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'content-asset',
-        ])
-        ->hasAttached(Asset::factory()->count(1),
-        [
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag3, [
             'id' => Str::uuid(),
         ])
@@ -289,21 +313,27 @@ class RetrieveTest extends TestCase
             'description' => 'title1',
         ])
         ->for($user, 'owner')
-        ->hasAttached($digiverse,
-        [
+        ->hasAttached(
+            $digiverse,
+            [
             'id' => Str::uuid(),
-        ])
+            ]
+        )
         ->audio()
-        ->hasAttached(Asset::factory()->audio()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'content-asset',
-        ])
-        ->hasAttached(Asset::factory()->count(1),
-        [
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -322,21 +352,27 @@ class RetrieveTest extends TestCase
             'description' => 'title2',
         ])
         ->for($user, 'owner')
-        ->hasAttached($digiverse,
-        [
+        ->hasAttached(
+            $digiverse,
+            [
             'id' => Str::uuid(),
-        ])
+            ]
+        )
         ->audio()
-        ->hasAttached(Asset::factory()->audio()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'content-asset',
-        ])
-        ->hasAttached(Asset::factory()->count(1),
-        [
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag1, [
             'id' => Str::uuid(),
         ])
@@ -355,21 +391,27 @@ class RetrieveTest extends TestCase
             'description' => 'title3',
         ])
         ->for($user, 'owner')
-        ->hasAttached($digiverse,
-        [
+        ->hasAttached(
+            $digiverse,
+            [
             'id' => Str::uuid(),
-        ])
+            ]
+        )
         ->audio()
-        ->hasAttached(Asset::factory()->audio()->count(1),
-        [
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'content-asset',
-        ])
-        ->hasAttached(Asset::factory()->count(1),
-        [
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
             'id' => Str::uuid(),
             'purpose' => 'cover'
-        ])
+            ]
+        )
         ->hasAttached($tag3, [
             'id' => Str::uuid(),
         ])

@@ -29,7 +29,7 @@ class CollectionResource extends JsonResource
     private function getCover()
     {
         $cover = $this->whenLoaded('cover');
-        if (!is_null($cover)) {
+        if (! is_null($cover)) {
             return $this->cover->first();
         }
 

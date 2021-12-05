@@ -17,6 +17,7 @@ class Pdf implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     public $asset;
     public $filepath;
     public $filename;
@@ -49,7 +50,7 @@ class Pdf implements ShouldQueue
         $folder = join_path(storage_path(), '/app/encrypted-files', $this->asset->id, 'pdf');
         $filename = $this->filename;
         $tempPathForEncryptedFile = join_path($folder, $filename);
-        if (!file_exists($folder)) {
+        if (! file_exists($folder)) {
             mkdir($folder, 0755, true);
         }
         file_put_contents($tempPathForEncryptedFile, $encryptedFileBase64);

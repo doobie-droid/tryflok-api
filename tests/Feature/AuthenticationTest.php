@@ -14,6 +14,7 @@ use Tests\TestCase;
 class AuthenticationTest extends TestCase
 {
     use DatabaseTransactions;
+
     public function testSuperAdminLoginWorks()
     {
         $response = $this->json('POST', '/api/v1/auth/login', UserMock::SEEDED_SUPER_ADMIN);
@@ -130,14 +131,14 @@ class AuthenticationTest extends TestCase
         ]);
         $user = User::where('email', UserMock::UNSEEDED_USER['email'])->first();
         Notification::assertSentTo(
-            [$user], EmailConfirmation::class
+            [$user],
+            EmailConfirmation::class
         );
 
         $this->assertDatabaseHas('users', [
             'email' => UserMock::UNSEEDED_USER['email'],
             'name' => UserMock::UNSEEDED_USER['name'],
         ]);
-
     }
 
     public function testInvalidUsernamesAreNotRegistered()

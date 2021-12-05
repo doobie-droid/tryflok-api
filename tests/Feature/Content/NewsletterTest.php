@@ -15,7 +15,9 @@ use Tests\TestCase;
 
 class NewsletterTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use DatabaseTransactions;
+    use WithFaker;
+
     public function test_create_newletter_issue_works()
     {
         $user = User::factory()->create();
@@ -65,8 +67,7 @@ class NewsletterTest extends TestCase
             'user_id' => $user->id,
         ])
         ->hasAttached(
-            $digiverse
-            ,
+            $digiverse,
             [
                 'id' => Str::uuid(),
             ]
@@ -85,7 +86,7 @@ class NewsletterTest extends TestCase
         $request = [
             'issue_id' => $issue->id,
             'title' => 'Update First Issue ' . date('YmdHis'),
-            'description' => "<p>Hello World</p>",
+            'description' => '<p>Hello World</p>',
         ];
         $response = $this->json('PUT', "/api/v1/contents/{$newsletter->id}/issues", $request);
         $response->assertStatus(200)->assertJsonStructure(ContentMock::STANDARD_ISSUE_RESPONSE);
@@ -113,8 +114,7 @@ class NewsletterTest extends TestCase
             'user_id' => $user->id,
         ])
         ->hasAttached(
-            $digiverse
-            ,
+            $digiverse,
             [
                 'id' => Str::uuid(),
             ]

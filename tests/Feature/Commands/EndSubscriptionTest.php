@@ -14,7 +14,9 @@ use Tests\TestCase;
 
 class EndSubscriptionTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use DatabaseTransactions;
+    use WithFaker;
+
     /**
      * A basic feature test example.
      *
@@ -22,7 +24,7 @@ class EndSubscriptionTest extends TestCase
      */
     public function test_example()
     {
-        
+
         $collection = Collection::factory()
         ->digiverse()
         ->create();
@@ -30,7 +32,7 @@ class EndSubscriptionTest extends TestCase
         ->for($collection, 'priceable')
         ->subscription()
         ->create();
-        $price_in_flk = bcmul($price->amount,100, 2);
+        $price_in_flk = bcmul($price->amount, 100, 2);
 
         // subscription has not ended
         $user1 = User::factory()->create();
@@ -172,7 +174,7 @@ class EndSubscriptionTest extends TestCase
             'subscriptionable_id' => $collection->id,
         ]);
 
-        $this->assertEquals($user2_wallet->refresh()->balance, bcsub($user2_initial_wallet_balance, $price_in_flk,2));
+        $this->assertEquals($user2_wallet->refresh()->balance, bcsub($user2_initial_wallet_balance, $price_in_flk, 2));
         $this->assertDatabaseHas('wallet_transactions', [
             'wallet_id' => $user2_wallet->id,
             'amount' => $price_in_flk,

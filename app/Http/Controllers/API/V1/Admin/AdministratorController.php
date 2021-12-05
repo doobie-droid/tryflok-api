@@ -14,7 +14,7 @@ class AdministratorController extends Controller
     public function dashboard(Request $request)
     {
         try {
-            return $this->respondWithSuccess("Dashboard details retrieved successfully.", [
+            return $this->respondWithSuccess('Dashboard details retrieved successfully.', [
                 'users_total' => User::all()->count(),
                 'users_today' => User::whereDate('created_at', today())->count(),
                 'users_month' => User::whereMonth('created_at', now()->month)->count(),
@@ -27,7 +27,7 @@ class AdministratorController extends Controller
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 }

@@ -2,7 +2,8 @@
 
 namespace Tests\MockData;
 
-class User {
+class User
+{
     const SEEDED_SUPER_ADMIN = [
         'name' => 'Super Admin',
         'username' => 'super_admin',
