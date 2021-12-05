@@ -1,8 +1,10 @@
 <?php
+
 namespace App\Constants;
 
-class Roles {
-	const SUPER_ADMIN = "super-admin";
-	const ADMIN = "admin";
-	const USER = "user";
+class Roles
+{
+    public const SUPER_ADMIN = "super-admin";
+    public const ADMIN = "admin";
+    public const USER = "user";
 }

@@ -2,15 +2,13 @@
 
 namespace App\Services\Payment\Providers\Paystack;
 
-
 interface APIInterface
 {
-
     /**
      * Returns API base URL
      * @return string
      */
-     public function baseUrl();
+    public function baseUrl();
 
     /**
      * Returns the number of items to return per page
@@ -90,8 +88,4 @@ interface APIInterface
      * @return array
      */
     public function execute($httpMethod, $url, array $parameters = []);
-
 }
-
-
-

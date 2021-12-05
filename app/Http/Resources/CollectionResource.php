@@ -16,7 +16,7 @@ class CollectionResource extends JsonResource
     public function toArray($request)
     {
         $parent = parent::toArray($request);
-        return array_merge($parent , [
+        return array_merge($parent, [
             'ratings_count' => $this->ratings_count,
             'ratings_average' => $this->ratings_avg_rating,
             'cover' => $this->getCover(),

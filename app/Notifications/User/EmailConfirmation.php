@@ -39,7 +39,7 @@ class EmailConfirmation extends Notification
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage)->view('emails.user.welcome', ['user'=> $this->user])->subject('Welcome');
+        return (new MailMessage())->view('emails.user.welcome', ['user'=> $this->user])->subject('Welcome');
     }
 
     /**

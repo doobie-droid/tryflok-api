@@ -1,0 +1,15 @@
+{
+    "preset": "laravel",
+    "disabled": ["NoInlineVarDocs"],
+    "excluded": [
+        "tests/",
+        "supervisord/",
+        "storage/",
+        "php/",
+        "public/",
+        "nginx/",
+        "mysql/",
+        "cron/",
+        "bootstrap/"
+    ]
+}

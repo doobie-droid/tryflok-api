@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Collection extends Model
 {
-    use HasFactory, SoftDeletes, Uuid;
+    use HasFactory;
+    use SoftDeletes;
+    use Uuid;
 
     /**
      * The attributes that are not mass assignable.

@@ -40,8 +40,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         return response()->json([
             "message" => "Languages retrieved successfully",
             "data" => [
-                "languages" => Cache::rememberForever('request:languages', function()
-                {
+                "languages" => Cache::rememberForever('request:languages', function () {
                     return \App\Models\Language::orderBy('name')->get();
                 }),
             ]
@@ -52,8 +51,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         return response()->json([
             "message" => "Countries retrieved successfully",
             "data" => [
-                "countries" => Cache::rememberForever('request:countries', function()
-                {
+                "countries" => Cache::rememberForever('request:countries', function () {
                     return \App\Models\Country::orderBy('name')->get();
                 }),
             ]
@@ -64,8 +62,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         return response()->json([
             "message" => "Continents retrieved successfully",
             "data" => [
-                "continents" => Cache::rememberForever('request:continents', function()
-                {
+                "continents" => Cache::rememberForever('request:continents', function () {
                     return \App\Models\Continent::orderBy('name')->get();
                 }),
             ]
@@ -147,7 +144,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
-
         Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => 'authorize_admin'], function () {
             Route::get('/dashboard', 'AdministratorController@dashboard');
 

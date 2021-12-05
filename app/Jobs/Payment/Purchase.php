@@ -18,7 +18,10 @@ use Illuminate\Support\Facades\Log;
 
 class Purchase implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
     public $data;
     /**
      * Create a new job instance.
@@ -76,7 +79,7 @@ class Purchase implements ShouldQueue
 
             $amount = $item['price']['amount'];
             if ($this->data['total_fees'] > 0) {
-                $fee = bcmul(bcdiv($amount, $this->data['total_amount'],6), $this->data['total_fees'], 6);
+                $fee = bcmul(bcdiv($amount, $this->data['total_amount'], 6), $this->data['total_fees'], 6);
             } else {
                 $fee = 0;
             }
@@ -97,7 +100,7 @@ class Purchase implements ShouldQueue
                     'status' => 'completed',
                 ]);
             }
-            
+
             //record payment on payment table
             $payment = $itemModel->payments()->create([
                 'payer_id' => $payer->id,
@@ -110,8 +113,8 @@ class Purchase implements ShouldQueue
 
             //record sales for the benefactors of this item
             $net_amount = $amount;
-            $platform_share = bcdiv(bcmul($net_amount, Constants::PLATFORM_SHARE,6),100,2);
-            $creator_share = bcdiv(bcmul($net_amount, Constants::CREATOR_SHARE,6),100,2);
+            $platform_share = bcdiv(bcmul($net_amount, Constants::PLATFORM_SHARE, 6), 100, 2);
+            $creator_share = bcdiv(bcmul($net_amount, Constants::CREATOR_SHARE, 6), 100, 2);
             foreach ($itemModel->benefactors as $benefactor) {
                 $benefactor->user->sales()->create([
                     'saleable_type' => $item['type'],
@@ -119,7 +122,7 @@ class Purchase implements ShouldQueue
                     'amount' => $amount,
                     'payment_processor_fee' => $fee,
                     'platform_share' => bcsub($platform_share, $fee, 2),
-                    'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share,6),100,2),
+                    'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share, 6), 100, 2),
                     'referral_bonus' => 0,
                 ]);
             }
@@ -132,12 +135,12 @@ class Purchase implements ShouldQueue
                     'payment_processor_fee' => $fee,
                     'platform_share' => bcsub($platform_share, $fee, 6),
                     'benefactor_share' => 0,
-                    'referral_bonus' => bcdiv(bcmul(bcsub($platform_share, $fee, 6), 2.5,6),100,2),
+                    'referral_bonus' => bcdiv(bcmul(bcsub($platform_share, $fee, 6), 2.5, 6), 100, 2),
                 ]);
             }
 
             //check if item exists in userables as a parent item (cos it's always going to trickle to children)
-            $parentUserable = Userable::where('userable_type',$item['type'])->where('userable_id', $itemModel->id)->where('user_id', $payer->id)->whereNull('parent_id')->first();
+            $parentUserable = Userable::where('userable_type', $item['type'])->where('userable_id', $itemModel->id)->where('user_id', $payer->id)->whereNull('parent_id')->first();
             if (is_null($parentUserable)) {
                 //add content/collection to userables
                 $parentUserable = Userable::create([
@@ -153,7 +156,7 @@ class Purchase implements ShouldQueue
             }
 
             //if subscription create subscription record
-            if ($item['type'] === 'collection' && $price->interval  === 'monthly'){
+            if ($item['type'] === 'collection' && $price->interval  === 'monthly') {
                 $start = now();
                 $cloneOfStart = clone $start;
                 $end = $cloneOfStart->add($price->interval_amount, 'month');
@@ -164,7 +167,7 @@ class Purchase implements ShouldQueue
                     'end' => $end,
                     'auto_renew' => 0,
                 ]);
-            } 
+            }
         }
     }
 

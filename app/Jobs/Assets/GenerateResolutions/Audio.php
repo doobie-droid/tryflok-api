@@ -12,8 +12,13 @@ use Illuminate\Support\Facades\Log;
 
 class Audio implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $asset, $filepath, $full_file_name;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $asset;
+    public $filepath;
+    public $full_file_name;
     /**
      * Create a new job instance.
      *

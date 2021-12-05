@@ -32,7 +32,7 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $user = $request->user();
@@ -65,7 +65,7 @@ class CollectionController extends Controller
                     ]);
                 }
             }
-            
+
             $digiverse->cover()->attach($request->cover['asset_id'], [
                 'id' => Str::uuid(),
                 'purpose' => 'cover'
@@ -78,8 +78,7 @@ class CollectionController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ])->withAvg([
-                'ratings' => function($query)
-                {
+                'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
@@ -88,10 +87,10 @@ class CollectionController extends Controller
             return $this->respondWithSuccess("Digiverse has been created successfully.", [
                 'digiverse' => new CollectionResource($digiverse),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getDigiverse(Request $request, $id)
@@ -102,10 +101,10 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
-            if ($request->user() == NULL || $request->user()->id == NULL) {
+            if ($request->user() == null || $request->user()->id == null) {
                 $user_id = 0;
             } else {
                 $user_id = $request->user()->id;
@@ -118,14 +117,13 @@ class CollectionController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ])->withAvg([
-                'ratings' => function($query)
-                {
+                'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
             ->with([
                 'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
             ])
             ->first();
@@ -133,10 +131,10 @@ class CollectionController extends Controller
             return $this->respondWithSuccess("Digiverse retrieved successfully.", [
                 'digiverse' => new CollectionResource($digiverse),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function updateDigiverse(Request $request, $id)
@@ -159,7 +157,7 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $user = $request->user();
@@ -170,8 +168,7 @@ class CollectionController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ])->withAvg([
-                'ratings' => function($query)
-                {
+                'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
@@ -221,14 +218,14 @@ class CollectionController extends Controller
                     }
                 }
             }
-            
+
             return $this->respondWithSuccess("Digiverse updated successfully.", [
                 'digiverse' => new CollectionResource($digiverse),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getAll(Request $request)
@@ -281,7 +278,7 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $digiverses = Collection::where('type', 'digiverse')->where('is_available', 1)
@@ -301,10 +298,10 @@ class CollectionController extends Controller
             }
 
             if (!empty($creators)) {
-                $digiverses = $digiverses->whereIn('user_id', $creators );
+                $digiverses = $digiverses->whereIn('user_id', $creators);
             }
-    
-            if ($request->user() == NULL || $request->user()->id == NULL) {
+
+            if ($request->user() == null || $request->user()->id == null) {
                 $user_id = 0;
             } else {
                 $user_id = $request->user()->id;
@@ -316,8 +313,7 @@ class CollectionController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ])->withAvg([
-                'ratings' => function($query)
-                {
+                'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
@@ -327,22 +323,21 @@ class CollectionController extends Controller
             ->with('prices')
             ->with([
                 'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
             ])->orderBy('collections.created_at', 'desc')
             ->paginate($limit, array('*'), 'page', $page);
 
-            return $this->respondWithSuccess('Digiverses retrieved successfully',[
+            return $this->respondWithSuccess('Digiverses retrieved successfully', [
                 'digiverses' => CollectionResource::collection($digiverses),
                 'current_page' => (int) $digiverses->currentPage(),
                 'items_per_page' => (int) $digiverses->perPage(),
                 'total' => (int) $digiverses->total(),
             ]);
-
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getUserCreatedDigiverses(Request $request)
@@ -388,7 +383,7 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $digiverses = Collection::where('type', 'digiverse')->where('user_id', $request->user()->id);
@@ -406,7 +401,7 @@ class CollectionController extends Controller
                 });
             }
 
-            if ($request->user() == NULL || $request->user()->id == NULL) {
+            if ($request->user() == null || $request->user()->id == null) {
                 $user_id = 0;
             } else {
                 $user_id = $request->user()->id;
@@ -418,33 +413,31 @@ class CollectionController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ])->withAvg([
-                'ratings' => function($query)
-                {
+                'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
             ->with('cover')
-            ->with('owner','owner.profile_picture')
+            ->with('owner', 'owner.profile_picture')
             ->with('tags')
             ->with('prices')
             ->with([
                 'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
             ])->orderBy('collections.created_at', 'desc')
             ->paginate($limit, array('*'), 'page', $page);
 
-            return $this->respondWithSuccess('Digiverses retrieved successfully',[
+            return $this->respondWithSuccess('Digiverses retrieved successfully', [
                 'digiverses' => CollectionResource::collection($digiverses),
                 'current_page' => (int) $digiverses->currentPage(),
                 'items_per_page' => (int) $digiverses->perPage(),
                 'total' => (int) $digiverses->total(),
             ]);
-
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getReviews(Request $request, $id)
@@ -460,18 +453,18 @@ class CollectionController extends Controller
                 $limit = Constants::MAX_ITEMS_LIMIT;
             }
 
-            $reviews = Cache::remember('request:collection#' . $collection->id . ':reviews:'  . url()->full(), Constants::MINUTE_CACHE_TIME * 5, function() use ($page, $limit, $request, $collection){
+            $reviews = Cache::remember('request:collection#' . $collection->id . ':reviews:'  . url()->full(), Constants::MINUTE_CACHE_TIME * 5, function () use ($page, $limit, $request, $collection) {
                 $reviews = $collection->reviews()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, array('*'), 'page', $page);
                 return $reviews;
             });
 
-            return $this->respondWithSuccess("Reviews retrieved successfully",[
+            return $this->respondWithSuccess("Reviews retrieved successfully", [
                 'reviews' => $reviews,
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getSingle(Request $request, $public_id)
@@ -482,10 +475,10 @@ class CollectionController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
-            if ($request->user() == NULL || $request->user()->id == NULL) {
+            if ($request->user() == null || $request->user()->id == null) {
                 $user_id = 0;
             } else {
                 $user_id = $request->user()->id;
@@ -497,19 +490,18 @@ class CollectionController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ])->withAvg([
-                'ratings' => function($query)
-                {
+                'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
             ->with('benefactors', 'benefactors.user')
             ->with('cover')
             ->with('approvalRequest')
-            ->with('owner','owner.profile_picture')
+            ->with('owner', 'owner.profile_picture')
             ->with('categories')
             ->with('prices', 'prices.continent', 'prices.country')
             ->with(['userables' => function ($query) use ($user_id) {
-                $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
             }])
             ->with('owner')
             ->with([
@@ -520,12 +512,11 @@ class CollectionController extends Controller
                         }
                     ])
                     ->withAvg([
-                        'ratings' => function($query)
-                        {
+                        'ratings' => function ($query) {
                             $query->where('rating', '>', 0);
                         }
                     ], 'rating')
-                    ->with('categories', 'owner', 'cover' ,'owner.profile_picture');
+                    ->with('categories', 'owner', 'cover', 'owner.profile_picture');
                 }
             ])
             ->with([
@@ -536,22 +527,21 @@ class CollectionController extends Controller
                         }
                     ])
                     ->withAvg([
-                        'ratings' => function($query)
-                        {
+                        'ratings' => function ($query) {
                             $query->where('rating', '>', 0);
                         }
                     ], 'rating')
-                    ->with('categories', 'owner', 'cover' ,'owner.profile_picture');
+                    ->with('categories', 'owner', 'cover', 'owner.profile_picture');
                 }
             ])
             ->first();
 
-            return $this->respondWithSuccess("Collection retrieved successfully",[
+            return $this->respondWithSuccess("Collection retrieved successfully", [
                 'collection' => new CollectionResource($collection),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 }

@@ -13,8 +13,16 @@ use Streaming\FFMpeg;
 
 class Video implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $asset, $filepath, $folder, $filename, $ext, $full_file_name;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $asset;
+    public $filepath;
+    public $folder;
+    public $filename;
+    public $ext;
+    public $full_file_name;
     public $timeout = 300;
     /**
      * Create a new job instance.
@@ -77,7 +85,7 @@ class Video implements ShouldQueue
                 $fileMeta = $this->getFileMeta($generatedFilename);
                 if ($fileMeta['ext'] === 'key') {
                     $data['hls_key_filepath'] = join_path($localTempFolder, $hlsKeyName);
-                } else if ($fileMeta['ext'] === 'm3u8') {
+                } elseif ($fileMeta['ext'] === 'm3u8') {
                     if ($fileMeta['resolution'] === 'main') {
                         $data['filepath'] = join_path($localTempFolder, $generatedFilename);
                     } else {
@@ -92,7 +100,7 @@ class Video implements ShouldQueue
                             $data['resolutions'][$fileMeta['resolution']]['filepath'] = join_path($localTempFolder, $generatedFilename);
                         }
                     }
-                } else if ($fileMeta['ext'] === 'ts') {
+                } elseif ($fileMeta['ext'] === 'ts') {
                     if ($fileMeta['resolution'] === 'main') {
                         $data['ts_files'][] = join_path($localTempFolder, $generatedFilename);
                     } else {
@@ -111,7 +119,7 @@ class Video implements ShouldQueue
         UploadVideoJob::dispatch($data);
     }
 
-    private function getFileMeta($filename) 
+    private function getFileMeta($filename)
     {
         $filenameParts = explode('.', $filename);
         $ext = '';
@@ -125,7 +133,7 @@ class Video implements ShouldQueue
             if (count($nameComponents) === 2) {
                 $resolution = $nameComponents[1];
             }
-        } else if ($ext === 'ts') {
+        } elseif ($ext === 'ts') {
             if (count($nameComponents) === 3) {
                 $resolution = $nameComponents[1];
             }

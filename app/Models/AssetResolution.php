@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class AssetResolution extends Model
 {
-    use HasFactory, Uuid;
-     /**
-     * The attributes that are not mass assignable.
-     *
-     * @var array
-     */
+    use HasFactory;
+    use Uuid;
+    /**
+    * The attributes that are not mass assignable.
+    *
+    * @var array
+    */
     protected $guarded = ['id'];
 
     /**

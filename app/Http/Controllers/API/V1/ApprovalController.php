@@ -27,12 +27,12 @@ class ApprovalController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             foreach ($request->items as $item) {
                 //validate that the content or collection exists and they belong to the user making request
-                $itemModel = NULL;
+                $itemModel = null;
                 switch ($item['type']) {
                     case 'content':
                         $itemModel = Content::where('public_id', $item['public_id'])->where('user_id', $request->user()->id)->first();
@@ -60,7 +60,7 @@ class ApprovalController extends Controller
                 $approval_request = Approval::where('approvable_type', $item['type'])->where('approvable_id', $itemModel->id)->first();
                 if (is_null($approval_request)) {
                     $approval_request = $itemModel->approvalRequest()->create([
-                        'public_id' => uniqid(rand ()), 
+                        'public_id' => uniqid(rand()),
                         'user_id' => $itemModel->user_id,
                         'status' => 'pending',
                         'needs_action_from' => 'admin',
@@ -79,10 +79,10 @@ class ApprovalController extends Controller
             return $this->respondWithSuccess("Approvals requested successfully", [
                 'approval_requests' => $approval_requests,
             ]);
-        }  catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getUserRequests(Request $request)
@@ -110,10 +110,10 @@ class ApprovalController extends Controller
                 'items_per_page' => (int) $approval_requests->perPage(),
                 'total' => (int) $approval_requests->total(),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function sendApprovalMessage(Request $request, $public_id)
@@ -127,7 +127,7 @@ class ApprovalController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $approval_request = Approval::where('public_id', $public_id)->first();
@@ -136,7 +136,7 @@ class ApprovalController extends Controller
             }
 
             $message = $approval_request->messages()->create([
-                'public_id' => uniqid(rand ()), 
+                'public_id' => uniqid(rand()),
                 'message' => $request->message,
                 'from' => $request->user()->id === $approval_request->user_id ? 'creator' : 'admin',
                 'to' => $request->user()->id === $approval_request->user_id ? 'admin' : 'creator',
@@ -146,7 +146,7 @@ class ApprovalController extends Controller
             if ($request->hasfile('attachments')) {
                 $storage = new Storage('cloudinary');
                 foreach ($request->file('attachments') as $file) {
-                    $uploadedImageData = $storage->upload($file->getRealPath(),'approval-requests/messages/attachments');
+                    $uploadedImageData = $storage->upload($file->getRealPath(), 'approval-requests/messages/attachments');
                     $message->attachments()->create([
                         'public_id' => uniqid(rand()),
                         'storage_provider' => 'cloudinary',
@@ -162,10 +162,10 @@ class ApprovalController extends Controller
             return $this->respondWithSuccess("Message sent successfully.", [
                 'message' => $message,
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getApprovalMessages(Request $request, $public_id)
@@ -176,7 +176,7 @@ class ApprovalController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $approval_request = Approval::where('public_id', $public_id)->first();
@@ -195,11 +195,10 @@ class ApprovalController extends Controller
             return $this->respondWithSuccess("Messages retrieved successfully.", [
                 'messages' => $messages,
             ]);
-
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getAll(Request $request)
@@ -232,11 +231,10 @@ class ApprovalController extends Controller
                 'items_per_page' => (int) $approval_requests->perPage(),
                 'total' => (int) $approval_requests->total(),
             ]);
-
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function update(Request $request, $public_id)
@@ -251,7 +249,7 @@ class ApprovalController extends Controller
             ]);
 
             $approval_request = Approval::where('public_id', $public_id)->first();
-            
+
             switch ($request->approval_action) {
                 case "decline":
                     $approval_request->status = 'declined';
@@ -280,9 +278,9 @@ class ApprovalController extends Controller
             return $this->respondWithSuccess("Approval updated successfully", [
                 'approval_request' => new ApprovalResource($approval_request),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 }

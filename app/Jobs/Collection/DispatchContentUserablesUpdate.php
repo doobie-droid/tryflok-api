@@ -13,8 +13,13 @@ use Illuminate\Support\Facades\Log;
 
 class DispatchContentUserablesUpdate implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $deleted_contents, $collection, $new_contents;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $deleted_contents;
+    public $collection;
+    public $new_contents;
     /**
      * Create a new job instance.
      *
@@ -38,7 +43,7 @@ class DispatchContentUserablesUpdate implements ShouldQueue
         $new_contents = $this->new_contents;
         $collection = $this->collection;
         Userable::where('userable_type', 'collection')->where('userable_id', $this->collection->id)
-        ->chunk(10000, function ($userables) use ($collection, $deleted_contents, $new_contents){
+        ->chunk(10000, function ($userables) use ($collection, $deleted_contents, $new_contents) {
             foreach ($userables as $userable) {
                 UpdateContentUserablesJob::dispatch([
                     'deleted_contents' => $deleted_contents,

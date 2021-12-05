@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
-    use HasFactory, Uuid;
+    use HasFactory;
+    use Uuid;
 
-     /**
-     * The attributes that are not mass assignable.
-     *
-     * @var array
-     */
+    /**
+    * The attributes that are not mass assignable.
+    *
+    * @var array
+    */
     protected $guarded = [
         'id',
     ];
@@ -35,11 +36,11 @@ class Payment extends Model
 
     public function payer()
     {
-        return $this->belongsTo(User::class,'payer_id');
+        return $this->belongsTo(User::class, 'payer_id');
     }
 
     public function payee()
     {
-        return $this->belongsTo(User::class,'payee_id');
+        return $this->belongsTo(User::class, 'payee_id');
     }
 }

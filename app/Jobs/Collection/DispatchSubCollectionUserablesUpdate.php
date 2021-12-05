@@ -13,8 +13,16 @@ use Illuminate\Support\Facades\Log;
 
 class DispatchSubCollectionUserablesUpdate implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $deleted_collections, $collection, $new_collections, $userable_id, $user_id, $userable_status;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $deleted_collections;
+    public $collection;
+    public $new_collections;
+    public $userable_id;
+    public $user_id;
+    public $userable_status;
     /**
      * Create a new job instance.
      *
@@ -44,7 +52,7 @@ class DispatchSubCollectionUserablesUpdate implements ShouldQueue
             $deleted_ids[] = $collection->id;
             $mapped_deleted[$collection->id] = $collection;
         }
-        $deletedSubUserables = Userable::where('userable_type','collection')->whereIn('userable_id', $deleted_ids)->where('user_id', $this->user_id)->where('parent_id', $this->userable_id)->get();
+        $deletedSubUserables = Userable::where('userable_type', 'collection')->whereIn('userable_id', $deleted_ids)->where('user_id', $this->user_id)->where('parent_id', $this->userable_id)->get();
         foreach ($deletedSubUserables as $userable) {
             //remove it's contents
             UpdateContentUserablesJob::dispatch([
@@ -67,7 +75,7 @@ class DispatchSubCollectionUserablesUpdate implements ShouldQueue
             //delete this
             $userable->delete();
         }
-        
+
         //add the new userables
         foreach ($this->new_collections as $collection) {
             $userable = Userable::create([

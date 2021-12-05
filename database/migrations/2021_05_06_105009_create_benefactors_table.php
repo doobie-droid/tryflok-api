@@ -12,7 +12,7 @@ class CreateBenefactorsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuidMorphs('benefactable');
             $table->foreignUuid('user_id');
-            $table->decimal('share', 5,2);
+            $table->decimal('share', 5, 2);
             $table->timestamps();
         });
     }

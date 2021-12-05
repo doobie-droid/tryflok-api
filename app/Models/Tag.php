@@ -8,14 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tag extends Model
 {
-    use HasFactory, Uuid;
+    use HasFactory;
+    use Uuid;
     /**
      * The attributes that are not mass assignable.
      *
      * @var array
      */
     protected $guarded = ['id'];
- 
+
     /**
      * The attributes that should be hidden for arrays.
      *

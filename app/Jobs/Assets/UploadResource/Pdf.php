@@ -12,8 +12,14 @@ use Illuminate\Support\Facades\Storage;
 
 class Pdf implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $asset, $filepath, $full_file_name, $encryption_key;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $asset;
+    public $filepath;
+    public $full_file_name;
+    public $encryption_key;
     /**
      * Create a new job instance.
      *

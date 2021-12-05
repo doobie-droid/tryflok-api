@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Log;
 
 class ApproveCollectionChildren implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
     public $collection;
     /**
      * Create a new job instance.

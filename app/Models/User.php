@@ -12,13 +12,17 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable, HasRoles, SoftDeletes, Uuid;
+    use HasFactory;
+    use Notifiable;
+    use HasRoles;
+    use SoftDeletes;
+    use Uuid;
 
-   /**
-     * The attributes that are not mass assignable.
-     *
-     * @var array
-     */
+    /**
+      * The attributes that are not mass assignable.
+      *
+      * @var array
+      */
     protected $guarded = [
         'id',
     ];
@@ -42,7 +46,7 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $casts = [
-        
+
     ];
 
     protected $guard_name = 'api';

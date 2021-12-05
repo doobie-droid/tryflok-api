@@ -12,8 +12,12 @@ use Illuminate\Support\Facades\Log;
 
 class Payout implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $payout, $payment_account;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $payout;
+    public $payment_account;
     /**
      * Create a new job instance.
      *
@@ -42,8 +46,8 @@ class Payout implements ShouldQueue
                     $this->payout->reference = $resp->data->id;
                     $this->payout->save();
                 } else {
-                    $this->payout->handler = NULL;
-                    $this->payout->last_payment_request = NULL;
+                    $this->payout->handler = null;
+                    $this->payout->last_payment_request = null;
                     $this->payout->save();
                     //notify user that payout attempt failed
                 }
@@ -54,8 +58,8 @@ class Payout implements ShouldQueue
                     $this->payout->claimed = 1;
                     $this->payout->save();
                 } else {
-                    $this->payout->handler = NULL;
-                    $this->payout->last_payment_request = NULL;
+                    $this->payout->handler = null;
+                    $this->payout->last_payment_request = null;
                     $this->payout->save();
                 }
                 break;
@@ -64,8 +68,8 @@ class Payout implements ShouldQueue
 
     public function failed(\Throwable $exception)
     {
-        $this->payout->handler = NULL;
-        $this->payout->last_payment_request = NULL;
+        $this->payout->handler = null;
+        $this->payout->last_payment_request = null;
         $this->payout->save();
         Log::error($exception);
         //TO DO: mail the user telling them the payout failed?

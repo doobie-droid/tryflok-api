@@ -33,6 +33,5 @@ class SendConfirmEmail implements ShouldQueue
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
         }
-        
     }
 }

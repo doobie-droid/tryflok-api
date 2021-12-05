@@ -2,7 +2,7 @@
 
 namespace App\Jobs\Content;
 
-use \GuzzleHttp\Client;
+use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -12,8 +12,12 @@ use Illuminate\Support\Facades\Log;
 
 class NotifySubscriber implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $content, $subscriber;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $content;
+    public $subscriber;
     /**
      * Create a new job instance.
      *
@@ -43,7 +47,7 @@ class NotifySubscriber implements ShouldQueue
         $url = "https://fcm.googleapis.com/fcm/send";
         $authorization_key = env('FCM_SERVER_KEY');
         foreach ($this->subscriber->notificationTokens as $notification_token) {
-            $client->post($url,  [
+            $client->post($url, [
                 'headers' => [
                     'Authorization' => "key={$authorization_key}",
                 ],

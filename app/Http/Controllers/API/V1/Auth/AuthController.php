@@ -28,14 +28,14 @@ class AuthController extends Controller
             $validator = Validator::make($request->all(), [
                 'name' => ['required', 'string', 'max:255'],
                 'username' => ['required', 'max:20', 'unique:users,username', 'regex:/^[A-Za-z0-9_]*$/'],
-				'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-				'password' => ['required', 'string', 'confirmed'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+                'password' => ['required', 'string', 'confirmed'],
                 'referral_id' => ['sometimes', 'nullable','string', 'exists:users,referral_id'],
                 'firebase_token' => ['sometimes', 'nullable','string',],
-			]);
-			
-			if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $user = User::create([
@@ -70,10 +70,10 @@ class AuthController extends Controller
                 'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
             ]);
-        } catch(\Exception $exception) {
-			Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function socialMediaSignIn(Request $request)
@@ -81,21 +81,21 @@ class AuthController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'name' => ['required_if:provider,google', 'string', 'max:255'],
-				'email' => ['required_if:provider,google', 'string', 'email', 'max:255',],
-				'provider' => ['required', 'string', 'regex:(google|apple)',],
+                'email' => ['required_if:provider,google', 'string', 'email', 'max:255',],
+                'provider' => ['required', 'string', 'regex:(google|apple)',],
                 'referral_id' => ['sometimes', 'nullable','string', 'exists:users,referral_id',],
                 'id_token' => ['required_if:provider,google,apple', 'string',],
                 'sign_in_type' => ['required', 'string', 'regex:(register|login)',],
                 'sign_in_source' => ['required_if:provider,google', 'string', 'regex:(ios|android)',],
                 'firebase_token' => ['sometimes', 'nullable','string',],
-			]);
+            ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $socialIsValid = false;
-            $picture = NULL;
+            $picture = null;
             $name = $request->name;
             $email = $request->email;
             //verify the request
@@ -109,7 +109,7 @@ class AuthController extends Controller
                     if ($payload) {
                         $socialIsValid = true;
                         $picture = $payload['picture'];
-                    }                    
+                    }
                     break;
                 case 'apple':
                     $apiClient = new Client([
@@ -121,7 +121,7 @@ class AuthController extends Controller
                         $decode = JWT::decode($request->id_token, JWK::parseKeySet($data), [ 'RS256' ]);
                         $email = $decode->email;
                         $socialIsValid = true;
-                    }  catch(\Exception $exception) {
+                    } catch (\Exception $exception) {
                         Log::error($exception);
                     }
                     break;
@@ -165,28 +165,28 @@ class AuthController extends Controller
                 'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
             ]);
-        } catch(\Exception $exception) {
-			Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function login(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
-				'username' => ['required', 'string', 'max:255'],
-				'password' => ['required', 'string',],
+                'username' => ['required', 'string', 'max:255'],
+                'password' => ['required', 'string',],
                 'firebase_token' => ['sometimes', 'nullable','string',],
-			]);
-			
-			if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
-    
-			if(Auth::attempt(['email' => $request->username, 'password' => $request->password]) || Auth::attempt(['username' => $request->username, 'password' => $request->password])){
-				$user = Auth::user();
-				$token = JWTAuth::fromUser($user);
+
+            if (Auth::attempt(['email' => $request->username, 'password' => $request->password]) || Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
+                $user = Auth::user();
+                $token = JWTAuth::fromUser($user);
                 $wallet = $user->wallet()->first();
                 if (is_null($wallet)) {
                     $user->wallet()->create([]);
@@ -201,28 +201,28 @@ class AuthController extends Controller
                         ]);
                     }
                 }
-				return $this->respondWithSuccess("Login successful", [
-					'user' => new UserResourceWithSensitive($user),
-					'token' => $token,
-				]);
-			} else{
-				return $this->respondBadRequest("User credentials do not match our record");
-			}
-        } catch(\Exception $exception) {
-			Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
-	}
+                return $this->respondWithSuccess("Login successful", [
+                    'user' => new UserResourceWithSensitive($user),
+                    'token' => $token,
+                ]);
+            } else {
+                return $this->respondBadRequest("User credentials do not match our record");
+            }
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
+    }
 
     public function loginViaOtp(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
-				'code' => ['required', 'string', 'exists:otps,code',],
-			]);
-			
-			if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                'code' => ['required', 'string', 'exists:otps,code',],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $otp = Otp::where('code', $request->code)->where('purpose', 'authentication')->first();
@@ -243,33 +243,32 @@ class AuthController extends Controller
                 'user' => new UserResourceWithSensitive($otp->user),
                 'token' => $token,
             ]);
-
-        } catch(\Exception $exception) {
-			Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
-	
-	public function forgotPassword(Request $request)
+
+    public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email'],
         ]);
         if ($validator->fails()) {
-            return $this->respondBadRequest("Invalid or missing input fields",  $validator->errors()->toArray());
+            return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
         }
 
         $user = User::where('email', $request->email)->first();
         if ($user) {
             $user->password_token = Str::random(32);
-			$user->save();
-			$user->notify(new ForgotPasswordNotification($user));
+            $user->save();
+            $user->notify(new ForgotPasswordNotification($user));
         }
 
         return $this->respondWithSuccess('Thank you, an email would be sent to your shortly');
-	}
-	
-	public function resetPassword(Request $request)
+    }
+
+    public function resetPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'token' => ['required', 'string'],
@@ -277,9 +276,9 @@ class AuthController extends Controller
             'firebase_token' => ['sometimes', 'nullable','string',],
         ]);
         if ($validator->fails()) {
-            return $this->respondBadRequest("Invalid or missing input fields",  $validator->errors()->toArray());
+            return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
         }
-        
+
         $user = User::with('roles', 'profile_picture', 'wallet')->where('password_token', $request->token)->first();
         if ($user) {
             $user->password = Hash::make($request->password);

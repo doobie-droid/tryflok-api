@@ -12,8 +12,15 @@ use Illuminate\Support\Facades\Log;
 
 class UpdateContentUserables implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $deleted_contents, $new_contents, $userable_id, $user_id, $userable_status;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $deleted_contents;
+    public $new_contents;
+    public $userable_id;
+    public $user_id;
+    public $userable_status;
     /**
      * Create a new job instance.
      *
@@ -41,7 +48,7 @@ class UpdateContentUserables implements ShouldQueue
             $deleted_ids[] = $content->id;
         }
         //get the deleted userables and delete them
-        $deleted_userables = Userable::where('userable_type','content')->whereIn('userable_id', $deleted_ids)->where('user_id', $this->user_id)->where('parent_id', $this->userable_id)->get();
+        $deleted_userables = Userable::where('userable_type', 'content')->whereIn('userable_id', $deleted_ids)->where('user_id', $this->user_id)->where('parent_id', $this->userable_id)->get();
         foreach ($deleted_userables as $userable) {
             $userable->delete();
         }

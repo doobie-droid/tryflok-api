@@ -41,7 +41,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $digiverse = Collection::where('id', $request->digiverse_id)->where('type', 'digiverse')->first();
@@ -126,14 +126,14 @@ class ContentController extends Controller
                     'purpose' => 'cover',
                 ]);
             }
-            
+
             if (!is_null($request->asset_id)) {
                 $content->assets()->attach($request->asset_id, [
                     'id' => Str::uuid(),
                     'purpose' => 'content-asset',
                 ]);
             }
-            
+
             if (isset($request->tags) && is_array($request->tags)) {
                 foreach ($request->tags as $tag_id) {
                     $content->tags()->attach($tag_id, [
@@ -151,8 +151,7 @@ class ContentController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ])->withAvg([
-                'ratings' => function($query)
-                {
+                'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
@@ -161,10 +160,10 @@ class ContentController extends Controller
             return $this->respondWithSuccess("Content has been created successfully", [
                 'content' => new ContentResource($content),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function update(Request $request, $id)
@@ -184,7 +183,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator1->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
             }
 
             //make sure user owns content
@@ -197,8 +196,7 @@ class ContentController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ])->withAvg([
-                'ratings' => function($query)
-                {
+                'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
@@ -211,18 +209,18 @@ class ContentController extends Controller
                 'asset_id' => ['sometimes', 'nullable', 'exists:assets,id', new AssetTypeRule($content->type)],
             ]);
             if ($validator2->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator2->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator2->errors()->toArray());
             }
 
             $user = $request->user();
             if (!is_null($request->title)) {
                 $content->title = $request->title;
             }
-    
+
             if (!is_null($request->description)) {
                 $content->description = $request->description;
             }
-    
+
             if (!is_null($request->is_available)) {
                 $content->is_available = $request->is_available;
             }
@@ -259,13 +257,13 @@ class ContentController extends Controller
                             ]
                         ]);
                     }
-    
+
                     if ($tagData['action'] === 'remove') {
                         $content->tags()->detach($tagData['id']);
                     }
                 }
             }
-            
+
             if (!is_null($request->price)) {
                 $price = $content->prices()->first();
                 if (is_null($price)) {
@@ -283,14 +281,14 @@ class ContentController extends Controller
             return $this->respondWithSuccess('Content has been updated successfully', [
                 'content' => new ContentResource($content),
             ]);
-
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
-    public function createIssue(Request $request, $id) {
+    public function createIssue(Request $request, $id)
+    {
         try {
             $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id',],
@@ -299,7 +297,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator1->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
             }
 
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)->first();
@@ -310,7 +308,7 @@ class ContentController extends Controller
             if ($content->type !== 'newsletter') {
                 return $this->respondBadRequest("Issues can only be created for newletters");
             }
-            
+
             $issue = $content->issues()->create([
                 'title' => $request->title,
                 'description' => $request->description,
@@ -320,13 +318,14 @@ class ContentController extends Controller
             return $this->respondWithSuccess('Issue has been created successfully', [
                 'issue' => $issue,
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
-    public function updateIssue(Request $request, $id) {
+    public function updateIssue(Request $request, $id)
+    {
         try {
             $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id',],
@@ -336,7 +335,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator1->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
             }
 
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)->first();
@@ -347,13 +346,13 @@ class ContentController extends Controller
             if ($content->type !== 'newsletter') {
                 return $this->respondBadRequest("Issues can only be created or updated for newletters");
             }
-            
+
             $issue = $content->issues()->where('id', $request->issue_id)->first();
 
             if (!is_null($request->title)) {
                 $issue->title = $request->title;
             }
-    
+
             if (!is_null($request->description)) {
                 $issue->description = $request->description;
             }
@@ -363,13 +362,14 @@ class ContentController extends Controller
             return $this->respondWithSuccess('Issue has been updated successfully', [
                 'issue' => $issue,
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
-    public function publishIssue(Request $request, $id) {
+    public function publishIssue(Request $request, $id)
+    {
         try {
             $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id',],
@@ -377,7 +377,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator1->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator1->errors()->toArray());
             }
 
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)->first();
@@ -388,7 +388,7 @@ class ContentController extends Controller
             if ($content->type !== 'newsletter') {
                 return $this->respondBadRequest("Issues can only be created or updated for newletters");
             }
-            
+
             $issue = $content->issues()->where('id', $request->issue_id)->first();
 
             if ($issue->is_available !== 1) {
@@ -398,14 +398,14 @@ class ContentController extends Controller
                     'content' => $content,
                 ]);
             }
-            
+
             return $this->respondWithSuccess('Issue has been published successfully', [
                 'issue' => $issue,
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getSingle(Request $request, $id)
@@ -416,15 +416,15 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
-            if ($request->user() == NULL || $request->user()->id == NULL) {
+            if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
-            
+
             $content = Content::where('id', $id)
             ->with('prices', 'cover', 'owner', 'tags')
             ->withCount('subscribers')
@@ -433,31 +433,30 @@ class ContentController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ])->withAvg([
-                'ratings' => function($query)
-                {
+                'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
             ->with([
                 'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
             ])
             ->with([
                 'subscribers' => function ($query) use ($user_id) {
-                    $query->where('users.id',  $user_id);
+                    $query->where('users.id', $user_id);
                 },
             ])
             ->with('issues')
             ->with('metas')
             ->first();
-            return $this->respondWithSuccess('Content retrieved successfully',[
+            return $this->respondWithSuccess('Content retrieved successfully', [
                 'content' => new ContentResource($content),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getDigiverseContents(Request $request, $digiverse_id)
@@ -519,12 +518,12 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
             $digiverse = Collection::where('id', $request->digiverse_id)->first();
             $contents = $digiverse->contents();
 
-            if ($request->user() == NULL || $request->user()->id == NULL) {
+            if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
             } else {
                 $user_id = $request->user()->id;
@@ -542,7 +541,7 @@ class ContentController extends Controller
             }
 
             if (!empty($types)) {
-                $contents = $contents->whereIn('type', $types );
+                $contents = $contents->whereIn('type', $types);
             }
 
             if (!empty($tags)) {
@@ -552,10 +551,10 @@ class ContentController extends Controller
             }
 
             if (!empty($creators)) {
-                $contents = $contents->whereIn('user_id', $creators );
+                $contents = $contents->whereIn('user_id', $creators);
             }
 
-            if ($request->user() == NULL || $request->user()->id == NULL) {
+            if ($request->user() == null || $request->user()->id == null) {
                 $user_id = 0;
             } else {
                 $user_id = $request->user()->id;
@@ -568,32 +567,31 @@ class ContentController extends Controller
                     $query->where('rating', '>', 0);
                 }
             ])->withAvg([
-                'ratings' => function($query)
-                {
+                'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 }
             ], 'rating')
             ->with('cover')
-            ->with('owner','owner.profile_picture')
+            ->with('owner', 'owner.profile_picture')
             ->with('tags')
             ->with('prices')
             ->with([
                 'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id',  $user_id)->where('status', 'available');
+                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
             ])->orderBy('contents.created_at', 'desc')
             ->paginate($limit, array('*'), 'page', $page);
 
-            return $this->respondWithSuccess('Contents retrieved successfully',[
+            return $this->respondWithSuccess('Contents retrieved successfully', [
                 'contents' => ContentResource::collection($contents),
                 'current_page' => (int) $contents->currentPage(),
                 'items_per_page' => (int) $contents->perPage(),
                 'total' => (int) $contents->total(),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getIssues(Request $request, $id)
@@ -621,7 +619,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
             $content = Content::where('id', $id)->first();
             $issues = $content->issues();
@@ -638,16 +636,16 @@ class ContentController extends Controller
 
             $issues = $issues->orderBy('content_issues.created_at', 'desc')
             ->paginate($limit, array('*'), 'page', $page);
-            return $this->respondWithSuccess('Issues retrieved successfully',[
+            return $this->respondWithSuccess('Issues retrieved successfully', [
                 'issues' => ContentIssueResource::collection($issues),
                 'current_page' => (int) $issues->currentPage(),
                 'items_per_page' => (int) $issues->perPage(),
                 'total' => (int) $issues->total(),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getSingleIssue(Request $request, $id)
@@ -660,17 +658,17 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $issue = ContentIssue::where('id', $id)->first();
-            return $this->respondWithSuccess('Issue retrieved successfully',[
+            return $this->respondWithSuccess('Issue retrieved successfully', [
                 'issue' => new ContentIssueResource($issue),
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function subscribeToContent(Request $request, $id)
@@ -683,7 +681,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $content = Content::where('id', $id)->first();
@@ -692,10 +690,10 @@ class ContentController extends Controller
                 ]
             ]);
             return $this->respondWithSuccess('You have been successfully subscribed');
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function unsubscribeFromContent(Request $request, $id)
@@ -708,16 +706,16 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $content = Content::where('id', $id)->first();
             $content->subscribers()->detach([$request->user()->id]);
             return $this->respondWithSuccess('You have successfully unsubscribed');
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function startLive(Request $request, $id)
@@ -730,7 +728,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $content = Content::where('id', $id)->first();
@@ -760,13 +758,13 @@ class ContentController extends Controller
 
             $token->value = $agora_token;
             $token->save();
-            
+
             $join_count->value = 1;
             $join_count->save();
 
             $status->value = 'active';
             $status->save();
-            
+
             DispatchNotificationToFollowersJob::dispatch([
                 'notificable_id' => $content->id,
                 'notificable_type' => 'content',
@@ -779,10 +777,10 @@ class ContentController extends Controller
                 'channel_name' => $channel->value,
                 'uid' => 0,
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function joinLive(Request $request, $id)
@@ -795,7 +793,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $content = Content::where('id', $id)->first();
@@ -803,7 +801,7 @@ class ContentController extends Controller
                 return $this->respondBadRequest("Live broadcasts can only be joined for live content types");
             }
 
-            if ($request->user() == NULL || $request->user()->id == NULL) {
+            if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
             } else {
                 $user_id = $request->user()->id;
@@ -830,18 +828,17 @@ class ContentController extends Controller
             $join_count->value = (int)$join_count->value + 1;
             $join_count->save();
             $expires = time() + (24 * 60 * 60); // let token last for 24hrs
-           // $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, $uid, AgoraRtcToken::ROLE_ATTENDEE, $expires);
+            // $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, $uid, AgoraRtcToken::ROLE_ATTENDEE, $expires);
 
             return $this->respondWithSuccess('Channel joined successfully', [
                 'token' => $token->value,
                 'channel_name' => $channel->value,
                 'uid' => (int)$uid,
             ]);
-
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function leaveLive(Request $request, $id)
@@ -854,7 +851,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $content = Content::where('id', $id)->first();
@@ -864,10 +861,10 @@ class ContentController extends Controller
             $content->subscribers()->detach([$request->user()->id]);
 
             return $this->respondWithSuccess('Channel left successfully');
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function endLive(Request $request, $id)
@@ -880,7 +877,7 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $content = Content::where('id', $id)->first();
@@ -896,18 +893,18 @@ class ContentController extends Controller
             $join_count->value = 0;
             $join_count->save();
             $status =  $content->metas()->where('key', 'live_status')->first();
-            
+
             $status->value = 'inactive';
             $status->save();
-            
+
             DispatchDisableLiveUserableJob::dispatch([
                 'live_content' => $content,
             ]);
             return $this->respondWithSuccess('Channel ended successfully');
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getReviews(Request $request, $id)
@@ -923,14 +920,14 @@ class ContentController extends Controller
                 $limit = Constants::MAX_ITEMS_LIMIT;
             }
 
-                $reviews = $content->reviews()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, array('*'), 'page', $page);
-            return $this->respondWithSuccess("Reviews retrieved successfully",[
+            $reviews = $content->reviews()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, array('*'), 'page', $page);
+            return $this->respondWithSuccess("Reviews retrieved successfully", [
                 'reviews' => $reviews,
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getAssets(Request $request, $id)
@@ -941,17 +938,17 @@ class ContentController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
-           
-            if ($request->user() == NULL || $request->user()->id == NULL) {
+
+            if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
 
             $content = Content::where('id', $id)->first();
-            
+
             if (!$content->isFree() && !$content->userHasPaid($user_id) && !($content->user_id == $user_id)) {
                 return $this->respondBadRequest("You are not permitted to view the assets of this content");
             }
@@ -985,14 +982,14 @@ class ContentController extends Controller
             foreach ($result as $key => $value) {
                 $cookies = $cookies . $key . '=' . $value . ';';
             }
-            return $this->respondWithSuccess("Assets retrieved successfully",[
+            return $this->respondWithSuccess("Assets retrieved successfully", [
                 'assets' => $content->assets()->with('resolutions')->wherePivot('purpose', 'content-asset')->get(),
                 'cookies' => $cookies,
                 'cookies_expire' => $expires
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 }

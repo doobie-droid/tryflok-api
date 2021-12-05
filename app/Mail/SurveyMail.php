@@ -8,7 +8,8 @@ use Illuminate\Queue\SerializesModels;
 
 class SurveyMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
     public $user;
     /**
      * Create a new message instance.

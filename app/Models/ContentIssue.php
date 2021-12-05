@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ContentIssue extends Model
 {
-    use HasFactory, Uuid;
+    use HasFactory;
+    use Uuid;
 
     /**
      * The attributes that are not mass assignable.

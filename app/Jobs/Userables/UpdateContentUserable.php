@@ -12,8 +12,14 @@ use Illuminate\Support\Facades\Log;
 
 class UpdateContentUserable implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $content, $user, $parentUserable, $status;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $content;
+    public $user;
+    public $parentUserable;
+    public $status;
     /**
      * Create a new job instance.
      *

@@ -17,7 +17,10 @@ use Illuminate\Support\Facades\Log;
 
 class EndSubscription implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
     public $subscription;
     /**
      * Create a new job instance.
@@ -59,7 +62,7 @@ class EndSubscription implements ShouldQueue
             }
             $user_wallet_balance = (float) $user->wallet->balance;//wallet is in AKC
             $item_price = (float) bcmul($price->amount, 100, 6);//converting dollars to AKC.
-            if (($item_price < $user_wallet_balance) && !is_null($item)){
+            if (($item_price < $user_wallet_balance) && !is_null($item)) {
                 $newWalletBalance = bcsub($user->wallet->balance, $item_price, 2);
                 $transaction = WalletTransaction::create([
                     'wallet_id' => $user->wallet->id,
@@ -93,7 +96,7 @@ class EndSubscription implements ShouldQueue
                 return;
             }
         }
-        
+
         //renew of subscription failed, go ahead to end subscription
         $parentUserable->status = 'subscription-ended';
         $parentUserable->save();

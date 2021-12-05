@@ -7,7 +7,8 @@ use Illuminate\Contracts\Validation\Rule;
 
 class AssetType implements Rule
 {
-    public $type, $response;
+    public $type;
+    public $response;
     /**
      * Create a new rule instance.
      *

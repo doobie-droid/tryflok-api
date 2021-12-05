@@ -13,8 +13,14 @@ use Illuminate\Support\Facades\Log;
 
 class Purchase implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $provider_response, $user, $items, $amount;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $provider_response;
+    public $user;
+    public $items;
+    public $amount;
     /**
      * Create a new job instance.
      *
@@ -25,7 +31,7 @@ class Purchase implements ShouldQueue
         $this->provider_response = $data['provider_response'];
         $this->user = $data['user'];
         $this->items = $data['items'];
-        $this->amount = bcadd(0,$data['dollar_amount'],0);//is in cents
+        $this->amount = bcadd(0, $data['dollar_amount'], 0);//is in cents
     }
 
     /**
@@ -35,7 +41,7 @@ class Purchase implements ShouldQueue
      */
     public function handle()
     {
-        $stripe = new StripePayment;
+        $stripe = new StripePayment();
         $req = $stripe->chargeViaToken($this->amount, $this->provider_response['id']);
         if (($req->status === "succeeded" && $req->paid === true)) {
             //Stripe for USD deals in cents

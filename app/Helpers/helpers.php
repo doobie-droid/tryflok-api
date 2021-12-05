@@ -2,16 +2,18 @@
 
 /**
  * Join paths
- * 
+ *
  * source: https://stackoverflow.com/a/15575293/7715823
  */
-if(!function_exists('join_path')) {
-    function join_path() 
+if (!function_exists('join_path')) {
+    function join_path()
     {
         $paths = array();
 
         foreach (func_get_args() as $arg) {
-            if ($arg !== '') { $paths[] = $arg; }
+            if ($arg !== '') {
+                $paths[] = $arg;
+            }
         }
 
         $prepend = '';
@@ -21,6 +23,6 @@ if(!function_exists('join_path')) {
             $prepend = substr($paths[0], 0, $e+1);
             $paths[0] = substr($paths[0], $e+1, $n);
         }
-        return $prepend . preg_replace('#/+#','/',join('/', $paths));
+        return $prepend . preg_replace('#/+#', '/', join('/', $paths));
     }
 }

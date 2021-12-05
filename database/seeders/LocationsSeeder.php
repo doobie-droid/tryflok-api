@@ -20,7 +20,7 @@ class LocationsSeeder extends Seeder
         $countries = new Countries();
         $all = $countries->all();
 
-        foreach($all as $country) {
+        foreach ($all as $country) {
             $countryModel = Country::create([
                 "name" => $country->name->common,
                 "iso_code" => $country->cca2,

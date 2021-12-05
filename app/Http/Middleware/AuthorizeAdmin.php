@@ -17,7 +17,7 @@ class AuthorizeAdmin
      */
     public function handle(Request $request, Closure $next)
     {
-        if(!$request->user()->hasRole(Roles::ADMIN) && !$request->user()->hasRole(Roles::SUPER_ADMIN)){
+        if (!$request->user()->hasRole(Roles::ADMIN) && !$request->user()->hasRole(Roles::SUPER_ADMIN)) {
             return response()->json([
                 'status' => false,
                 'status_code' => 403,

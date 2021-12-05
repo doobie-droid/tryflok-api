@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Services\LiveStream\Agora;
+
 use App\Services\LiveStream\Agora\Message;
 use App\Services\LiveStream\Agora\Utils;
 
-class AccessToken {
-    const PRIVILEGES = array(
+class AccessToken
+{
+    public const PRIVILEGES = array(
         "kJoinChannel" => 1,
         "kPublishAudioStream" => 2,
         "kPublishVideoStream" => 3,
@@ -13,7 +15,11 @@ class AccessToken {
         "kRtmLogin" => 1000,
     );
 
-    public $appID, $appCertificate, $channelName, $uid, $message;
+    public $appID;
+    public $appCertificate;
+    public $channelName;
+    public $uid;
+    public $message;
 
     public function __construct()
     {

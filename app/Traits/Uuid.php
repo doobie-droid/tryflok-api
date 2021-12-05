@@ -4,7 +4,7 @@ namespace App\Traits;
 
 use Illuminate\Support\Str;
 
-trait Uuid 
+trait Uuid
 {
     /**
      * Boot function from Laravel.
@@ -19,21 +19,21 @@ trait Uuid
         });
     }
 
-   /**
-     * Get the value indicating whether the IDs are incrementing.
-     *
-     * @return bool
-     */
+    /**
+      * Get the value indicating whether the IDs are incrementing.
+      *
+      * @return bool
+      */
     public function getIncrementing()
     {
         return false;
     }
 
-   /**
-     * Get the auto-incrementing key type.
-     *
-     * @return string
-     */
+    /**
+      * Get the auto-incrementing key type.
+      *
+      * @return string
+      */
     public function getKeyType()
     {
         return 'string';

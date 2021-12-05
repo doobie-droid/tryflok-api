@@ -31,7 +31,7 @@ class WalletController extends Controller
                 'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
                 'expected_akc_amount' => ['required', 'integer', 'min:1'],
             ]);
-    
+
             if ($validator->fails()) {
                 return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
@@ -41,10 +41,10 @@ class WalletController extends Controller
                     $flutterwave = new PaymentProvider($request->provider);
                     $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
                     if (($req->status === "success" && $req->data->status === "successful")) {
-                        $amount_in_dollars = bcdiv($req->data->amount, 505,2);
+                        $amount_in_dollars = bcdiv($req->data->amount, 505, 2);
                         $expected_akc_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
-                        $min_variation = $expected_akc_based_on_amount - bcmul($expected_akc_based_on_amount, bcdiv(3,100,2), 2);
-                        $max_variation = $expected_akc_based_on_amount + bcmul($expected_akc_based_on_amount,bcdiv(3,100,2), 2);
+                        $min_variation = $expected_akc_based_on_amount - bcmul($expected_akc_based_on_amount, bcdiv(3, 100, 2), 2);
+                        $max_variation = $expected_akc_based_on_amount + bcmul($expected_akc_based_on_amount, bcdiv(3, 100, 2), 2);
                         if ($request->expected_akc_amount < $min_variation || $request->expected_akc_amount > $max_variation) {
                             return $this->respondBadRequest("AKC conversion is not correct. Expects +/-3% of " . $expected_akc_based_on_amount . " for " . $req->data->amount . " Naira but got " . $request->expected_akc_amount);
                         }
@@ -62,11 +62,11 @@ class WalletController extends Controller
                     }
                     break;
                 case "stripe":
-                    $stripe = new StripePayment;
-                    $amount_in_dollars = bcdiv($request->amount_in_cents, 100,2);
+                    $stripe = new StripePayment();
+                    $amount_in_dollars = bcdiv($request->amount_in_cents, 100, 2);
                     $expected_akc_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
-                    $min_variation = $expected_akc_based_on_amount - bcmul($expected_akc_based_on_amount, bcdiv(3,100,2), 2);
-                    $max_variation = $expected_akc_based_on_amount + bcmul($expected_akc_based_on_amount,bcdiv(3,100,2), 2);
+                    $min_variation = $expected_akc_based_on_amount - bcmul($expected_akc_based_on_amount, bcdiv(3, 100, 2), 2);
+                    $max_variation = $expected_akc_based_on_amount + bcmul($expected_akc_based_on_amount, bcdiv(3, 100, 2), 2);
 
                     if ($request->expected_akc_amount < $min_variation || $request->expected_akc_amount > $max_variation) {
                         return $this->respondBadRequest("AKC conversion is not correct. Expects +/-3% of " . $expected_akc_based_on_amount . " for " . $request->amount_in_cents . " cents but got " . $request->expected_akc_amount);
@@ -120,12 +120,12 @@ class WalletController extends Controller
                 default:
                     return $this->respondBadRequest("Invalid provider specified");
             }
-    
+
             return $this->respondWithSuccess("Payment received successfully");
-        }  catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function payViaWallet(Request $request)
@@ -143,14 +143,14 @@ class WalletController extends Controller
             ]);
 
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
 
             $total_amount_in_dollars = 0;
             foreach ($request->items as $item) {
                 $price = Price::where('id', $item['price']['id'])->first();
                 //validate that the content or collection exists
-                $itemModel = NULL;
+                $itemModel = null;
                 switch ($item['type']) {
                     case 'content':
                         $itemModel = Content::where('id', $item['id'])->first();
@@ -165,11 +165,11 @@ class WalletController extends Controller
                 //add total price
                 $total_amount_in_dollars = bcadd($total_amount_in_dollars, $price->amount, 2);
             }
-            
+
             $total_amount_in_dollars = (float) $total_amount_in_dollars;//convert from creator dollars to AKC
             $total_amount_in_akc = (float) bcmul($total_amount_in_dollars, 100, 2);
             $wallet_balance = (float) $request->user()->wallet->balance;
-            
+
             if ($total_amount_in_akc > $wallet_balance) {
                 return $this->respondBadRequest("Your wallet balance is too low to make this purchase. Please fund your wallet with Akiddie Cowries and try again.");
             }
@@ -194,10 +194,10 @@ class WalletController extends Controller
             ]);
             $this->setStatusCode(202);
             return $this->respondWithSuccess("Items queued to be added to user's library.");
-        }  catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function getTransactions(Request $request)
@@ -211,12 +211,12 @@ class WalletController extends Controller
 
             $transactions = $request->user()->wallet->transactions()->orderBy('created_at', 'asc')->paginate($limit, array('*'), 'page', $page);
 
-            return $this->respondWithSuccess("Transactions retrieved successfully",[
+            return $this->respondWithSuccess("Transactions retrieved successfully", [
                 'transactions' => $transactions,
             ]);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 }

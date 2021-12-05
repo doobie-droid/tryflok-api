@@ -13,8 +13,13 @@ use Illuminate\Support\Facades\Log;
 
 class DispatchCollectionUserablesUpdate implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $collection, $deleted_collections, $new_collections;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $collection;
+    public $deleted_collections;
+    public $new_collections;
     /**
      * Create a new job instance.
      *
@@ -39,7 +44,7 @@ class DispatchCollectionUserablesUpdate implements ShouldQueue
         $collection = $this->collection;
 
         Userable::where('userable_type', 'collection')->where('userable_id', $this->collection->id)
-        ->chunk(10000, function ($userables) use ($collection, $deleted_collections, $new_collections){
+        ->chunk(10000, function ($userables) use ($collection, $deleted_collections, $new_collections) {
             foreach ($userables as $userable) {
                 DispatchSubCollectionUserablesUpdateJob::dispatch([
                     'collection' => $collection,

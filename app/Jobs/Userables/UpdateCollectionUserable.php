@@ -13,8 +13,14 @@ use Illuminate\Support\Facades\Log;
 
 class UpdateCollectionUserable implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $collection, $user, $parentUserable, $status;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $collection;
+    public $user;
+    public $parentUserable;
+    public $status;
     /**
      * Create a new job instance.
      *

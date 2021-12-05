@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Content extends Model
 {
-    use HasFactory, SoftDeletes, Uuid;
+    use HasFactory;
+    use SoftDeletes;
+    use Uuid;
 
     /**
      * The attributes that are not mass assignable.
@@ -90,12 +92,12 @@ class Content extends Model
     {
         return $this->morphMany(Benefactor::class, 'benefactable');
     }
-    
+
     public function sales()
     {
         return $this->morphMany(Sale::class, 'saleable');
     }
-    
+
     public function reviews()
     {
         return $this->morphMany(Review::class, 'reviewable');
@@ -137,7 +139,7 @@ class Content extends Model
                 $query->where('amount', '>', 0);
             });
         })->count();
-       return $freePriceCount > 0 && $parentPaidPriceCount === 0 && $grandParentPaidPriceCount === 0;
+        return $freePriceCount > 0 && $parentPaidPriceCount === 0 && $grandParentPaidPriceCount === 0;
     }
 
     public function userHasPaid($user_id)

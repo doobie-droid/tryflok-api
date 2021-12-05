@@ -12,8 +12,14 @@ use Illuminate\Support\Facades\Log;
 
 class DispatchNotificationToFollowers implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $notificable_type, $notificable_id, $user, $message;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $notificable_type;
+    public $notificable_id;
+    public $user;
+    public $message;
     /**
      * Create a new job instance.
      *

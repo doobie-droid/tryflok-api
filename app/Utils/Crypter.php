@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Utils;
 
-class Crypter {
+class Crypter
+{
     private static function symmetricalKey()
     {
         return base64_decode(env('SYMMETRICAL_ENCRYPTION_KEY'));
@@ -14,9 +16,9 @@ class Crypter {
 
     /**
      * Encrypts the message using someone else's key
-     * 
+     *
      * @param String $message - base64 encode of the data
-     * 
+     *
      * @return String - base64 encode of the encrypted data
      */
     public static function symmetricalEncryptUsingOwnKey($message)
@@ -35,10 +37,10 @@ class Crypter {
 
     /**
      * Encrypts the message using other key
-     * 
+     *
      * @param mixed $message - binary  or string
      * @param String $key - base64 encode of other key
-     * 
+     *
      * @return String - base64 encode of the encrypted data
      */
     public static function symmetricalEncryptUsingOtherKey($message, $key)
@@ -57,16 +59,16 @@ class Crypter {
 
     /**
      * Dencrypts the message using own key
-     * 
+     *
      * @param String $encrypted - base64 encode of the encrypted data
-     * 
+     *
      * @return mixed binary or string
      */
     public static function symmetricalDecryptUsingOwnKey($encrypted)
     {
         $decoded = base64_decode($encrypted);
         $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
-        $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, NULL, '8bit');
+        $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
 
         return sodium_crypto_secretbox_open(
             $ciphertext,
@@ -77,17 +79,17 @@ class Crypter {
 
     /**
      * Dencrypts the message using other key
-     * 
+     *
      * @param String $encrypted - base64 encode of the encrypted data
      * @param String $key - base64 encode of other key
-     * 
+     *
      * @return mixed binary or string
      */
     public static function symmetricalDecryptUsingOtherKey($encrypted, $key)
     {
         $decoded = base64_decode($encrypted);
         $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
-        $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, NULL, '8bit');
+        $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
 
         return sodium_crypto_secretbox_open(
             $ciphertext,
@@ -98,7 +100,7 @@ class Crypter {
 
     /**
      * @param String $encrypted -  base64 encode of the encrypted data
-     * 
+     *
      * @return String
      */
     public function decryptPublicKeyEncryption($encrypted)
@@ -109,5 +111,4 @@ class Crypter {
             self::privateKey()
         );
     }
-
 }

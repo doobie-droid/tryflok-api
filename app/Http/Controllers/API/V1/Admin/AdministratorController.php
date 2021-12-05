@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class AdministratorController extends Controller
 {
-    public function dashboard(Request $request) 
+    public function dashboard(Request $request)
     {
         try {
             return $this->respondWithSuccess("Dashboard details retrieved successfully.", [
@@ -25,10 +25,9 @@ class AdministratorController extends Controller
                 'sales_today' => Sale::whereDate('created_at', today())->sum('amount'),
                 'sales_month' => Sale::whereMonth('created_at', now()->month)->sum('amount'),
             ]);
-
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 }

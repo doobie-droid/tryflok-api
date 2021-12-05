@@ -13,8 +13,13 @@ use Illuminate\Support\Facades\Log;
 
 class Purchase implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $provider_response, $user, $items;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $provider_response;
+    public $user;
+    public $items;
     /**
      * Create a new job instance.
      *
@@ -34,7 +39,7 @@ class Purchase implements ShouldQueue
      */
     public function handle()
     {
-        $flutterwave = new FlutterwavePayment;
+        $flutterwave = new FlutterwavePayment();
         $req = $flutterwave->verifyTransaction($this->provider_response['transaction_id']);
         if (($req->status === "success" && $req->data->status === "successful")) {
             PurchaseJob::dispatch([

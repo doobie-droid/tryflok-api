@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\Log;
 
 class DispatchDisableLiveUserable implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
     public $live_content;
     /**
      * Create a new job instance.

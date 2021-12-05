@@ -52,6 +52,5 @@ class ProdUsersSeeder extends Seeder
             'referral_id' => 'WOJAY-210506',
         ]);
         $tolu->assignRole(Roles::ADMIN);
-
     }
 }

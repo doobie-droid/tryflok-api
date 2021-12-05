@@ -12,8 +12,17 @@ use Illuminate\Support\Facades\Log;
 
 class FundWallet implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    private $user, $wallet, $provider, $provider_id, $akc, $amount, $fee;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    private $user;
+    private $wallet;
+    private $provider;
+    private $provider_id;
+    private $akc;
+    private $amount;
+    private $fee;
 
     /**
      * Create a new job instance.
@@ -47,7 +56,7 @@ class FundWallet implements ShouldQueue
             'transaction_type' => 'fund',
             'details' => 'Fund wallet with ' . $this->akc . ' AKC via ' . $this->provider,
         ]);
-        
+
         $this->wallet->balance = $newWalletBalance;
         $this->wallet->save();
 

@@ -12,7 +12,10 @@ use Streaming\FFMpeg;
 
 class Dash implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
     public $resource_path;
     public $timeout = 60;
     /**
@@ -33,16 +36,16 @@ class Dash implements ShouldQueue
     public function handle()
     {
         $ffmpeg =  FFMpeg::create();
-       /* $ffmpegCore = FFMpegCore::create();
-        $admin_resource = $ffmpegCore->open($this->resource_path);
-        $admin_resource
-        ->filters()
-        ->watermark(public_path() . '/creator-wm.png', array(
-            'position' => 'relative',
-            'bottom' => 50,
-            'right' => 50,
-        ));
-        $admin_resource->save(new \FFMpeg\Format\Video\X264(), public_path() . '/upload/admin.mp4');*/
+        /* $ffmpegCore = FFMpegCore::create();
+         $admin_resource = $ffmpegCore->open($this->resource_path);
+         $admin_resource
+         ->filters()
+         ->watermark(public_path() . '/creator-wm.png', array(
+             'position' => 'relative',
+             'bottom' => 50,
+             'right' => 50,
+         ));
+         $admin_resource->save(new \FFMpeg\Format\Video\X264(), public_path() . '/upload/admin.mp4');*/
 
 
         $resource = $ffmpeg->open($this->resource_path);
@@ -55,14 +58,14 @@ class Dash implements ShouldQueue
         ->autoGenerateRepresentations([480, 720, 1080, ]);
         $hlsenc->save(join_path(public_path(), "hls-encrypted/hls.m3u8"));
 
-       /* //generate admin version
-        $admin_video = $ffmpeg->open(public_path() . '/upload/admin.mp4');
-        $admhlsenc = $admin_video->hls()
-        ->encryption(public_path() . "/hls-encrypted/creator-key", env('BACKEND_URL') . "hls-encrypted/creator-key")
-        ->setHlsTime(30)
-        ->x264()
-        ->autoGenerateRepresentations([2160]);
-        $admhlsenc->save(public_path() . "/hls-encrypted/hls-creator.m3u8");*/
+        /* //generate admin version
+         $admin_video = $ffmpeg->open(public_path() . '/upload/admin.mp4');
+         $admhlsenc = $admin_video->hls()
+         ->encryption(public_path() . "/hls-encrypted/creator-key", env('BACKEND_URL') . "hls-encrypted/creator-key")
+         ->setHlsTime(30)
+         ->x264()
+         ->autoGenerateRepresentations([2160]);
+         $admhlsenc->save(public_path() . "/hls-encrypted/hls-creator.m3u8");*/
         //it does not generate versions greater than the dimensions of the video itself
     }
 

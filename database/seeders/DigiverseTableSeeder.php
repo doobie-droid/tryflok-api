@@ -24,7 +24,7 @@ class DigiverseTableSeeder extends Seeder
         $user = User::where('email', UserMock::SEEDED_USER['email'])->first();
         $tags = Tag::all();
         $tag_ids = [];
-        foreach($tags as $tag) {
+        foreach ($tags as $tag) {
             $tag_ids[] = $tag->id;
         }
         Collection::factory()
@@ -51,6 +51,5 @@ class DigiverseTableSeeder extends Seeder
                 'id' => Str::uuid(),
             ]);
         });
-        
     }
 }

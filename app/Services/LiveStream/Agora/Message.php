@@ -2,7 +2,8 @@
 
 namespace App\Services\LiveStream\Agora;
 
-class Message {
+class Message
+{
     public $salt;
     public $ts;
     public $privileges;

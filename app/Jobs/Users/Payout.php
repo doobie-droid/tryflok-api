@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Log;
 
 class Payout implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
     public $user;
     /**
      * Create a new job instance.
@@ -34,14 +37,14 @@ class Payout implements ShouldQueue
         $total_referral = 0;
         $this->user->sales()->where('added_to_payout', 0)->chunk(100000, function ($sales) use (&$total_benefactor, &$total_referral) {
             foreach ($sales as $sale) {
-                $total_benefactor = bcadd($total_benefactor, $sale->benefactor_share,6);
-                $total_referral = bcadd($total_referral, $sale->referral_bonus,6);
+                $total_benefactor = bcadd($total_benefactor, $sale->benefactor_share, 6);
+                $total_referral = bcadd($total_referral, $sale->referral_bonus, 6);
                 $sale->added_to_payout = 1;
                 $sale->save();
             }
         });
 
-        $total_payout = bcadd($total_benefactor, $total_referral,2);
+        $total_payout = bcadd($total_benefactor, $total_referral, 2);
 
         if ($total_payout > 0) {
             $this->user->payouts()->create([

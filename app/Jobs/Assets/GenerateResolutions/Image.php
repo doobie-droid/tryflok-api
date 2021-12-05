@@ -12,8 +12,16 @@ use Illuminate\Support\Facades\Log;
 
 class Image implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $asset, $filepath, $folder, $filename, $ext, $full_file_name;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $asset;
+    public $filepath;
+    public $folder;
+    public $filename;
+    public $ext;
+    public $full_file_name;
     /**
      * Create a new job instance.
      *

@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Payout extends Model
 {
-    use HasFactory, Uuid;
+    use HasFactory;
+    use Uuid;
 
-     /**
-     * The attributes that are not mass assignable.
-     *
-     * @var array
-     */
+    /**
+    * The attributes that are not mass assignable.
+    *
+    * @var array
+    */
     protected $guarded = [
         'id',
     ];
@@ -32,9 +33,9 @@ class Payout extends Model
      * @var array
      */
     protected $casts = [
-        'last_payment_request' => 'datetime', 
-        'start' => 'datetime', 
-        'end' => 'datetime', 
+        'last_payment_request' => 'datetime',
+        'start' => 'datetime',
+        'end' => 'datetime',
     ];
 
     protected $guard_name = 'api';
@@ -43,4 +44,4 @@ class Payout extends Model
     {
         return $this->belongsTo(User::class);
     }
-}   
+}

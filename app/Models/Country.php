@@ -24,5 +24,4 @@ class Country extends Model
     protected $hidden = [];
 
     protected $guard_name = 'api';
-
 }

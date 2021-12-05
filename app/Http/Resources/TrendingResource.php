@@ -17,7 +17,7 @@ class TrendingResource extends JsonResource
     public function toArray($request)
     {
         $parent = parent::toArray($request);
-        return array_merge($parent , [
+        return array_merge($parent, [
             'reviewable' => $this->reviewable_type === 'content' ? new ContentResource($this->whenLoaded('reviewable')) : new CollectionResource($this->whenLoaded('reviewable')),
         ]);
     }

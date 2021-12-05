@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\Log;
 
 class Delegator implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
     public $data;
     /**
      * Create a new job instance.
@@ -52,12 +55,12 @@ class Delegator implements ShouldQueue
             'total_fees' => $this->data['data']['fees'] / 100,
             'provider' => 'paystack',
             'provider_id' => $this->data['data']['reference'],
-        ]; 
+        ];
         if (
-            $this->data['data']['metadata'] != NULL && 
-            $this->data['data']['metadata'] != 0 && 
+            $this->data['data']['metadata'] != null &&
+            $this->data['data']['metadata'] != 0 &&
             is_array($this->data['data']['metadata']) &&
-            array_key_exists('payment_data',$this->data['data']['metadata'])
+            array_key_exists('payment_data', $this->data['data']['metadata'])
         ) {
             $data['user'] = $this->data['data']['metadata']['payment_data']['user'];
             $data['items'] = $this->data['data']['metadata']['payment_data']['items'];

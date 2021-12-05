@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
 {
-    use HasFactory, Uuid;
+    use HasFactory;
+    use Uuid;
 
-     /**
-     * The attributes that are not mass assignable.
-     *
-     * @var array
-     */
+    /**
+    * The attributes that are not mass assignable.
+    *
+    * @var array
+    */
     protected $guarded = [
         'id',
     ];

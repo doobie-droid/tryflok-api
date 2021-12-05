@@ -20,10 +20,10 @@ class ContentSeeder extends Seeder
     {
         /**
          * Add Content
-         * 
+         *
          */
         $unpaidOneOffVideoContent = Content::create(MockContent::SEEDED_UNPAID_ONE_OFF_VIDEO);
-        //add benefactors 
+        //add benefactors
         $unpaidOneOffVideoContent->benefactors()->createMany([
             [
                 'user_id' => 4,
@@ -67,7 +67,7 @@ class ContentSeeder extends Seeder
         ]);
 
         $unpaidSubAudioContent = Content::create(MockContent::SEEDED_UNPAID_SUBSCRIPTION_AUDIO);
-        //add benefactors 
+        //add benefactors
         $unpaidSubAudioContent->benefactors()->createMany([
             [
                 'user_id' => 4,
@@ -110,9 +110,9 @@ class ContentSeeder extends Seeder
             'interval_amount' => 1,
             'currency' => 'USD',
         ]);
-        
+
         $unpaidPdfBookContent = Content::create(MockContent::SEEDED_UNPAID_PDF_BOOK);
-        //add benefactors 
+        //add benefactors
         $unpaidPdfBookContent->benefactors()->createMany([
             [
                 'user_id' => 4,
@@ -167,7 +167,7 @@ class ContentSeeder extends Seeder
         ]);
 
         $unpaidImageBookContent = Content::create(MockContent::SEEDED_UNPAID_IMAGE_BOOK);
-        //add benefactors 
+        //add benefactors
         $unpaidImageBookContent->benefactors()->createMany([
             [
                 'user_id' => 4,
@@ -224,7 +224,7 @@ class ContentSeeder extends Seeder
             'asset_type' => 'image',
             'mime_type' => 'image/png',
         ]);
-        
+
         //add prices
         $unpaidImageBookContent->prices()->create([
             'public_id' => '14517881306066d47a5320p',
@@ -235,10 +235,10 @@ class ContentSeeder extends Seeder
 
         /**
          * Add Collection
-         * 
+         *
          */
         $collection = Collection::create(MockCollection::SEEDED_UNPAID_COLLECTION);
-        //add benefactors 
+        //add benefactors
         $collection->benefactors()->createMany([
             [
                 'user_id' => 4,
@@ -334,7 +334,7 @@ class ContentSeeder extends Seeder
 
         //unpaid entities
         $unpaidOneOffVideoContent = Content::create(MockContent::SEEDED_UNPAID_ONE_OFF_VIDEO_2);
-        //add benefactors 
+        //add benefactors
         $unpaidOneOffVideoContent->benefactors()->createMany([
             [
                 'user_id' => 4,
@@ -378,7 +378,7 @@ class ContentSeeder extends Seeder
         ]);
 
         $unpaidSubAudioContent = Content::create(MockContent::SEEDED_UNPAID_SUBSCRIPTION_AUDIO2);
-        //add benefactors 
+        //add benefactors
         $unpaidSubAudioContent->benefactors()->createMany([
             [
                 'user_id' => 4,
@@ -421,9 +421,9 @@ class ContentSeeder extends Seeder
             'interval_amount' => 1,
             'currency' => 'USD',
         ]);
-        
+
         $unpaidPdfBookContent = Content::create(MockContent::SEEDED_UNPAID_PDF_BOOK2);
-        //add benefactors 
+        //add benefactors
         $unpaidPdfBookContent->benefactors()->createMany([
             [
                 'user_id' => 4,
@@ -478,7 +478,7 @@ class ContentSeeder extends Seeder
         ]);
 
         $unpaidImageBookContent = Content::create(MockContent::SEEDED_UNPAID_IMAGE_BOOK2);
-        //add benefactors 
+        //add benefactors
         $unpaidImageBookContent->benefactors()->createMany([
             [
                 'user_id' => 4,
@@ -535,7 +535,7 @@ class ContentSeeder extends Seeder
             'asset_type' => 'image',
             'mime_type' => 'image/png',
         ]);
-        
+
         //add prices
         $unpaidImageBookContent->prices()->create([
             'public_id' => '14517881306066d47a5320pu',
@@ -546,10 +546,10 @@ class ContentSeeder extends Seeder
 
         /**
          * Add Collection
-         * 
+         *
          */
         $collection = Collection::create(MockCollection::SEEDED_UNPAID_COLLECTION2);
-        //add benefactors 
+        //add benefactors
         $collection->benefactors()->createMany([
             [
                 'user_id' => 4,
@@ -586,7 +586,7 @@ class ContentSeeder extends Seeder
         $collection->contents()->attach([1,2,]);
 
         $parentCollectionWithSubs = Collection::create(MockCollection::SEEDED_COLLECTION_WITH_SUB);
-        //add benefactors 
+        //add benefactors
         $parentCollectionWithSubs->benefactors()->createMany([
             [
                 'user_id' => 4,

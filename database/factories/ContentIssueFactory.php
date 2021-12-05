@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ContentIssueFactory extends Factory
 {
-     /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
+    /**
+    * The name of the factory's corresponding model.
+    *
+    * @var string
+    */
     protected $model = ContentIssue::class;
 
     /**

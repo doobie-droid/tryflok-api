@@ -13,8 +13,13 @@ use Illuminate\Support\Facades\Log;
 
 class Purchase implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $provider_response, $user, $items;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $provider_response;
+    public $user;
+    public $items;
     /**
      * Create a new job instance.
      *
@@ -34,9 +39,9 @@ class Purchase implements ShouldQueue
      */
     public function handle()
     {
-        $paystack = new PaystackPayment;
+        $paystack = new PaystackPayment();
         $req = $paystack->verifyTransaction($this->provider_response['reference']);
-        if ((($req->status === true || $req->status === "true" ) && $req->data->status === "success")) {
+        if ((($req->status === true || $req->status === "true") && $req->data->status === "success")) {
             PurchaseJob::dispatch([
                 'total_amount' => $req->data->amount / 100,
                 'total_fees' => $req->data->fees / 100,

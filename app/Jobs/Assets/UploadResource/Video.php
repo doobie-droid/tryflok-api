@@ -12,8 +12,19 @@ use Illuminate\Support\Facades\Storage;
 
 class Video implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $asset, $filepath, $ts_files, $folder, $filename, $ext, $full_file_name, $resolutions, $hls_key_filepath;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    public $asset;
+    public $filepath;
+    public $ts_files;
+    public $folder;
+    public $filename;
+    public $ext;
+    public $full_file_name;
+    public $resolutions;
+    public $hls_key_filepath;
     /**
      * Create a new job instance.
      *
@@ -62,8 +73,8 @@ class Video implements ShouldQueue
             $nameParts = explode('/', $data['filepath']);
             $filename = end($nameParts);
             $fullFilename = join_path($this->folder, $filename);
-            Storage::disk('private_s3')->put($fullFilename, file_get_contents( $data['filepath']));
-            unlink( $data['filepath']);
+            Storage::disk('private_s3')->put($fullFilename, file_get_contents($data['filepath']));
+            unlink($data['filepath']);
             $this->asset->resolutions()->create([
                 'storage_provider' => 'private-s3',
                 'storage_provider_id' => $fullFilename,

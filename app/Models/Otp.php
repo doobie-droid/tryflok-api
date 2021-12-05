@@ -8,9 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Otp extends Model
 {
-    use HasFactory, Uuid;
+    use HasFactory;
+    use Uuid;
 
-     //
+    //
     /**
      * The attributes that are not mass assignable.
      *
@@ -31,7 +32,7 @@ class Otp extends Model
      * @var array
      */
     protected $casts = [
-        'expires_at' => 'datetime', 
+        'expires_at' => 'datetime',
     ];
 
     protected $guard_name = 'api';

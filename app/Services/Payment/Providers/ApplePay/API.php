@@ -2,7 +2,6 @@
 
 namespace App\Services\Payment\Providers\ApplePay;
 
-
 use App\Services\Payment\Providers\ApplePay\APIInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -24,7 +23,7 @@ abstract class API implements APIInterface
         $this->secret = config('payment.providers.apple.secret_key');
     }
 
-     public function baseUrl()
+    public function baseUrl()
     {
         return config('payment.providers.apple.api_url');
     }
@@ -45,16 +44,16 @@ abstract class API implements APIInterface
     }
     public function _get($url = null, $parameter = [])
     {
-        if ($perPage = $this->getPerPage()){
+        if ($perPage = $this->getPerPage()) {
             $parameter['limit'] = $perPage;
         }
 
-        return $this->execute('get',$url, $parameter);
+        return $this->execute('get', $url, $parameter);
     }
 
     public function _head($url = null, array $parameter = [])
     {
-        return $this->execute('head',$url, $parameter);
+        return $this->execute('head', $url, $parameter);
     }
     public function _delete($url = null, array $parameter = [])
     {
@@ -63,7 +62,7 @@ abstract class API implements APIInterface
 
     public function _put($url = null, array $parameter = [])
     {
-        return $this->execute('put',$url, $parameter);
+        return $this->execute('put', $url, $parameter);
     }
 
     public function _patch($url = null, array $parameter = [])
@@ -89,12 +88,12 @@ abstract class API implements APIInterface
      */
     public function execute($httpMethod, $url, array $parameters = [])
     {
-        try{
-            $results = $this->getClient()->{$httpMethod}($url,  ['json'=>$parameters]);
+        try {
+            $results = $this->getClient()->{$httpMethod}($url, ['json'=>$parameters]);
             $res  = json_decode((string)$results->getBody(), true);
             return response()->json($res)->getData();
-        }catch (ClientException $exception){
-           return response()->json([
+        } catch (ClientException $exception) {
+            return response()->json([
                'status' => false,
                'status_code' => $exception->getCode(),
                'message' => $exception->getMessage(),
@@ -107,7 +106,8 @@ abstract class API implements APIInterface
      *
      * @return Client
      */
-    private function getClient(){
+    private function getClient()
+    {
         return new Client([
             'base_uri' => $this->baseUrl(), 'handler' => $this->createHandler()
         ]);
@@ -120,22 +120,19 @@ abstract class API implements APIInterface
     private function createHandler()
     {
         $stack  = HandlerStack::create();
-        $stack->push(Middleware::mapRequest(function (RequestInterface $request){
+        $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
 
            // $request = $request->withHeader('Authorization', 'Bearer '. $this->secret);
             $request= $request->withHeader('Content-Type', 'application/json');
             return $request;
         }));
 
-        $stack->push(Middleware::retry(function ($retries, RequestInterface $request, ResponseInterface $response = null, TransferException $exception = null){
+        $stack->push(Middleware::retry(function ($retries, RequestInterface $request, ResponseInterface $response = null, TransferException $exception = null) {
             return $retries < 3 && ($exception instanceof ConnectException || ($response && $response->getStatusCode() >= 500));
-        },function ($retries){
+        }, function ($retries) {
             return (int) pow(2, $retries) * 1000;
         }));
 
         return $stack;
     }
-
-
-
 }

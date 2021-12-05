@@ -28,11 +28,10 @@ class SubscriptionController extends Controller
             return $this->respondWithSuccess("Subscriptions retrieved successfully", [
                 'subscriptions' => $subscriptions,
             ]);
-
-        }  catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function update(Request $request, $public_id)
@@ -43,7 +42,7 @@ class SubscriptionController extends Controller
                 'auto_renew' => ['sometimes', 'required', 'numeric', 'integer', 'min:0', 'max:1'],
             ]);
             if ($validator->fails()) {
-				return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
+                return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
             $user_id = $request->user()->id;
             $subscription = Subscription::with('subscriptionable', 'subscriptionable.cover', 'subscriptionable.owner', 'subscriptionable.prices', 'subscriptionable.prices.continent', 'subscriptionable.prices.country', 'subscriptionable.categories')->where('public_id', $public_id)->whereHas('userable', function (Builder $query) use ($user_id) {
@@ -63,9 +62,9 @@ class SubscriptionController extends Controller
             return $this->respondWithSuccess("Subscription updated successfully", [
                 'subscription' => $subscription,
             ]);
-        }  catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		} 
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 }

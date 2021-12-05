@@ -23,11 +23,11 @@ class AssetController extends Controller
                 'files.*' => ['required', 'file'],
                 'type' => ['required', 'string', 'regex:(image|pdf|audio|video)'],
             ]);
-    
+
             if ($validator->fails()) {
                 return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
-    
+
             switch ($request->type) {
                 case 'image':
                     $response = $this->uploadImage($request);
@@ -42,12 +42,12 @@ class AssetController extends Controller
                     $response = $this->uploadVideo($request);
                     break;
             }
-    
+
             return $response;
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function uploadImage(Request $request)
@@ -56,7 +56,7 @@ class AssetController extends Controller
             $validator = Validator::make($request->all(), [
                 'files.*' => ['required', 'image', 'max:10240'], //10MB
             ]);
-    
+
             if ($validator->fails()) {
                 return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
@@ -96,13 +96,13 @@ class AssetController extends Controller
             return $this->respondWithSuccess("Assets have been created successfully.", [
                 'assets' => $assets,
             ]);
-        }  catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
             foreach ($assets as $asset) {
                 $asset->delete();
             }
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function uploadVideo(Request $request)
@@ -111,7 +111,7 @@ class AssetController extends Controller
             $validator = Validator::make($request->all(), [
                 'files.*' => ['required', 'max:4096000'], // 4GB
             ]);
-    
+
             if ($validator->fails()) {
                 return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
@@ -150,13 +150,13 @@ class AssetController extends Controller
             return $this->respondWithSuccess("Assets have been created successfully.", [
                 'assets' => $assets,
             ]);
-        }  catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
             foreach ($assets as $asset) {
                 $asset->delete();
             }
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function uploadAudio(Request $request)
@@ -165,7 +165,7 @@ class AssetController extends Controller
             $validator = Validator::make($request->all(), [
                 'files.*' => ['required', 'max:204800'], // 200MB
             ]);
-    
+
             if ($validator->fails()) {
                 return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
@@ -203,13 +203,13 @@ class AssetController extends Controller
             return $this->respondWithSuccess("Assets have been created successfully.", [
                 'assets' => $assets,
             ]);
-        }  catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
             foreach ($assets as $asset) {
                 $asset->delete();
             }
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 
     public function uploadPdf(Request $request)
@@ -218,7 +218,7 @@ class AssetController extends Controller
             $validator = Validator::make($request->all(), [
                 'files.*' => ['required', 'max:102400', 'mimetypes:application/pdf'], // 100MB
             ]);
-    
+
             if ($validator->fails()) {
                 return $this->respondBadRequest("Invalid or missing input fields", $validator->errors()->toArray());
             }
@@ -257,12 +257,12 @@ class AssetController extends Controller
             return $this->respondWithSuccess("Assets have been created successfully.", [
                 'assets' => $assets,
             ]);
-        }  catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
             foreach ($assets as $asset) {
                 $asset->delete();
             }
-			return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-		}
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
     }
 }

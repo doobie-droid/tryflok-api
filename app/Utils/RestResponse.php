@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Utils;
+
 use Illuminate\Http\Response as IlluminateResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
@@ -54,7 +56,6 @@ trait RestResponse
      */
     protected function respondWithPagination(LengthAwarePaginator $items, $data, $headers = [ ])
     {
-
         $data = array_merge($data, [
             'pagination' => [
                 'total_count'  => $items->total(),
@@ -228,6 +229,4 @@ trait RestResponse
         $this->setStatusCode(IlluminateResponse::HTTP_INTERNAL_SERVER_ERROR);
         return $this->respondWithError($message, $headers);
     }
-
-
 }
