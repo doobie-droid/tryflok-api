@@ -10,12 +10,13 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Tests\MockData\User as UserMock;
 use Tests\TestCase;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthenticationTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function testSuperAdminLoginWorks()
+    public function test_super_admin_login_works()
     {
         $response = $this->json('POST', '/api/v1/auth/login', UserMock::SEEDED_SUPER_ADMIN);
         $response->assertStatus(200)
@@ -41,7 +42,7 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
-    public function testAdminLoginWorks()
+    public function test_admin_login_works()
     {
         $response = $this->json('POST', '/api/v1/auth/login', UserMock::SEEDED_ADMIN);
         $response->assertStatus(200)
@@ -68,7 +69,7 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
-    public function testUserLoginWorks()
+    public function test_user_login_works()
     {
         $response = $this->json('POST', '/api/v1/auth/login', UserMock::SEEDED_USER);
         $response->assertStatus(200)
@@ -99,7 +100,7 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
-    public function testRegistrationWorks()
+    public function test_registration_works()
     {
         Notification::fake();
         $response = $this->json('POST', '/api/v1/auth/register', UserMock::UNSEEDED_USER);
@@ -141,7 +142,7 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
-    public function testInvalidUsernamesAreNotRegistered()
+    public function test_invalid_usernames_are_not_registered()
     {
         $testData = UserMock::UNSEEDED_USER;
 
@@ -158,7 +159,7 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(400);
     }
 
-    public function testValidUsernamesAreRegistered()
+    public function test_valid_usernames_are_registered()
     {
         $testData = UserMock::UNSEEDED_USER;
 
@@ -178,16 +179,38 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function testUpdatePasswordWorks()
+    public function test_update_password_works()
     {
-        $user = User::where('email', UserMock::SEEDED_USER['email'])->first();
+        $user = User::factory()->create();
         $this->be($user);
         $response = $this->json('PUT', '/api/v1/account/password', [
-            'old' => UserMock::SEEDED_USER['password'],
+            'old' => 'password',
             'password' => 'user126',
             'password_confirmation' => 'user126',
         ]);
         $response->assertStatus(200);
         $this->assertTrue(Hash::check('user126', $user->password));
+    }
+
+    public function test_refresh_token_works()
+    {
+        $user = User::factory()->create();
+        $this->be($user);
+        $token = JWTAuth::fromUser($user);
+        $server = [
+            'HTTP_Authorization' => 'Bearer ' . $token
+        ];
+    
+        $response = $this->json('PATCH', '/api/v1/account/token', [], $server);
+        $response->assertStatus(200)->assertJsonStructure([
+            'status_code',
+            'message',
+            'data' => [
+                'user' => [
+                    'roles',
+                ],
+                'token',
+            ]
+        ]);
     }
 }
