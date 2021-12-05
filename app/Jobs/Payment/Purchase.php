@@ -114,16 +114,16 @@ class Purchase implements ShouldQueue
 
             //record sales for the benefactors of this item
             $net_amount = $amount;
-            $platform_share = bcdiv(bcmul($net_amount, Constants::PLATFORM_SHARE, 6), 100, 2);
-            $creator_share = bcdiv(bcmul($net_amount, Constants::CREATOR_SHARE, 6), 100, 2);
+            $platform_share = bcmul($net_amount, Constants::PLATFORM_SHARE, 6);
+            $creator_share = bcmul($net_amount, Constants::CREATOR_SHARE, 6);
             foreach ($itemModel->benefactors as $benefactor) {
                 $benefactor->user->sales()->create([
                     'saleable_type' => $item['type'],
                     'saleable_id' => $itemModel->id,
                     'amount' => $amount,
                     'payment_processor_fee' => $fee,
-                    'platform_share' => bcsub($platform_share, $fee, 2),
-                    'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share, 6), 100, 2),
+                    'platform_share' => bcsub($platform_share, $fee, 6),
+                    'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share, 6), 100, 6),
                     'referral_bonus' => 0,
                 ]);
             }
@@ -136,7 +136,7 @@ class Purchase implements ShouldQueue
                     'payment_processor_fee' => $fee,
                     'platform_share' => bcsub($platform_share, $fee, 6),
                     'benefactor_share' => 0,
-                    'referral_bonus' => bcdiv(bcmul(bcsub($platform_share, $fee, 6), 2.5, 6), 100, 2),
+                    'referral_bonus' => bcmul(bcsub($platform_share, $fee, 6), .025, 6),
                 ]);
             }
 

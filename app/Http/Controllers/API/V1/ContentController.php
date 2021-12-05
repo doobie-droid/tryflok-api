@@ -743,9 +743,33 @@ class ContentController extends Controller
             }
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
+            if (is_null($channel)) {
+                $channel = $content->metas()->create([
+                    'key' => 'channel_name',
+                    'value' => "{$content->id}-" . date('Ymd'),
+                ]);
+            }
             $status =  $content->metas()->where('key', 'live_status')->first();
+            if (is_null($status)) {
+                $status = $content->metas()->create([
+                    'key' => 'live_status',
+                    'value' => 'inactive',
+                ]);
+            }
             $token = $content->metas()->where('key', 'live_token')->first();
+            if (is_null($token)) {
+                $token = $content->metas()->create([
+                    'key' => 'live_token',
+                    'value' => '',
+                ]);
+            }
             $join_count = $content->metas()->where('key', 'join_count')->first();
+            if (is_null($join_count)) {
+                $join_count = $content->metas()->create([
+                    'key' => 'join_count',
+                    'value' => 0,
+                ]);
+            }
             //ensure that the live has not been started before
             if ($status->value === 'active') {
                 return $this->respondWithSuccess('Channel started successfully', [

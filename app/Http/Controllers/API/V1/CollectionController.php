@@ -208,8 +208,10 @@ class CollectionController extends Controller
                 foreach ($request->tags as $tag) {
                     switch ($tag['action']) {
                         case 'add':
-                            $digiverse->tags()->syncWithoutDetaching($tag['id'], [
-                                'id' => Str::uuid(),
+                            $digiverse->tags()->syncWithoutDetaching([
+                                $tag['id'] => [
+                                    'id' => Str::uuid(),
+                                ],
                             ]);
                             break;
                         case 'remove':

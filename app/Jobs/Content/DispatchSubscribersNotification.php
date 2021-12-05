@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Content;
 
+use App\Jobs\Content\NotifySubscriber as NotifySubscriberJob;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -37,7 +38,7 @@ class DispatchSubscribersNotification implements ShouldQueue
         $content = $this->content;
         $this->content->subscribers()->chunk(100000, function ($users) use ($content) {
             foreach ($users as $user) {
-                NotifiySubscriberJob::dispatch([
+                NotifySubscriberJob::dispatch([
                     'subscriber' => $user,
                     'content' => $content,
                 ]);

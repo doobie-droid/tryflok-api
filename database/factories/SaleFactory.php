@@ -26,8 +26,8 @@ class SaleFactory extends Factory
             'referral_bonus' => 0,
             'added_to_payout' => 0,
             'payment_processor_fee' => 0,
-            'platform_share' => bcdiv(bcmul($amount, Constants::PLATFORM_SHARE, 6), 100, 2),
-            'benefactor_share' => bcdiv(bcmul($amount, Constants::CREATOR_SHARE, 6), 100, 2),
+            'platform_share' => bcmul($amount, Constants::PLATFORM_SHARE, 6),
+            'benefactor_share' => bcmul($amount, Constants::CREATOR_SHARE, 6),
         ];
     }
 
@@ -45,8 +45,8 @@ class SaleFactory extends Factory
         return $this->state(function (array $attributes) use ($amount) {
             return [
                 'amount' => $amount,
-                'platform_share' => bcdiv(bcmul($amount, Constants::PLATFORM_SHARE, 6), 100, 2),
-                'benefactor_share' => bcdiv(bcmul($amount, Constants::CREATOR_SHARE, 6), 100, 2),
+                'platform_share' => bcmul($amount, Constants::PLATFORM_SHARE, 6),
+                'benefactor_share' => bcmul($amount, Constants::CREATOR_SHARE, 6),
             ];
         });
     }

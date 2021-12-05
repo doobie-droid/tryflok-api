@@ -15,6 +15,6 @@ class Constants
     public const MAX_ITEMS_LIMIT = 100;
 
     // revenue share
-    public const PLATFORM_SHARE = 25;
-    public const CREATOR_SHARE = 75;
+    public const PLATFORM_SHARE = .25;
+    public const CREATOR_SHARE = .75;
 }

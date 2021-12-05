@@ -45,7 +45,7 @@ class Payout implements ShouldQueue
             }
         });
 
-        $total_payout = bcadd($total_benefactor, $total_referral, 2);
+        $total_payout = bcadd($total_benefactor, $total_referral, 6);
 
         if ($total_payout > 0) {
             $this->user->payouts()->create([

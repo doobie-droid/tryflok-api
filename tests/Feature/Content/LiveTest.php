@@ -3,6 +3,7 @@
 namespace Tests\Feature\Content;
 
 use App\Models\Content;
+use App\Models\Price;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -140,14 +141,18 @@ class LiveTest extends TestCase
         $response->assertStatus(400);
     }
 
-    public function test_join_live_does_works()
+    public function test_join_live_works()
     {
         $user = User::factory()->create();
-        $this->be($user);
         $user2 = User::factory()->create();
         $content = Content::factory()
         ->for($user2, 'owner')
         ->liveAudio()
+        ->has(Price::factory()->state([
+            'amount' => 0,
+            'interval' => 'one-off',
+            'interval_amount' => 1,
+        ]))
         ->create();
         $content->metas()->createMany([
             [
@@ -158,8 +163,19 @@ class LiveTest extends TestCase
                 'key' => 'channel_name',
                 'value' => "{$content->id}-" . date('Ymd'),
             ],
+            [
+                'key' => 'live_token',
+                'value' => '',
+            ],
+            [
+                'key' => 'join_count',
+                'value' => 0,
+            ],
         ]);
+        $this->be($user2);
+        $this->json('POST', "/api/v1/contents/{$content->id}/live");
 
+        $this->be($user);
         $response = $this->json('PATCH', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(200)
         ->assertJsonStructure([
@@ -220,6 +236,8 @@ class LiveTest extends TestCase
                 'value' => "{$content->id}-" . date('Ymd'),
             ],
         ]);
+
+        $this->json('POST', "/api/v1/contents/{$content->id}/live");
 
         $response = $this->json('DELETE', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(200);
