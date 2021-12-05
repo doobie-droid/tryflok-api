@@ -7,33 +7,43 @@ jobs:
   build:
     docker:
       # Specify the version you desire here
-      - image: circleci/php:7.2-cli
+      - image: circleci/php:7.4-cli
         environment:
           MYSQL_HOST: 127.0.0.1
-          MYSQL_DB: testing
+          MYSQL_DB: flok
           MYSQL_USER: root
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_PASSWORD:
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # Using the RAM variation mitigates I/O contention
-      # for database intensive operations.
       - image: circleci/mysql:5.7
         environment:
-          MYSQL_DATABASE: testing
+          MYSQL_DATABASE: flok
       #
       - image: redis:latest
 
     steps:
       - checkout
 
-      - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File 
-      #- run: sudo apt install -y mysql-client
-      - run: sudo apt install -y zlib1g-dev libsqlite3-dev 
-      - run: sudo apt-get install -y libpng-dev libjpeg62-turbo-dev
-      - run: sudo docker-php-ext-install zip exif pdo_mysql gd
+      - run: sudo apt update
       - run: cp .env.example .env
+      - run: apt-get install -y zlib1g-dev libsqlite3-dev
+      - run: apt-get install -y libpng-dev libjpeg62-turbo-dev
+      - run: apt-get update && apt-get install -y git curl libonig-dev libxml2-dev libzip-dev zip unzip
+      - run: apt-get install -y ffmpeg
+      - run: pecl install -o -f redis &&  rm -rf /tmp/pear &&  docker-php-ext-enable redis
+      - run: apt-get clean && rm -rf /var/lib/apt/lists/*
+      - run: apt-get update
+      - run: apt install libsodium-dev
+      - run: docker-php-ext-configure sodium
+      - run: docker-php-ext-install sodium
+      - run: pecl install -f libsodium
+      - run: docker-php-ext-enable sodium
+      - run: docker-php-ext-install pdo_mysql
+      - run: docker-php-ext-install pcntl
+      - run: docker-php-ext-install exif
+      - run: docker-php-ext-install bcmath
+      - run: docker-php-ext-install gd
+      - run: docker-php-ext-install zip
+      
 
       # Download and cache dependencies
       - restore_cache:
@@ -49,8 +59,9 @@ jobs:
           key: v1-dependencies-{{ checksum "composer.json" }}
           paths:
             - ./vendor
-      # set up passport
       - run: php artisan key:generate
-      - run: php artisan migrate:fresh --seed
+      - run: php artisan migrate:fresh
+      - run: php artisan db:seed --class=TestingSeeder
       # run tests with phpunit or codecept
+      - run: ./vendor/bin/tlint
       - run: ./vendor/bin/phpunit
