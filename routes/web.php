@@ -17,17 +17,17 @@ Route::get('/', function () {
     return 'OK 200';
 });
 
-Route::get('/apple-app-site-association', function () {
+Route::get('apple-app-site-association', function () {
     $obj = [
         'applinks' => [
             'apps' => [],
             'details' => [
                 [
                     'appID' => 'DHG3RK7L57.com.flok.flok',
-                    'paths' => [ '*' ]
-                ]
-            ]
-        ]
+                    'paths' => [ '*' ],
+                ],
+            ],
+        ],
     ];
     return response()->json($obj);
 });

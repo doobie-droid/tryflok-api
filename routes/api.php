@@ -3,6 +3,11 @@
 use App\Constants\Constants;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\TagResource;
+use App\Models\Category;
+use App\Models\Continent;
+use App\Models\Country;
+use App\Models\Language;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -27,7 +32,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::patch('email', 'AuthController@verifyEmail');
         Route::patch('password/forgot', 'AuthController@forgotPassword');
         Route::patch('password/reset', 'AuthController@resetPassword');
-        Route::get('/unauthenticated', function () {
+        Route::get('unauthenticated', function () {
             return response()->json([
                 'status' => false,
                 'status_code' => 401,
@@ -36,40 +41,40 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         })->name('unauthenticated');
     });
 
-    Route::get('/languages', function () {
+    Route::get('languages', function () {
         return response()->json([
             'message' => 'Languages retrieved successfully',
             'data' => [
                 'languages' => Cache::rememberForever('request:languages', function () {
-                    return \App\Models\Language::orderBy('name')->get();
+                    return Language::orderBy('name')->get();
                 }),
-            ]
+            ],
         ]);
     });
 
-    Route::get('/countries', function () {
+    Route::get('countries', function () {
         return response()->json([
             'message' => 'Countries retrieved successfully',
             'data' => [
                 'countries' => Cache::rememberForever('request:countries', function () {
-                    return \App\Models\Country::orderBy('name')->get();
+                    return Country::orderBy('name')->get();
                 }),
-            ]
+            ],
         ]);
     });
 
-    Route::get('/continents', function () {
+    Route::get('continents', function () {
         return response()->json([
             'message' => 'Continents retrieved successfully',
             'data' => [
                 'continents' => Cache::rememberForever('request:continents', function () {
-                    return \App\Models\Continent::orderBy('name')->get();
+                    return Continent::orderBy('name')->get();
                 }),
-            ]
+            ],
         ]);
     });
 
-    Route::get('/categories', function (Request $request) {
+    Route::get('categories', function (Request $request) {
         $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
         $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
         if ($limit > Constants::MAX_ITEMS_LIMIT) {
@@ -77,7 +82,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         }
         $search = urldecode($request->query('search', ''));
 
-        $categories = \App\Models\Category::where('name', 'LIKE', '%' . $search . '%')->orderBy('name')->paginate($limit, ['*'], 'page', $page);
+        $categories = Category::where('name', 'LIKE', "%{$search}%")->orderBy('name')->paginate($limit, ['*'], 'page', $page);
         return response()->json([
             'message' => 'Categories retrieved successfully',
             'data' => [
@@ -85,11 +90,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
                 'current_page' => (int) $categories->currentPage(),
                 'items_per_page' => (int) $categories->perPage(),
                 'total' => (int) $categories->total(),
-            ]
+            ],
         ]);
     });
 
-    Route::get('/tags', function (Request $request) {
+    Route::get('tags', function (Request $request) {
         $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
         $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
         if ($limit > Constants::MAX_ITEMS_LIMIT) {
@@ -97,7 +102,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         }
         $search = urldecode($request->query('search', ''));
 
-        $tags = \App\Models\Tag::where('name', 'LIKE', '%' . $search . '%')->orderBy('name')->paginate($limit, ['*'], 'page', $page);
+        $tags = Tag::where('name', 'LIKE', "%{$search}%")->orderBy('name')->paginate($limit, ['*'], 'page', $page);
         return response()->json([
             'message' => 'Tags retrieved successfully',
             'data' => [
@@ -105,25 +110,25 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
                 'current_page' => (int) $tags->currentPage(),
                 'items_per_page' => (int) $tags->perPage(),
                 'total' => (int) $tags->total(),
-            ]
+            ],
         ]);
     });
 
     Route::group(['prefix' => 'contents'], function () {
-        Route::get('/{id}', 'ContentController@getSingle');
-        Route::get('/{id}/reviews', 'ContentController@getReviews');
-        Route::get('/{id}/assets', 'ContentController@getAssets');
+        Route::get('{id}', 'ContentController@getSingle');
+        Route::get('{id}/reviews', 'ContentController@getReviews');
+        Route::get('{id}/assets', 'ContentController@getAssets');
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
         Route::get('/', 'CollectionController@getAll');
-        Route::get('/{id}', 'CollectionController@getDigiverse');
-        Route::get('/{digiverse_id}/contents', 'ContentController@getDigiverseContents');
-        Route::get('/{id}/reviews', 'CollectionController@getReviews');
+        Route::get('{id}', 'CollectionController@getDigiverse');
+        Route::get('{digiverse_id}/contents', 'ContentController@getDigiverseContents');
+        Route::get('{id}/reviews', 'CollectionController@getReviews');
     });
 
     Route::group(['prefix' => 'reviews'], function () {
-        Route::get('/{id}/reviews', 'ReviewController@getReviews');
+        Route::get('{id}/reviews', 'ReviewController@getReviews');
     });
 
     Route::group(['prefix' => 'users'], function () {
@@ -136,20 +141,20 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'payments'], function () {
-        Route::get('/flutterwave/banks', 'PaymentController@getFlutterwaveBanks');
-        Route::get('/flutterwave/banks/branches', 'PaymentController@getFlutterwaveBankBranches');
-        Route::get('/stripe/connect', 'UserController@addStripePaymentAccount');
+        Route::get('flutterwave/banks', 'PaymentController@getFlutterwaveBanks');
+        Route::get('flutterwave/banks/branches', 'PaymentController@getFlutterwaveBankBranches');
+        Route::get('stripe/connect', 'UserController@addStripePaymentAccount');
     });
 });
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => 'authorize_admin'], function () {
-            Route::get('/dashboard', 'AdministratorController@dashboard');
+            Route::get('dashboard', 'AdministratorController@dashboard');
 
             Route::group(['prefix' => 'categories'], function () {
                 Route::post('/', 'CategoryController@create');
-                Route::patch('/{public_id}', 'CategoryController@update');
+                Route::patch('{public_id}', 'CategoryController@update');
             });
         });
 
@@ -160,9 +165,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'approvals'], function () {
             Route::get('/', 'ApprovalController@getAll');
             Route::post('/', 'ApprovalController@create');
-            Route::patch('/{public_id}', 'ApprovalController@update');
-            Route::post('/{public_id}/messages', 'ApprovalController@sendApprovalMessage');
-            Route::get('/{public_id}/messages', 'ApprovalController@getApprovalMessages');
+            Route::patch('{public_id}', 'ApprovalController@update');
+            Route::post('{public_id}/messages', 'ApprovalController@sendApprovalMessage');
+            Route::get('{public_id}/messages', 'ApprovalController@getApprovalMessages');
         });
 
         Route::group(['prefix' => 'users',], function () {
@@ -173,62 +178,62 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'account'], function () {
             Route::get('/', 'UserController@getAccount');
-            Route::get('/digiverses', 'CollectionController@getUserCreatedDigiverses');
-            Route::get('/notifications', 'UserController@getNotifications');
-            Route::patch('/notifications', 'UserController@markAllNotificationsAsRead');
-            Route::get('/signed-cookie', 'UserController@getSignedCookies');
-            Route::get('/approval-requests', 'ApprovalController@getUserRequests');
-            Route::get('/subscriptions', 'SubscriptionController@getUserSubscriptions');
-            Route::patch('/fund-wallet', 'WalletController@fundWallet');
-            Route::post('/wallet-pay', 'WalletController@payViaWallet');
-            Route::get('/wallet-transactions', 'WalletController@getTransactions');
-            Route::post('/profile', 'UserController@updateBasicData');
-            Route::put('/password', 'UserController@updatePassword');
-            Route::patch('/token', 'UserController@refreshToken');
-            Route::post('/wishlist', 'UserController@addItemsToWishList');
-            Route::delete('/wishlist', 'UserController@removeItemsFromWishlist');
-            Route::get('/wishlist', 'UserController@getWishlist');
-            Route::get('/purchased-items', 'UserController@getPurchasedItems');
-            Route::post('/cart', 'UserController@addItemsToCart');
-            Route::delete('/cart', 'UserController@removeItemsFromCart');
-            Route::get('/cart', 'UserController@getCartItems');
-            Route::get('/auth-otp', 'UserController@generateAuthOtp');
-            Route::get('/payout', 'UserController@getPayouts');
-            Route::patch('/payout', 'UserController@cashoutPayout');
-            Route::post('/payment-account', 'UserController@addPaymentAccount');
-            Route::get('/payment-account', 'UserController@getPaymentAccount');
-            Route::delete('/payment-account', 'UserController@removePaymentAccount');
+            Route::get('digiverses', 'CollectionController@getUserCreatedDigiverses');
+            Route::get('notifications', 'UserController@getNotifications');
+            Route::patch('notifications', 'UserController@markAllNotificationsAsRead');
+            Route::get('signed-cookie', 'UserController@getSignedCookies');
+            Route::get('approval-requests', 'ApprovalController@getUserRequests');
+            Route::get('subscriptions', 'SubscriptionController@getUserSubscriptions');
+            Route::patch('fund-wallet', 'WalletController@fundWallet');
+            Route::post('wallet-pay', 'WalletController@payViaWallet');
+            Route::get('wallet-transactions', 'WalletController@getTransactions');
+            Route::post('profile', 'UserController@updateBasicData');
+            Route::put('password', 'UserController@updatePassword');
+            Route::patch('token', 'UserController@refreshToken');
+            Route::post('wishlist', 'UserController@addItemsToWishList');
+            Route::delete('wishlist', 'UserController@removeItemsFromWishlist');
+            Route::get('wishlist', 'UserController@getWishlist');
+            Route::get('purchased-items', 'UserController@getPurchasedItems');
+            Route::post('cart', 'UserController@addItemsToCart');
+            Route::delete('cart', 'UserController@removeItemsFromCart');
+            Route::get('cart', 'UserController@getCartItems');
+            Route::get('auth-otp', 'UserController@generateAuthOtp');
+            Route::get('payout', 'UserController@getPayouts');
+            Route::patch('payout', 'UserController@cashoutPayout');
+            Route::post('payment-account', 'UserController@addPaymentAccount');
+            Route::get('payment-account', 'UserController@getPaymentAccount');
+            Route::delete('payment-account', 'UserController@removePaymentAccount');
         });
 
         Route::group(['prefix' => 'subscriptions'], function () {
-            Route::patch('/{public_id}', 'SubscriptionController@update');
+            Route::patch('{public_id}', 'SubscriptionController@update');
         });
 
         Route::group(['prefix' => 'contents'], function () {
             Route::post('/', 'ContentController@create');
-            Route::patch('/{id}', 'ContentController@update');
+            Route::patch('{id}', 'ContentController@update');
 
-            Route::post('/{id}/issues', 'ContentController@createIssue');
-            Route::put('/{id}/issues', 'ContentController@updateIssue');
-            Route::patch('/{id}/issues', 'ContentController@publishIssue');
-            Route::get('/{id}/issues', 'ContentController@getIssues');
+            Route::post('{id}/issues', 'ContentController@createIssue');
+            Route::put('{id}/issues', 'ContentController@updateIssue');
+            Route::patch('{id}/issues', 'ContentController@publishIssue');
+            Route::get('{id}/issues', 'ContentController@getIssues');
 
-            Route::post('/{id}/subscription', 'ContentController@subscribeToContent');
-            Route::delete('/{id}/subscription', 'ContentController@unsubscribeFromContent');
+            Route::post('{id}/subscription', 'ContentController@subscribeToContent');
+            Route::delete('{id}/subscription', 'ContentController@unsubscribeFromContent');
 
-            Route::post('/{id}/live', 'ContentController@startLive');
-            Route::patch('/{id}/live', 'ContentController@joinLive');
-            Route::patch('/{id}/leave-live', 'ContentController@leaveLive');
-            Route::delete('/{id}/live', 'ContentController@endLive');
+            Route::post('{id}/live', 'ContentController@startLive');
+            Route::patch('{id}/live', 'ContentController@joinLive');
+            Route::patch('{id}/leave-live', 'ContentController@leaveLive');
+            Route::delete('{id}/live', 'ContentController@endLive');
         });
 
         Route::group(['prefix' => 'issues'], function () {
-            Route::get('/{id}', 'ContentController@getSingleIssue');
+            Route::get('{id}', 'ContentController@getSingleIssue');
         });
 
         Route::group(['prefix' => 'digiverses'], function () {
             Route::post('/', 'CollectionController@createDigiverse');
-            Route::patch('/{id}', 'CollectionController@updateDigiverse');
+            Route::patch('{id}', 'CollectionController@updateDigiverse');
         });
 
         Route::group(['prefix' => 'reviews'], function () {
@@ -240,7 +245,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'payments'], function () {
-            Route::post('/free', 'PaymentController@freeItems');
+            Route::post('free', 'PaymentController@freeItems');
         });
     });
 });
