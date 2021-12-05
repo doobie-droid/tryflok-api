@@ -34,7 +34,7 @@ jobs:
       - run: sudo apt install libsodium-dev
       - run: sudo docker-php-ext-configure sodium
       - run: sudo docker-php-ext-install sodium
-      - run: sudo pecl install -f libsodium
+      - run: sudo pecl install libsodium
       - run: sudo docker-php-ext-enable sodium
       - run: sudo docker-php-ext-install pdo_mysql
       - run: sudo docker-php-ext-install pcntl
