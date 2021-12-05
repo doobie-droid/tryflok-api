@@ -563,6 +563,7 @@ class ContentController extends Controller
 
             $contents = $contents
             ->withCount('subscribers')
+            ->with('metas')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);

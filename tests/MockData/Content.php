@@ -134,9 +134,12 @@ class Content
                         'resolutions'
                     ]
                 ],
-                'metas'
-            ]
-        ]
+                'metas' => [
+                    'live_status',
+                    'channel_name',
+                ],
+            ],
+        ],
     ];
 
     const CONTENT_WITH_NO_ASSET_RESPONSE = [
@@ -181,9 +184,12 @@ class Content
                         'name',
                     ]
                 ],
-                'metas',
-            ]
-        ]
+                'metas' => [
+                    'channel_name',
+                    'live_status',
+                ],
+            ],
+        ],
     ];
 
     const CONTENT_WITH_NO_COVER_AND_ASSET_RESPONSE = [
@@ -224,9 +230,12 @@ class Content
                         'name',
                     ]
                 ],
-                'metas',
-            ]
-        ]
+                'metas' => [
+                    'channel_name',
+                    'live_status',
+                ],
+            ],
+        ],
     ];
 
     const ISSUE_STRUCTURE = [
