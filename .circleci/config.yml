@@ -25,14 +25,14 @@ jobs:
 
       - run: sudo apt update
       - run: cp .env.example .env
-      - run: apt-get install -y zlib1g-dev libsqlite3-dev
-      - run: apt-get install -y libpng-dev libjpeg62-turbo-dev
-      - run: apt-get update && apt-get install -y git curl libonig-dev libxml2-dev libzip-dev zip unzip
-      - run: apt-get install -y ffmpeg
+      - run: sudo apt-get install -y zlib1g-dev libsqlite3-dev
+      - run: sudo apt-get install -y libpng-dev libjpeg62-turbo-dev
+      - run: sudo apt-get update && apt-get install -y git curl libonig-dev libxml2-dev libzip-dev zip unzip
+      - run: sudo apt-get install -y ffmpeg
       - run: pecl install -o -f redis &&  rm -rf /tmp/pear &&  docker-php-ext-enable redis
-      - run: apt-get clean && rm -rf /var/lib/apt/lists/*
-      - run: apt-get update
-      - run: apt install libsodium-dev
+      - run: sudo apt-get clean && rm -rf /var/lib/apt/lists/*
+      - run: sudo apt-get update
+      - run: sudo apt install libsodium-dev
       - run: docker-php-ext-configure sodium
       - run: docker-php-ext-install sodium
       - run: pecl install -f libsodium
