@@ -154,8 +154,8 @@ class PurchaseTest extends TestCase
             'saleable_id' => $paid_digiverse->id,
             'amount' => 100,
             'payment_processor_fee' => 0,
-            'platform_share' => bcdiv(bcmul(100, Constants::PLATFORM_SHARE, 6), 100, 2),
-            'benefactor_share' => bcdiv(bcmul(100, Constants::CREATOR_SHARE, 6), 100, 2),
+            'platform_share' => bcmul(100, Constants::PLATFORM_SHARE, 2),
+            'benefactor_share' => bcmul(100, Constants::CREATOR_SHARE, 2),
             'referral_bonus' => 0,
         ]);
 
@@ -165,8 +165,8 @@ class PurchaseTest extends TestCase
             'saleable_id' => $paid_content_in_free_digiverse->id,
             'amount' => 100,
             'payment_processor_fee' => 0,
-            'platform_share' => bcdiv(bcmul(100, Constants::PLATFORM_SHARE, 6), 100, 2),
-            'benefactor_share' => bcdiv(bcmul(100, Constants::CREATOR_SHARE, 6), 100, 2),
+            'platform_share' => bcmul(100, Constants::PLATFORM_SHARE, 2),
+            'benefactor_share' => bcmul(100, Constants::CREATOR_SHARE, 2),
             'referral_bonus' => 0,
         ]);
 
@@ -176,8 +176,8 @@ class PurchaseTest extends TestCase
             'saleable_id' => $free_content_in_free_digiverse->id,
             'amount' => 0,
             'payment_processor_fee' => 0,
-            'platform_share' => bcdiv(bcmul(0, Constants::PLATFORM_SHARE, 6), 100, 2),
-            'benefactor_share' => bcdiv(bcmul(0, Constants::CREATOR_SHARE, 6), 100, 2),
+            'platform_share' => bcmul(0, Constants::PLATFORM_SHARE, 2),
+            'benefactor_share' => bcmul(0, Constants::CREATOR_SHARE, 2),
             'referral_bonus' => 0,
         ]);
 
