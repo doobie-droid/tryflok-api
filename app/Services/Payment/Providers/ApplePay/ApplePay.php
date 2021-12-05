@@ -1,8 +1,8 @@
 <?php
 namespace App\Services\Payment\Providers\ApplePay;
+use App\Models\PaymentAccount;
 use App\Services\Payment\PaymentInterface;
 use App\Services\Payment\Providers\ApplePay\API;
-use App\Models\PaymentAccount;
 
 class ApplePay extends API implements PaymentInterface 
 {

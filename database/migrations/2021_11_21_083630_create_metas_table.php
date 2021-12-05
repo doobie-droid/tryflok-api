@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateMetasTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('metas', function (Blueprint $table) {
@@ -22,11 +17,6 @@ class CreateMetasTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('metas');

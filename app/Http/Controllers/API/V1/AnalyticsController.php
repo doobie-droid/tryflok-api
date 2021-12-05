@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
-use App\Constants\Constants;
-use App\Models\Review;
-use Illuminate\Support\Facades\Cache;
 use App\Http\Resources\TrendingResource;
+use App\Models\Review;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AnalyticsController extends Controller
 {

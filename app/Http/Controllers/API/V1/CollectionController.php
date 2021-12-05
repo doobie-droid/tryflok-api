@@ -2,28 +2,17 @@
 
 namespace App\Http\Controllers\API\V1;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use App\Constants\Permissions;
-use App\Constants\Roles;
 use App\Constants\Constants;
-use App\Http\Resources\UserResource;
-use App\Services\Storage\Storage as Storage;
-use App\Models\User;
-use App\Models\Content;
-use App\Models\Collection;
-use App\Models\Category;
-use App\Models\Price;
-use App\Models\Review;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Database\Eloquent\Builder;
-use App\Jobs\Collection\DispatchContentUserablesUpdate as DispatchContentUserablesUpdateJob;
-use App\Jobs\Collection\DispatchCollectionUserablesUpdate as DispatchCollectionUserablesUpdateJob;
-use App\Rules\AssetType as AssetTypeRule;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\CollectionResource;
+use App\Models\Collection;
+use App\Rules\AssetType as AssetTypeRule;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class CollectionController extends Controller
 {

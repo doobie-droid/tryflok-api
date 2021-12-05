@@ -2,9 +2,9 @@
 
 namespace App\Services\Payment\Providers\Flutterwave;
 
+use App\Models\PaymentAccount;
 use App\Services\Payment\PaymentInterface;
 use App\Services\Payment\Providers\Flutterwave\API;
-use App\Models\PaymentAccount;
 
 class Flutterwave extends API implements PaymentInterface {
     /**

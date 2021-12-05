@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Collection;
-use App\Models\Userable;
 use App\Models\Price;
+use App\Models\Userable;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SubscriptionFactory extends Factory
 {

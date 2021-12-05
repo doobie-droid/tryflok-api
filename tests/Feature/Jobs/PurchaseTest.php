@@ -2,22 +2,18 @@
 
 namespace Tests\Feature\Jobs;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Tests\TestCase;
+use App\Constants\Constants;
+use App\Constants\Roles;
+use App\Jobs\Payment\Purchase as PurchaseJob;
+use App\Models\Benefactor;
+use App\Models\Collection;
+use App\Models\Content;
+use App\Models\Price;
 use App\Models\User;
 use App\Models\Userable;
-use App\Models\Content;
-use App\Models\Collection;
-use App\Models\Price;
-use App\Models\Benefactor;
-use App\Jobs\Payment\Purchase as PurchaseJob;
-use Tests\MockData\Content as MockContent;
-use Tests\MockData\Collection as MockCollection;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
-use App\Constants\Roles;
-use App\Constants\Constants;
+use Tests\TestCase;
 
 class PurchaseTest extends TestCase
 {

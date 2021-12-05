@@ -2,16 +2,14 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Constants\Roles;
+use App\Models\User;
+use App\Notifications\User\EmailConfirmation;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Tests\MockData\User as UserMock;
 use Tests\TestCase;
-use App\Constants\Roles;
-use App\Models\User;
-use App\Notifications\User\EmailConfirmation;
 
 class AuthenticationTest extends TestCase
 {

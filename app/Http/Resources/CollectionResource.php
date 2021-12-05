@@ -2,9 +2,8 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\ContentResource;
 use App\Http\Resources\UserResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class CollectionResource extends JsonResource
 {

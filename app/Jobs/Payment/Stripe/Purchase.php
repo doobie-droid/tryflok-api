@@ -2,15 +2,14 @@
 
 namespace App\Jobs\Payment\Stripe;
 
+use App\Jobs\Payment\Purchase as PurchaseJob;
+use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use App\Jobs\Payment\Purchase as PurchaseJob;
-use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
 
 class Purchase implements ShouldQueue
 {

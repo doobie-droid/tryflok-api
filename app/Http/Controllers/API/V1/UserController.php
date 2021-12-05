@@ -2,36 +2,29 @@
 
 namespace App\Http\Controllers\API\V1;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use App\Constants\Permissions;
+use App\Constants\Constants;
 use App\Constants\Roles;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\NotificationResource;
 use App\Http\Resources\UserResource;
-use App\Services\Storage\Storage;
-use Illuminate\Support\Str;
-use App\Models\User;
-use App\Models\Userable;
-use App\Models\Content;
-use App\Models\Collection;
+use App\Http\Resources\UserResourceWithSensitive;
+use App\Jobs\Payment\Payout as PayoutToCreatorJob;
 use App\Models\Cart;
-use App\Models\Configuration;
+use App\Models\Collection;
+use App\Models\Content;
 use App\Models\PaymentAccount;
 use App\Models\Payout;
-use App\Models\Notification;
-use App\Events\User\ConfirmEmail as ConfirmEmailEvent;
-use PragmaRX\Countries\Package\Countries as PragmarxCountries;
-use App\Jobs\Payment\Payout as PayoutToCreatorJob;
-use Illuminate\Database\Eloquent\Builder;
-use App\Http\Resources\UserResourceWithSensitive;
-use \Carbon\Carbon;
-use Aws\CloudFront\CloudFrontClient;
-use Aws\Exception\AwsException;
-use App\Http\Resources\NotificationResource;
-use App\Constants\Constants;
+use App\Models\User;
+use App\Models\Userable;
 use App\Rules\AssetType as AssetTypeRule;
+use Aws\CloudFront\CloudFrontClient;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use PragmaRX\Countries\Package\Countries as PragmarxCountries;
 
 class UserController extends Controller
 {

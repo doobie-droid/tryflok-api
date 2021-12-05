@@ -2,24 +2,19 @@
 
 namespace App\Jobs\Payment;
 
+use App\Constants\Constants;
+use App\Models\Cart;
+use App\Models\Collection;
+use App\Models\Content;
+use App\Models\Price;
+use App\Models\User;
+use App\Models\Userable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use App\Models\User;
-use App\Models\Collection;
-use App\Models\Content;
-use App\Models\Price;
-use App\Models\Userable;
-use App\Models\Sale;
-use App\Models\Subscription;
-use App\Models\Cart;
-use App\Jobs\Userables\UpdateContentUserable as UpdateContentUserableJob;
-use App\Jobs\Userables\UpdateCollectionUserable as UpdateCollectionUserable;
-use App\Constants\Constants;
 
 class Purchase implements ShouldQueue
 {

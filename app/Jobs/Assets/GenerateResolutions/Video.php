@@ -2,17 +2,14 @@
 
 namespace App\Jobs\Assets\GenerateResolutions;
 
+use App\Jobs\Assets\UploadResource\Video as UploadVideoJob;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Streaming\FFMpeg;
-use Streaming\Representation;
-use App\Jobs\Assets\UploadResource\Video as UploadVideoJob;
 
 class Video implements ShouldQueue
 {

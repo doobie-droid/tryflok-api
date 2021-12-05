@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Continent;
+use App\Models\Country;
 use Illuminate\Database\Seeder;
 use PragmaRX\Countries\Package\Countries;
-use App\Models\Country;
-use App\Models\State;
-use App\Models\Continent;
 
 class LocationsSeeder extends Seeder
 {

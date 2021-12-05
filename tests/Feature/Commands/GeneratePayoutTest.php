@@ -2,14 +2,12 @@
 
 namespace Tests\Feature\Commands;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Constants\Constants;
+use App\Models\Sale;
+use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
-use App\Models\User;
-use App\Models\Sale;
-use App\Constants\Constants;
 
 class GeneratePayoutTest extends TestCase
 {

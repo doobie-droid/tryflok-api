@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class AddLastPaymentRequestColumnToPayoutsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::table('payouts', function (Blueprint $table) {
@@ -18,11 +13,6 @@ class AddLastPaymentRequestColumnToPayoutsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::table('payouts', function (Blueprint $table) {

@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class DropPayoutsStartAndEndColumns extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::table('payouts', function (Blueprint $table) {
@@ -19,11 +14,6 @@ class DropPayoutsStartAndEndColumns extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         //

@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateContentSubscriberTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('content_subscriber', function (Blueprint $table) {
@@ -21,11 +16,6 @@ class CreateContentSubscriberTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('content_subscriber');

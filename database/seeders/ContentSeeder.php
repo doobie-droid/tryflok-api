@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Content;
 use App\Models\Collection;
+use App\Models\Content;
 use App\Models\Userable;
-use Tests\MockData\Content as MockContent;
+use Illuminate\Database\Seeder;
 use Tests\MockData\Collection as MockCollection;
+use Tests\MockData\Content as MockContent;
 
 class ContentSeeder extends Seeder
 {

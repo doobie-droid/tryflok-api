@@ -2,14 +2,13 @@
 
 namespace App\Jobs\Assets\GenerateResolutions;
 
+use App\Jobs\Assets\EncryptResource\Pdf as EncryptPdfJob;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use App\Jobs\Assets\EncryptResource\Pdf as EncryptPdfJob;
 
 class Pdf implements ShouldQueue
 {

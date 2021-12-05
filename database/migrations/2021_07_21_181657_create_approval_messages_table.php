@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateApprovalMessagesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('approval_messages', function (Blueprint $table) {
@@ -23,11 +18,6 @@ class CreateApprovalMessagesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('approval_messages');

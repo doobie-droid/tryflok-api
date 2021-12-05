@@ -2,22 +2,18 @@
 
 namespace App\Jobs\Subscriptions;
 
+use App\Jobs\Payment\Purchase as PurchaseJob;
+use App\Models\Collection;
+use App\Models\Content;
+use App\Models\Price;
+use App\Models\Userable;
+use App\Models\WalletTransaction;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use App\Models\Collection;
-use App\Models\Userable;
-use App\Models\Price;
-use App\Models\Content;
-use App\Models\Subscription;
-use App\Models\WalletTransaction;
-use App\Jobs\Userables\UpdateContentUserable as UpdateContentUserableJob;
-use App\Jobs\Userables\UpdateCollectionUserable as UpdateCollectionUserable;
-use App\Jobs\Payment\Purchase as PurchaseJob;
 
 class EndSubscription implements ShouldQueue
 {

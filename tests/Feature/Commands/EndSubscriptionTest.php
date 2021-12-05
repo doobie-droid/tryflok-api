@@ -2,18 +2,15 @@
 
 namespace Tests\Feature\Commands;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
+use App\Models\Collection;
+use App\Models\Price;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Models\Userable;
-use App\Models\Subscription;
-use App\Models\Price;
-use App\Models\Collection;
 use App\Models\Wallet;
-use App\Constants\Constants;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
 
 class EndSubscriptionTest extends TestCase
 {

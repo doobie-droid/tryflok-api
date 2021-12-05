@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePaymentAccountsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('payment_accounts', function (Blueprint $table) {
@@ -30,11 +25,6 @@ class CreatePaymentAccountsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('payment_accounts');

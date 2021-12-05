@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Models\Asset;
+use Illuminate\Contracts\Validation\Rule;
 
 class AssetType implements Rule
 {

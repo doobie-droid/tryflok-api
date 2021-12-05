@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Asset;
+use Illuminate\Database\Seeder;
+
 class AssetsTableSeeder extends Seeder
 {
     /**

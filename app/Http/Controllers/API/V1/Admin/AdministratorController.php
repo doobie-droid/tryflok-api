@@ -2,17 +2,12 @@
 
 namespace App\Http\Controllers\API\V1\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-use App\Models\User;
-use App\Models\Content;
-use App\Models\Collection;
-use App\Models\Category;
-use App\Models\Sale;
 use App\Constants\Roles;
-
+use App\Http\Controllers\Controller;
+use App\Models\Sale;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AdministratorController extends Controller
 {

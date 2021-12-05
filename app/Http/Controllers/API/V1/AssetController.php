@@ -3,19 +3,16 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
-use App\Constants\Permissions;
-use App\Constants\Roles;
-use App\Constants\Constants;
-use App\Models\Asset;
-use App\Jobs\Assets\GenerateResolutions\Image as GenerateImageResolutionsJob;
-use App\Jobs\Assets\GenerateResolutions\Video as GenerateVideoResolutionsJob;
 use App\Jobs\Assets\GenerateResolutions\Audio as GenerateAudioResolutionsJob;
+use App\Jobs\Assets\GenerateResolutions\Image as GenerateImageResolutionsJob;
 use App\Jobs\Assets\GenerateResolutions\Pdf as GeneratePdfResolutionsJob;
+use App\Jobs\Assets\GenerateResolutions\Video as GenerateVideoResolutionsJob;
+use App\Models\Asset;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AssetController extends Controller
 {

@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands\Subscriptions;
 
-use Illuminate\Console\Command;
-use App\Models\Subscription;
 use App\Jobs\Subscriptions\EndSubscription as EndSubscriptionJob;
+use App\Models\Subscription;
+use Illuminate\Console\Command;
 
 class EndSubscriptions extends Command
 {

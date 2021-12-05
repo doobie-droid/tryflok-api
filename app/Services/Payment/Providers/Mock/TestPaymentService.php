@@ -2,8 +2,8 @@
 
 namespace App\Services\Payment\Providers\Mock;
 
-use App\Services\Payment\PaymentInterface;
 use App\Models\PaymentAccount;
+use App\Services\Payment\PaymentInterface;
 
 class TestPaymentService implements PaymentInterface {
 	

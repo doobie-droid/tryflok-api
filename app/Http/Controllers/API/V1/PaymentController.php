@@ -3,19 +3,17 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-use App\Services\Payment\Payment as PaymentProvider;
-//use App\Jobs\Payment\Paystack\Delegator as PaystackDelegator;
-use App\Jobs\Payment\Stripe\Purchase as StripePurchaseHandler;
-use App\Jobs\Payment\Paystack\Purchase as PaystackPurchaseHandler;
 use App\Jobs\Payment\Flutterwave\Purchase as FlutterwavePurchaseHandler;
+use App\Jobs\Payment\Paystack\Purchase as PaystackPurchaseHandler;
 use App\Jobs\Payment\Purchase as PurchaseJob;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\App;
+use App\Jobs\Payment\Stripe\Purchase as StripePurchaseHandler;
+use App\Services\Payment\Payment as PaymentProvider;
 use App\Services\Payment\Providers\Flutterwave\Flutterwave;
-use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {

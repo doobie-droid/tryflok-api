@@ -2,14 +2,12 @@
 
 namespace App\Jobs\Content;
 
+use \GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use \GuzzleHttp\Client;
 
 class NotifyFollower implements ShouldQueue
 {

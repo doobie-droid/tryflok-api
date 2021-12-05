@@ -2,15 +2,14 @@
 
 namespace App\Jobs\Payment\Flutterwave;
 
+use App\Jobs\Payment\Purchase as PurchaseJob;
+use App\Services\Payment\Providers\Flutterwave\Flutterwave as FlutterwavePayment;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use App\Jobs\Payment\Purchase as PurchaseJob;
-use App\Services\Payment\Providers\Flutterwave\Flutterwave as FlutterwavePayment;
 
 class Purchase implements ShouldQueue
 {

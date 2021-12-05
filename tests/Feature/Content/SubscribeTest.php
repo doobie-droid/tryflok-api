@@ -2,20 +2,14 @@
 
 namespace Tests\Feature\Content;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
-use App\Models\User;
+use App\Constants\Roles;
 use App\Models\Collection;
 use App\Models\Content;
-use App\Models\Benefactor;
-use App\Models\Tag;
-use App\Models\Asset;
-use App\Models\Price;
-use App\Constants\Roles;
-use Tests\MockData\Content as ContentMock;
+use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Str;
+use Tests\TestCase;
 
 class SubscribeTest extends TestCase
 {

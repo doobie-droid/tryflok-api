@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateCategorablesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('categorables', function (Blueprint $table) {
@@ -21,11 +16,6 @@ class CreateCategorablesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('categorables');

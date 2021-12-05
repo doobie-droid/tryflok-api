@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateCollectionCollectionTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('collection_collection', function (Blueprint $table) {
@@ -21,11 +16,6 @@ class CreateCollectionCollectionTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('collection_collection');

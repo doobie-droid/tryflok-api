@@ -2,26 +2,23 @@
 
 namespace App\Http\Controllers\API\V1\Auth;
 
+use App\Constants\Roles;
+use App\Events\User\ConfirmEmail as ConfirmEmailEvent;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\UserResourceWithSensitive;
+use App\Models\Otp;
+use App\Models\User;
+use App\Notifications\User\ForgotPassword as ForgotPasswordNotification;
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Otp;
-use App\Models\NotificationToken;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use App\Notifications\User\ForgotPassword as ForgotPasswordNotification;
-use Illuminate\Support\Facades\Mail;
-use App\Constants\Roles;
-use App\Http\Resources\UserResource;
-use App\Http\Resources\UserResourceWithSensitive;
-use App\Events\User\ConfirmEmail as ConfirmEmailEvent;
-use GuzzleHttp\Client;
-use Firebase\JWT\JWK;
-use Firebase\JWT\JWT;
 
 class AuthController extends Controller
 {

@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateContinentsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('continents', function (Blueprint $table) {
@@ -21,11 +16,6 @@ class CreateContinentsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('continents');

@@ -1,8 +1,8 @@
 <?php
 namespace App\Utils;
+use Illuminate\Http\Response as IlluminateResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Http\Response as IlluminateResponse;
 
 trait RestResponse
 {

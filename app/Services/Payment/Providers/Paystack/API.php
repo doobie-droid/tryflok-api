@@ -3,6 +3,7 @@
 namespace App\Services\Payment\Providers\Paystack;
 
 
+use App\Services\Payment\Providers\Paystack\APIInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
@@ -11,7 +12,6 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use App\Services\Payment\Providers\Paystack\APIInterface;
 
 abstract class API implements APIInterface
 {

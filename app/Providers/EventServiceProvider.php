@@ -2,12 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\User\ConfirmEmail as ConfirmEmailEvent;
+use App\Listeners\User\SendConfirmEmail as SendConfirmEmailListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
-use App\Events\User\ConfirmEmail as ConfirmEmailEvent;
-use App\Listeners\User\SendConfirmEmail as SendConfirmEmailListener;
 
 class EventServiceProvider extends ServiceProvider
 {

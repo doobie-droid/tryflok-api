@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands\Payments;
 
-use Illuminate\Console\Command;
-use App\Models\Payout;
 use App\Jobs\Payment\CheckPayoutTransferStatus as CheckPayoutTransferStatusJob;
+use App\Models\Payout;
+use Illuminate\Console\Command;
 
 class CheckPayoutTransferStatus extends Command
 {

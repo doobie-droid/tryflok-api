@@ -2,20 +2,18 @@
 
 namespace App\Http\Controllers\API\V1;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use App\Constants\Constants;
-use Illuminate\Support\Facades\Log;
-use App\Models\User;
-use App\Models\Content;
-use App\Models\Collection;
-use App\Models\Approval;
-use App\Models\ApprovalMessage;
 use App\Constants\Roles;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\ApprovalResource;
-use App\Services\Storage\Storage;
 use App\Jobs\Collection\ApproveCollectionChildren as ApproveCollectionChildrenJob;
+use App\Models\Approval;
+use App\Models\Collection;
+use App\Models\Content;
+use App\Services\Storage\Storage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class ApprovalController extends Controller
 {

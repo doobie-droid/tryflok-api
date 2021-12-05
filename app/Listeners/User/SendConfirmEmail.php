@@ -2,10 +2,9 @@
 
 namespace App\Listeners\User;
 
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Notifications\User\EmailConfirmation;
 use App\Events\User\ConfirmEmail as ConfirmEmailEvent;
+use App\Notifications\User\EmailConfirmation;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 
 class SendConfirmEmail implements ShouldQueue

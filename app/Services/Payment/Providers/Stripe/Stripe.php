@@ -2,9 +2,9 @@
 
 namespace App\Services\Payment\Providers\Stripe;
 
+use App\Models\PaymentAccount;
 use App\Services\Payment\PaymentInterface;
 use App\Services\Payment\Providers\Stripe\API;
-use App\Models\PaymentAccount;
 
 class Stripe extends API implements PaymentInterface {
     /**

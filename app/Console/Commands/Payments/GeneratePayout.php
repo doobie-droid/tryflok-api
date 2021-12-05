@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands\Payments;
 
-use Illuminate\Console\Command;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 use App\Jobs\Users\Payout as PayoutJob;
+use App\Models\User;
+use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 
 class GeneratePayout extends Command
 {

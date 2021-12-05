@@ -2,13 +2,12 @@
 
 namespace App\Jobs\Assets\GenerateResolutions;
 
+use App\Jobs\Assets\UploadResource\Image as UploadImageJob;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Jobs\Assets\UploadResource\Image as UploadImageJob;
 use Illuminate\Support\Facades\Log;
 
 class Image implements ShouldQueue

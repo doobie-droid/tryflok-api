@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Content;
 use App\Models\ContentIssue;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ContentIssueFactory extends Factory
 {

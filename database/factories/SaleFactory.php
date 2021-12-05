@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Constants\Constants;
 use App\Models\Content;
 use App\Models\User;
-use App\Constants\Constants;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SaleFactory extends Factory
 {

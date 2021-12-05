@@ -1,14 +1,14 @@
 <?php
 namespace App\Services\Payment;
 
-use App\Services\Payment\PaymentInterface;
-use App\Services\Payment\Providers\Paystack\Paystack;
-use App\Services\Payment\Providers\Flutterwave\Flutterwave;
-use App\Services\Payment\Providers\Stripe\Stripe;
-use App\Services\Payment\Providers\ApplePay\ApplePay;
-use App\Services\Payment\Providers\Mock\TestPaymentService;
-use Illuminate\Support\Str;
 use App\Models\PaymentAccount;
+use App\Services\Payment\PaymentInterface;
+use App\Services\Payment\Providers\ApplePay\ApplePay;
+use App\Services\Payment\Providers\Flutterwave\Flutterwave;
+use App\Services\Payment\Providers\Mock\TestPaymentService;
+use App\Services\Payment\Providers\Paystack\Paystack;
+use App\Services\Payment\Providers\Stripe\Stripe;
+use Illuminate\Support\Str;
 
 class Payment implements PaymentInterface {
 	/**

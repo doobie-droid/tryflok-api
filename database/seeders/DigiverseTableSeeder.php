@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use App\Models\Asset;
+use App\Models\Benefactor;
 use App\Models\Collection;
 use App\Models\Price;
 use App\Models\Tag;
 use App\Models\User;
-use App\Models\Asset;
-use App\Models\Benefactor;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Tests\MockData\User as UserMock;
 
 class DigiverseTableSeeder extends Seeder

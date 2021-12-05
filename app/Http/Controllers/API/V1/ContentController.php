@@ -2,34 +2,24 @@
 
 namespace App\Http\Controllers\API\V1;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use App\Constants\Permissions;
-use App\Constants\Roles;
 use App\Constants\Constants;
-use App\Http\Resources\UserResource;
-use Illuminate\Support\Facades\Storage;
-use App\Models\User;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\ContentIssueResource;
+use App\Http\Resources\ContentResource;
+use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJob;
+use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
+use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
 use App\Models\Collection;
 use App\Models\Content;
 use App\Models\ContentIssue;
-use App\Models\Price;
-use App\Models\Review;
-use App\Models\Userable;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Database\Eloquent\Builder;
 use App\Rules\AssetType as AssetTypeRule;
-use App\Http\Resources\ContentResource;
-use App\Http\Resources\ContentIssueResource;
-use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
-use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
-use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJob;
 use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
 use Aws\CloudFront\CloudFrontClient;
-use Aws\Exception\AwsException;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class ContentController extends Controller
 {

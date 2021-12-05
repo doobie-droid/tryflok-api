@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Payment\Providers\Paystack;
-use App\Services\Payment\Providers\Paystack\AmountConverter;
-use App\Services\Payment\PaymentInterface;
-use App\Services\Payment\Providers\Paystack\API;
 use App\Models\PaymentAccount;
+use App\Services\Payment\PaymentInterface;
+use App\Services\Payment\Providers\Paystack\AmountConverter;
+use App\Services\Payment\Providers\Paystack\API;
 
 class Paystack extends API implements PaymentInterface
 {

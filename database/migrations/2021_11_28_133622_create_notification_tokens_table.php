@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateNotificationTokensTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('notification_tokens', function (Blueprint $table) {
@@ -23,11 +18,6 @@ class CreateNotificationTokensTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('notification_tokens');

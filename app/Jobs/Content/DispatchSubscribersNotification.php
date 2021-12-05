@@ -3,12 +3,10 @@
 namespace App\Jobs\Content;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Jobs\Content\NotifySubscriber as NotifySubscriberJob;
 use Illuminate\Support\Facades\Log;
 
 class DispatchSubscribersNotification implements ShouldQueue

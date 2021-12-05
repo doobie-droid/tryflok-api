@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Constants\Roles;
 use Closure;
 use Illuminate\Http\Request;
-use App\Constants\Roles;
 
 class AuthorizeAdmin
 {

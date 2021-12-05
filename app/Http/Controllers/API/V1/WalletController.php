@@ -2,26 +2,19 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\Constants\Constants;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-use App\Constants\Permissions;
-use App\Constants\Roles;
-use App\Http\Resources\UserResource;
-use Illuminate\Support\Str;
-use App\Models\User;
-use App\Models\Price;
-use App\Models\Content;
+use App\Jobs\Payment\FundWallet as FundWalletJob;
+use App\Jobs\Payment\Purchase as PurchaseJob;
 use App\Models\Collection;
-use App\Models\Wallet;
+use App\Models\Content;
+use App\Models\Price;
 use App\Models\WalletTransaction;
 use App\Services\Payment\Payment as PaymentProvider;
 use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
-use App\Jobs\Payment\FundWallet as FundWalletJob;
-use App\Jobs\Payment\Purchase as PurchaseJob;
-use App\Constants\Constants;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class WalletController extends Controller
 {
