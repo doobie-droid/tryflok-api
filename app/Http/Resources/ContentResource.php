@@ -42,7 +42,7 @@ class ContentResource extends JsonResource
     private function refactorMetas()
     {
         $metas = $this->whenLoaded('metas');
-        $metasReworked = [];
+        $metasReworked = null;
         foreach ($metas as $meta) {
             $metasReworked[$meta->key] = $meta->value;
         }
