@@ -30,7 +30,7 @@ class UserFactory extends Factory
             'bio' => $this->faker->sentence(20),
             'email_verified' => 1,
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-            'referral_id' => strtoupper(Str::random(6)) . '-' . date('Ymd'),
+            'referral_id' => strtoupper(Str::random(6)).'-'.date('Ymd'),
         ];
     }
 

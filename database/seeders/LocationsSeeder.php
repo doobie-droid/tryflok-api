@@ -17,7 +17,7 @@ class LocationsSeeder extends Seeder
     public function run()
     {
         //seed countries
-        $countries = new Countries();
+        $countries = new Countries;
         $all = $countries->all();
 
         foreach ($all as $country) {

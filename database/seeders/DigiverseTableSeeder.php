@@ -34,7 +34,7 @@ class DigiverseTableSeeder extends Seeder
         ->has(Price::factory()->subscription()->count(1))
         ->has(
             Benefactor::factory()->state([
-                'user_id' => $user->id
+                'user_id' => $user->id,
             ])
         )
         ->create()
@@ -44,7 +44,7 @@ class DigiverseTableSeeder extends Seeder
 
             $digiverse->cover()->attach($cover->id, [
                 'id' => Str::uuid(),
-                'purpose' => 'cover'
+                'purpose' => 'cover',
             ]);
 
             $digiverse->tags()->attach($tag, [
