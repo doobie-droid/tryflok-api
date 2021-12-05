@@ -14,6 +14,7 @@ use App\Models\Content;
 use App\Models\ContentIssue;
 use App\Rules\AssetType as AssetTypeRule;
 use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
+use App\Services\LiveStream\Agora\RtmTokenBuilder as AgoraRtmToken;
 use Aws\CloudFront\CloudFrontClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -95,7 +96,11 @@ class ContentController extends Controller
                         'value' => "{$content->id}-" . date('Ymd'),
                     ],
                     [
-                        'key' => 'live_token',
+                        'key' => 'rtc_token',
+                        'value' => '',
+                    ],
+                    [
+                        'key' => 'rtm_token',
                         'value' => '',
                     ],
                     [
@@ -757,10 +762,17 @@ class ContentController extends Controller
                     'value' => 'inactive',
                 ]);
             }
-            $token = $content->metas()->where('key', 'live_token')->first();
-            if (is_null($token)) {
-                $token = $content->metas()->create([
-                    'key' => 'live_token',
+            $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
+            if (is_null($rtc_token)) {
+                $rtc_token = $content->metas()->create([
+                    'key' => 'rtc_token',
+                    'value' => '',
+                ]);
+            }
+            $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
+            if (is_null($rtm_token)) {
+                $rtm_token = $content->metas()->create([
+                    'key' => 'rtm_token',
                     'value' => '',
                 ]);
             }
@@ -781,10 +793,15 @@ class ContentController extends Controller
             }
 
             $expires = time() + (24 * 60 * 60); // let token last for 24hrs
-            $agora_token = AgoraRtcToken::buildTokenWithUid(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
+            $agora_rtc_token = AgoraRtcToken::buildTokenWithUid(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
 
-            $token->value = $agora_token;
-            $token->save();
+            $agora_rtm_token = AgoraRtmToken::buildToken(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtmToken::ROLE_RTM_USER, $expires);
+
+            $rtc_token->value = $agora_rtc_token;
+            $rtc_token->save();
+
+            $rtm_token->value = $agora_rtm_token;
+            $rtm_token->save();
 
             $join_count->value = 1;
             $join_count->save();
@@ -800,7 +817,8 @@ class ContentController extends Controller
             ]);
 
             return $this->respondWithSuccess('Channel started successfully', [
-                'token' => $token->value,
+                'rtc_token' => $rtc_token->value,
+                'rtm_token' => $rtm_token->value,
                 'channel_name' => $channel->value,
                 'uid' => 0,
             ]);
@@ -850,7 +868,8 @@ class ContentController extends Controller
             ]);
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
-            $token = $content->metas()->where('key', 'live_token')->first();
+            $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
+            $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
             $join_count->value = (int)$join_count->value + 1;
@@ -859,7 +878,8 @@ class ContentController extends Controller
             // $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, $uid, AgoraRtcToken::ROLE_ATTENDEE, $expires);
 
             return $this->respondWithSuccess('Channel joined successfully', [
-                'token' => $token->value,
+                'rtc_token' => $rtc_token->value,
+                'rtm_token' => $rtm_token->value,
                 'channel_name' => $channel->value,
                 'uid' => (int)$uid,
             ]);

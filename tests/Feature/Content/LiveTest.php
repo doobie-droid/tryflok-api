@@ -27,22 +27,13 @@ class LiveTest extends TestCase
         ->for($user, 'owner')
         ->liveAudio()
         ->create();
-        $content->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content->id}-" . date('Ymd'),
-            ],
-        ]);
 
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(200)
         ->assertJsonStructure([
             'data' => [
-                'token',
+                'rtc_token',
+                'rtm_token',
                 'channel_name',
                 'uid'
             ]
@@ -64,16 +55,6 @@ class LiveTest extends TestCase
         ->for($user, 'owner')
         ->audio()
         ->create();
-        $content->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content->id}-" . date('Ymd'),
-            ],
-        ]);
 
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(400);
@@ -154,24 +135,6 @@ class LiveTest extends TestCase
             'interval_amount' => 1,
         ]))
         ->create();
-        $content->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'active',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content->id}-" . date('Ymd'),
-            ],
-            [
-                'key' => 'live_token',
-                'value' => '',
-            ],
-            [
-                'key' => 'join_count',
-                'value' => 0,
-            ],
-        ]);
         $this->be($user2);
         $this->json('POST', "/api/v1/contents/{$content->id}/live");
 
@@ -180,7 +143,8 @@ class LiveTest extends TestCase
         $response->assertStatus(200)
         ->assertJsonStructure([
             'data' => [
-                'token',
+                'rtc_token',
+                'rtm_token',
                 'channel_name',
                 'uid'
             ]

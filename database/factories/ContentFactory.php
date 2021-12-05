@@ -50,7 +50,11 @@ class ContentFactory extends Factory
                     'value' => "{$content->id}-" . date('Ymd'),
                 ],
                 [
-                    'key' => 'live_token',
+                    'key' => 'rtc_token',
+                    'value' => '',
+                ],
+                [
+                    'key' => 'rtm_token',
                     'value' => '',
                 ],
                 [
