@@ -190,23 +190,15 @@ class LiveTest extends TestCase
     public function test_end_live_does_not_work_if_not_creator_live_content()
     {
         $user = User::factory()->create();
-        $this->be($user);
+        
         $user2 = User::factory()->create();
         $content = Content::factory()
         ->for($user2, 'owner')
         ->liveAudio()
         ->create();
-        $content->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'active',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content->id}-" . date('Ymd'),
-            ],
-        ]);
-
+        $this->be($user2);
+        $this->json('POST', "/api/v1/contents/{$content->id}/live");
+        $this->be($user);
         $response = $this->json('DELETE', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(400);
 
@@ -226,16 +218,6 @@ class LiveTest extends TestCase
         ->for($user, 'owner')
         ->liveAudio()
         ->create();
-        $content->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'active',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content->id}-" . date('Ymd'),
-            ],
-        ]);
 
         $this->json('POST', "/api/v1/contents/{$content->id}/live");
 

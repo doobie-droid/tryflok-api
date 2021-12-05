@@ -134,10 +134,7 @@ class Content
                         'resolutions'
                     ]
                 ],
-                'metas' => [
-                    'live_status',
-                    'channel_name',
-                ],
+                'metas',
             ],
         ],
     ];
@@ -184,15 +181,55 @@ class Content
                         'name',
                     ]
                 ],
-                'metas' => [
-                    'channel_name',
-                    'live_status',
-                ],
+                'metas',
             ],
         ],
     ];
 
     const CONTENT_WITH_NO_COVER_AND_ASSET_RESPONSE = [
+        'status_code',
+        'message',
+        'data' => [
+            'content' => [
+                'id',
+                'title',
+                'description',
+                'owner' => [
+                    'id',
+                    'name',
+                    'email',
+                    'username',
+                ],
+                'type',
+                'is_available',
+                'approved_by_admin',
+                'show_only_in_digiverses',
+                'views',
+                'ratings_count',
+                'ratings_average',
+                'subscribers_count',
+                'prices' => [
+                    [
+                        'id',
+                        'amount',
+                        'currency',
+                        'interval',
+                        'interval_amount'
+                    ]
+                ],
+                'tags' => [
+                    [
+                        'id',
+                        'type',
+                        'name',
+                    ]
+                ],
+                'metas',
+            ],
+        ],
+    ];
+
+    const LIVE_CONTENT_RESPONSE = [
         'status_code',
         'message',
         'data' => [

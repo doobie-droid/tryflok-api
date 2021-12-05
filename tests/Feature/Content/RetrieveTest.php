@@ -67,25 +67,6 @@ class RetrieveTest extends TestCase
         ->for($user, 'owner')
         ->create();
 
-        $content->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content->id}-" . date('Ymd'),
-            ],
-            [
-                'key' => 'live_token',
-                'value' => '',
-            ],
-            [
-                'key' => 'join_count',
-                'value' => 0,
-            ],
-        ]);
-
         $price = $content->prices()->first();
         $asset = $content->assets()->first();
         $cover = $content->cover()->first();
@@ -248,24 +229,6 @@ class RetrieveTest extends TestCase
             ])
         )
         ->create();
-        $content1->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content1->id}-" . date('Ymd'),
-            ],
-            [
-                'key' => 'live_token',
-                'value' => '',
-            ],
-            [
-                'key' => 'join_count',
-                'value' => 0,
-            ],
-        ]);
 
         $content2 = Content::factory()
         ->state([
@@ -306,24 +269,6 @@ class RetrieveTest extends TestCase
             ])
         )
         ->create();
-        $content2->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content2->id}-" . date('Ymd'),
-            ],
-            [
-                'key' => 'live_token',
-                'value' => '',
-            ],
-            [
-                'key' => 'join_count',
-                'value' => 0,
-            ],
-        ]);
 
         $content3 = Content::factory()
         ->state([
@@ -364,24 +309,6 @@ class RetrieveTest extends TestCase
             ])
         )
         ->create();
-        $content3->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content3->id}-" . date('Ymd'),
-            ],
-            [
-                'key' => 'live_token',
-                'value' => '',
-            ],
-            [
-                'key' => 'join_count',
-                'value' => 0,
-            ],
-        ]);
 
         $content4 = Content::factory()
         ->state([
@@ -422,24 +349,6 @@ class RetrieveTest extends TestCase
             ])
         )
         ->create();
-        $content4->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content4->id}-" . date('Ymd'),
-            ],
-            [
-                'key' => 'live_token',
-                'value' => '',
-            ],
-            [
-                'key' => 'join_count',
-                'value' => 0,
-            ],
-        ]);
 
         $content5 = Content::factory()
         ->state([
@@ -480,24 +389,6 @@ class RetrieveTest extends TestCase
             ])
         )
         ->create();
-        $content5->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content5->id}-" . date('Ymd'),
-            ],
-            [
-                'key' => 'live_token',
-                'value' => '',
-            ],
-            [
-                'key' => 'join_count',
-                'value' => 0,
-            ],
-        ]);
 
         $content6 = Content::factory()
         ->state([
@@ -538,24 +429,6 @@ class RetrieveTest extends TestCase
             ])
         )
         ->create();
-        $content6->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content6->id}-" . date('Ymd'),
-            ],
-            [
-                'key' => 'live_token',
-                'value' => '',
-            ],
-            [
-                'key' => 'join_count',
-                'value' => 0,
-            ],
-        ]);
 
         // when no filtering is set
         $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}/contents?page=1&limit=10");
@@ -565,7 +438,7 @@ class RetrieveTest extends TestCase
             'message',
             'data' => [
                 'contents' => [
-                    ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE['data']['content'],
+                    ContentMock::LIVE_CONTENT_RESPONSE['data']['content'],
                 ],
                 'current_page',
                 'items_per_page',

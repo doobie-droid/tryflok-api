@@ -35,6 +35,32 @@ class ContentFactory extends Factory
         ];
     }
 
+    public function configure()
+    {
+        return $this->afterMaking(function (Content $content) {
+            //
+        })->afterCreating(function (Content $content) {
+            $content->metas()->createMany([
+                [
+                    'key' => 'live_status',
+                    'value' => 'inactive',
+                ],
+                [
+                    'key' => 'channel_name',
+                    'value' => "{$content->id}-" . date('Ymd'),
+                ],
+                [
+                    'key' => 'live_token',
+                    'value' => '',
+                ],
+                [
+                    'key' => 'join_count',
+                    'value' => 0,
+                ],
+            ]);
+        });
+    }
+
     public function audio()
     {
         return $this->state(function (array $attributes) {
