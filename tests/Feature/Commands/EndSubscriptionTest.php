@@ -22,7 +22,7 @@ class EndSubscriptionTest extends TestCase
      *
      * @return void
      */
-    public function test_example()
+    public function test_end_subscription_works()
     {
 
         $collection = Collection::factory()

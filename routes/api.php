@@ -207,7 +207,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'subscriptions'], function () {
-            Route::patch('{public_id}', 'SubscriptionController@update');
+            Route::patch('{id}', 'SubscriptionController@toggleAutorenew');
         });
 
         Route::group(['prefix' => 'contents'], function () {
