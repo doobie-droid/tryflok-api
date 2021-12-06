@@ -498,7 +498,9 @@ class ContentController extends Controller
             $minPrice = $request->query('min_price', 0);
 
             $orderBy = $request->query('order_by', 'created_at');
-            $orderDirection = $request->query('order_direction', 'asc');
+            $orderDirection = $request->query('order_direction', 'desc');
+
+            $activeLiveContent = $request->query('active_live_content', 'false');
 
             $max_items_count = Constants::MAX_ITEMS_LIMIT;
             $validator = Validator::make([
@@ -513,6 +515,7 @@ class ContentController extends Controller
                 'order_by' => $orderBy,
                 'order_direction' => $orderDirection,
                 'type' => $types,
+                'active_live_content' => $activeLiveContent,
             ], [
                 'id' => ['required', 'string', 'exists:collections,id'],
                 'page' => ['required', 'integer', 'min:1',],
@@ -520,7 +523,7 @@ class ContentController extends Controller
                 'keyword' => ['sometimes', 'string', 'max:200',],
                 'max_price' => ['required', 'integer', 'min:-1',],
                 'min_price' => ['required', 'integer', 'min:0',],
-                'order_by' => ['required', 'string', 'regex:(created_at|price|views|reviews)'],
+                'order_by' => ['required', 'string', 'regex:(created_at|price|views|reviews|scheduled_date)'],
                 'order_direction' => ['required', 'string', 'regex:(asc|desc)'],
                 'types' => ['sometimes',],
                 'type.*' => ['required', 'string',],
@@ -528,6 +531,7 @@ class ContentController extends Controller
                 'tags.*' => ['required', 'string', 'exists:tags,id',],
                 'creators' => ['sometimes',],
                 'creators.*' => ['required', 'string', 'exists:users,id',],
+                'active_live_content' => ['sometimes', 'regex:(true|false)']
             ]);
 
             if ($validator->fails()) {
@@ -567,6 +571,10 @@ class ContentController extends Controller
                 $contents = $contents->whereIn('user_id', $creators);
             }
 
+            if ($activeLiveContent === 'true') {
+                $contents = $contents->where('live_status', 'active');
+            }
+
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = 0;
             } else {
@@ -593,7 +601,7 @@ class ContentController extends Controller
                 'userables' => function ($query) use ($user_id) {
                     $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
-            ])->orderBy('contents.created_at', 'desc')
+            ])->orderBy("contents.{$orderBy}", $orderDirection)
             ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Contents retrieved successfully', [
