@@ -857,7 +857,13 @@ class ContentController extends Controller
             }
 
             $status =  $content->metas()->where('key', 'live_status')->first();
-            if ($status->value !== 'active') {
+            $channel = $content->metas()->where('key', 'channel_name')->first();
+            $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
+            $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
+            if (is_null($rtc_token) || $rtc_token->value == '' || is_null($rtm_token) || $rtm_token->value == '') {
+                return $this->respondBadRequest('You cannot join a broadcast that has been not started');
+            }
+            if (is_null($status) || $status->value !== 'active') {
                 return $this->respondBadRequest('You cannot join a broadcast that has been not started');
             }
 
@@ -867,9 +873,6 @@ class ContentController extends Controller
                 ],
             ]);
 
-            $channel = $content->metas()->where('key', 'channel_name')->first();
-            $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
-            $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
             $join_count->value = (int)$join_count->value + 1;
