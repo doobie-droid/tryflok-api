@@ -28,8 +28,8 @@ class Content extends Model
      *
      * @var array
      */
-    protected $dates = [
-        'scheduled_date',
+    protected $casts = [
+        'scheduled_date' => 'datetime',
     ];
 
 
