@@ -115,6 +115,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'contents'], function () {
+        Route::post('{id}/views', 'ContentController@addViews');
         Route::get('{id}', 'ContentController@getSingle');
         Route::get('{id}/reviews', 'ContentController@getReviews');
         Route::get('{id}/assets', 'ContentController@getAssets');
@@ -238,10 +239,6 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'reviews'], function () {
             Route::post('/', 'ReviewController@create');
-        });
-
-        Route::group(['prefix' => 'views'], function () {
-            Route::post('/', 'ReviewController@addViews');
         });
 
         Route::group(['prefix' => 'payments'], function () {

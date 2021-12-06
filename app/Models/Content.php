@@ -67,6 +67,11 @@ class Content extends Model
         return $this->morphMany(Subscription::class, 'subscriptionable');
     }
 
+    public function views()
+    {
+        return $this->morphMany(View::class, 'viewable');
+    }
+
     public function payments()
     {
         return $this->morphMany(Payment::class, 'paymentable');

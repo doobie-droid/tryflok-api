@@ -369,4 +369,35 @@ class UpdateTest extends TestCase
         ]);
         $this->assertTrue($content->prices()->count() === 1);
     }
+
+    public function test_adding_views_works()
+    {
+        $user = User::factory()->create();
+        $user->assignRole(Roles::USER);
+        $test_data = $this->generateSingleContent($user);
+        $content = $test_data['content'];
+
+        //when no user is logged in
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/views");
+        $response->assertStatus(200)
+        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_COVER_AND_ASSET_RESPONSE);
+
+        $this->assertDatabaseHas('views', [
+            'viewable_id' => $content->id,
+            'viewable_type' => 'content',
+            'user_id' => null,
+        ]);
+
+        //when user is signed in
+        $this->be($user);
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/views");
+        $response->assertStatus(200)
+        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_COVER_AND_ASSET_RESPONSE);
+
+        $this->assertDatabaseHas('views', [
+            'viewable_id' => $content->id,
+            'viewable_type' => 'content',
+            'user_id' => $user->id,
+        ]);
+    }
 }

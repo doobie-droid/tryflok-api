@@ -92,43 +92,4 @@ class ReviewController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
-
-    public function addViews(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'id' => ['required', 'string', ],
-                'type' => ['required', 'string', 'regex:(content|collection)',],
-            ]);
-
-            if ($validator->fails()) {
-                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
-            }
-
-            $itemModel = null;
-
-            switch ($request->type) {
-                case 'content':
-                    $itemModel = Content::where('id', $request->id)->first();
-                    break;
-                case 'collection':
-                    $itemModel = Collection::where('id', $request->id)->first();
-                    break;
-            }
-
-            if (is_null($itemModel)) {
-                return $this->respondBadRequest('Invalid public ID supplied for ' . ucfirst($request->type));
-            }
-
-            $itemModel->views = $itemModel->views + 1;
-            $itemModel->save();
-
-            return $this->respondWithSuccess('View recorded successfully', [
-                'item' => $itemModel,
-            ]);
-        } catch (\Exception $exception) {
-            Log::error($exception);
-            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
-        }
-    }
 }

@@ -107,6 +107,7 @@ class Content
                 'ratings_count',
                 'ratings_average',
                 'subscribers_count',
+                'views_count',
                 'cover' => [
                     'url',
                     'asset_type',
@@ -163,6 +164,7 @@ class Content
                 'ratings_count',
                 'ratings_average',
                 'subscribers_count',
+                'views_count',
                 'cover' => [
                     'url',
                     'asset_type',
@@ -211,6 +213,7 @@ class Content
                 'ratings_count',
                 'ratings_average',
                 'subscribers_count',
+                'views_count',
                 'prices' => [
                     [
                         'id',
@@ -255,6 +258,7 @@ class Content
                 'ratings_count',
                 'ratings_average',
                 'subscribers_count',
+                'views_count',
                 'prices' => [
                     [
                         'id',

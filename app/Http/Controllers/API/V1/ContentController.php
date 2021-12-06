@@ -152,6 +152,7 @@ class ContentController extends Controller
             $content = Content::where('id', $content->id)
             ->with('prices', 'cover', 'owner', 'tags')
             ->withCount('subscribers')
+            ->withCount('views')
             ->with('metas')
             ->withCount([
                 'ratings' => function ($query) {
@@ -198,6 +199,7 @@ class ContentController extends Controller
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)
             ->with('prices', 'cover', 'owner', 'tags')
             ->withCount('subscribers')
+            ->withCount('views')
             ->with('metas')
             ->withCount([
                 'ratings' => function ($query) {
@@ -441,6 +443,7 @@ class ContentController extends Controller
             $content = Content::where('id', $id)
             ->with('prices', 'cover', 'owner', 'tags')
             ->withCount('subscribers')
+            ->withCount('views')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -583,6 +586,7 @@ class ContentController extends Controller
 
             $contents = $contents
             ->withCount('subscribers')
+            ->withCount('views')
             ->with('metas')
             ->withCount([
                 'ratings' => function ($query) {
@@ -1045,6 +1049,64 @@ class ContentController extends Controller
                 'assets' => $content->assets()->with('resolutions')->wherePivot('purpose', 'content-asset')->get(),
                 'cookies' => $cookies,
                 'cookies_expire' => $expires,
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function addViews(Request $request, $id) 
+    {
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = null;
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            $content = Content::where('id', $id)->first();
+
+            $content->views()->create([
+                'user_id' => $user_id,
+            ]);
+
+            $content = $content->with('prices', 'cover', 'owner', 'tags')
+            ->withCount('subscribers')
+            ->withCount('views')
+            ->withCount([
+                'ratings' => function ($query) {
+                    $query->where('rating', '>', 0);
+                },
+            ])->withAvg([
+                'ratings' => function ($query) {
+                    $query->where('rating', '>', 0);
+                },
+            ], 'rating')
+            ->with([
+                'userables' => function ($query) use ($user_id) {
+                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
+                },
+            ])
+            ->with([
+                'subscribers' => function ($query) use ($user_id) {
+                    $query->where('users.id', $user_id);
+                },
+            ])
+            ->with('issues')
+            ->with('metas')
+            ->first();
+
+            return $this->respondWithSuccess('View recorded successfully', [
+                'content' => new ContentResource($content),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
