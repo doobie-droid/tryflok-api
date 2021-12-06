@@ -13,6 +13,7 @@ services:
       - WAIT_HOSTS_TIMEOUT=300
       - WAIT_SLEEP_INTERVAL=30
       - WAIT_HOST_CONNECT_TIMEOUT=30
+      - TZ=Africa/Lagos
     links:
       - redis
       - mysql
@@ -33,6 +34,12 @@ services:
     links:
       - redis
       - mysql
+    environment:
+      - WAIT_HOSTS=mysql:3306
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+      - TZ=Africa/Lagos
 
   nginx:
     image: nginx:1.17-alpine
