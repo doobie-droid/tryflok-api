@@ -142,6 +142,11 @@ class Content extends Model
         return $this->belongsToMany(Collection::class);
     }
 
+    public function access_through_ancestors()
+    {
+        return $this->belongsToMany(Collection::class);
+    }
+
     public function isFree()
     {
         $freePriceCount = $this->prices()->where('amount', 0)->count();

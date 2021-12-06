@@ -459,6 +459,18 @@ class ContentController extends Controller
                 },
             ])
             ->with([
+                'access_through_ancestors' => function ($query) use ($user_id) {
+                    $query->whereHas('userables', function (Builder $query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })
+                    ->orWhereHas('parentCollections', function (Builder $query) use ($user_id) {
+                        $query->whereHas('userables', function (Builder $query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                    });
+                },
+            ])
+            ->with([
                 'subscribers' => function ($query) use ($user_id) {
                     $query->where('users.id', $user_id);
                 },
@@ -605,7 +617,20 @@ class ContentController extends Controller
                 'userables' => function ($query) use ($user_id) {
                     $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
-            ])->orderBy("contents.{$orderBy}", $orderDirection)
+            ])
+            ->with([
+                'access_through_ancestors' => function ($query) use ($user_id) {
+                    $query->whereHas('userables', function (Builder $query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })
+                    ->orWhereHas('parentCollections', function (Builder $query) use ($user_id) {
+                        $query->whereHas('userables', function (Builder $query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                    });
+                },
+            ])
+            ->orderBy("contents.{$orderBy}", $orderDirection)
             ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Contents retrieved successfully', [
