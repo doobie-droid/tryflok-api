@@ -31,7 +31,7 @@ class ContentFactory extends Factory
             'is_available' => 1,
             'approved_by_admin' => 1,
             'show_only_in_digiverses' => 1,
-            'views' => 0,
+            'live_status' => 'inactive',
         ];
     }
 
@@ -41,10 +41,6 @@ class ContentFactory extends Factory
             //
         })->afterCreating(function (Content $content) {
             $content->metas()->createMany([
-                [
-                    'key' => 'live_status',
-                    'value' => 'inactive',
-                ],
                 [
                     'key' => 'channel_name',
                     'value' => "{$content->id}-" . date('Ymd'),
@@ -62,6 +58,15 @@ class ContentFactory extends Factory
                     'value' => 0,
                 ],
             ]);
+        });
+    }
+
+    public function futureScheduledDate()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'scheduled_date' => now()->addDays(10),
+            ];
         });
     }
 

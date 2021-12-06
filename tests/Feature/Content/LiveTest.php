@@ -26,8 +26,10 @@ class LiveTest extends TestCase
         $content = Content::factory()
         ->for($user, 'owner')
         ->liveAudio()
+        ->futureScheduledDate()
         ->create();
 
+        $this->assertTrue($content->scheduled_date->gt(now()));
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(200)
         ->assertJsonStructure([
@@ -39,12 +41,11 @@ class LiveTest extends TestCase
             ]
         ]);
 
-        $this->assertDatabaseHas('metas', [
-            'metaable_type' => 'content',
-            'metaable_id' => $content->id,
-            'key' => 'live_status',
-            'value' => 'active',
+        $this->assertDatabaseHas('contents', [
+            'id' => $content->id,
+            'live_status' => 'active',
         ]);
+        $this->assertTrue($content->refresh()->scheduled_date->lte(now()));
     }
 
     public function test_start_live_does_not_work_for_non_live_content()
@@ -59,11 +60,9 @@ class LiveTest extends TestCase
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(400);
 
-        $this->assertDatabaseMissing('metas', [
-            'metaable_type' => 'content',
-            'metaable_id' => $content->id,
-            'key' => 'live_status',
-            'value' => 'active',
+        $this->assertDatabaseMissing('contents', [
+            'id' => $content->id,
+            'live_status' => 'active',
         ]);
     }
 
@@ -76,25 +75,13 @@ class LiveTest extends TestCase
         ->for($user2, 'owner')
         ->liveAudio()
         ->create();
-        $content->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content->id}-" . date('Ymd'),
-            ],
-        ]);
 
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(400);
 
-        $this->assertDatabaseMissing('metas', [
-            'metaable_type' => 'content',
-            'metaable_id' => $content->id,
-            'key' => 'live_status',
-            'value' => 'active',
+        $this->assertDatabaseMissing('contents', [
+            'id' => $content->id,
+            'live_status' => 'active',
         ]);
     }
 
@@ -107,16 +94,6 @@ class LiveTest extends TestCase
         ->for($user2, 'owner')
         ->liveAudio()
         ->create();
-        $content->metas()->createMany([
-            [
-                'key' => 'live_status',
-                'value' => 'inactive',
-            ],
-            [
-                'key' => 'channel_name',
-                'value' => "{$content->id}-" . date('Ymd'),
-            ],
-        ]);
 
         $response = $this->json('PATCH', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(400);
@@ -166,11 +143,9 @@ class LiveTest extends TestCase
         $response = $this->json('DELETE', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(400);
 
-        $this->assertDatabaseMissing('metas', [
-            'metaable_type' => 'content',
-            'metaable_id' => $content->id,
-            'key' => 'live_status',
-            'value' => 'inactive',
+        $this->assertDatabaseMissing('contents', [
+            'id' => $content->id,
+            'live_status' => 'inactive',
         ]);
     }
 
@@ -188,11 +163,9 @@ class LiveTest extends TestCase
         $response = $this->json('DELETE', "/api/v1/contents/{$content->id}/live");
         $response->assertStatus(200);
 
-        $this->assertDatabaseHas('metas', [
-            'metaable_type' => 'content',
-            'metaable_id' => $content->id,
-            'key' => 'live_status',
-            'value' => 'inactive',
+        $this->assertDatabaseHas('contents', [
+            'id' => $content->id,
+            'live_status' => 'inactive',
         ]);
     }
 }

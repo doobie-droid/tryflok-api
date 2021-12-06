@@ -61,6 +61,12 @@ class CreateTest extends TestCase
         $request['title'] = '';
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(400);
+        //when scheduled_date is in the past
+        $request = $completeRequest;
+        $scheduled_date = now()->subDays(2);
+        $request['scheduled_date'] = $scheduled_date->format('Y-m-d H:i:s');
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
         // when type is omitted
         $request = $completeRequest;
         $request['type'] = '';
@@ -173,7 +179,6 @@ class CreateTest extends TestCase
             'is_available' => 1,
             'approved_by_admin' => 0,
             'show_only_in_digiverses' => 1,
-            'views' => 0,
         ]);
         $content = Content::where('title', $request['title'])->first();
         // content is attached to collection
@@ -275,7 +280,6 @@ class CreateTest extends TestCase
             'is_available' => 1,
             'approved_by_admin' => 0,
             'show_only_in_digiverses' => 1,
-            'views' => 0,
         ]);
         $content = Content::where('title', $request['title'])->first();
 
@@ -379,7 +383,6 @@ class CreateTest extends TestCase
             'is_available' => 1,
             'approved_by_admin' => 0,
             'show_only_in_digiverses' => 1,
-            'views' => 0,
         ]);
         $content = Content::where('title', $request['title'])->first();
 
@@ -481,7 +484,6 @@ class CreateTest extends TestCase
             'is_available' => 1,
             'approved_by_admin' => 0,
             'show_only_in_digiverses' => 1,
-            'views' => 0,
         ]);
         $content = Content::where('title', $request['title'])->first();
 
@@ -545,6 +547,7 @@ class CreateTest extends TestCase
         ->digiverse()
         ->for($user, 'owner')
         ->create();
+        $scheduled_date = now()->addDays(2);
         $request = [
             'title' => 'A content ' . date('YmdHis'),
             'description' => 'Content description',
@@ -558,6 +561,7 @@ class CreateTest extends TestCase
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
+            'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
@@ -571,22 +575,37 @@ class CreateTest extends TestCase
             'is_available' => 1,
             'approved_by_admin' => 0,
             'show_only_in_digiverses' => 1,
-            'views' => 0,
+            'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
+            'live_status' => 'inactive',
         ]);
         $content = Content::where('title', $request['title'])->first();
 
         $this->assertDatabaseHas('metas', [
             'metaable_type' => 'content',
             'metaable_id' => $content->id,
-            'key' => 'live_status',
-            'value' => 'inactive',
+            'key' => 'channel_name',
+            'value' => "{$content->id}-" . date('Ymd'),
         ]);
 
         $this->assertDatabaseHas('metas', [
             'metaable_type' => 'content',
             'metaable_id' => $content->id,
-            'key' => 'channel_name',
-            'value' => "{$content->id}-" . date('Ymd'),
+            'key' => 'join_count',
+            'value' => 0,
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'rtc_token',
+            'value' => '',
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'rtm_token',
+            'value' => '',
         ]);
 
         // content is attached to collection
@@ -640,6 +659,7 @@ class CreateTest extends TestCase
         ->digiverse()
         ->for($user, 'owner')
         ->create();
+        $scheduled_date = now()->addDays(2);
         $request = [
             'title' => 'A content ' . date('YmdHis'),
             'description' => 'Content description',
@@ -653,6 +673,7 @@ class CreateTest extends TestCase
                 '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
                 '120566de-0361-4d66-b458-321d4ede62a9'
             ],
+            'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
@@ -666,9 +687,38 @@ class CreateTest extends TestCase
             'is_available' => 1,
             'approved_by_admin' => 0,
             'show_only_in_digiverses' => 1,
-            'views' => 0,
+            'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
+            'live_status' => 'inactive',
         ]);
         $content = Content::where('title', $request['title'])->first();
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'channel_name',
+            'value' => "{$content->id}-" . date('Ymd'),
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'join_count',
+            'value' => 0,
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'rtc_token',
+            'value' => '',
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'rtm_token',
+            'value' => '',
+        ]);
 
         // content is attached to collection
         $this->assertDatabaseHas('collection_content', [

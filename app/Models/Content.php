@@ -23,6 +23,15 @@ class Content extends Model
         'id',
     ];
 
+     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'scheduled_date' => 'datetime',
+    ];
+
 
     /**
      * The attributes that should be hidden for arrays.

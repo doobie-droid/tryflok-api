@@ -39,6 +39,7 @@ class ContentController extends Controller
                 'type' => ['required', 'string', 'regex:(pdf|audio|video|newsletter|live-audio|live-video)'],
                 'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
                 'is_available' => ['required', 'integer', 'min:0', 'max:1'],
+                'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
             ]);
 
             if ($validator->fails()) {
@@ -82,15 +83,16 @@ class ContentController extends Controller
                 'is_available' => $request->is_available,
                 'approved_by_admin' => 0,
                 'show_only_in_digiverses' => 1,
-                'views' => 0,
+                'live_status' => 'inactive',
             ]);
+
+            if (! is_null($request->scheduled_date)) {
+                $content->scheduled_date = $request->scheduled_date;
+                $content->save();
+            }
 
             if ($content->type === 'live-audio' || $content->type === 'live-video') {
                 $content->metas()->createMany([
-                    [
-                        'key' => 'live_status',
-                        'value' => 'inactive',
-                    ],
                     [
                         'key' => 'channel_name',
                         'value' => "{$content->id}-" . date('Ymd'),
@@ -185,6 +187,7 @@ class ContentController extends Controller
                 'tags.*.id' => ['required', 'string', 'exists:tags,id'],
                 'tags.*.action' => ['required', 'string', 'regex:(add|remove)'],
                 'is_available' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
+                'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
             ]);
 
             if ($validator1->fails()) {
@@ -228,6 +231,10 @@ class ContentController extends Controller
 
             if (! is_null($request->is_available)) {
                 $content->is_available = $request->is_available;
+            }
+
+            if (! is_null($request->scheduled_date)) {
+                $content->scheduled_date = $request->scheduled_date;
             }
 
             $content->save();
@@ -491,7 +498,9 @@ class ContentController extends Controller
             $minPrice = $request->query('min_price', 0);
 
             $orderBy = $request->query('order_by', 'created_at');
-            $orderDirection = $request->query('order_direction', 'asc');
+            $orderDirection = $request->query('order_direction', 'desc');
+
+            $activeLiveContent = $request->query('active_live_content', 'false');
 
             $max_items_count = Constants::MAX_ITEMS_LIMIT;
             $validator = Validator::make([
@@ -506,6 +515,7 @@ class ContentController extends Controller
                 'order_by' => $orderBy,
                 'order_direction' => $orderDirection,
                 'type' => $types,
+                'active_live_content' => $activeLiveContent,
             ], [
                 'id' => ['required', 'string', 'exists:collections,id'],
                 'page' => ['required', 'integer', 'min:1',],
@@ -513,7 +523,7 @@ class ContentController extends Controller
                 'keyword' => ['sometimes', 'string', 'max:200',],
                 'max_price' => ['required', 'integer', 'min:-1',],
                 'min_price' => ['required', 'integer', 'min:0',],
-                'order_by' => ['required', 'string', 'regex:(created_at|price|views|reviews)'],
+                'order_by' => ['required', 'string', 'regex:(created_at|price|views|reviews|scheduled_date)'],
                 'order_direction' => ['required', 'string', 'regex:(asc|desc)'],
                 'types' => ['sometimes',],
                 'type.*' => ['required', 'string',],
@@ -521,6 +531,7 @@ class ContentController extends Controller
                 'tags.*' => ['required', 'string', 'exists:tags,id',],
                 'creators' => ['sometimes',],
                 'creators.*' => ['required', 'string', 'exists:users,id',],
+                'active_live_content' => ['sometimes', 'regex:(true|false)']
             ]);
 
             if ($validator->fails()) {
@@ -560,6 +571,10 @@ class ContentController extends Controller
                 $contents = $contents->whereIn('user_id', $creators);
             }
 
+            if ($activeLiveContent === 'true') {
+                $contents = $contents->where('live_status', 'active');
+            }
+
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = 0;
             } else {
@@ -586,7 +601,7 @@ class ContentController extends Controller
                 'userables' => function ($query) use ($user_id) {
                     $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
-            ])->orderBy('contents.created_at', 'desc')
+            ])->orderBy("contents.{$orderBy}", $orderDirection)
             ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Contents retrieved successfully', [
@@ -755,13 +770,6 @@ class ContentController extends Controller
                     'value' => "{$content->id}-" . date('Ymd'),
                 ]);
             }
-            $status =  $content->metas()->where('key', 'live_status')->first();
-            if (is_null($status)) {
-                $status = $content->metas()->create([
-                    'key' => 'live_status',
-                    'value' => 'inactive',
-                ]);
-            }
             $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
             if (is_null($rtc_token)) {
                 $rtc_token = $content->metas()->create([
@@ -784,9 +792,10 @@ class ContentController extends Controller
                 ]);
             }
             //ensure that the live has not been started before
-            if ($status->value === 'active') {
+            if ($content->live_status === 'active') {
                 return $this->respondWithSuccess('Channel started successfully', [
-                    'token' => $token->value,
+                    'rtc_token' => $rtc_token->value,
+                    'rtm_token' => $rtm_token->value,
                     'channel_name' => $channel->value,
                     'uid' => 0,
                 ]);
@@ -806,8 +815,9 @@ class ContentController extends Controller
             $join_count->value = 1;
             $join_count->save();
 
-            $status->value = 'active';
-            $status->save();
+            $content->live_status = 'active';
+            $content->scheduled_date = now();
+            $content->save();
 
             DispatchNotificationToFollowersJob::dispatch([
                 'notificable_id' => $content->id,
@@ -856,14 +866,13 @@ class ContentController extends Controller
                 return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
             }
 
-            $status =  $content->metas()->where('key', 'live_status')->first();
             $channel = $content->metas()->where('key', 'channel_name')->first();
             $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
             $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
             if (is_null($rtc_token) || $rtc_token->value == '' || is_null($rtm_token) || $rtm_token->value == '') {
                 return $this->respondBadRequest('You cannot join a broadcast that has been not started');
             }
-            if (is_null($status) || $status->value !== 'active') {
+            if ($content->live_status !== 'active') {
                 return $this->respondBadRequest('You cannot join a broadcast that has been not started');
             }
 
@@ -940,13 +949,12 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Only the creator can start the live broadcast');
             }
 
-            $join_count = $content->metas()->where('key', 'join_count')->first();
-            $join_count->value = 0;
-            $join_count->save();
-            $status =  $content->metas()->where('key', 'live_status')->first();
+            if ($content->live_status !== 'active') {
+                return $this->respondWithSuccess('Channel ended successfully');
+            }
 
-            $status->value = 'inactive';
-            $status->save();
+            $content->live_status = 'inactive';
+            $content->save();
 
             DispatchDisableLiveUserableJob::dispatch([
                 'live_content' => $content,
