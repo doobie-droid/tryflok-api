@@ -145,7 +145,7 @@ class LiveTest extends TestCase
 
         $this->assertDatabaseMissing('contents', [
             'id' => $content->id,
-            'live_status' => 'inactive',
+            'live_status' => 'ended',
         ]);
     }
 
@@ -165,7 +165,7 @@ class LiveTest extends TestCase
 
         $this->assertDatabaseHas('contents', [
             'id' => $content->id,
-            'live_status' => 'inactive',
+            'live_status' => 'ended',
         ]);
     }
 }

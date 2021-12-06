@@ -516,6 +516,7 @@ class ContentController extends Controller
             $orderDirection = $request->query('order_direction', 'desc');
 
             $activeLiveContent = $request->query('active_live_content', 'false');
+            $noEndedLiveContent = $request->query('no_ended_live_content', 'true');
 
             $max_items_count = Constants::MAX_ITEMS_LIMIT;
             $validator = Validator::make([
@@ -531,6 +532,7 @@ class ContentController extends Controller
                 'order_direction' => $orderDirection,
                 'type' => $types,
                 'active_live_content' => $activeLiveContent,
+                'no_ended_live_content' => $noEndedLiveContent,
             ], [
                 'id' => ['required', 'string', 'exists:collections,id'],
                 'page' => ['required', 'integer', 'min:1',],
@@ -546,7 +548,8 @@ class ContentController extends Controller
                 'tags.*' => ['required', 'string', 'exists:tags,id',],
                 'creators' => ['sometimes',],
                 'creators.*' => ['required', 'string', 'exists:users,id',],
-                'active_live_content' => ['sometimes', 'regex:(true|false)']
+                'active_live_content' => ['sometimes', 'regex:(true|false)'],
+                'no_ended_live_content' => ['sometimes', 'regex:(true|false)'],
             ]);
 
             if ($validator->fails()) {
@@ -588,6 +591,10 @@ class ContentController extends Controller
 
             if ($activeLiveContent === 'true') {
                 $contents = $contents->where('live_status', 'active');
+            }
+
+            if ($noEndedLiveContent === 'true') {
+                $contents = $contents->where('live_status', '!=', 'ended');
             }
 
             if ($request->user() == null || $request->user()->id == null) {
@@ -982,7 +989,7 @@ class ContentController extends Controller
                 return $this->respondWithSuccess('Channel ended successfully');
             }
 
-            $content->live_status = 'inactive';
+            $content->live_status = 'ended';
             $content->save();
 
             DispatchDisableLiveUserableJob::dispatch([

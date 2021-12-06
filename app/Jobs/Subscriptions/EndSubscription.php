@@ -48,6 +48,8 @@ class EndSubscription implements ShouldQueue
             Log::error($this->subscription);
             return;
         }
+        // check that owner of content is still available
+        //if owner has been deleted prevent renewal of the content
         //attempt to renew subscription
         if ($this->subscription->auto_renew == 1) {
             $user = $parentUserable->user()->first();
