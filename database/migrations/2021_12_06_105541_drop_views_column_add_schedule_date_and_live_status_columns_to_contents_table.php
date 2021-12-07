@@ -10,7 +10,7 @@ class DropViewsColumnAddScheduleDateAndLiveStatusColumnsToContentsTable extends 
     {
         Schema::table('contents', function (Blueprint $table) {
             $table->dateTime('scheduled_date')->nullable();
-            $table->string('live_status')->nullable();
+            $table->string('live_status')->default('inactive');
             $table->dropColumn('views');
         });
     }
