@@ -376,7 +376,7 @@ class CollectionController extends Controller
                 'page' => ['required', 'integer', 'min:1',],
                 'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
                 'keyword' => ['sometimes', 'string', 'max:200',],
-                'max_price' => ['required', 'integer', 'min:-1',],
+                'max_price' => ['required', 'integer', 'min:0',],
                 'min_price' => ['required', 'integer', 'min:0',],
                 'order_by' => ['required', 'string', 'regex:(created_at|price|views|reviews)'],
                 'order_direction' => ['required', 'string', 'regex:(asc|desc)'],
