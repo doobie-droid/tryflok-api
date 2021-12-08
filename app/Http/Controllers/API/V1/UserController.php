@@ -239,6 +239,8 @@ class UserController extends Controller
         try {
             $user = $request->user();
             $request->user()->delete();
+            // TO DO: mark all user's contents as unavailable
+            // TO DO: ensure that subscribed users cannot renew any subscriptions if user is deleted
             return $this->respondWithSuccess('Account deleted successfully', [
                 'user' => new UserResourceWithSensitive($user),
             ]);
