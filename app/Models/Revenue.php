@@ -6,7 +6,7 @@ use App\Traits\Uuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Sale extends Model
+class Revenue extends Model
 {
     use HasFactory;
     use Uuid;
@@ -29,7 +29,7 @@ class Sale extends Model
 
     protected $guard_name = 'api';
 
-    public function saleable()
+    public function revenueable()
     {
         return $this->morphTo();
     }

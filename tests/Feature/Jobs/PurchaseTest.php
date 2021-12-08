@@ -130,6 +130,7 @@ class PurchaseTest extends TestCase
             'payment_processor_fee' => 0,
             'paymentable_type' => 'collection',
             'paymentable_id' => $paid_digiverse->id,
+
         ]);
         $this->assertDatabaseHas('payments', [
             'payer_id' => $buyer->id,
@@ -148,37 +149,40 @@ class PurchaseTest extends TestCase
             'paymentable_id' => $free_content_in_free_digiverse->id,
         ]);
 
-        $this->assertDatabaseHas('sales', [
+        $this->assertDatabaseHas('revenues', [
             'user_id' => $creator->id,
-            'saleable_type' => 'collection',
-            'saleable_id' => $paid_digiverse->id,
+            'revenueable_type' => 'collection',
+            'revenueable_id' => $paid_digiverse->id,
             'amount' => 100,
             'payment_processor_fee' => 0,
-            'platform_share' => bcmul(100, Constants::PLATFORM_SHARE, 2),
-            'benefactor_share' => bcmul(100, Constants::CREATOR_SHARE, 2),
+            'platform_share' => bcmul(100, Constants::NORMAL_CREATOR_CHARGE, 2),
+            'benefactor_share' => bcmul(100, 100 - Constants::NORMAL_CREATOR_CHARGE, 2),
             'referral_bonus' => 0,
+            'revenue_from' => 'sale',
         ]);
 
-        $this->assertDatabaseHas('sales', [
+        $this->assertDatabaseHas('revenues', [
             'user_id' => $creator->id,
-            'saleable_type' => 'content',
-            'saleable_id' => $paid_content_in_free_digiverse->id,
+            'revenueable_type' => 'content',
+            'revenueable_id' => $paid_content_in_free_digiverse->id,
             'amount' => 100,
             'payment_processor_fee' => 0,
-            'platform_share' => bcmul(100, Constants::PLATFORM_SHARE, 2),
-            'benefactor_share' => bcmul(100, Constants::CREATOR_SHARE, 2),
+            'platform_share' => bcmul(100, Constants::NORMAL_CREATOR_CHARGE, 2),
+            'benefactor_share' => bcmul(100, 100 - Constants::NORMAL_CREATOR_CHARGE, 2),
             'referral_bonus' => 0,
+            'revenue_from' => 'sale',
         ]);
 
-        $this->assertDatabaseHas('sales', [
+        $this->assertDatabaseHas('revenues', [
             'user_id' => $creator->id,
-            'saleable_type' => 'content',
-            'saleable_id' => $free_content_in_free_digiverse->id,
+            'revenueable_type' => 'content',
+            'revenueable_id' => $free_content_in_free_digiverse->id,
             'amount' => 0,
             'payment_processor_fee' => 0,
-            'platform_share' => bcmul(0, Constants::PLATFORM_SHARE, 2),
-            'benefactor_share' => bcmul(0, Constants::CREATOR_SHARE, 2),
+            'platform_share' => bcmul(0, Constants::NORMAL_CREATOR_CHARGE, 2),
+            'benefactor_share' => bcmul(0, 100 - Constants::NORMAL_CREATOR_CHARGE, 2),
             'referral_bonus' => 0,
+            'revenue_from' => 'sale',
         ]);
 
         $this->assertDatabaseHas('carts', [

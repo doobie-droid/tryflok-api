@@ -40,7 +40,7 @@ class GeneratePayout extends Command
      */
     public function handle()
     {
-        User::whereHas('sales', function (Builder $query) {
+        User::whereHas('revenues', function (Builder $query) {
             $query->where('added_to_payout', 0);
         })->chunk(100000, function ($users) {
             foreach ($users as $user) {

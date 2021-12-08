@@ -107,9 +107,9 @@ class Content extends Model
         return $this->morphMany(Benefactor::class, 'benefactable');
     }
 
-    public function sales()
+    public function revenues()
     {
-        return $this->morphMany(Sale::class, 'saleable');
+        return $this->morphMany(Revenue::class, 'revenueable');
     }
 
     public function reviews()

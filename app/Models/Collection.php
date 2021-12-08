@@ -72,9 +72,9 @@ class Collection extends Model
         return $this->morphOne(Approval::class, 'approvable');
     }
 
-    public function sales()
+    public function revenues()
     {
-        return $this->morphMany(Sale::class, 'saleable');
+        return $this->morphMany(Revenue::class, 'revenueable');
     }
 
     public function reviews()

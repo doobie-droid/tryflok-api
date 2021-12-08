@@ -134,7 +134,7 @@ TO CALCULATE HOW MUCH FLOK HAS MADE
 ===========================================
 total_payments = SUM OF amount ON PAYMENTS TABLE
 total_fees = SUM OF payment_processor_fee ON PAYMENTS TABLE
-referal_bonuses = SUM OF referral_bonus ON SALES TABLE
+referal_bonuses = SUM OF referral_bonus ON REVENUES TABLE
 net_amount = total_payments - fees
 share_amount = 30% * net_amount
 revenue = share_amount - referal_bonuses
