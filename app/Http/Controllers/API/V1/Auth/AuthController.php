@@ -104,7 +104,7 @@ class AuthController extends Controller
                     $iosAppClientId = config('services.google.ios_client_id');
                     $androidAppClientId = config('services.google.android_client_id');
                     $client_id = $request->sign_in_source == 'ios' ? $iosAppClientId : $androidAppClientId;
-                    $client = new Google_Client(['client_id' => $client_id ]);
+                    $client = new \Google_Client(['client_id' => $client_id ]);
                     $payload = $client->verifyIdToken($request->id_token);
                     if ($payload) {
                         $socialIsValid = true;

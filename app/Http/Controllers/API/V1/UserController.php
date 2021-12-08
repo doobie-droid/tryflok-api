@@ -26,10 +26,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use PragmaRX\Countries\Package\Countries as PragmarxCountries;
-use Stripe\Account as StripeAccount;
-use Stripe\AccountLink as StripeAccountLink;
-use Stripe\Stripe;
-use Stripe\StripeClient;
+use \Stripe\Account as StripeAccount;
+use \Stripe\AccountLink as StripeAccountLink;
+use \Stripe\Stripe;
+use \Stripe\StripeClient;
 
 class UserController extends Controller
 {
