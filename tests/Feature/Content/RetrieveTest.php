@@ -546,6 +546,7 @@ class RetrieveTest extends TestCase
     {
         $user = User::factory()->create();
         $content3 = Content::factory()
+        ->has(View::factory()->count(100))
         ->hasAttached(
             Asset::factory()->audio()->count(1),
             [
@@ -569,6 +570,7 @@ class RetrieveTest extends TestCase
         ->create();
 
         $content4 = Content::factory()
+        ->has(View::factory()->count(100))
         ->hasAttached(
             Asset::factory()->audio()->count(1),
             [
