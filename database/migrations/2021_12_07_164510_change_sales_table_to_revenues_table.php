@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangeSalesTableToRevenuesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::rename('sales', 'revenues');
@@ -22,11 +17,6 @@ class ChangeSalesTableToRevenuesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::table('revenues', function (Blueprint $table) {

@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Content;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ViewFactory extends Factory
+class ReviewFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -15,8 +16,11 @@ class ViewFactory extends Factory
     public function definition()
     {
         return [
-            'id' => $this->faker->unique()->uuid,
             'user_id' => User::factory(),
+            'rating' => 5,
+            'comment' => 'A comment',
+            'reviewable_type' => 'content',
+            'reviewable_id' => Content::factory(),
         ];
     }
 

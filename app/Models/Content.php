@@ -132,6 +132,11 @@ class Content extends Model
         return $this->morphToMany(Tag::class, 'taggable');
     }
 
+    public function categories()
+    {
+        return $this->morphToMany(Category::class, 'categorable');
+    }
+
     public function carts()
     {
         return $this->morphToMany(Cart::class, 'cartable');

@@ -487,6 +487,156 @@ class ContentController extends Controller
         }
     }
 
+    public function getTrending(Request $request)
+    {
+        try {
+            $page = $request->query('page', 1);
+            $limit = $request->query('limit', 10);
+
+            $keyword = urldecode($request->query('keyword', ''));
+            $keywords = explode(' ', $keyword);
+            $keywords = array_diff($keywords, ['']);
+
+            $types = $request->query('types', '');
+            $types = explode(',', urldecode($types));
+            $types = array_diff($types, ['']);
+
+            $tags = $request->query('tags', '');
+            $tags = explode(',', urldecode($tags));
+            $tags = array_diff($tags, ['']);
+
+            $creators = $request->query('creators', '');
+            $creators = explode(',', urldecode($creators));
+            $creators = array_diff($creators, ['']);
+
+            $maxPrice = $request->query('max_price', -1);
+            $minPrice = $request->query('min_price', 0);
+
+            $orderBy = $request->query('order_by', 'created_at');
+            $orderDirection = $request->query('order_direction', 'desc');
+
+            $activeLiveContent = $request->query('active_live_content', 'false');
+
+            $max_items_count = Constants::MAX_ITEMS_LIMIT;
+            $validator = Validator::make([
+                'page' => $page,
+                'limit' => $limit,
+                'keyword' => $keyword,
+                'tags' => $tags,
+                'creators' => $creators,
+                'max_price' => $maxPrice,
+                'min_price' => $minPrice,
+                'order_by' => $orderBy,
+                'order_direction' => $orderDirection,
+                'type' => $types,
+                'active_live_content' => $activeLiveContent,
+            ], [
+                'page' => ['required', 'integer', 'min:1',],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
+                'keyword' => ['sometimes', 'string', 'max:200',],
+                'max_price' => ['required', 'integer', 'min:-1',],
+                'min_price' => ['required', 'integer', 'min:0',],
+                'order_by' => ['required', 'string', 'regex:(created_at|price|views|reviews|scheduled_date)'],
+                'order_direction' => ['required', 'string', 'regex:(asc|desc)'],
+                'types' => ['sometimes',],
+                'type.*' => ['required', 'string',],
+                'tags' => ['sometimes',],
+                'tags.*' => ['required', 'string', 'exists:tags,id',],
+                'creators' => ['sometimes',],
+                'creators.*' => ['required', 'string', 'exists:users,id',],
+                'active_live_content' => ['sometimes', 'regex:(true|false)'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+            
+            $contents = Content::where('is_available', 1);
+
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            foreach ($keywords as $keyword) {
+                $contents = $contents->where(function ($query) use ($keyword) {
+                    $query->where('title', 'LIKE', "%{$keyword}%")
+                    ->orWhere('description', 'LIKE', "%{$keyword}%");
+                });
+            }
+
+            if (! empty($types)) {
+                $contents = $contents->whereIn('type', $types);
+            }
+
+            if (! empty($tags)) {
+                $contents = $contents->whereHas('tags', function (Builder $query) use ($tags) {
+                    $query->whereIn('tags.id', $tags);
+                });
+            }
+
+            if (! empty($creators)) {
+                $contents = $contents->whereIn('user_id', $creators);
+            }
+
+            if ($activeLiveContent === 'true') {
+                $contents = $contents->where(function ($query) {
+                    $query->where('live_status', 'active')
+                    ->orWhere('live_status', 'inactive');
+                });
+            }
+
+            $contents = $contents
+            ->withCount('subscribers')
+            ->withCount('views')
+            ->with('metas')
+            ->withCount([
+                'ratings' => function ($query) {
+                    $query->where('rating', '>', 0);
+                },
+            ])->withAvg([
+                'ratings' => function ($query) {
+                    $query->where('rating', '>', 0);
+                },
+            ], 'rating')
+            ->with('cover')
+            ->with('owner', 'owner.profile_picture')
+            ->with('tags')
+            ->with('prices')
+            ->with([
+                'userables' => function ($query) use ($user_id) {
+                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
+                },
+            ])
+            ->with([
+                'access_through_ancestors' => function ($query) use ($user_id) {
+                    $query->whereHas('userables', function (Builder $query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })
+                    ->orWhereHas('parentCollections', function (Builder $query) use ($user_id) {
+                        $query->whereHas('userables', function (Builder $query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                    });
+                },
+            ])
+            ->orderBy('contents.trending_points', 'desc')
+            ->orderBy("contents.{$orderBy}", $orderDirection)
+            ->paginate($limit, ['*'], 'page', $page);
+
+            return $this->respondWithSuccess('Contents retrieved successfully', [
+                'contents' => ContentResource::collection($contents),
+                'current_page' => (int) $contents->currentPage(),
+                'items_per_page' => (int) $contents->perPage(),
+                'total' => (int) $contents->total(),
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
     public function getDigiverseContents(Request $request, $digiverse_id)
     {
         try {

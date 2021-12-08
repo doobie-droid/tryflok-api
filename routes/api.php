@@ -115,6 +115,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'contents'], function () {
+        Route::get('trending', 'ContentController@getTrending');
+
         Route::post('{id}/views', 'ContentController@addViews');
         Route::get('{id}', 'ContentController@getSingle');
         Route::get('{id}/reviews', 'ContentController@getReviews');
@@ -135,10 +137,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', 'UserController@getAll');
         Route::get('{id}', 'UserController@getSingle');
-    });
-
-    Route::group(['prefix' => 'analytics'], function () {
-        Route::get('trending', 'AnalyticsController@trending');
     });
 
     Route::group(['prefix' => 'payments'], function () {

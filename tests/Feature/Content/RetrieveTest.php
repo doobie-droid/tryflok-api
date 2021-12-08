@@ -11,6 +11,9 @@ use App\Models\Content;
 use App\Models\Price;
 use App\Models\Tag;
 use App\Models\User;
+use App\Models\View;
+use App\Models\Revenue;
+use App\Models\Review;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Str;
@@ -537,5 +540,126 @@ class RetrieveTest extends TestCase
             'id' => $content6->id
         ]);
         $this->assertTrue(count($response->getData()->data->contents) === 6);
+    }
+
+    public function test_retrieve_trending_works()
+    {
+        $user = User::factory()->create();
+        $content3 = Content::factory()
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
+            'id' => Str::uuid(),
+            'purpose' => 'content-asset',
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+            ]
+        )
+        ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user->id
+            ])
+        )
+        ->create();
+
+        $content4 = Content::factory()
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
+            'id' => Str::uuid(),
+            'purpose' => 'content-asset',
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+            ]
+        )
+        ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user->id
+            ])
+        )
+        ->create();
+
+
+        $content1_views = 100;
+        $content1_reviews = 5;
+        $content1_revnues = 10;
+        $content1 = Content::factory()
+        ->has(View::factory()->count($content1_views))
+        ->has(Revenue::factory()->count($content1_revnues))
+        ->has(Review::factory()->count($content1_reviews))
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
+            'id' => Str::uuid(),
+            'purpose' => 'content-asset',
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+            ]
+        )
+        ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user->id
+            ])
+        )
+        ->create();
+        $content1_trending_points = (int) (Constants::TRENDING_VIEWS_WEIGHT * $content1_views) + (Constants::TRENDING_REVIEWS_WEIGHT * $content1_reviews * 5) + (Constants::TRENDING_PURCHASES_WEIGHT * $content1_revnues);
+
+        $content2_views = 83;
+        $content2_reviews = 2;
+        $content2_revnues = 3;
+        $content2 = Content::factory()
+        ->has(View::factory()->count($content2_views))
+        ->has(Revenue::factory()->count($content2_revnues))
+        ->has(Review::factory()->count($content2_reviews))
+        ->hasAttached(
+            Asset::factory()->audio()->count(1),
+            [
+            'id' => Str::uuid(),
+            'purpose' => 'content-asset',
+            ]
+        )
+        ->hasAttached(
+            Asset::factory()->count(1),
+            [
+            'id' => Str::uuid(),
+            'purpose' => 'cover'
+            ]
+        )
+        ->has(Price::factory()->subscription()->count(1))
+        ->has(
+            Benefactor::factory()->state([
+                'user_id' => $user->id
+            ])
+        )
+        ->create();
+        $content2_trending_points = (int) (Constants::TRENDING_VIEWS_WEIGHT * $content2_views) + (Constants::TRENDING_REVIEWS_WEIGHT * $content2_reviews * 5) + (Constants::TRENDING_PURCHASES_WEIGHT * $content2_revnues);
+
+        $this->artisan('flok:compute-content-trending')->assertSuccessful();
+
+        $response = $this->json('GET', '/api/v1/contents/trending?page=1&limit=10');
+        $response->assertStatus(200);
+        $contents = $response->getData()->data->contents;
+        $this->assertEquals($contents[0]->id, $content1->id);
+        $this->assertEquals($contents[1]->id, $content2->id);
+        $this->assertEquals($contents[2]->id, $content4->id);
+        $this->assertEquals($contents[3]->id, $content3->id);
     }
 }

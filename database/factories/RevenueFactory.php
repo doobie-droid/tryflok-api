@@ -51,4 +51,13 @@ class RevenueFactory extends Factory
             ];
         });
     }
+
+    public function createdDaysAgo($days_count = 1)
+    {
+        return $this->state(function (array $attributes) use ($days_count) {
+            return [
+                'created_at' => now()->subDays($days_count),
+            ];
+        });
+    }
 }

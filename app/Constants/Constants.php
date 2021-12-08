@@ -18,4 +18,12 @@ class Constants
     public const NORMAL_CREATOR_CHARGE = .15;
     public const NON_PROFIT_CREATOR_CHARGE = .10;
     public const TIPPING_CHARGE = .15;
+
+    //trending metrics
+    public const TRENDING_VIEWS_WEIGHT = .1;
+    public const TRENDING_SUBSCRIBERS_WEIGHT = .1;
+    public const TRENDING_PURCHASES_WEIGHT = 2;
+    public const TRENDING_REVIEWS_WEIGHT = .2;
+
+    public const TRENDING_COLLECTION_WEIGHT = .1;
 }
