@@ -29,7 +29,7 @@ class WalletController extends Controller
                 'provider_response.transaction_id' => ['required_if:provider,flutterwave'],
                 'provider_response.id' => ['required_if:provider,stripe', 'string'],
                 'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
-                'expected_akc_amount' => ['required', 'integer', 'min:1'],
+                'expected_flk_amount' => ['required', 'integer', 'min:1'],
             ]);
 
             if ($validator->fails()) {
@@ -42,11 +42,11 @@ class WalletController extends Controller
                     $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
                     if (($req->status === 'success' && $req->data->status === 'successful')) {
                         $amount_in_dollars = bcdiv($req->data->amount, 505, 2);
-                        $expected_akc_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
-                        $min_variation = $expected_akc_based_on_amount - bcmul($expected_akc_based_on_amount, bcdiv(3, 100, 2), 2);
-                        $max_variation = $expected_akc_based_on_amount + bcmul($expected_akc_based_on_amount, bcdiv(3, 100, 2), 2);
-                        if ($request->expected_akc_amount < $min_variation || $request->expected_akc_amount > $max_variation) {
-                            return $this->respondBadRequest('AKC conversion is not correct. Expects +/-3% of ' . $expected_akc_based_on_amount . ' for ' . $req->data->amount . ' Naira but got ' . $request->expected_akc_amount);
+                        $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                        $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
+                        $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
+                        if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
+                            return $this->respondBadRequest('FLK conversion is not correct. Expects +/-3% of ' . $expected_flk_based_on_amount . ' for ' . $req->data->amount . ' Naira but got ' . $request->expected_flk_amount);
                         }
                         FundWalletJob::dispatch([
                             'user' => $request->user(),
@@ -54,7 +54,7 @@ class WalletController extends Controller
                             'provider' => $request->provider,
                             'provider_id' => $req->data->id,
                             'amount' => $amount_in_dollars,
-                            'akc' => $request->expected_akc_amount,
+                            'flk' => $request->expected_flk_amount,
                             'fee' => bcdiv($req->data->app_fee, 505, 2)
                         ]);
                     } else {
@@ -64,12 +64,12 @@ class WalletController extends Controller
                 case 'stripe':
                     $stripe = new StripePayment;
                     $amount_in_dollars = bcdiv($request->amount_in_cents, 100, 2);
-                    $expected_akc_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
-                    $min_variation = $expected_akc_based_on_amount - bcmul($expected_akc_based_on_amount, bcdiv(3, 100, 2), 2);
-                    $max_variation = $expected_akc_based_on_amount + bcmul($expected_akc_based_on_amount, bcdiv(3, 100, 2), 2);
+                    $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                    $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
+                    $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
 
-                    if ($request->expected_akc_amount < $min_variation || $request->expected_akc_amount > $max_variation) {
-                        return $this->respondBadRequest('AKC conversion is not correct. Expects +/-3% of ' . $expected_akc_based_on_amount . ' for ' . $request->amount_in_cents . ' cents but got ' . $request->expected_akc_amount);
+                    if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
+                        return $this->respondBadRequest('FLK conversion is not correct. Expects +/-3% of ' . $expected_flk_based_on_amount . ' for ' . $request->amount_in_cents . ' cents but got ' . $request->expected_flk_amount);
                     }
 
                     $req = $stripe->chargeViaToken($request->amount_in_cents, $request->provider_response['id']);
@@ -80,7 +80,7 @@ class WalletController extends Controller
                             'provider' => $request->provider,
                             'provider_id' => $req->id,
                             'amount' => $amount_in_dollars,
-                            'akc' => $request->expected_akc_amount,
+                            'flk' => $request->expected_flk_amount,
                             'fee' => bcdiv(bcadd(bcdiv(bcmul(2.9, $request->amount_in_cents, 2), 100, 2), 30, 2), 100, 2),//2.9 % + 30,
                         ]);
                     } else {
@@ -95,12 +95,12 @@ class WalletController extends Controller
                             return $this->respondBadRequest('Product ID supplied [' . $request->provider_response['product_id'] . '] is not same that was paid for [' . $req->receipt->in_app[0]->product_id . '].');
                         }
                         $product_ids_to_amount = [
-                            '250_akc' => 3,
-                            '500_akc' => 6,
-                            '1000_akc' => 12,
-                            '3000_akc' => 36,
-                            '5000_akc' => 60,
-                            '10000_akc' => 120,
+                            '250_flk' => 3,
+                            '500_flk' => 6,
+                            '1000_flk' => 12,
+                            '3000_flk' => 36,
+                            '5000_flk' => 60,
+                            '10000_flk' => 120,
                         ];
                         $ekc_to_dollar = bcadd(1, bcdiv((30), 100 - 30), 2);
                         $amount_in_dollars = $product_ids_to_amount[$request->provider_response['product_id']];
@@ -110,7 +110,7 @@ class WalletController extends Controller
                             'provider' => $request->provider,
                             'provider_id' => $req->receipt->in_app[0]->transaction_id,
                             'amount' => $amount_in_dollars,
-                            'akc' => $request->expected_akc_amount,
+                            'flk' => $request->expected_flk_amount,
                             'fee' => bcdiv(bcmul(30, $amount_in_dollars, 2), 100, 2),
                         ]);
                     } else {
@@ -166,18 +166,18 @@ class WalletController extends Controller
                 $total_amount_in_dollars = bcadd($total_amount_in_dollars, $price->amount, 2);
             }
 
-            $total_amount_in_dollars = (float) $total_amount_in_dollars;//convert from creator dollars to AKC
-            $total_amount_in_akc = (float) bcmul($total_amount_in_dollars, 100, 2);
+            $total_amount_in_dollars = (float) $total_amount_in_dollars;//convert from creator dollars to flk
+            $total_amount_in_flk = (float) bcmul($total_amount_in_dollars, 100, 2);
             $wallet_balance = (float) $request->user()->wallet->balance;
 
-            if ($total_amount_in_akc > $wallet_balance) {
+            if ($total_amount_in_flk > $wallet_balance) {
                 return $this->respondBadRequest('Your wallet balance is too low to make this purchase. Please fund your wallet with Akiddie Cowries and try again.');
             }
 
-            $newWalletBalance = bcsub($request->user()->wallet->balance, $total_amount_in_akc, 2);
+            $newWalletBalance = bcsub($request->user()->wallet->balance, $total_amount_in_flk, 2);
             $transaction = WalletTransaction::create([
                 'wallet_id' => $request->user()->wallet->id,
-                'amount' => $total_amount_in_akc,
+                'amount' => $total_amount_in_flk,
                 'balance' => $newWalletBalance,
                 'transaction_type' => 'deduct',
                 'details' => 'Deduct from wallet to pay for items',

@@ -174,11 +174,13 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'users',], function () {
             Route::patch('{id}/follow', 'UserController@followUser');
             Route::patch('{id}/unfollow', 'UserController@unfollowUser');
-            Route::get('{user_public_id}/sales', 'UserController@getSales');
+            Route::get('{id}/revenues', 'UserController@getRevenues');
+            Route::post('{id}/tip', 'UserController@tipUser');
         });
 
         Route::group(['prefix' => 'account'], function () {
             Route::get('/', 'UserController@getAccount');
+            Route::delete('/', 'UserController@deleteAccount');
             Route::get('digiverses', 'CollectionController@getUserCreatedDigiverses');
             Route::get('notifications', 'UserController@getNotifications');
             Route::patch('notifications', 'UserController@markAllNotificationsAsRead');

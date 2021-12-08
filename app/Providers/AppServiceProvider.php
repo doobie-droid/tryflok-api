@@ -47,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
             'payout' => 'App\Models\Payout',
             'price' => 'App\Models\Price',
             'review' => 'App\Models\Review',
-            'sale' => 'App\Models\Sale',
+            'revenue' => 'App\Models\Revenue',
             'subscription' => 'App\Models\Subscription',
             'tag' => 'App\Models\Tag',
             'user' => 'App\Models\User',

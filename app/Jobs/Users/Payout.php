@@ -36,16 +36,16 @@ class Payout implements ShouldQueue
     {
         $total_benefactor = 0;
         $total_referral = 0;
-        $this->user->sales()->where('added_to_payout', 0)->chunk(100000, function ($sales) use (&$total_benefactor, &$total_referral) {
-            foreach ($sales as $sale) {
-                $total_benefactor = bcadd($total_benefactor, $sale->benefactor_share, 6);
-                $total_referral = bcadd($total_referral, $sale->referral_bonus, 6);
-                $sale->added_to_payout = 1;
-                $sale->save();
+        $this->user->revenues()->where('added_to_payout', 0)->chunk(100000, function ($revenues) use (&$total_benefactor, &$total_referral) {
+            foreach ($revenues as $revenue) {
+                $total_benefactor = bcadd($total_benefactor, $revenue->benefactor_share, 6);
+                $total_referral = bcadd($total_referral, $revenue->referral_bonus, 6);
+                $revenue->added_to_payout = 1;
+                $revenue->save();
             }
         });
 
-        $total_payout = bcadd($total_benefactor, $total_referral, 6);
+        $total_payout = bcadd($total_benefactor, $total_referral, 2);
 
         if ($total_payout > 0) {
             $this->user->payouts()->create([

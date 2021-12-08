@@ -114,29 +114,35 @@ class Purchase implements ShouldQueue
 
             //record sales for the benefactors of this item
             $net_amount = $amount;
-            $platform_share = bcmul($net_amount, Constants::PLATFORM_SHARE, 6);
-            $creator_share = bcmul($net_amount, Constants::CREATOR_SHARE, 6);
+            $platform_share = bcmul($net_amount, Constants::NORMAL_CREATOR_CHARGE, 6);
+            $platform_charge = Constants::NORMAL_CREATOR_CHARGE;
+            if ($itemModel->owner->user_charge_type === 'non-profit') {
+                $platform_charge = Constants::NON_PROFIT_CREATOR_CHARGE;
+            }
+            $creator_share = bcmul($net_amount, 100 - $platform_charge, 6);
             foreach ($itemModel->benefactors as $benefactor) {
-                $benefactor->user->sales()->create([
-                    'saleable_type' => $item['type'],
-                    'saleable_id' => $itemModel->id,
+                $benefactor->user->revenues()->create([
+                    'revenueable_type' => $item['type'],
+                    'revenueable_id' => $itemModel->id,
                     'amount' => $amount,
                     'payment_processor_fee' => $fee,
                     'platform_share' => bcsub($platform_share, $fee, 6),
                     'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share, 6), 100, 6),
                     'referral_bonus' => 0,
+                    'revenue_from' => 'sale',
                 ]);
             }
-            //record sales for the referrer of the item
+            //record revenue from referral of the item
             if ($itemModel->owner->referrer()->exists()) {
-                $itemModel->owner->referrer->sales()->create([
-                    'saleable_type' => $item['type'],
-                    'saleable_id' => $itemModel->id,
+                $itemModel->owner->referrer->revenues()->create([
+                    'revenueable_type' => $item['type'],
+                    'revenueable_id' => $itemModel->id,
                     'amount' => $amount,
                     'payment_processor_fee' => $fee,
                     'platform_share' => bcsub($platform_share, $fee, 6),
                     'benefactor_share' => 0,
                     'referral_bonus' => bcmul(bcsub($platform_share, $fee, 6), .025, 6),
+                    'revenue_from' => 'referral',
                 ]);
             }
 

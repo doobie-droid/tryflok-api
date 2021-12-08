@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\V1\Admin;
 
 use App\Constants\Roles;
 use App\Http\Controllers\Controller;
-use App\Models\Sale;
+use App\Models\Revenue;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -21,9 +21,9 @@ class AdministratorController extends Controller
                 'creators_total' => User::role(Roles::CREATOR)->count(),
                 'creators_today' => User::role(Roles::CREATOR)->whereDate('created_at', today())->count(),
                 'creators_month' => User::role(Roles::CREATOR)->whereMonth('created_at', now()->month)->count(),
-                'sales_total' => Sale::all()->sum('amount'),
-                'sales_today' => Sale::whereDate('created_at', today())->sum('amount'),
-                'sales_month' => Sale::whereMonth('created_at', now()->month)->sum('amount'),
+                'revenues_total' => Revenue::all()->sum('amount'),
+                'revenues_today' => Revenue::whereDate('created_at', today())->sum('amount'),
+                'revenues_month' => Revenue::whereMonth('created_at', now()->month)->sum('amount'),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);

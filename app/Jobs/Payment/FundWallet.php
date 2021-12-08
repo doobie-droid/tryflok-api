@@ -21,7 +21,7 @@ class FundWallet implements ShouldQueue
     private $wallet;
     private $provider;
     private $provider_id;
-    private $akc;
+    private $flk;
     private $amount;
     private $fee;
 
@@ -36,7 +36,7 @@ class FundWallet implements ShouldQueue
         $this->wallet = $data['wallet'];
         $this->provider = $data['provider'];
         $this->provider_id = $data['provider_id'];
-        $this->akc = $data['akc'];
+        $this->flk = $data['flk'];
         $this->amount = $data['amount'];
         $this->fee = $data['fee'];
     }
@@ -48,14 +48,14 @@ class FundWallet implements ShouldQueue
      */
     public function handle()
     {
-        $newWalletBalance = bcadd($this->wallet->balance, $this->akc, 2);
+        $newWalletBalance = bcadd($this->wallet->balance, $this->flk, 2);
         $walletTransaction = WalletTransaction::create([
             'public_id' => uniqid(rand()),
             'wallet_id' => $this->wallet->id,
-            'amount' => $this->akc,
+            'amount' => $this->flk,
             'balance' => $newWalletBalance,
             'transaction_type' => 'fund',
-            'details' => 'Fund wallet with ' . $this->akc . ' AKC via ' . $this->provider,
+            'details' => 'Fund wallet with ' . $this->flk . ' FLK via ' . $this->provider,
         ]);
 
         $this->wallet->balance = $newWalletBalance;

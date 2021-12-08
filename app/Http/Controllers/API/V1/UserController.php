@@ -16,6 +16,7 @@ use App\Models\PaymentAccount;
 use App\Models\Payout;
 use App\Models\User;
 use App\Models\Userable;
+use App\Models\WalletTransaction;
 use App\Rules\AssetType as AssetTypeRule;
 use Aws\CloudFront\CloudFrontClient;
 use Illuminate\Database\Eloquent\Builder;
@@ -233,6 +234,20 @@ class UserController extends Controller
         }
     }
 
+    public function deleteAccount(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $request->user()->delete();
+            return $this->respondWithSuccess('Account deleted successfully', [
+                'user' => new UserResourceWithSensitive($user),
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
     public function updatePassword(Request $request)
     {
         try {
@@ -435,28 +450,28 @@ class UserController extends Controller
         }
     }
 
-    public function getSales(Request $request, $user_id)
+    public function getRevenues(Request $request, $id)
     {
         try {
-            $user = User::where('id', $user_id)->first();
+            $user = User::where('id', $id)->first();
             if (is_null($user)) {
                 return $this->respondBadRequest('Invalid user ID supplied');
             }
 
             if (
-                $request->user()->id !== $user_id &&
+                $request->user()->id !== $id &&
                 ! $request->user()->hasRole(Roles::ADMIN) &&
                 ! $request->user()->hasRole(Roles::SUPER_ADMIN)
             ) {
-                return $this->respondBadRequest("You do not have permission to view this user's sales");
+                return $this->respondBadRequest("You do not have permission to view this user's revenues");
             }
 
             $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
             $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
 
-            $sales = $user->sales()->with('saleable')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
-            return $this->respondWithSuccess('Sales retrieved successfully', [
-                'sales' => $sales,
+            $revenues = $user->revenues()->with('revenueable')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
+            return $this->respondWithSuccess('Revenues retrieved successfully', [
+                'revenues' => $revenues,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -879,7 +894,7 @@ class UserController extends Controller
     public function cashoutPayout(Request $request)
     {
         try {
-            $validator = Validator::make(array_merge($request->all()), [
+            $validator = Validator::make($request->all(), [
                 'payout_id' => ['required', 'string', 'exists:payouts,id'],
                 'payment_account_id' => ['required', 'string', 'exists:payment_accounts,id', ],
             ]);
@@ -965,6 +980,67 @@ class UserController extends Controller
                 'cookies' => $cookies,
                 'expires' => $expires,
             ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function tipUser(Request $request, $user_id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['user_id' => $user_id]), [
+                'amount_in_flk' => ['required', 'numeric', 'min:100', 'max:1000000'],
+                'user_id' => ['required', 'string', 'exists:users,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if ((float) $request->user()->wallet->balance < (float) $request->amount_in_flk) {
+                return $this->respondBadRequest("You do not have enough Flok cowries to send {$request->amount_in_flk} FLK");
+            }
+
+            $userToTip = User::where('id', $user_id)->first();
+            $amount_in_dollars = bcdiv($request->amount_in_flk, 100, 6);
+            $newWalletBalance = bcsub($request->user()->wallet->balance, $request->amount_in_flk, 2);
+            $transaction = WalletTransaction::create([
+                'wallet_id' => $request->user()->wallet->id,
+                'amount' => $request->amount_in_flk,
+                'balance' => $newWalletBalance,
+                'transaction_type' => 'deduct',
+                'details' => 'Deduct from wallet to tip a user',
+            ]);
+            $transaction->payments()->create([
+                'payer_id' => $request->user()->id,
+                'payee_id' => $userToTip->id,
+                'amount' => $amount_in_dollars,
+                'payment_processor_fee' => 0,
+                'provider' => 'wallet',
+                'provider_id' => $transaction->id,
+            ]);
+            $request->user()->wallet->balance = $newWalletBalance;
+            $request->user()->wallet->save();
+
+            $platform_share = bcmul($amount_in_dollars, Constants::NORMAL_CREATOR_CHARGE, 6);
+            $platform_charge = Constants::NORMAL_CREATOR_CHARGE;
+            if ($userToTip->user_charge_type === 'non-profit') {
+                $platform_charge = Constants::NON_PROFIT_CREATOR_CHARGE;
+            }
+            $creator_share = bcmul($amount_in_dollars, 100 - $platform_charge, 6);
+            $userToTip->revenues()->create([
+                'revenueable_type' => 'user',
+                'revenueable_id' => $userToTip->id,
+                'amount' => $amount_in_dollars,
+                'payment_processor_fee' => 0,
+                'platform_share' => $platform_share,
+                'benefactor_share' => $creator_share,
+                'referral_bonus' => 0,
+                'revenue_from' => 'tip',
+            ]);
+
+            return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
