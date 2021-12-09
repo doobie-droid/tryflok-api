@@ -331,7 +331,7 @@ class ContentController extends Controller
             ]);
 
             return $this->respondWithSuccess('Issue has been created successfully', [
-                'issue' => $issue,
+                'issue' => $issue->with('content')->first(),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -375,7 +375,7 @@ class ContentController extends Controller
             $issue->save();
 
             return $this->respondWithSuccess('Issue has been updated successfully', [
-                'issue' => $issue,
+                'issue' => $issue->with('content')->first(),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -415,7 +415,7 @@ class ContentController extends Controller
             }
 
             return $this->respondWithSuccess('Issue has been published successfully', [
-                'issue' => $issue,
+                'issue' => $issue->with('content')->first(),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -838,7 +838,9 @@ class ContentController extends Controller
                 });
             }
 
-            $issues = $issues->orderBy('content_issues.created_at', 'desc')
+            $issues = $issues
+            ->with('content')
+            ->orderBy('content_issues.created_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
             return $this->respondWithSuccess('Issues retrieved successfully', [
                 'issues' => ContentIssueResource::collection($issues),
@@ -867,7 +869,7 @@ class ContentController extends Controller
 
             $issue = ContentIssue::where('id', $id)->first();
             return $this->respondWithSuccess('Issue retrieved successfully', [
-                'issue' => new ContentIssueResource($issue),
+                'issue' => new ContentIssueResource($issue->with('content')->first()),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
