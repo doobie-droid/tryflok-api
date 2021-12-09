@@ -226,6 +226,8 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('{id}/live', 'ContentController@joinLive');
             Route::patch('{id}/leave-live', 'ContentController@leaveLive');
             Route::delete('{id}/live', 'ContentController@endLive');
+
+            Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
         });
 
         Route::group(['prefix' => 'issues'], function () {

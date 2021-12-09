@@ -302,6 +302,35 @@ class ContentController extends Controller
         }
     }
 
+    public function attachMediaToContent(Request $request, $id)
+    {
+        try {
+            $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'asset_ids' => ['required'], 
+                'asset_ids.*' => ['sometimes', 'nullable', 'string', 'exists:assets,id',],
+            ]);
+
+            if ($validator1->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator1->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+
+            foreach ($request->asset_ids as $asset_id) {
+                $content->assets()->attach($asset_id, [
+                    'id' => Str::uuid(),
+                    'purpose' => 'attached-media',
+                ]);
+            }
+            
+            return $this->respondWithSuccess('Assets attached successfully');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
     public function createIssue(Request $request, $id)
     {
         try {
