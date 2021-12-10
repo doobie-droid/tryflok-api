@@ -32,10 +32,9 @@ class CreateAndUpdateTest extends TestCase
             'description' => DigiverseMock::UNSEEDED_DIGIVERSE['description'],
             'user_id' => $user->id,
             'type' => 'digiverse',
-            'is_available' => 0,
+            'is_available' => 1,
             'approved_by_admin' => 0,
             'show_only_in_collections' => 0,
-            'views' => 0,
         ]);
 
         $digiverse = Collection::where('title', DigiverseMock::UNSEEDED_DIGIVERSE['title'])->first();
@@ -141,7 +140,6 @@ class CreateAndUpdateTest extends TestCase
             'is_available' => 1,
             'approved_by_admin' => 0,
             'show_only_in_collections' => 0,
-            'views' => 0,
         ]);
 
         $this->assertDatabaseHas('taggables', [

@@ -8,6 +8,7 @@
         "php": "^7.3|^8.0",
         "aminyazdanpanah/php-ffmpeg-video-streaming": "^1.2",
         "aws/aws-sdk-php": "^3.192",
+        "cboden/ratchet": "^0.4.3",
         "doctrine/dbal": "^3.2",
         "fideloper/proxy": "^4.4",
         "firebase/php-jwt": "^5.4",

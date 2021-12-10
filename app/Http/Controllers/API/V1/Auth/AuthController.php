@@ -238,7 +238,7 @@ class AuthController extends Controller
             $otp->expires_at = now();//expire the token since it has been used
             $otp->save();
             $token = JWTAuth::fromUser($otp->user);
-            $user = User::with('roles', 'profile_picture', 'wallet')->where('public_id', $otp->user->public_id)->first();
+            $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $otp->user->id)->first();
             return $this->respondWithSuccess('Login successful', [
                 'user' => new UserResourceWithSensitive($otp->user),
                 'token' => $token,

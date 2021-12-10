@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Wallet;
+namespace Tests\Feature\User;
 
 use App\Constants\Constants;
 use Illuminate\Foundation\Testing\RefreshDatabase;

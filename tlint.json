@@ -1,6 +1,11 @@
 {
     "preset": "laravel",
-    "disabled": ["NoInlineVarDocs", "ConcatenationNoSpacing", "RemoveLeadingSlashNamespaces"],
+    "disabled": [
+        "NoInlineVarDocs", 
+        "ConcatenationNoSpacing", 
+        "RemoveLeadingSlashNamespaces", 
+        "NoStringInterpolationWithoutBraces"
+    ],
     "excluded": [
         "tests/",
         "supervisord/",
