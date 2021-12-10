@@ -68,6 +68,5 @@ class UpdateContentUserables implements ShouldQueue
     public function failed(\Throwable $exception)
     {
         Log::error($exception);
-        //TO DO: mail the user telling them the edit failed?
     }
 }
