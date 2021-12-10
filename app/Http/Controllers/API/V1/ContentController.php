@@ -241,7 +241,7 @@ class ContentController extends Controller
 
             $content->save();
 
-            if (! is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
+            if (! is_null($request->cover) && array_key_exists('asset_id', $request->cover)  && ! is_null($request->cover['asset_id']) && $request->cover['asset_id'] != '') {
                 $oldCover = $content->cover()->first();
                 $content->cover()->detach($oldCover->id);
                 $oldCover->delete();

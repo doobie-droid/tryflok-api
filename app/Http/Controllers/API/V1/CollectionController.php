@@ -194,7 +194,7 @@ class CollectionController extends Controller
                 $price->save();
             }
 
-            if (! is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
+            if (! is_null($request->cover) && array_key_exists('asset_id', $request->cover) && ! is_null($request->cover['asset_id']) && $request->cover['asset_id'] != '') {
                 $oldCover = $digiverse->cover()->first();
                 $digiverse->cover()->detach($oldCover->id);
                 $oldCover->delete();
