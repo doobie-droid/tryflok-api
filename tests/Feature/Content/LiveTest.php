@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Content;
 
+use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
 use App\Models\Content;
 use App\Models\Price;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -22,6 +24,14 @@ class LiveTest extends TestCase
     public function test_start_live_works()
     {
         $user = User::factory()->create();
+        $user2 = User::factory()->create();
+
+        $user->followers()->syncWithoutDetaching([
+            $user2->id => [
+                'id' => Str::uuid(),
+            ],
+        ]);
+
         $this->be($user);
         $content = Content::factory()
         ->for($user, 'owner')
@@ -46,6 +56,12 @@ class LiveTest extends TestCase
             'live_status' => 'active',
         ]);
         $this->assertTrue($content->refresh()->scheduled_date->lte(now()));
+
+        $this->assertDatabaseHas('notifications', [
+            'notificable_type' => 'content',
+            'notificable_id' => $content->id,
+            'message' => "{$user->username} has started a new live",
+        ]);
     }
 
     public function test_start_live_does_not_work_for_non_live_content()
