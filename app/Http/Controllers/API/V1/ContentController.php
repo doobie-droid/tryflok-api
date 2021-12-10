@@ -243,8 +243,11 @@ class ContentController extends Controller
 
             if (! is_null($request->cover) && array_key_exists('asset_id', $request->cover)  && ! is_null($request->cover['asset_id']) && $request->cover['asset_id'] != '') {
                 $oldCover = $content->cover()->first();
-                $content->cover()->detach($oldCover->id);
-                $oldCover->delete();
+                if (! is_null($oldCover)) {
+                    $content->cover()->detach($oldCover->id);
+                    $oldCover->delete();
+                }
+                
                 $content->cover()->attach($request->cover['asset_id'], [
                     'id' => Str::uuid(),
                     'purpose' => 'cover',
