@@ -21,9 +21,11 @@ class Constants
 
     //trending metrics
     public const TRENDING_VIEWS_WEIGHT = .1;
-    public const TRENDING_SUBSCRIBERS_WEIGHT = .1;
+    public const TRENDING_CONTENT_SUBSCRIBERS_WEIGHT = .1;
     public const TRENDING_PURCHASES_WEIGHT = 2;
     public const TRENDING_REVIEWS_WEIGHT = .2;
 
     public const TRENDING_COLLECTION_WEIGHT = .1;
+    public const TRENDING_COLLECTION_CONTENT_WEIGHT = .1;
+    public const TRENDING_COLLECTION_SUBSCRIBERS_WEIGHT = 3;
 }

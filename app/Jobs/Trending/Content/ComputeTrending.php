@@ -46,7 +46,7 @@ class ComputeTrending implements ShouldQueue
         $days_ago = now()->subDays(7);
         // get subscribers
         $total_subscribers = $this->content->subscribers()->count();
-        $normalized_subscribers = bcmul($total_subscribers, Constants::TRENDING_SUBSCRIBERS_WEIGHT, 3);
+        $normalized_subscribers = bcmul($total_subscribers, Constants::TRENDING_CONTENT_SUBSCRIBERS_WEIGHT, 3);
         // get views in last 7 days
         $total_views = $this->content->views()->whereDate('created_at', '>=', $days_ago)->count();
         $normalized_views = bcmul($total_views, Constants::TRENDING_VIEWS_WEIGHT, 3);
