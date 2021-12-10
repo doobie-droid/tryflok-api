@@ -160,6 +160,10 @@ class RetrieveTest extends TestCase
         ])
         ->for($user1, 'owner')
         ->digiverse()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -186,6 +190,10 @@ class RetrieveTest extends TestCase
         ])
         ->for($user1, 'owner')
         ->digiverse()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -212,6 +220,10 @@ class RetrieveTest extends TestCase
         ])
         ->for($user1, 'owner')
         ->digiverse()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -239,6 +251,10 @@ class RetrieveTest extends TestCase
         ])
         ->for($user2, 'owner')
         ->digiverse()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -265,6 +281,10 @@ class RetrieveTest extends TestCase
         ])
         ->for($user2, 'owner')
         ->digiverse()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -291,6 +311,10 @@ class RetrieveTest extends TestCase
         ])
         ->for($user2, 'owner')
         ->digiverse()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -464,6 +488,10 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -491,6 +519,10 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -518,6 +550,10 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -546,6 +582,10 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -573,6 +613,10 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [
@@ -600,6 +644,10 @@ class RetrieveTest extends TestCase
         ->for($user1, 'owner')
         ->digiverse()
         ->unavailable()
+        ->hasAttached(Content::factory()->count(1),
+        [
+            'id' => Str::uuid(),
+        ])
         ->hasAttached(
             Asset::factory()->count(1),
             [

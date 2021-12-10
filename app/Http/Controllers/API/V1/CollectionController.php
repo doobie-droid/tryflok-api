@@ -283,8 +283,10 @@ class CollectionController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            $digiverses = Collection::where('type', 'digiverse')->where('is_available', 1)
-            ->where('show_only_in_collections', 0);
+            $digiverses = Collection::where('type', 'digiverse')
+            ->where('is_available', 1)
+            ->where('show_only_in_collections', 0)
+            ->has('contents');
 
             foreach ($keywords as $keyword) {
                 $digiverses = $digiverses->where(function ($query) use ($keyword) {
@@ -327,7 +329,8 @@ class CollectionController extends Controller
                 'userables' => function ($query) use ($user_id) {
                     $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
                 },
-            ])->orderBy('collections.created_at', 'desc')
+            ])
+            ->orderBy('collections.created_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Digiverses retrieved successfully', [
@@ -462,86 +465,6 @@ class CollectionController extends Controller
 
             return $this->respondWithSuccess('Reviews retrieved successfully', [
                 'reviews' => $reviews,
-            ]);
-        } catch (\Exception $exception) {
-            Log::error($exception);
-            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
-        }
-    }
-
-    public function getSingle(Request $request, $public_id)
-    {
-        try {
-            $validator = Validator::make(['public_id' => $public_id], [
-                'public_id' => ['required', 'string', 'exists:collections,public_id'],
-            ]);
-
-            if ($validator->fails()) {
-                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
-            }
-
-            if ($request->user() == null || $request->user()->id == null) {
-                $user_id = 0;
-            } else {
-                $user_id = $request->user()->id;
-            }
-
-            $collection = Collection::where('public_id', $public_id)
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
-            ->with('benefactors', 'benefactors.user')
-            ->with('cover')
-            ->with('approvalRequest')
-            ->with('owner', 'owner.profile_picture')
-            ->with('categories')
-            ->with('prices', 'prices.continent', 'prices.country')
-            ->with([
-                'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
-                },
-            ])
-            ->with('owner')
-            ->with([
-                'contents' => function ($query) {
-                    $query->withCount([
-                        'ratings' => function ($query) {
-                            $query->where('rating', '>', 0);
-                        },
-                    ])
-                    ->withAvg([
-                        'ratings' => function ($query) {
-                            $query->where('rating', '>', 0);
-                        },
-                    ], 'rating')
-                    ->with('categories', 'owner', 'cover', 'owner.profile_picture');
-                },
-            ])
-            ->with([
-                'childCollections' => function ($query) {
-                    $query->withCount([
-                        'ratings' => function ($query) {
-                            $query->where('rating', '>', 0);
-                        },
-                    ])
-                    ->withAvg([
-                        'ratings' => function ($query) {
-                            $query->where('rating', '>', 0);
-                        },
-                    ], 'rating')
-                    ->with('categories', 'owner', 'cover', 'owner.profile_picture');
-                },
-            ])
-            ->first();
-
-            return $this->respondWithSuccess('Collection retrieved successfully', [
-                'collection' => new CollectionResource($collection),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);

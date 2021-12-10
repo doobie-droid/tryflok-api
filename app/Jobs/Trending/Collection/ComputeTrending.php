@@ -43,8 +43,24 @@ class ComputeTrending implements ShouldQueue
             ]);
         }
 
+        $total_contents = $this->collection->contents()->count();
+        $normalized_contents = bcmul($total_contents, Constants::TRENDING_COLLECTION_CONTENT_WEIGHT, 3);
+
+        $total_subscriptions = $this->collection->subscriptions()->count();
+        $normalized_subscriptions = bcmul($total_subscriptions, Constants::TRENDING_COLLECTION_SUBSCRIBERS_WEIGHT, 3);
+
         $contents_trending_aggregate = $this->collection->contents()->sum('trending_points');
-        $this->collection->trending_points = bcmul($contents_trending_aggregate, Constants::TRENDING_COLLECTION_WEIGHT, 0);
+        $normalized_contents_trending_aggregate = bcmul($contents_trending_aggregate, Constants::TRENDING_COLLECTION_WEIGHT, 0);
+
+        $this->collection->trending_points = bcadd(
+            bcadd(
+                $normalized_contents,  
+                $normalized_subscriptions,
+                3
+            ), 
+            $normalized_contents_trending_aggregate, 
+            0
+        );
         $this->collection->save();
 
         // TO DO: when we have multi-nested collections sum the content agregate for the sub-collections contents too
