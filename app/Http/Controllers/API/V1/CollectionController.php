@@ -105,7 +105,7 @@ class CollectionController extends Controller
             }
 
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = 0;
+                $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
@@ -309,7 +309,7 @@ class CollectionController extends Controller
             }
 
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = 0;
+                $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
@@ -410,7 +410,7 @@ class CollectionController extends Controller
             }
 
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = 0;
+                $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
