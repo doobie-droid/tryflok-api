@@ -16,7 +16,7 @@
 		}
 
 		a {
-			color: #276db8;
+			color: #6E4CF5;
 		}
 
 		a img {
@@ -103,11 +103,11 @@
 		/* Buttons ------------------------------ */
 
 		.button {
-			background-color: #276db8;
-			border-top: 10px solid #276db8;
-			border-right: 18px solid #276db8;
-			border-bottom: 10px solid #276db8;
-			border-left: 18px solid #276db8;
+			background-color: #6E4CF5;
+			border-top: 10px solid #6E4CF5;
+			border-right: 18px solid #6E4CF5;
+			border-bottom: 10px solid #6E4CF5;
+			border-left: 18px solid #6E4CF5;
 			display: inline-block;
 			color: #FFF;
 			text-decoration: none;
@@ -446,14 +446,13 @@
 			<table class="email-content" width="100%" cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; -premailer-width: 100%; -premailer-cellpadding: 0; -premailer-cellspacing: 0; margin: 0; padding: 0;">
 				<tr>
 					<td class="email-masthead" style="word-break: break-word; font-family: &quot;Nunito Sans&quot;, Helvetica, Arial, sans-serif; font-size: 16px; text-align: center; padding: 25px 0;" align="center">
-						<a href="https://akiddie.com.ng" class="f-fallback email-masthead_name" style="color: #A8AAAF; font-size: 16px; font-weight: bold; text-decoration: none; text-shadow: 0 1px 0 white;">
-							<img src="https://res.cloudinary.com/akiddie/image/upload/v1584479983/akiddie_logo.png" style="width: 180px;">
+						<a href="{{ config('flok.frontend_url') }}" class="f-fallback email-masthead_name" style="color: #A8AAAF; font-size: 16px; font-weight: bold; text-decoration: none; text-shadow: 0 1px 0 white;">
+							<img src="https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png" style="width: 100px; border-radius: 50%;">
 						</a>
 					</td>
 				</tr>
-				<!-- Email Body -->
-				@yield('body')
-
+                <!-- Email Body -->
+                @yield('body')
 				<tr>
 					<td style="word-break: break-word; font-family: &quot;Nunito Sans&quot;, Helvetica, Arial, sans-serif; font-size: 16px;">
 						<table class="email-footer" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation" style="width: 570px; -premailer-width: 570px; -premailer-cellpadding: 0; -premailer-cellspacing: 0; text-align: center; margin: 0 auto; padding: 0;">
@@ -462,7 +461,7 @@
 									<p class="f-fallback sub align-center" style="font-size: 13px; line-height: 1.625; text-align: center; color: #A8AAAF; margin: .4em 0 1.1875em;" align="center">© {{ date('Y') }} Flok. All rights reserved.</p>
 									<p class="f-fallback sub align-center" style="font-size: 13px; line-height: 1.625; text-align: center; color: #A8AAAF; margin: .4em 0 1.1875em;" align="center">
 										Flok
-										<br />www.flok.app
+										<br />www.tryflok.com
 									</p>
 								</td>
 							</tr>

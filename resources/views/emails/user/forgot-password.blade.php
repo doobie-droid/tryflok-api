@@ -20,14 +20,17 @@
 									<table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
 										<tr>
 											<td align="center" style="word-break: break-word; font-family: &quot;Nunito Sans&quot;, Helvetica, Arial, sans-serif; font-size: 16px;">
-												<a href="{{ join_path(config('flok.frontend_url'), 'password/reset/' . $user['password_token']) }}" class="f-fallback button" target="_blank" style="color: #FFF; border-color: #276db8; border-style: solid; border-width: 10px 18px; background-color: #276db8; display: inline-block; text-decoration: none; border-radius: 3px; box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16); -webkit-text-size-adjust: none; box-sizing: border-box;">Reset Password</a>
+												<a href="{{ join_path(config('flok.frontend_url'), 'password/reset/' . $user['password_token']) }}" class="f-fallback button" target="_blank" style="color: #FFF; border-color: #6E4CF5
+; border-style: solid; border-width: 10px 18px; background-color: #6E4CF5
+; display: inline-block; text-decoration: none; border-radius: 3px; box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16); -webkit-text-size-adjust: none; box-sizing: border-box;">Reset Password</a>
 											</td>
 										</tr>
 									</table>
 								</td>
 							</tr>
 						</table>
-						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you have any questions, feel free to <a href="mailto:contact@akiddie.com.ng" style="color: #276db8;">send us an email</a>.</p>
+						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you have any questions, feel free to <a href="mailto:contact@tryflok.com" style="color: #6E4CF5
+;">send us an email</a>.</p>
 						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">Thanks,
 							<br />Flok</p>
 						<!-- Sub copy -->
