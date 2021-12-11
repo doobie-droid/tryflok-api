@@ -9,6 +9,7 @@ use App\Http\Resources\NotificationResource;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceWithSensitive;
 use App\Jobs\Payment\Payout as PayoutToCreatorJob;
+use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\Content;
@@ -1042,6 +1043,11 @@ class UserController extends Controller
                 'revenue_from' => 'tip',
             ]);
 
+            NotifyTippingJob::dispatch([
+                'tipper' => $request->user(),
+                'tippee' => $userToTip,
+                'amount_in_flk' => $request->amount_in_flk,
+            ]);
             return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
