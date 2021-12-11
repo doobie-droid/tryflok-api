@@ -1,6 +1,6 @@
 version: "3.3"
 services:
-  api1:
+  api:
     build: 
       args:
         user: flok
@@ -8,69 +8,6 @@ services:
       context: ./
     ports:
       - 8080:8080 # for websocket
-    environment:
-      - WAIT_HOSTS=mysql:3306
-      - WAIT_HOSTS_TIMEOUT=300
-      - WAIT_SLEEP_INTERVAL=30
-      - WAIT_HOST_CONNECT_TIMEOUT=30
-      - TZ=Africa/Lagos
-    links:
-      - redis
-    volumes:
-      - ./:/var/www
-      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-      - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
-      - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
-    command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
-  
-  api2:
-    build: 
-      args:
-        user: flok
-        uid: 1000
-      context: ./
-    environment:
-      - WAIT_HOSTS=mysql:3306
-      - WAIT_HOSTS_TIMEOUT=300
-      - WAIT_SLEEP_INTERVAL=30
-      - WAIT_HOST_CONNECT_TIMEOUT=30
-      - TZ=Africa/Lagos
-    links:
-      - redis
-    volumes:
-      - ./:/var/www
-      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-      - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
-      - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
-    command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
-  
-  api3:
-    build: 
-      args:
-        user: flok
-        uid: 1000
-      context: ./
-    environment:
-      - WAIT_HOSTS=mysql:3306
-      - WAIT_HOSTS_TIMEOUT=300
-      - WAIT_SLEEP_INTERVAL=30
-      - WAIT_HOST_CONNECT_TIMEOUT=30
-      - TZ=Africa/Lagos
-    links:
-      - redis
-    volumes:
-      - ./:/var/www
-      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-      - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
-      - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
-    command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
-  
-  api4:
-    build: 
-      args:
-        user: flok
-        uid: 1000
-      context: ./
     environment:
       - WAIT_HOSTS=mysql:3306
       - WAIT_HOSTS_TIMEOUT=300
@@ -102,63 +39,17 @@ services:
       - WAIT_HOST_CONNECT_TIMEOUT=30
       - TZ=Africa/Lagos
 
-  api1-nginx:
-    image: nginx:1.17-alpine
-    restart: unless-stopped
-    ports:
-     - 8000:80
-    links:
-      - api1
-    volumes:
-      - ./:/var/www
-      - ./nginx-staging/api1/logs:/var/log/nginx
-      - ./nginx-staging/api1:/etc/nginx/conf.d
-  
-  api2-nginx:
-    image: nginx:1.17-alpine
-    restart: unless-stopped
-    ports:
-     - 8001:80
-    links:
-      - api2
-    volumes:
-      - ./:/var/www
-      - ./nginx-staging/api2/logs:/var/log/nginx
-      - ./nginx-staging/api2:/etc/nginx/conf.d
-  
-  api3-nginx:
-    image: nginx:1.17-alpine
-    restart: unless-stopped
-    ports:
-     - 8002:80
-    links:
-      - api3
-    volumes:
-      - ./:/var/www
-      - ./nginx-staging/api3/logs:/var/log/nginx
-      - ./nginx-staging/api3:/etc/nginx/conf.d
-
-  api4-nginx:
+  nginx:
     image: nginx:1.17-alpine
     restart: unless-stopped
     ports:
      - 8003:80
     links:
-      - api4
+      - api
     volumes:
       - ./:/var/www
-      - ./nginx-staging/api4/logs:/var/log/nginx
-      - ./nginx-staging/api4:/etc/nginx/conf.d
-
-  #lb-nginx:
-   # image: nginx:1.17-alpine
-    #restart: unless-stopped
-    #ports:
-     # - 8000:80
-    #volumes:
-     # - ./:/var/www
-     # - ./nginx-staging/lb/logs:/var/log/nginx
-     # - ./nginx-staging/lb:/etc/nginx/conf.d
+      - ./nginx-staging/logs:/var/log/nginx
+      - ./nginx-staging:/etc/nginx/conf.d
       
   redis:
     image: redis:3.0
