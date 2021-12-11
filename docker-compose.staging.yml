@@ -64,7 +64,8 @@ services:
     image: nginx:1.17-alpine
     restart: unless-stopped
     links:
-      - api
+      - api1
+      - api2
     ports:
       - 8000:80
     volumes:
