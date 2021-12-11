@@ -33,7 +33,7 @@ class ContentController extends Controller
                 'digiverse_id' => ['required','exists:collections,id'],
                 'cover.asset_id' => ['required_if:type,pdf,audio,video,newsletter', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'price' => ['required',],
-                'price.amount' => ['required', 'min:0', 'numeric'],
+                'price.amount' => ['required', 'min:0', 'numeric', 'max:1000'],
                 'tags' => ['sometimes',],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
                 'type' => ['required', 'string', 'regex:(pdf|audio|video|newsletter|live-audio|live-video)'],
@@ -183,7 +183,7 @@ class ContentController extends Controller
                 'description' => ['sometimes', 'nullable', 'string',],
                 'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'price' => ['sometimes', 'nullable'],
-                'price.amount' => ['sometimes', 'nullable', 'min:0', 'numeric'],
+                'price.amount' => ['sometimes', 'nullable', 'min:0', 'numeric', 'max:1000'],
                 'tags' => ['sometimes',],
                 'tags.*.id' => ['required', 'string', 'exists:tags,id'],
                 'tags.*.action' => ['required', 'string', 'regex:(add|remove)'],
@@ -776,7 +776,7 @@ class ContentController extends Controller
             }
 
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = 0;
+                $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
@@ -1280,7 +1280,7 @@ class ContentController extends Controller
             }
 
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = null;
+                $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }

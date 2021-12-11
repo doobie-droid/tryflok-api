@@ -12,12 +12,12 @@ class CreateSalesTable extends Migration
             $table->uuid('id')->primary();
             $table->uuidMorphs('saleable');
             $table->foreignUuid('user_id');
-            $table->unsignedDecimal('amount', 6, 2);
+            $table->unsignedDecimal('amount', 9, 2);
             $table->string('currency')->default('USD');
-            $table->unsignedDecimal('payment_processor_fee', 6, 2);
-            $table->unsignedDecimal('platform_share', 6, 2); // (amount - fee) * 30%
-            $table->unsignedDecimal('benefactor_share', 6, 2); // ((amount - fee) * 70%) * (share_on_benefactor_table / 100)
-            $table->unsignedDecimal('referral_bonus', 5, 2); // platform_share * 2.5%
+            $table->unsignedDecimal('payment_processor_fee', 9, 2);
+            $table->unsignedDecimal('platform_share', 9, 2); 
+            $table->unsignedDecimal('benefactor_share', 9, 2); 
+            $table->unsignedDecimal('referral_bonus', 7, 2);
             $table->boolean('added_to_payout')->default(0);
             $table->timestamps();
         });

@@ -24,7 +24,7 @@ class CollectionController extends Controller
                 'description' => ['required', 'string'],
                 'cover.asset_id' => ['required', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'price' => ['required',],
-                'price.amount' => ['required', 'min:0', 'numeric'],
+                'price.amount' => ['required', 'min:0', 'numeric', 'max:1000'],
                 'price.interval' => ['required', 'string', 'regex:(one-off|monthly)'],
                 'price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
                 'tags' => ['sometimes',],
@@ -105,7 +105,7 @@ class CollectionController extends Controller
             }
 
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = 0;
+                $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
@@ -148,7 +148,7 @@ class CollectionController extends Controller
                 'is_available' => ['sometimes', 'integer', 'min:0', 'max:1'],
                 'price' => ['sometimes', 'nullable',],
                 'price.id' => ['sometimes', 'exists:prices,id'],
-                'price.amount' => ['sometimes', 'min:0', 'numeric'],
+                'price.amount' => ['sometimes', 'min:0', 'numeric', 'max:1000'],
                 'price.interval' => ['sometimes', 'string', 'regex:(one-off|monthly)'],
                 'price.interval_amount' => ['sometimes', 'nullable', 'integer', 'size:1',],
                 'tags' => ['sometimes',],
@@ -309,7 +309,7 @@ class CollectionController extends Controller
             }
 
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = 0;
+                $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
@@ -410,7 +410,7 @@ class CollectionController extends Controller
             }
 
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = 0;
+                $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
