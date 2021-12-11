@@ -11,7 +11,7 @@ class CreatePricesTable extends Migration
         Schema::create('prices', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuidMorphs('priceable');
-            $table->decimal('amount', 6, 2)->default(0);
+            $table->unsignedDecimal('amount', 6, 2)->default(0);
             $table->string('currency')->default('USD');
             $table->string('interval')->default('one-off'); // one-off, monthly , yearly
             $table->integer('interval_amount')->default(1);
