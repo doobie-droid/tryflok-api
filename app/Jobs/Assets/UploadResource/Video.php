@@ -26,6 +26,7 @@ class Video implements ShouldQueue
     public $full_file_name;
     public $resolutions;
     public $hls_key_filepath;
+    public $timeout = 3600;
     /**
      * Create a new job instance.
      *
