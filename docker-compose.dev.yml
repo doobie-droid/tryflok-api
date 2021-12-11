@@ -52,8 +52,8 @@ services:
       - 8000:80
     volumes:
       - ./:/var/www
-      - ./nginx/logs:/var/log/nginx
-      - ./nginx:/etc/nginx/conf.d
+      - ./nginx-dev/logs:/var/log/nginx
+      - ./nginx-dev:/etc/nginx/conf.d
 
   mysql:
     image: mysql:5.7.12

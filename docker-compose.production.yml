@@ -52,8 +52,8 @@ services:
       - 8000:80
     volumes:
       - ./:/var/www
-      - ./nginx/logs:/var/log/nginx
-      - ./nginx:/etc/nginx/conf.d
+      - ./nginx-production/logs:/var/log/nginx
+      - ./nginx-production:/etc/nginx/conf.d
 
   redis:
     image: redis:3.0
