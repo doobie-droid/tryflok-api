@@ -16,9 +16,8 @@ yarn-error.log
 /mysql
 /logs
 **/*.DS_Store
-/nginx-dev/logs
-/nginx-staging/logs
-/nginx-production/logs
+**/*logs/
+
 flok_worker.out.log
 flok_worker.err.log
 php-fpm_stderr.log

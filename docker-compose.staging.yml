@@ -7,7 +7,7 @@ services:
         uid: 1000
       context: ./
     ports:
-      - 8080:8080
+      - 8080:8080 # for websocket
     environment:
       - WAIT_HOSTS=mysql:3306
       - WAIT_HOSTS_TIMEOUT=300
@@ -60,18 +60,35 @@ services:
       - WAIT_HOST_CONNECT_TIMEOUT=30
       - TZ=Africa/Lagos
 
-  nginx:
+  api1-nginx:
     image: nginx:1.17-alpine
     restart: unless-stopped
     links:
       - api1
+    volumes:
+      - ./:/var/www
+      - ./nginx-staging/api1/logs:/var/log/nginx
+      - ./nginx-staging/api1:/etc/nginx/conf.d
+  
+  api2-nginx:
+    image: nginx:1.17-alpine
+    restart: unless-stopped
+    links:
       - api2
+    volumes:
+      - ./:/var/www
+      - ./nginx-staging/api2/logs:/var/log/nginx
+      - ./nginx-staging/api2:/etc/nginx/conf.d
+
+  lb-nginx:
+    image: nginx:1.17-alpine
+    restart: unless-stopped
     ports:
       - 8000:80
     volumes:
       - ./:/var/www
-      - ./nginx-staging/logs:/var/log/nginx
-      - ./nginx-staging:/etc/nginx/conf.d
+      - ./nginx-staging/lb/logs:/var/log/nginx
+      - ./nginx-staging/lb:/etc/nginx/conf.d
       
   redis:
     image: redis:3.0
