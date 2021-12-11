@@ -17,6 +17,7 @@ class NotifyTipping implements ShouldQueue
     public $tipper;
     public $tippee;
     public $amount_in_flk;
+    public $revenue;
     /**
      * Create a new job instance.
      *
@@ -27,6 +28,7 @@ class NotifyTipping implements ShouldQueue
         $this->tipper = $data['tipper'];
         $this->tippee = $data['tippee'];
         $this->amount_in_flk = $data['amount_in_flk'];
+        $this->revenue = $data['revenue'];
     }
 
     /**
@@ -36,12 +38,12 @@ class NotifyTipping implements ShouldQueue
      */
     public function handle()
     {
-        $message = "@{$tipper->username} just tipped you {$this->amount_in_flk} FLK";
+        $message = "@{$this->tipper->username} just tipped you {$this->amount_in_flk} FLK";
         // TO DO: send push notification to user
         $this->tippee->notifications()->create([
             'message' => $message,
-            'notificable_type' => 'wallet',
-            'notificable_id' => $this->tippee->wallet->id,
+            'notificable_type' => 'revenue',
+            'notificable_id' => $this->revenue->id,
         ]);
         // TO DO: notify the user they have been tipped
         $client = new Client;
@@ -60,8 +62,8 @@ class NotifyTipping implements ShouldQueue
                     ],
                     'data' => [
                         'message' => $message,
-                        'notificable_type' => 'wallet',
-                        'notificable_id' => $this->tippee->wallet->id,
+                        'notificable_type' => 'revenue',
+                        'notificable_id' => $this->revenue->id,
                     ],
                 ],
             ]);

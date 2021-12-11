@@ -1280,7 +1280,7 @@ class ContentController extends Controller
             }
 
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = '';
+                $user_id = null;
             } else {
                 $user_id = $request->user()->id;
             }

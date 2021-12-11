@@ -1032,7 +1032,7 @@ class UserController extends Controller
                 $platform_charge = Constants::NON_PROFIT_CREATOR_CHARGE;
             }
             $creator_share = bcmul($amount_in_dollars, 100 - $platform_charge, 6);
-            $userToTip->revenues()->create([
+            $revenue = $userToTip->revenues()->create([
                 'revenueable_type' => 'user',
                 'revenueable_id' => $userToTip->id,
                 'amount' => $amount_in_dollars,
@@ -1047,6 +1047,7 @@ class UserController extends Controller
                 'tipper' => $request->user(),
                 'tippee' => $userToTip,
                 'amount_in_flk' => $request->amount_in_flk,
+                'revenue' => $revenue,
             ]);
             return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {
