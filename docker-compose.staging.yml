@@ -105,6 +105,8 @@ services:
   api1-nginx:
     image: nginx:1.17-alpine
     restart: unless-stopped
+    ports:
+     - 8000:80
     links:
       - api1
     volumes:
@@ -115,6 +117,8 @@ services:
   api2-nginx:
     image: nginx:1.17-alpine
     restart: unless-stopped
+    ports:
+     - 8001:80
     links:
       - api2
     volumes:
@@ -125,6 +129,8 @@ services:
   api3-nginx:
     image: nginx:1.17-alpine
     restart: unless-stopped
+    ports:
+     - 8002:80
     links:
       - api3
     volumes:
@@ -135,6 +141,8 @@ services:
   api4-nginx:
     image: nginx:1.17-alpine
     restart: unless-stopped
+    ports:
+     - 8003:80
     links:
       - api4
     volumes:
@@ -142,15 +150,15 @@ services:
       - ./nginx-staging/api4/logs:/var/log/nginx
       - ./nginx-staging/api4:/etc/nginx/conf.d
 
-  lb-nginx:
-    image: nginx:1.17-alpine
-    restart: unless-stopped
-    ports:
-      - 8000:80
-    volumes:
-      - ./:/var/www
-      - ./nginx-staging/lb/logs:/var/log/nginx
-      - ./nginx-staging/lb:/etc/nginx/conf.d
+  #lb-nginx:
+   # image: nginx:1.17-alpine
+    #restart: unless-stopped
+    #ports:
+     # - 8000:80
+    #volumes:
+     # - ./:/var/www
+     # - ./nginx-staging/lb/logs:/var/log/nginx
+     # - ./nginx-staging/lb:/etc/nginx/conf.d
       
   redis:
     image: redis:3.0
