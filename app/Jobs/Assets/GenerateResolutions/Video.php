@@ -49,7 +49,9 @@ class Video implements ShouldQueue
     public function handle()
     {
         set_time_limit($this->timeout);
-        $ffmpeg =  FFMpeg::create();
+        $ffmpeg =  FFMpeg::create([
+            'timeout'          => 7200,
+        ]);
         $resource = $ffmpeg->open($this->filepath);
         $localTempFolder = join_path(storage_path(), '/app/hls', $this->asset->id, 'video');
         $hlsKeyName = $this->filename . '.key';
@@ -150,7 +152,6 @@ class Video implements ShouldQueue
     public function failed(\Throwable $exception)
     {
         unlink($this->filepath);
-        Log::error($this->timeout);
         Log::error($exception);
     }
 }
