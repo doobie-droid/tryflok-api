@@ -150,6 +150,7 @@ class Video implements ShouldQueue
     public function failed(\Throwable $exception)
     {
         unlink($this->filepath);
+        Log::error($this->timeout);
         Log::error($exception);
     }
 }
