@@ -47,6 +47,7 @@ class Video implements ShouldQueue
      */
     public function handle()
     {
+        set_time_limit($this->timeout);
         $ffmpeg =  FFMpeg::create();
         $resource = $ffmpeg->open($this->filepath);
         $localTempFolder = join_path(storage_path(), '/app/hls', $this->asset->id, 'video');
