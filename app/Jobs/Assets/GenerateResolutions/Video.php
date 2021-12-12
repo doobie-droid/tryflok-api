@@ -25,6 +25,7 @@ class Video implements ShouldQueue
     public $ext;
     public $full_file_name;
     public $timeout = 7200;
+    public $idleTimeout = 7200;
     /**
      * Create a new job instance.
      *
