@@ -26,6 +26,7 @@ class Video implements ShouldQueue
     public $full_file_name;
     public $resolutions;
     public $hls_key_filepath;
+    public $timeout = 3600;
     /**
      * Create a new job instance.
      *
@@ -90,6 +91,13 @@ class Video implements ShouldQueue
                 Storage::disk('private_s3')->put($fullFilename, file_get_contents($tsPath));
                 unlink($tsPath);
             }
+        }
+
+        $this->asset->processing_complete = 1;
+        $this->asset->save();
+        $content = $this->asset->contents()->first();
+        if (! is_null($content)) {
+            
         }
     }
 

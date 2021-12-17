@@ -38,7 +38,6 @@ class ContentController extends Controller
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
                 'type' => ['required', 'string', 'regex:(pdf|audio|video|newsletter|live-audio|live-video)'],
                 'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
-                'is_available' => ['required', 'integer', 'min:0', 'max:1'],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
             ]);
 
@@ -80,7 +79,7 @@ class ContentController extends Controller
                 'description' => $request->description,
                 'user_id' => $user->id,
                 'type' => $request->type,
-                'is_available' => $request->is_available,
+                'is_available' => 1,
                 'approved_by_admin' => 0,
                 'show_only_in_digiverses' => 1,
                 'live_status' => 'inactive',
@@ -1280,7 +1279,7 @@ class ContentController extends Controller
             }
 
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = '';
+                $user_id = null;
             } else {
                 $user_id = $request->user()->id;
             }

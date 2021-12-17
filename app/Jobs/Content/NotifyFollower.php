@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class NotifyFollower implements ShouldQueue
 {
@@ -68,5 +69,10 @@ class NotifyFollower implements ShouldQueue
                 ],
             ]);
         }
+    }
+
+    public function failed(\Throwable $exception)
+    {
+        Log::error($exception);
     }
 }

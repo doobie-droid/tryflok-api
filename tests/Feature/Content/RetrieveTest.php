@@ -546,6 +546,9 @@ class RetrieveTest extends TestCase
     {
         $user = User::factory()->create();
         $content3 = Content::factory()
+        ->state([
+            'created_at' => now()->subMinutes(3),
+        ])
         ->has(View::factory()->count(100))
         ->hasAttached(
             Asset::factory()->audio()->count(1),
@@ -570,6 +573,9 @@ class RetrieveTest extends TestCase
         ->create();
 
         $content4 = Content::factory()
+        ->state([
+            'created_at' => now(),
+        ])
         ->has(View::factory()->count(100))
         ->hasAttached(
             Asset::factory()->audio()->count(1),
@@ -598,6 +604,9 @@ class RetrieveTest extends TestCase
         $content1_reviews = 5;
         $content1_revnues = 10;
         $content1 = Content::factory()
+        ->state([
+            'created_at' => now()->subMinutes(7),
+        ])
         ->has(View::factory()->count($content1_views))
         ->has(Revenue::factory()->count($content1_revnues))
         ->has(Review::factory()->count($content1_reviews))
@@ -628,6 +637,9 @@ class RetrieveTest extends TestCase
         $content2_reviews = 2;
         $content2_revnues = 3;
         $content2 = Content::factory()
+        ->state([
+            'created_at' => now()->subMinutes(5),
+        ])
         ->has(View::factory()->count($content2_views))
         ->has(Revenue::factory()->count($content2_revnues))
         ->has(Review::factory()->count($content2_reviews))

@@ -61,6 +61,9 @@ class TippingTest extends TestCase
         ->create();
         $wallet_initial_balance = $wallet->balance;
         $user2 = User::factory()->create();
+        Wallet::factory()
+        ->for($user2, 'walletable')
+        ->create();
         
 
         $this->be($user1);

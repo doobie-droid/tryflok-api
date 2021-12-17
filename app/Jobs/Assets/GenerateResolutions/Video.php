@@ -24,7 +24,8 @@ class Video implements ShouldQueue
     public $filename;
     public $ext;
     public $full_file_name;
-    public $timeout = 300;
+    public $timeout = 7200;
+    public $idleTimeout = 7200;
     /**
      * Create a new job instance.
      *
@@ -47,7 +48,10 @@ class Video implements ShouldQueue
      */
     public function handle()
     {
-        $ffmpeg =  FFMpeg::create();
+        set_time_limit($this->timeout);
+        $ffmpeg =  FFMpeg::create([
+            'timeout'          => 7200,
+        ]);
         $resource = $ffmpeg->open($this->filepath);
         $localTempFolder = join_path(storage_path(), '/app/hls', $this->asset->id, 'video');
         $hlsKeyName = $this->filename . '.key';

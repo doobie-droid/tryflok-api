@@ -1,0 +1,55 @@
+version: "3.3"
+services:
+  api:
+    build: 
+      args:
+        user: flok
+        uid: 1000
+      context: ./
+    ports:
+      - 8080:8080 # for websocket
+    environment:
+      - WAIT_HOSTS=mysql:3306
+      - WAIT_HOSTS_TIMEOUT=7200
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+      - TZ=Africa/Lagos
+    links:
+      - redis
+    volumes:
+      - ./:/var/www
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
+    command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+
+  cron:
+    build:
+      context: ./
+      dockerfile: Dockerfile.cron
+    volumes:
+      - ./:/var/www
+      - ./cron/logs:/var/log/cron
+    links:
+      - redis
+    environment:
+      - WAIT_HOSTS=mysql:3306
+      - WAIT_HOSTS_TIMEOUT=3600
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+      - TZ=Africa/Lagos
+
+  nginx:
+    image: nginx:1.17-alpine
+    restart: unless-stopped
+    ports:
+     - 8000:80
+    links:
+      - api
+    volumes:
+      - ./:/var/www
+      - ./nginx-staging/logs:/var/log/nginx
+      - ./nginx-staging:/etc/nginx/conf.d
+      
+  redis:
+    image: redis:3.0

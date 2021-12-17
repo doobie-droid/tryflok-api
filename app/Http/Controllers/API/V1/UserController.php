@@ -9,6 +9,7 @@ use App\Http\Resources\NotificationResource;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceWithSensitive;
 use App\Jobs\Payment\Payout as PayoutToCreatorJob;
+use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\Content;
@@ -1031,7 +1032,7 @@ class UserController extends Controller
                 $platform_charge = Constants::NON_PROFIT_CREATOR_CHARGE;
             }
             $creator_share = bcmul($amount_in_dollars, 100 - $platform_charge, 6);
-            $userToTip->revenues()->create([
+            $revenue = $userToTip->revenues()->create([
                 'revenueable_type' => 'user',
                 'revenueable_id' => $userToTip->id,
                 'amount' => $amount_in_dollars,
@@ -1042,6 +1043,12 @@ class UserController extends Controller
                 'revenue_from' => 'tip',
             ]);
 
+            NotifyTippingJob::dispatch([
+                'tipper' => $request->user(),
+                'tippee' => $userToTip,
+                'amount_in_flk' => $request->amount_in_flk,
+                'revenue' => $revenue,
+            ]);
             return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
