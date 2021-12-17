@@ -79,7 +79,7 @@ class ContentController extends Controller
                 'description' => $request->description,
                 'user_id' => $user->id,
                 'type' => $request->type,
-                'is_available' => 0,
+                'is_available' => 1,
                 'approved_by_admin' => 0,
                 'show_only_in_digiverses' => 1,
                 'live_status' => 'inactive',
