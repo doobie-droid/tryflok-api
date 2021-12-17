@@ -44,6 +44,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::get('languages', function () {
         return response()->json([
             'message' => 'Languages retrieved successfully',
+            'status' => true,
+            'status_code' => 200,
             'data' => [
                 'languages' => Cache::rememberForever('request:languages', function () {
                     return Language::orderBy('name')->get();
@@ -55,6 +57,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::get('countries', function () {
         return response()->json([
             'message' => 'Countries retrieved successfully',
+            'status' => true,
+            'status_code' => 200,
             'data' => [
                 'countries' => Cache::rememberForever('request:countries', function () {
                     return Country::orderBy('name')->get();
@@ -66,6 +70,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::get('continents', function () {
         return response()->json([
             'message' => 'Continents retrieved successfully',
+            'status' => true,
+            'status_code' => 200,
             'data' => [
                 'continents' => Cache::rememberForever('request:continents', function () {
                     return Continent::orderBy('name')->get();
@@ -85,6 +91,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         $categories = Category::where('name', 'LIKE', "%{$search}%")->orderBy('name')->paginate($limit, ['*'], 'page', $page);
         return response()->json([
             'message' => 'Categories retrieved successfully',
+            'status' => true,
+            'status_code' => 200,
             'data' => [
                 'categories' => CategoryResource::collection($categories),
                 'current_page' => (int) $categories->currentPage(),
@@ -105,6 +113,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         $tags = Tag::where('name', 'LIKE', "%{$search}%")->orderBy('name')->paginate($limit, ['*'], 'page', $page);
         return response()->json([
             'message' => 'Tags retrieved successfully',
+            'status' => true,
+            'status_code' => 200,
             'data' => [
                 'categories' => TagResource::collection($tags),
                 'current_page' => (int) $tags->currentPage(),
