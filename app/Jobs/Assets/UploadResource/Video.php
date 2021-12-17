@@ -92,6 +92,13 @@ class Video implements ShouldQueue
                 unlink($tsPath);
             }
         }
+
+        $this->asset->processing_complete = 1;
+        $this->asset->save();
+        $content = $this->asset->contents()->first();
+        if (! is_null($content)) {
+            
+        }
     }
 
     public function failed(\Throwable $exception)
