@@ -24,6 +24,7 @@
         "predis/predis": "^1.1",
         "spatie/laravel-permission": "^4.0",
         "stripe/stripe-php": "^7.83",
+        "textalk/websocket": "^1.5",
         "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {
