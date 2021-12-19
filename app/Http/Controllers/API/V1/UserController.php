@@ -1042,12 +1042,12 @@ class UserController extends Controller
             $request->user()->wallet->balance = $newWalletBalance;
             $request->user()->wallet->save();
 
-            $platform_share = bcmul($amount_in_dollars, Constants::NORMAL_CREATOR_CHARGE, 6);
-            $platform_charge = Constants::NORMAL_CREATOR_CHARGE;
+            $platform_charge = Constants::TIPPING_CHARGE;
             if ($userToTip->user_charge_type === 'non-profit') {
-                $platform_charge = Constants::NON_PROFIT_CREATOR_CHARGE;
+                $platform_charge = Constants::TIPPING_CHARGE;
             }
-            $creator_share = bcmul($amount_in_dollars, 100 - $platform_charge, 6);
+            $platform_share = bcmul($amount_in_dollars, $platform_charge, 6);
+            $creator_share = bcmul($amount_in_dollars, 1 - $platform_charge, 6);
             $revenue = $userToTip->revenues()->create([
                 'revenueable_type' => 'user',
                 'revenueable_id' => $userToTip->id,

@@ -99,9 +99,9 @@ class TippingTest extends TestCase
             'paymentable_id' => $wallet->transactions()->first()->id,
         ]);
 
-        $platform_share = bcmul($amount_in_dollars, Constants::NORMAL_CREATOR_CHARGE, 6);
-        $platform_charge = Constants::NORMAL_CREATOR_CHARGE;
-        $creator_share = bcmul($amount_in_dollars, 100 - $platform_charge, 6);
+        $platform_share = bcmul($amount_in_dollars, Constants::TIPPING_CHARGE, 6);
+        $platform_charge = Constants::TIPPING_CHARGE;
+        $creator_share = bcmul($amount_in_dollars, 1 - $platform_charge, 6);
         $this->assertDatabaseHas('revenues', [
             'revenueable_type' => 'user',
             'revenueable_id' => $user2->id,
