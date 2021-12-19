@@ -77,6 +77,11 @@ class CollectionController extends Controller
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 },
+            ])
+            ->withCount([
+                'subscriptions' => function ($query) {
+                    $query->where('status', 'active');
+                },
             ])->withAvg([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -115,6 +120,11 @@ class CollectionController extends Controller
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
+                },
+            ])
+            ->withCount([
+                'subscriptions' => function ($query) {
+                    $query->where('status', 'active');
                 },
             ])->withAvg([
                 'ratings' => function ($query) {
@@ -163,6 +173,11 @@ class CollectionController extends Controller
             $user = $request->user();
             $digiverse = Collection::where('id', $id)
             ->with('prices', 'cover', 'owner', 'tags')
+            ->withCount([
+                'subscriptions' => function ($query) {
+                    $query->where('status', 'active');
+                },
+            ])
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -316,6 +331,11 @@ class CollectionController extends Controller
 
             $digiverses = $digiverses
             ->withCount([
+                'subscriptions' => function ($query) {
+                    $query->where('status', 'active');
+                },
+            ])
+            ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
                 },
@@ -416,6 +436,11 @@ class CollectionController extends Controller
             }
 
             $digiverses = $digiverses
+            ->withCount([
+                'subscriptions' => function ($query) {
+                    $query->where('status', 'active');
+                },
+            ])
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
