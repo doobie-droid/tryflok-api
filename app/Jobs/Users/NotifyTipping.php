@@ -45,7 +45,7 @@ class NotifyTipping implements ShouldQueue
             'notificable_type' => 'revenue',
             'notificable_id' => $this->revenue->id,
         ]);
-        // TO DO: notify the user they have been tipped
+        // send push notification
         $client = new Client;
         $url = 'https://fcm.googleapis.com/fcm/send';
         $authorization_key = config('services.google.fcm_server_key');
