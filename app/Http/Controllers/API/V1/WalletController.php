@@ -95,12 +95,12 @@ class WalletController extends Controller
                             return $this->respondBadRequest('Product ID supplied [' . $request->provider_response['product_id'] . '] is not same that was paid for [' . $req->receipt->in_app[0]->product_id . '].');
                         }
                         $product_ids_to_amount = [
-                            '250_flk' => 3,
-                            '500_flk' => 6,
-                            '1000_flk' => 12,
-                            '3000_flk' => 36,
-                            '5000_flk' => 60,
-                            '10000_flk' => 120,
+                            '250_flc' => 3,
+                            '500_flc' => 6,
+                            '1000_flc' => 12,
+                            '3000_flc' => 36,
+                            '5000_flc' => 60,
+                            '10000_flc' => 120,
                         ];
                         $ekc_to_dollar = bcadd(1, bcdiv((30), 100 - 30), 2);
                         $amount_in_dollars = $product_ids_to_amount[$request->provider_response['product_id']];
