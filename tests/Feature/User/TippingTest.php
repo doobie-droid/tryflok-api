@@ -35,8 +35,8 @@ class TippingTest extends TestCase
             'status' => false,
             'message' => 'Invalid or missing input fields',
             'errors' => [
-                'user_id' => [
-                    'The selected user id is invalid.',
+                'id' => [
+                    'The selected id is invalid.',
                 ],
             ],
         ]);
@@ -61,9 +61,10 @@ class TippingTest extends TestCase
         ->create();
         $wallet_initial_balance = $wallet->balance;
         $user2 = User::factory()->create();
-        Wallet::factory()
+        $wallet2 = Wallet::factory()
         ->for($user2, 'walletable')
         ->create();
+        $wallet2_initial_balance = $wallet2->balance;
         
 
         $this->be($user1);
@@ -85,7 +86,6 @@ class TippingTest extends TestCase
             'amount' => $amount,
             'balance' => $wallet_initial_balance - $amount,
             'transaction_type' => 'deduct',
-            'details' => 'Deduct from wallet to tip a user',
         ]);
 
         $this->assertDatabaseHas('payments', [
@@ -111,6 +111,21 @@ class TippingTest extends TestCase
             'benefactor_share' => $creator_share,
             'referral_bonus' => 0,
             'revenue_from' => 'tip',
+            'added_to_payout' => 1,
+        ]);
+
+        $creator_share_in_flk = $creator_share * 100;
+        $this->assertDatabaseHas('wallets', [
+            'walletable_type' => 'user',
+            'walletable_id' => $user2->id,
+            'balance' => bcadd($wallet2_initial_balance, $creator_share_in_flk, 0),
+        ]);
+
+        $this->assertDatabaseHas('wallet_transactions', [
+            'wallet_id' => $user2->wallet->id,
+            'amount' => $creator_share_in_flk,
+            'balance' => bcadd($wallet2_initial_balance, $creator_share_in_flk, 0),
+            'transaction_type' => 'fund',
         ]);
     }
 }

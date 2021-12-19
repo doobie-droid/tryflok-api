@@ -1075,7 +1075,7 @@ class UserController extends Controller
             NotifyTippingJob::dispatch([
                 'tipper' => $request->user(),
                 'tippee' => $userToTip,
-                'amount_in_flk' => $request->amount_in_flk,
+                'amount_in_flk' => $creator_share_in_flk,
                 'revenue' => $revenue,
             ]);
             return $this->respondWithSuccess('User has been tipped successfully');

@@ -38,7 +38,7 @@ class NotifyTipping implements ShouldQueue
      */
     public function handle()
     {
-        $message = "@{$this->tipper->username} just tipped you {$this->amount_in_flk} FLK";
+        $message = "@{$this->tipper->username} just gifted you {$this->amount_in_flk} Flok Cowries";
         // TO DO: send push notification to user
         $this->tippee->notifications()->create([
             'message' => $message,
