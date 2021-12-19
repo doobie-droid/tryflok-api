@@ -149,6 +149,10 @@ class UserController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
+            if ($id === $request->user()->id) {
+                return $this->respondBadRequest("You cannot follow yourself");
+            }
+
             $user = User::where('id', $id)->first();
             $user->followers()->syncWithoutDetaching([
                 $request->user()->id => [
@@ -193,6 +197,10 @@ class UserController extends Controller
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if ($id === $request->user()->id) {
+                return $this->respondBadRequest("You cannot unfollow yourself");
             }
 
             $user = User::where('id', $id)->first();
@@ -993,23 +1001,27 @@ class UserController extends Controller
         }
     }
 
-    public function tipUser(Request $request, $user_id)
+    public function tipUser(Request $request, $id)
     {
         try {
-            $validator = Validator::make(array_merge($request->all(), ['user_id' => $user_id]), [
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'amount_in_flk' => ['required', 'numeric', 'min:100', 'max:1000000'],
-                'user_id' => ['required', 'string', 'exists:users,id'],
+                'id' => ['required', 'string', 'exists:users,id'],
             ]);
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
+            if ($id === $request->user()->id) {
+                return $this->respondBadRequest("You cannot tip yourself");
+            }
+
             if ((float) $request->user()->wallet->balance < (float) $request->amount_in_flk) {
                 return $this->respondBadRequest("You do not have enough Flok cowries to send {$request->amount_in_flk} FLK");
             }
 
-            $userToTip = User::where('id', $user_id)->first();
+            $userToTip = User::where('id', $id)->first();
             $amount_in_dollars = bcdiv($request->amount_in_flk, 100, 6);
             $newWalletBalance = bcsub($request->user()->wallet->balance, $request->amount_in_flk, 2);
             $transaction = WalletTransaction::create([

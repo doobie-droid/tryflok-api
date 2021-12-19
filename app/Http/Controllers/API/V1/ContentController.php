@@ -153,7 +153,7 @@ class ContentController extends Controller
             ->withCount('subscribers')
             ->withCount('views')
             ->with('metas')
-            ->with('collections')
+            ->with('collections', 'collections.prices')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -201,7 +201,7 @@ class ContentController extends Controller
             ->withCount('subscribers')
             ->withCount('views')
             ->with('metas')
-            ->with('collections')
+            ->with('collections', 'collections.prices')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
@@ -475,7 +475,7 @@ class ContentController extends Controller
 
             $content = Content::where('id', $id)
             ->with('prices', 'cover', 'owner', 'tags')
-            ->with('collections')
+            ->with('collections', 'collections.prices')
             ->withCount('subscribers')
             ->withCount('views')
             ->withCount([
@@ -623,7 +623,7 @@ class ContentController extends Controller
 
             $contents = $contents
             ->withCount('subscribers')
-            ->with('collections')
+            ->with('collections', 'collections.prices')
             ->withCount('views')
             ->with('metas')
             ->withCount([
@@ -788,7 +788,7 @@ class ContentController extends Controller
             ->withCount('subscribers')
             ->withCount('views')
             ->with('metas')
-            ->with('collections')
+            ->with('collections', 'collections.prices')
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);
