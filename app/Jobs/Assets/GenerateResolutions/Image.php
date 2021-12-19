@@ -129,19 +129,13 @@ class Image implements ShouldQueue
                 imagegif($image, $destination);
                 break;
             case 'image/png':
-                $pngQuality = 9 - bcdiv($quality, 100, 0);
-                list($width, $height) = $imageInfo;
-                $targetImage = imagecreatetruecolor($width, $height);   
-                imagealphablending($targetImage, false); 
-                imagesavealpha($targetImage, true);
-                $transparent = imagecolorallocatealpha($targetImage, 255, 255, 255, 127);
-                imagefilledrectangle($targetImage, 0, 0, $width, $height, $transparent);
-                imagecopyresampled($targetImage, $image, 
-                    0, 0, 
-                    0, 0, 
-                    $width, $height, 
-                    $width, $height );
-                imagepng($targetImage, $destination, $pngQuality);
+                $pngQuality = abs(9 - bcdiv($quality, 10, 0)); 
+                $im = new \Imagick($this->filepath); 
+                $im->setImageFormat('PNG8');
+                $colors = min(255, $im->getImageColors());
+                $im->quantizeImage($colors, \Imagick::COLORSPACE_RGB, 0, false, false);
+                $im->setImageDepth(16);
+                $im->writeImage($destination);
                 break;
             default:
                 imagejpeg($image, $destination, $quality);
