@@ -9,6 +9,7 @@ use App\Jobs\Payment\Purchase as PurchaseJob;
 use App\Jobs\Payment\Stripe\Purchase as StripePurchaseHandler;
 use App\Models\Content;
 use App\Models\Collection;
+use App\Models\Price;
 use App\Services\Payment\Payment as PaymentProvider;
 use App\Services\Payment\Providers\Flutterwave\Flutterwave;
 use Illuminate\Http\Request;
@@ -165,7 +166,7 @@ class PaymentController extends Controller
                 'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
                 'items.*.price' => ['required',],
                 'items.*.price.amount' => ['required', 'numeric', 'min:0', 'max:0'],
-                'items.*.price.id' => ['required', 'string',],
+                'items.*.price.id' => ['required', 'string', 'exists:prices,id'],
                 'items.*.price.interval' => ['required', 'string', 'regex:(monthly|one-off)',],
                 'items.*.price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer',],
             ]);
@@ -176,20 +177,21 @@ class PaymentController extends Controller
             //check that Item is actually free. That means it's collection will also be free if it is a content
             $itemsThatCanBeAddedForFree = [];
             foreach ($request->items as $item) {
-                if ($item['type'] === 'content') {
+                if ($item['type'] == 'content') {
                     $itemModel = Content::where('id', $item['id'])->first();
                     if (! is_null($itemModel)) {
                         $digivierse = $itemModel->collections()->first();
                         $digiversePrice = $digivierse->prices()->first();
-                        $itemPrice = $itemModel->prices()->first();
-                        if ($digiversePrice->amount === 0 && $itemPrice->amount === 0) {
+                        $itemPrice = $itemModel->prices()->where('id', $item['price']['id'])->first();
+                        if (! is_null($itemPrice) && ! is_null($digiversePrice) && $digiversePrice->amount === 0 && $itemPrice->amount === 0) {
                             $itemsThatCanBeAddedForFree[] = $item;
                         }
                     }
                 } else {
                     $itemModel = Collection::where('id', $item['id'])->first();
                     $itemPrice = $itemModel->prices()->first();
-                    if ($itemPrice->amount === 0) {
+                    $itemPrice = $itemModel->prices()->where('id', $item['price']['id'])->first();
+                    if (! is_null($itemPrice) && $itemPrice->amount == 0) {
                         $itemsThatCanBeAddedForFree[] = $item;
                     }
                 }
