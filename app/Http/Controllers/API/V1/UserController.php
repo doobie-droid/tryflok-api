@@ -1029,7 +1029,7 @@ class UserController extends Controller
                 'amount' => $request->amount_in_flk,
                 'balance' => $newWalletBalance,
                 'transaction_type' => 'deduct',
-                'details' => 'Deduct from wallet to tip a user',
+                'details' => "You gifted @{$userToTip->username} {$request->amount_in_flk} Flok Cowries",
             ]);
             $transaction->payments()->create([
                 'payer_id' => $request->user()->id,
@@ -1057,7 +1057,20 @@ class UserController extends Controller
                 'benefactor_share' => $creator_share,
                 'referral_bonus' => 0,
                 'revenue_from' => 'tip',
+                'added_to_payout' => 1,
             ]);
+
+            $creator_share_in_flk = $creator_share * 100;
+            $newWalletBalance = bcadd($userToTip->wallet->balance, $creator_share_in_flk, 2);
+            $transaction = WalletTransaction::create([
+                'wallet_id' => $userToTip->wallet->id,
+                'amount' => $creator_share_in_flk,
+                'balance' => $newWalletBalance,
+                'transaction_type' => 'fund',
+                'details' => "@{$request->user()->username} gifted you {$creator_share_in_flk} Flok Cowries",
+            ]);
+            $userToTip->wallet->balance = $newWalletBalance;
+            $userToTip->wallet->save();
 
             NotifyTippingJob::dispatch([
                 'tipper' => $request->user(),
