@@ -82,11 +82,11 @@ class AuthController extends Controller
             $validator = Validator::make($request->all(), [
                 'name' => ['required_if:provider,google', 'string', 'max:255'],
                 'email' => ['required_if:provider,google', 'string', 'email', 'max:255',],
-                'provider' => ['required', 'string', 'regex:(google|apple)',],
+                'provider' => ['required', 'string', 'regex:(google|apple|google-web)',],
                 'referral_id' => ['sometimes', 'nullable','string', 'exists:users,referral_id',],
                 'id_token' => ['required_if:provider,google,apple', 'string',],
                 'sign_in_type' => ['required', 'string', 'regex:(register|login)',],
-                'sign_in_source' => ['required_if:provider,google', 'string', 'regex:(ios|android)',],
+                'sign_in_source' => ['required_if:provider,google', 'string', 'regex:(ios|android|web)',],
                 'firebase_token' => ['sometimes', 'nullable','string',],
             ]);
 
@@ -103,7 +103,14 @@ class AuthController extends Controller
                 case 'google':
                     $iosAppClientId = config('services.google.ios_client_id');
                     $androidAppClientId = config('services.google.android_client_id');
-                    $client_id = $request->sign_in_source == 'ios' ? $iosAppClientId : $androidAppClientId;
+                    $webClientId = config('services.google.web_client_id');
+                    if ($request->sign_in_source == 'ios') {
+                        $client_id = $iosAppClientId;
+                    } else if ($request->sign_in_source == 'android') {
+                        $client_id = $androidAppClientId;
+                    } else {
+                        $client_id = $webClientId;
+                    }
                     $client = new \Google_Client(['client_id' => $client_id ]);
                     $payload = $client->verifyIdToken($request->id_token);
                     if ($payload) {

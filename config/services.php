@@ -40,6 +40,7 @@ return [
     'google' => [
         'ios_client_id' => env('GOOGLE_IOS_CLIENT_ID'),
         'android_client_id' => env('GOOGLE_ANDROID_CLIENT_ID'),
+        'web_client_id' => env('GOOGLE_WEB_CLIENT_ID'),
         'fcm_server_key' => env('FCM_SERVER_KEY'),
     ],
 
