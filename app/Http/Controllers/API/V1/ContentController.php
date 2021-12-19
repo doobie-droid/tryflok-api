@@ -1113,7 +1113,7 @@ class ContentController extends Controller
                 'rtc_token' => $rtc_token->value,
                 'rtm_token' => $rtm_token->value,
                 'channel_name' => $channel->value,
-                'uid' => (int)$uid,
+                'uid' => (int) $uid,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);

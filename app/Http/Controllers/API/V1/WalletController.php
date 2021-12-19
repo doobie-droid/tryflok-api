@@ -209,7 +209,7 @@ class WalletController extends Controller
                 $limit = Constants::MAX_ITEMS_LIMIT;
             }
 
-            $transactions = $request->user()->wallet->transactions()->orderBy('created_at', 'asc')->paginate($limit, ['*'], 'page', $page);
+            $transactions = $request->user()->wallet->transactions()->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Transactions retrieved successfully', [
                 'transactions' => $transactions,
