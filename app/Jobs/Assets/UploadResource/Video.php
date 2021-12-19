@@ -103,6 +103,7 @@ class Video implements ShouldQueue
 
     public function failed(\Throwable $exception)
     {
+        Log::error($exception);
         unlink($this->filepath);
         unlink($this->hls_key_filepath);
         foreach ($this->ts_files as $filepath) {
@@ -114,6 +115,5 @@ class Video implements ShouldQueue
                 unlink($filepath);
             }
         }
-        Log::error($exception);
     }
 }

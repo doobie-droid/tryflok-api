@@ -54,7 +54,7 @@ class AssetController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'files.*' => ['required', 'image', 'max:10240'], //10MB
+                'files.*' => ['required', 'image', 'max:5120'], //5MB
             ]);
 
             if ($validator->fails()) {

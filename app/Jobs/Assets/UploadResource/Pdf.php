@@ -49,7 +49,7 @@ class Pdf implements ShouldQueue
 
     public function failed(\Throwable $exception)
     {
-        unlink($this->filepath);
         Log::error($exception);
+        unlink($this->filepath);
     }
 }
