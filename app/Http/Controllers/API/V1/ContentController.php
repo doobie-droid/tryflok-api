@@ -6,9 +6,11 @@ use App\Constants\Constants;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ContentIssueResource;
 use App\Http\Resources\ContentResource;
+use App\Jobs\Assets\UploadResource\Html as UploadHtmlJob;
 use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJob;
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
+use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
 use App\Models\ContentIssue;
@@ -39,6 +41,7 @@ class ContentController extends Controller
                 'type' => ['required', 'string', 'regex:(pdf|audio|video|newsletter|live-audio|live-video)'],
                 'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
+                'article' => ['required_if:type,newsletter', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -90,6 +93,29 @@ class ContentController extends Controller
                         'key' => 'join_count',
                         'value' => 0,
                     ],
+                ]);
+            }
+
+            if ($request->type === 'newsletter') {
+                $filename = date('Ymd') . Str::random(16);
+                $folder = join_path('assets', Str::random(16) . date('Ymd'), 'text');
+                $fullFilename = join_path($folder, $filename . '.html');
+                $url = join_path(config('services.cloudfront.public_url'), $fullFilename);
+                $asset = Asset::create([
+                    'url' => $url,
+                    'storage_provider' => 'public-s3',
+                    'storage_provider_id' => $fullFilename,
+                    'asset_type' => 'text',
+                    'mime_type' => 'text/html',
+                ]);
+                $content->assets()->attach($asset->id, [
+                    'id' => Str::uuid(),
+                    'purpose' => 'content-asset',
+                ]);
+                
+                UploadHtmlJob::dispatch([
+                    'article' => $request->article,
+                    'full_file_name' => $fullFilename,
                 ]);
             }
 
@@ -171,6 +197,7 @@ class ContentController extends Controller
                 'tags.*.action' => ['required', 'string', 'regex:(add|remove)'],
                 'is_available' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
+                'article' => ['sometimes', 'nullable', 'string'],
             ]);
 
             if ($validator1->fails()) {
@@ -277,6 +304,12 @@ class ContentController extends Controller
                     $price->amount = $request->price['amount'];
                     $price->save();
                 }
+            }
+
+            if (! is_null($request->article) && $content->type === 'newsletter') {
+                $oldArticle = $content->assets()->first();
+                $oldArticle->url = $request->article;
+                $oldArticle->save();
             }
 
             return $this->respondWithSuccess('Content has been updated successfully', [
