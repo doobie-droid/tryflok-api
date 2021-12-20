@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Users;
 
+use App\Mail\User\TippedMail;
 use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,6 +10,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class NotifyTipping implements ShouldQueue
 {
@@ -67,7 +69,10 @@ class NotifyTipping implements ShouldQueue
                 ],
             ]);
         }
-        // TO DO: mail the user they have been tipped
+        Mail::to($this->tippee)->send(new TippedMail([
+            'user' => $this->tippee,
+            'message' => $message,
+        ]));
     }
 
     public function failed(\Throwable $exception)

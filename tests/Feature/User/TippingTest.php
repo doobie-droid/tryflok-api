@@ -3,13 +3,15 @@
 namespace Tests\Feature\User;
 
 use App\Constants\Constants;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
+use App\Mail\User\TippedMail;
 use App\Models\User;
 use App\Models\Userable;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Mail;
+use Tests\TestCase;
 
 class TippingTest extends TestCase
 {
@@ -55,6 +57,7 @@ class TippingTest extends TestCase
 
     public function test_tipping_works()
     {
+        Mail::fake();
         $user1 = User::factory()->create();
         $wallet = Wallet::factory()
         ->for($user1, 'walletable')
@@ -74,6 +77,7 @@ class TippingTest extends TestCase
             'amount_in_flk' => "{$amount}",
         ]);
         $response->assertStatus(200);
+        Mail::assertSent(TippedMail::class);
 
         $this->assertDatabaseHas('wallets', [
             'walletable_type' => 'user',

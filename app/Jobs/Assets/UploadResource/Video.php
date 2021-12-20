@@ -2,12 +2,15 @@
 
 namespace App\Jobs\Assets\UploadResource;
 
+use App\Mail\User\ContentReadyMail;
+use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class Video implements ShouldQueue
@@ -98,6 +101,34 @@ class Video implements ShouldQueue
         $content = $this->asset->contents()->first();
         if (! is_null($content)) {
             $message = "Your video content titles \"{$content->title}\" is ready for viewing.";
+
+            $client = new Client;
+            $url = 'https://fcm.googleapis.com/fcm/send';
+            $authorization_key = config('services.google.fcm_server_key');
+            foreach ($content->user->notificationTokens as $notification_token) {
+                $client->post($url, [
+                    'headers' => [
+                        'Authorization' => "key={$authorization_key}",
+                    ],
+                    'json' => [
+                        'to' => $notification_token->token,
+                        'notification' => [
+                            'title' => 'You just got tipped!',
+                            'body' => $message,
+                        ],
+                        'data' => [
+                            'message' => $message,
+                            'notificable_type' => 'content',
+                            'notificable_id' => $content->id,
+                        ],
+                    ],
+                ]);
+            }
+
+            Mail::to($content->user)->send(new ContentReadyMail([
+                'user' => $content->user,
+                'message' => $message,
+            ]));
         }
     }
 
