@@ -54,25 +54,7 @@ class ContentController extends Controller
                 return $this->respondBadRequest('You cannot to this digiverse because you do not own it');
             }
 
-            if ($request->type === 'newsletter') {
-                $digiverseNewsletterCount = $digiverse->contents()->where('type', 'newsletter')->count();
-                if ($digiverseNewsletterCount > 0) {
-                    return $this->respondBadRequest('This Digiverse already has a newsletter. Only one newsletter allowed per digiverse.');
-                }
-            }
             $user = $request->user();
-            /*if ($request->type === 'live-audio') {
-                $live_audio_count = Content::where('type', 'live-audio')->count();
-                if ($live_audio_count > 0) {
-                    return $this->respondBadRequest("You can only create one live audio");
-                }
-            }
-            if ($request->type ===  'live-video') {
-                $live_video_count = Content::where('type', 'live-video')->count();
-                if ($live_video_count > 0) {
-                    return $this->respondBadRequest("You can only create one live video");
-                }
-            }*/
 
             $content = Content::create([
                 'title' => $request->title,
