@@ -114,6 +114,7 @@ class ContentController extends Controller
                 ]);
                 
                 UploadHtmlJob::dispatch([
+                    'asset' => $asset,
                     'article' => $request->article,
                     'full_file_name' => $fullFilename,
                 ]);

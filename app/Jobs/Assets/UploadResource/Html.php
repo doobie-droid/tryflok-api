@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 class Html implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    public $asset;
     public $article;
     public $full_file_name;
     /**
@@ -23,6 +24,7 @@ class Html implements ShouldQueue
      */
     public function __construct($data)
     {
+        $this->asset = $data['asset'];
         $this->article = $data['article'];
         $this->full_file_name = $data['full_file_name'];
     }
@@ -35,6 +37,8 @@ class Html implements ShouldQueue
     public function handle()
     {
         Storage::disk('public_s3')->put($this->full_file_name, $this->article);
+        $this->asset->processing_complete = 1;
+        $this->asset->save();
     }
 
     public function failed(\Throwable $exception)

@@ -97,7 +97,7 @@ class Video implements ShouldQueue
         $this->asset->save();
         $content = $this->asset->contents()->first();
         if (! is_null($content)) {
-            
+            $message = "Your video content titles \"{$content->title}\" is ready for viewing.";
         }
     }
 
