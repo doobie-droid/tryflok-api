@@ -131,8 +131,8 @@ class Collection extends Model
             if ($this->user_id !== $user_id) {
                 $ctc = $ctc->where('is_available', 1);
             }
-            $ctc->count();
-            if ($ctc > 0) {
+            $count = $ctc->count();
+            if ($count > 0) {
                 $content_types_available[] = $content_type;
             }
         }
