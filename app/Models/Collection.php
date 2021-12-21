@@ -122,12 +122,16 @@ class Collection extends Model
         return $this->belongsToMany(Collection::class, 'collection_collection', 'child_id', 'parent_id');
     }
 
-    public function contentTypesAvailable()
+    public function contentTypesAvailable($user_id)
     {
         $all_content_types = ['pdf', 'audio', 'video', 'newsletter', 'live-audio', 'live-video'];
         $content_types_available = [];
         foreach ($all_content_types as $content_type) {
-            $ctc = $this->contents()->where('type', $content_type)->where('is_available', 1)->count();
+            $ctc = $this->contents()->where('type', $content_type);
+            if ($this->user_id !== $user_id) {
+                $ctc = $ctc->where('is_available', 1);
+            }
+            $ctc->count();
             if ($ctc > 0) {
                 $content_types_available[] = $content_type;
             }

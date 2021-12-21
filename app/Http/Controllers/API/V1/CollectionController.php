@@ -137,7 +137,7 @@ class CollectionController extends Controller
                 },
             ])
             ->first();
-            $digiverse->content_types_available = $digiverse->contentTypesAvailable();
+            $digiverse->content_types_available = $digiverse->contentTypesAvailable($user_id);
             return $this->respondWithSuccess('Digiverse retrieved successfully.', [
                 'digiverse' => new CollectionResource($digiverse),
             ]);
