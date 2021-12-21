@@ -224,6 +224,8 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('/', 'ContentController@create');
             Route::patch('{id}', 'ContentController@update');
 
+            Route::get('{id}/insights', 'ContentController@getContentInsights');
+
             Route::post('{id}/issues', 'ContentController@createIssue');
             Route::put('{id}/issues', 'ContentController@updateIssue');
             Route::patch('{id}/issues', 'ContentController@publishIssue');

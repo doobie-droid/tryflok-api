@@ -541,6 +541,39 @@ class ContentController extends Controller
         }
     }
 
+    public function getContentInsights(Request $request, $id) {
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+
+            if ($request->user()->id !== $content->user_id) {
+                return $this->respondBadRequest('Only owner of content can view this information');
+            }
+
+            return $this->respondWithSuccess('Insights retrieved successfully', [
+                'all_time_views' => $content->views()->count(),
+                'year_views' => $content->views()->whereDate('created_at', '>=', now()->startOfYear())->count(),
+                'month_views' => $content->views()->whereDate('created_at', '>=', now()->startOfMonth())->count(),
+                'day_views' => $content->views()->whereDate('created_at', '=', today())->count(),
+                'all_time_sales' => $content->revenues()->where('revenue_from', 'sale')->count(),
+                'year_sales' => $content->revenues()->where('revenue_from', 'sale')->whereDate('created_at', '>=', now()->startOfYear())->count(),
+                'month_sales' => $content->revenues()->where('revenue_from', 'sale')->whereDate('created_at', '>=', now()->startOfMonth())->count(),
+                'day_sales' => $content->revenues()->where('revenue_from', 'sale')->whereDate('created_at', '>=', today())->count(),
+                'subscribers' => $content->subscribers()->count(),
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
     public function getTrending(Request $request)
     {
         try {
