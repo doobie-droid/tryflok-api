@@ -105,7 +105,8 @@ class Video implements ShouldQueue
             $client = new Client;
             $url = 'https://fcm.googleapis.com/fcm/send';
             $authorization_key = config('services.google.fcm_server_key');
-            foreach ($content->user->notificationTokens as $notification_token) {
+
+            foreach ($content->owner->notificationTokens as $notification_token) {
                 $client->post($url, [
                     'headers' => [
                         'Authorization' => "key={$authorization_key}",
@@ -125,8 +126,8 @@ class Video implements ShouldQueue
                 ]);
             }
 
-            Mail::to($content->user)->send(new ContentReadyMail([
-                'user' => $content->user,
+            Mail::to($content->owner)->send(new ContentReadyMail([
+                'user' => $content->owner,
                 'message' => $message,
             ]));
         }
