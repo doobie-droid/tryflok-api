@@ -304,7 +304,9 @@ class CollectionController extends Controller
             $digiverses = Collection::where('type', 'digiverse')
             ->where('is_available', 1)
             ->where('show_only_in_collections', 0)
-            ->has('contents');
+            ->whereHas('contents', function (Builder $query) {
+                $query->where('is_available', 1);
+            });
 
             foreach ($keywords as $keyword) {
                 $digiverses = $digiverses->where(function ($query) use ($keyword) {
