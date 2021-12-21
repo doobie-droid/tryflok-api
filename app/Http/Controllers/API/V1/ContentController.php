@@ -64,7 +64,7 @@ class ContentController extends Controller
                 'description' => $request->description,
                 'user_id' => $user->id,
                 'type' => $request->type,
-                'is_available' => 1,
+                'is_available' => 0,
                 'approved_by_admin' => 0,
                 'show_only_in_digiverses' => 1,
                 'live_status' => 'inactive',
@@ -233,6 +233,14 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator2->errors()->toArray());
             }
 
+            if (! is_null($request->is_available)) {
+                // ensure that asset content is ready before it can be marked as available
+                if (in_array($content->type, ['video', 'pdf', 'audio', 'newsletter']) && $content->assets()->first()->processing_complete != 1) {
+                    return $this->respondBadRequest("You can only mark a content as available if it's asset has successfully uploaded.");
+                }
+                $content->is_available = $request->is_available;
+            }
+
             $user = $request->user();
             if (! is_null($request->title)) {
                 $content->title = $request->title;
@@ -240,10 +248,6 @@ class ContentController extends Controller
 
             if (! is_null($request->description)) {
                 $content->description = $request->description;
-            }
-
-            if (! is_null($request->is_available)) {
-                $content->is_available = $request->is_available;
             }
 
             if (! is_null($request->scheduled_date)) {

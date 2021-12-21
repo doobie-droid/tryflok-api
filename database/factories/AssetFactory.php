@@ -29,6 +29,7 @@ class AssetFactory extends Factory
             'storage_provider_id' => Str::random(10),
             'asset_type' => 'image',
             'mime_type' => 'image/png',
+            'processing_complete' => 1,
         ];
     }
 
