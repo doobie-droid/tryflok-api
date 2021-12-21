@@ -31,7 +31,7 @@ class ContentController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'title' => ['required', 'string', 'max: 200'],
-                'description' => ['sometimes', 'string'],
+                'description' => ['required', 'string'],
                 'digiverse_id' => ['required','exists:collections,id'],
                 'cover.asset_id' => ['required_if:type,pdf,audio,video,newsletter', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'price' => ['required',],
