@@ -11,6 +11,7 @@ use Ratchet\MessageComponentInterface;
 class WebSocketController extends Controller implements MessageComponentInterface
 {
     private $connections = [];
+    private $map_user_id_to_connections = [];
     private $rtm_channel_subscribers = [];
 
     /**
@@ -37,7 +38,16 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      */
     public function onClose(ConnectionInterface $conn){
         try {
+            $user_id = null;
+            if (array_key_exists('user_id', $this->connections[$conn->resourceId])) {
+                $user_id = $this->connections[$conn->resourceId]['user_id'];
+            }
+            
             unset($this->connections[$conn->resourceId]);
+            if (! is_null($user_id)) {
+                $key = array_search($conn->resourceId,$this->map_user_id_to_connections[$user_id]);
+                unset($this->map_user_id_to_connections[$user_id][$key]); 
+            }
         } catch (\Exception $exception) {
             Log::error($exception);
         }
@@ -52,8 +62,16 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      */
     public function onError(ConnectionInterface $conn, \Exception $e){
         try {
+            $user_id = null;
+            if (array_key_exists('user_id', $this->connections[$conn->resourceId])) {
+                $user_id = $this->connections[$conn->resourceId]['user_id'];
+            }
+            
             unset($this->connections[$conn->resourceId]);
-            Log::error($e);
+            if (! is_null($user_id)) {
+                $key = array_search($conn->resourceId,$this->map_user_id_to_connections[$user_id]);
+                unset($this->map_user_id_to_connections[$user_id][$key]); 
+            }
             $conn->close();
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -121,14 +139,20 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 return;
             }
 
-            //$otp->expires_at = now();//expire the token since it has been used
-            //$otp->save();
+            $otp->expires_at = now();//expire the token since it has been used
+            $otp->save();
 
             $this->connections[$connection->resourceId] = [
                 'socket_connection' => $connection,
                 'user_id' => $data->user_id,
                 'is_authenticated' => true,
             ];
+            $user_connections = [];
+            if (array_key_exists($data->user_id, $this->map_user_id_to_connections)) {
+                $user_connections = $this->map_user_id_to_connections[$data->user_id];
+            }
+            $this->map_user_id_to_connections[$data->user_id] = array_unique(array_merge($user_connections, [$connection->resourceId]));
+            
             $response = $this->respondWithSuccess('User authenticated successfully')->getData();
             $connection->send(json_encode($response));
         } catch (\Exception $exception) {
