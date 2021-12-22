@@ -181,6 +181,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             $connection_auth_data = $this->connections[$connection->resourceId];
             if (is_null($connection_auth_data) || ! is_array($connection_auth_data) || $connection_auth_data['is_authenticated'] !== true) {
                 $response = $this->respondBadRequest('This connection is not authenticated');
+                $connection->send(json_encode($response));
+                return;
             }
 
             // add connection to channel subscribers
@@ -221,6 +223,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             $connection_auth_data = $this->connections[$connection->resourceId];
             if (is_null($connection_auth_data) || ! is_array($connection_auth_data) || $connection_auth_data['is_authenticated'] !== true) {
                 $response = $this->respondBadRequest('This connection is not authenticated');
+                $connection->send(json_encode($response));
+                return;
             }
 
             // send message to channel subscribers
