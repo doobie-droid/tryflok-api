@@ -10,8 +10,8 @@ use Ratchet\MessageComponentInterface;
 
 class WebSocketController extends Controller implements MessageComponentInterface
 {
-    private $map_connections_to_user_id = [];
-    private $map_user_id_to_resource_ids = [];
+    private $connections = [];
+    private $rtm_channel_subscribers = [];
 
     /**
      * When a new connection is opened it will be passed to this method
@@ -20,7 +20,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      */
     public function onOpen(ConnectionInterface $conn){
         try {
-            $this->map_connections_to_user_id[$conn->resourceId] = [
+            $this->connections[$conn->resourceId] = [
                 'socket_connection' => $conn,
                 'user_id' => null,
                 'is_authenticated' => false,
@@ -37,15 +37,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      */
     public function onClose(ConnectionInterface $conn){
         try {
-            $resource_id = $conn->resourceId;
-            $user_id = $this->map_connections_to_user_id[$resource_id]['user_id'];
-            unset($this->map_connections_to_user_id[$resource_id]);
-            if (! is_null($user_id)) {
-                $connection_ids = $this->map_user_id_to_resource_ids[$user_id];
-                if (is_array($connection_ids)) {
-                    $this->map_user_id_to_resource_ids[$user_id] = array_diff($connection_ids, [$resource_id]);
-                }
-            }
+            unset($this->connections[$conn->resourceId]);
         } catch (\Exception $exception) {
             Log::error($exception);
         }
@@ -60,15 +52,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      */
     public function onError(ConnectionInterface $conn, \Exception $e){
         try {
-            $resource_id = $conn->resourceId;
-            $user_id = $this->map_connections_to_user_id[$resource_id]['user_id'];
-            unset($this->map_connections_to_user_id[$resource_id]);
-            if (! is_null($user_id)) {
-                $connection_ids = $this->map_user_id_to_resource_ids[$user_id];
-                if (is_array($connection_ids)) {
-                    $this->map_user_id_to_resource_ids[$user_id] = array_diff($connection_ids, [$resource_id]);
-                }
-            }
+            unset($this->connections[$conn->resourceId]);
             Log::error($e);
             $conn->close();
         } catch (\Exception $exception) {
@@ -89,6 +73,12 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 case 'authenticate':
                     $this->authenticateConnection($data, $conn);
                     break;
+                case 'join-rtm-channel':
+                    $this->joinRtmChannel($data, $conn);
+                    break;
+                case 'message-rtm-channel':
+                    $this->messageRtmChannel($data, $conn);
+                    break;
                 case 'echo':
                     $echo = ['echo' => $data->message];
                     $conn->send(json_encode($echo));
@@ -107,14 +97,13 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     {
         try {
             $validator = Validator::make((array) $data, [
-                'code' => ['required', 'string', 'exists:otps,code',],
-                'user_id' => ['required', 'string', 'exists:users,id'],
+                'code' => ['required', 'string',],
+                'user_id' => ['required', 'string',],
             ]);
 
             if ($validator->fails()) {
                 $response = $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray())->getData();
                 $connection->send(json_encode($response));
-                Log::error($exception);
                 return;
             }
 
@@ -123,28 +112,118 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             if (is_null($otp)) {
                 $response = $this->respondBadRequest('Invalid OTP provided')->getData();
                 $connection->send(json_encode($response));
-                Log::error($exception);
                 return;
             }
 
             if ($otp->expires_at->lt(now())) {
                 $response = $this->respondBadRequest('Access code has expired')->getData();
                 $connection->send(json_encode($response));
-                Log::error($exception);
                 return;
             }
 
-            $otp->expires_at = now();//expire the token since it has been used
-            $otp->save();
+            //$otp->expires_at = now();//expire the token since it has been used
+            //$otp->save();
 
-            $this->map_connections_to_user_id[$connection->resourceId] = [
+            $this->connections[$connection->resourceId] = [
                 'socket_connection' => $connection,
                 'user_id' => $data->user_id,
                 'is_authenticated' => true,
             ];
-            $this->map_user_id_to_resource_ids = array_unique(array_merge($this->map_user_id_to_resource_ids, [$connection->resourceId]));
             $response = $this->respondWithSuccess('User authenticated successfully')->getData();
             $connection->send(json_encode($response));
+        } catch (\Exception $exception) {
+            $response = $this->respondBadRequest('Oops, an error occurred, please try again later')->getData();
+            $connection->send(json_encode($response));
+            Log::error($exception);
+            return;
+        }
+    }
+
+    private function joinRtmChannel($data, $connection)
+    {
+        try {
+            $validator = Validator::make((array) $data, [
+                'channel_name' => ['required', 'string',],
+                'user_id' => ['required', 'string',],
+            ]);
+
+            if ($validator->fails()) {
+                $response = $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray())->getData();
+                $connection->send(json_encode($response));
+                return;
+            }
+
+            //check if connection has been authenticated
+            $connection_auth_data = $this->connections[$connection->resourceId];
+            if (is_null($connection_auth_data) || ! is_array($connection_auth_data) || $connection_auth_data['is_authenticated'] !== true) {
+                $response = $this->respondBadRequest('This connection is not authenticated');
+            }
+
+            // add connection to channel subscribers
+            $channel_name = $data->channel_name;
+            $channel_subscribers = [];
+            if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
+                $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
+            }
+ 
+            $this->rtm_channel_subscribers[$channel_name] = array_unique(array_merge($channel_subscribers, [$connection->resourceId]));
+
+            $response = $this->respondWithSuccess('Channel joined successfully.')->getData();
+            $connection->send(json_encode($response));
+        } catch (\Exception $exception) {
+            $response = $this->respondBadRequest('Oops, an error occurred, please try again later')->getData();
+            $connection->send(json_encode($response));
+            Log::error($exception);
+            return;
+        }
+    }
+
+    private function messageRtmChannel($data, $connection)
+    {
+        try {
+            $validator = Validator::make((array) $data, [
+                'channel_name' => ['required', 'string',],
+                'user_id' => ['required', 'string',],
+                'message' => ['required', 'string',],
+            ]);
+
+            if ($validator->fails()) {
+                $response = $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray())->getData();
+                $connection->send(json_encode($response));
+                return;
+            }
+
+            //check if connection has been authenticated
+            $connection_auth_data = $this->connections[$connection->resourceId];
+            if (is_null($connection_auth_data) || ! is_array($connection_auth_data) || $connection_auth_data['is_authenticated'] !== true) {
+                $response = $this->respondBadRequest('This connection is not authenticated');
+            }
+
+            // send message to channel subscribers
+            $channel_name = $data->channel_name;
+            $channel_subscribers = [];
+            if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
+                $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
+            }
+
+            foreach ($channel_subscribers as $key => $resourceId) {
+                $message = [
+                    'action' => 'message-from-rtm-channel',
+                    'channel_name' => $channel_name,
+                    'message' => $data->message,
+                    'message_from' => $data->user_id,
+                ];
+                $connection_data = null;
+                if (array_key_exists($resourceId, $this->connections)) {
+                    $connection_data = $this->connections[$resourceId];
+                } else {
+                    unset($this->rtm_channel_subscribers[$channel_name][$key]);
+                }
+
+                if (! is_null($connection_data)) {
+                    $connection_data['socket_connection']->send(json_encode($message));
+                }
+            }
         } catch (\Exception $exception) {
             $response = $this->respondBadRequest('Oops, an error occurred, please try again later')->getData();
             $connection->send(json_encode($response));
