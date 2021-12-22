@@ -180,7 +180,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             //check if connection has been authenticated
             $connection_auth_data = $this->connections[$connection->resourceId];
             if (is_null($connection_auth_data) || ! is_array($connection_auth_data) || $connection_auth_data['is_authenticated'] !== true) {
-                $response = $this->respondBadRequest('This connection is not authenticated');
+                $response = $this->respondBadRequest('This connection is not authenticated')->getData();
                 $connection->send(json_encode($response));
                 return;
             }
@@ -222,7 +222,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             //check if connection has been authenticated
             $connection_auth_data = $this->connections[$connection->resourceId];
             if (is_null($connection_auth_data) || ! is_array($connection_auth_data) || $connection_auth_data['is_authenticated'] !== true) {
-                $response = $this->respondBadRequest('This connection is not authenticated');
+                $response = $this->respondBadRequest('This connection is not authenticated')->getData();
                 $connection->send(json_encode($response));
                 return;
             }
