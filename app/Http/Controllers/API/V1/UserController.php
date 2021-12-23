@@ -1131,7 +1131,7 @@ class UserController extends Controller
             foreach ($digiverses as $digiverse) {
                 foreach ($digiverse->subscriptions as $subscription) {
                     $dateString = (string) $subscription->created_at->format('Y-m-d');
-                    if (!array_key_exists($dateString, $subscription_graph)) {
+                    if (! array_key_exists($dateString, $subscription_graph)) {
                         $subscription_graph[$dateString] = 0;
                     }
                     $subscription_graph[$dateString] = $subscription_graph[$dateString] + 1;
