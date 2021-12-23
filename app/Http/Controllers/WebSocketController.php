@@ -86,8 +86,12 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      */
     public function onMessage(ConnectionInterface $conn, $msg){
         try {
+            $action = "";
             $data = json_decode($msg);
-            switch ($data->action) {
+            if (is_object($data) && property_exists($data, 'action')) {
+                $action = $data->action;
+            }
+            switch ($action) {
                 case 'authenticate':
                     $this->authenticateConnection($data, $conn);
                     break;
