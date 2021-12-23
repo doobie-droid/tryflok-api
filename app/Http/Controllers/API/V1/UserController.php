@@ -1130,7 +1130,7 @@ class UserController extends Controller
             $subscription_graph = [];
             foreach ($digiverses as $digiverse) {
                 foreach ($digiverse->subscriptions as $subscription) {
-                    $dateString = (string) $subscription->created_at;
+                    $dateString = (string) $subscription->created_at->format('Y-m-d');
                     if (!array_key_exists($dateString, $subscription_graph)) {
                         $subscription_graph[$dateString] = 0;
                     }
@@ -1146,7 +1146,7 @@ class UserController extends Controller
                 'total_sales' => $request->user()->revenues()->where('revenue_from', 'sale')->count(),
                 'month_sales' => $request->user()->revenues()->where('revenue_from', 'sale')->whereDate('created_at', '>=', now()->startOfMonth())->count(),
                 'total_subscribers' => $total_subscribers_count,
-                'month_subscribers_count' => $month_subscribers_count,
+                'month_subscribers' => $month_subscribers_count,
                 'subscription_graph' => $subscription_graph,
             ]);
         } catch (\Exception $exception) {
