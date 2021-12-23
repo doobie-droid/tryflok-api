@@ -24,6 +24,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             $this->connections[$conn->resourceId] = [
                 'socket_connection' => $conn,
                 'user_id' => null,
+                'profile_picture' => '',
+                'username' => '',
                 'is_authenticated' => false,
             ];
         } catch (\Exception $exception) {
@@ -86,12 +88,12 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      */
     public function onMessage(ConnectionInterface $conn, $msg){
         try {
-            $action = "";
+            $event = "";
             $data = json_decode($msg);
-            if (is_object($data) && property_exists($data, 'action')) {
-                $action = $data->action;
+            if (is_object($data) && property_exists($data, 'event')) {
+                $event = $data->event;
             }
-            switch ($action) {
+            switch ($event) {
                 case 'authenticate':
                     $this->authenticateConnection($data, $conn);
                     break;
@@ -108,8 +110,12 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     break;
             }
         } catch (\Exception $exception) {
-            $response = $this->respondBadRequest('Oops, an error occurred, please try again later')->getData();
-            $conn->send(json_encode($response));
+            $conn->send(json_encode([
+                'event' => 'event-error',
+                'event-name' => $data->event,
+                'message' => 'Oops, an error occurred, please try again later',
+                'errors' => [],
+            ]));
             Log::error($exception);
             return;
         }
@@ -121,25 +127,39 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             $validator = Validator::make((array) $data, [
                 'code' => ['required', 'string',],
                 'user_id' => ['required', 'string',],
+                'username' => ['required', 'string',],
+                'profile_picture' => ['required', 'string',],
             ]);
 
             if ($validator->fails()) {
-                $response = $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray())->getData();
-                $connection->send(json_encode($response));
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event-name' => $data->event,
+                    'message' => 'Invalid or missing input fields',
+                    'errors' => $validator->errors()->toArray(),
+                ]));
                 return;
             }
 
             $otp = Otp::where('code', $data->code)->where('user_id', $data->user_id)->where('purpose', 'authentication')->first();
 
             if (is_null($otp)) {
-                $response = $this->respondBadRequest('Invalid OTP provided')->getData();
-                $connection->send(json_encode($response));
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event-name' => $data->event,
+                    'message' => 'Invalid OTP provided',
+                    'errors' => [],
+                ]));
                 return;
             }
 
             if ($otp->expires_at->lt(now())) {
-                $response = $this->respondBadRequest('Access code has expired')->getData();
-                $connection->send(json_encode($response));
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event-name' => $data->event,
+                    'message' => 'Access code has expired',
+                    'errors' => [],
+                ]));
                 return;
             }
 
@@ -149,6 +169,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             $this->connections[$connection->resourceId] = [
                 'socket_connection' => $connection,
                 'user_id' => $data->user_id,
+                'profile_picture' => $data->profile_picture,
+                'username' => $data->username,
                 'is_authenticated' => true,
             ];
             $user_connections = [];
@@ -157,11 +179,19 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             }
             $this->map_user_id_to_connections[$data->user_id] = array_unique(array_merge($user_connections, [$connection->resourceId]));
             
-            $response = $this->respondWithSuccess('User authenticated successfully')->getData();
-            $connection->send(json_encode($response));
+            $connection->send(json_encode([
+                'event' => 'event-success',
+                'event-name' => $data->event,
+                'message' => 'User authenticated successfully',
+                'data' => [],
+            ]));
         } catch (\Exception $exception) {
-            $response = $this->respondBadRequest('Oops, an error occurred, please try again later')->getData();
-            $connection->send(json_encode($response));
+            $connection->send(json_encode([
+                'event' => 'event-error',
+                'event-name' => $data->event,
+                'message' => 'Oops, an error occurred, please try again later',
+                'errors' => [],
+            ]));
             Log::error($exception);
             return;
         }
@@ -176,16 +206,24 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             ]);
 
             if ($validator->fails()) {
-                $response = $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray())->getData();
-                $connection->send(json_encode($response));
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event-name' => $data->event,
+                    'message' => 'Invalid or missing input fields',
+                    'errors' => $validator->errors()->toArray(),
+                ]));
                 return;
             }
 
             //check if connection has been authenticated
             $connection_auth_data = $this->connections[$connection->resourceId];
             if (is_null($connection_auth_data) || ! is_array($connection_auth_data) || $connection_auth_data['is_authenticated'] !== true) {
-                $response = $this->respondBadRequest('This connection is not authenticated')->getData();
-                $connection->send(json_encode($response));
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event-name' => $data->event,
+                    'message' => 'This connection is not authenticated',
+                    'errors' => [],
+                ]));
                 return;
             }
 
@@ -198,11 +236,19 @@ class WebSocketController extends Controller implements MessageComponentInterfac
  
             $this->rtm_channel_subscribers[$channel_name] = array_unique(array_merge($channel_subscribers, [$connection->resourceId]));
 
-            $response = $this->respondWithSuccess('Channel joined successfully.')->getData();
-            $connection->send(json_encode($response));
+            $connection->send(json_encode([
+                'event' => 'event-success',
+                'event-name' => $data->event,
+                'message' => 'Channel joined successfully',
+                'data' => [],
+            ]));
         } catch (\Exception $exception) {
-            $response = $this->respondBadRequest('Oops, an error occurred, please try again later')->getData();
-            $connection->send(json_encode($response));
+            $connection->send(json_encode([
+                'event' => 'event-error',
+                'event-name' => $data->event,
+                'message' => 'Oops, an error occurred, please try again later',
+                'errors' => [],
+            ]));
             Log::error($exception);
             return;
         }
@@ -218,16 +264,24 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             ]);
 
             if ($validator->fails()) {
-                $response = $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray())->getData();
-                $connection->send(json_encode($response));
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event-name' => $data->event,
+                    'message' => 'Invalid or missing input fields',
+                    'errors' => $validator->errors()->toArray(),
+                ]));
                 return;
             }
 
             //check if connection has been authenticated
-            $connection_auth_data = $this->connections[$connection->resourceId];
-            if (is_null($connection_auth_data) || ! is_array($connection_auth_data) || $connection_auth_data['is_authenticated'] !== true) {
-                $response = $this->respondBadRequest('This connection is not authenticated')->getData();
-                $connection->send(json_encode($response));
+            $sender_auth_data = $this->connections[$connection->resourceId];
+            if (is_null($sender_auth_data) || ! is_array($sender_auth_data) || $sender_auth_data['is_authenticated'] !== true) {
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event-name' => $data->event,
+                    'message' => 'This connection is not authenticated',
+                    'errors' => [],
+                ]));
                 return;
             }
 
@@ -240,10 +294,12 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
             foreach ($channel_subscribers as $key => $resourceId) {
                 $message = [
-                    'action' => 'message-from-rtm-channel',
+                    'event' => 'message-from-rtm-channel',
                     'channel_name' => $channel_name,
                     'message' => $data->message,
-                    'message_from' => $data->user_id,
+                    'user_id' => $sender_auth_data['user_id'],
+                    'profile_picture' => $sender_auth_data['profile_picture'],
+                    'username' => $sender_auth_data['username'],
                 ];
                 $connection_data = null;
                 if (array_key_exists($resourceId, $this->connections)) {
@@ -257,8 +313,12 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 }
             }
         } catch (\Exception $exception) {
-            $response = $this->respondBadRequest('Oops, an error occurred, please try again later')->getData();
-            $connection->send(json_encode($response));
+            $connection->send(json_encode([
+                'event' => 'event-error',
+                'event-name' => $data->event,
+                'message' => 'Oops, an error occurred, please try again later',
+                'errors' => [],
+            ]));
             Log::error($exception);
             return;
         }
