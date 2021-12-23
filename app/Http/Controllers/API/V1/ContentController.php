@@ -1145,10 +1145,10 @@ class ContentController extends Controller
             $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
             $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
             if (is_null($rtc_token) || $rtc_token->value == '' || is_null($rtm_token) || $rtm_token->value == '') {
-                return $this->respondBadRequest('You cannot join a broadcast that has been not started');
+                return $this->respondBadRequest('You cannot join a broadcast that has not been started');
             }
             if ($content->live_status !== 'active') {
-                return $this->respondBadRequest('You cannot join a broadcast that has been not started');
+                return $this->respondBadRequest('You cannot join a broadcast that has not been started');
             }
 
             $content->subscribers()->syncWithoutDetaching([
@@ -1163,6 +1163,14 @@ class ContentController extends Controller
             $join_count->save();
             $expires = time() + (24 * 60 * 60); // let token last for 24hrs
             // $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, $uid, AgoraRtcToken::ROLE_ATTENDEE, $expires);
+            $subscribers_count = $content->subscribers()->count();
+            $websocket_client = new \WebSocket\Client(config('services.websocket.url'));
+            $websocket_client->text(json_encode([
+                'event' => 'app-update-rtm-channel-subscribers-count',
+                'channel_name' => $channel->value,
+                'subscribers_count' => $subscribers_count,
+            ]));
+            $websocket_client->close();
 
             return $this->respondWithSuccess('Channel joined successfully', [
                 'rtc_token' => $rtc_token->value,
