@@ -189,6 +189,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'account'], function () {
             Route::get('/', 'UserController@getAccount');
             Route::delete('/', 'UserController@deleteAccount');
+            Route::get('/dashboard', 'UserController@getDashboardDetails');
             Route::get('digiverses', 'CollectionController@getUserCreatedDigiverses');
             Route::get('notifications', 'UserController@getNotifications');
             Route::patch('notifications', 'UserController@markAllNotificationsAsRead');

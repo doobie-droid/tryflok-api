@@ -1084,4 +1084,74 @@ class UserController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
+
+    public function getDashboardDetails(Request $request)
+    {
+        try {
+            $subcribers_graph_start_date = $request->query('subscribers_graph_start_date', now()->startOfMonth());
+            $subcribers_graph_end_date = $request->query('subscribers_graph_end_date', now()->endOfMonth());
+
+            $validator = Validator::make([
+                'subscribers_graph_start_date' => $subcribers_graph_start_date,
+                'subscribers_graph_end_date' => $subcribers_graph_end_date,
+            ], [
+                'subscribers_graph_start_date' => ['required', 'date',],
+                'subscribers_graph_end_date' => ['required', 'date', 'after_or_equal:subscribers_graph_start_date'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            // get all subscribers
+            $digiverses = $request->user()->digiversesCreated()->withCount('subscriptions')->get();
+            $total_subscribers_count = 0;
+            foreach ($digiverses as $digiverse) {
+                $total_subscribers_count = $total_subscribers_count + $digiverse->subscriptions_count;
+            }
+
+            // month subscribers
+            $digiverses = $request->user()->digiversesCreated()->withCount([
+                'subscriptions' => function ($query) {
+                    $query->whereDate('created_at', '>=', now()->startOfMonth());
+                },
+            ])->get();
+            $month_subscribers_count = 0;
+            foreach ($digiverses as $digiverse) {
+                $month_subscribers_count = $month_subscribers_count + $digiverse->subscriptions_count;
+            }
+
+            // subscription graph
+            $digiverses = $request->user()->digiversesCreated()->with([
+                'subscriptions' => function ($query) use ($subcribers_graph_start_date, $subcribers_graph_end_date){
+                    $query->whereDate('created_at', '>=', $subcribers_graph_start_date)->whereDate('created_at', '<=', $subcribers_graph_end_date);
+                },
+            ])->get();
+            $subscription_graph = [];
+            foreach ($digiverses as $digiverse) {
+                foreach ($digiverse->subscriptions as $subscription) {
+                    $dateString = (string) $subscription->created_at;
+                    if (!array_key_exists($dateString, $subscription_graph)) {
+                        $subscription_graph[$dateString] = 0;
+                    }
+                    $subscription_graph[$dateString] = $subscription_graph[$dateString] + 1;
+                }
+            }
+
+
+
+            return $this->respondWithSuccess('Dashboard details retrieved successfully', [
+                'total_tips' => $request->user()->revenues()->where('revenue_from', 'tip')->count(),
+                'month_tips' => $request->user()->revenues()->where('revenue_from', 'tip')->whereDate('created_at', '>=', now()->startOfMonth())->count(),
+                'total_sales' => $request->user()->revenues()->where('revenue_from', 'sale')->count(),
+                'month_sales' => $request->user()->revenues()->where('revenue_from', 'sale')->whereDate('created_at', '>=', now()->startOfMonth())->count(),
+                'total_subscribers' => $total_subscribers_count,
+                'month_subscribers_count' => $month_subscribers_count,
+                'subscription_graph' => $subscription_graph,
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
 }
