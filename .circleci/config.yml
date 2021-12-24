@@ -64,4 +64,4 @@ jobs:
       - run: php artisan db:seed --class=TestingSeeder
       # run tests with phpunit or codecept
       - run: ./vendor/bin/tlint
-      - run: ./vendor/bin/phpunit
+      - run: php artisan test --parallel
