@@ -25,75 +25,12 @@ class RetrieveTest extends TestCase
     use DatabaseTransactions;
     use WithFaker;
 
-    private function generateSingleContent($user)
-    {
-        $tag1 = Tag::factory()->create();
-        $tag2 = Tag::factory()->create();
-        $content = Content::factory()
-        ->state([
-            'type' => 'audio',
-            'title' => 'title before update',
-            'description' => 'description before update',
-            'is_available' => 1,
-        ])
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover',
-            ]
-        )
-        ->hasAttached($tag1, [
-            'id' => Str::uuid(),
-        ])
-        ->hasAttached($tag2, [
-            'id' => Str::uuid(),
-        ])
-        ->hasAttached(
-            Collection::factory()->digiverse(),
-            [
-                'id' => Str::uuid(),
-            ],
-        )
-        ->has(Price::factory()->state([
-            'amount' => 10,
-            'interval' => 'one-off',
-            'interval_amount' => 1,
-        ])->count(1))
-        ->for($user, 'owner')
-        ->create();
-
-        $price = $content->prices()->first();
-        $asset = $content->assets()->first();
-        $cover = $content->cover()->first();
-
-        return [
-            'content' => $content,
-            'cover' => $cover,
-            'asset' => $asset,
-            'tags' => [
-                $tag1,
-                $tag2,
-            ],
-            'price' => $price,
-        ];
-    }
-
     public function test_retrieve_single_content_works()
     {
         $user = User::factory()->create();
         $user->assignRole(Roles::USER);
         $this->be($user);
-
-        $test_data = $this->generateSingleContent($user);
-        $content = $test_data['content'];
+        $content = Content::factory()->setTags([Tag::factory()->create()])->create();
         $response = $this->json('GET', "/api/v1/contents/{$content->id}");
         $response->assertStatus(200)->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
     }
@@ -198,39 +135,8 @@ class RetrieveTest extends TestCase
             'title' => 'title1',
         ])
         ->for($user, 'owner')
-        ->hasAttached(
-            $digiverse,
-            [
-            'id' => Str::uuid(),
-            ]
-        )
-        ->audio()
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-            ]
-        )
-        ->hasAttached($tag1, [
-            'id' => Str::uuid(),
-        ])
-        ->hasAttached($tag2, [
-            'id' => Str::uuid(),
-        ])
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
+        ->setDigiverse($digiverse)
+        ->setTags([$tag1, $tag2])
         ->create();
 
         $content2 = Content::factory()
@@ -238,39 +144,8 @@ class RetrieveTest extends TestCase
             'title' => 'title2',
         ])
         ->for($user, 'owner')
-        ->hasAttached(
-            $digiverse,
-            [
-            'id' => Str::uuid(),
-            ]
-        )
-        ->audio()
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-            ]
-        )
-        ->hasAttached($tag1, [
-            'id' => Str::uuid(),
-        ])
-        ->hasAttached($tag3, [
-            'id' => Str::uuid(),
-        ])
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
+        ->setDigiverse($digiverse)
+        ->setTags([$tag1, $tag3])
         ->create();
 
         $content3 = Content::factory()
@@ -278,39 +153,8 @@ class RetrieveTest extends TestCase
             'title' => 'title3',
         ])
         ->for($user, 'owner')
-        ->hasAttached(
-            $digiverse,
-            [
-            'id' => Str::uuid(),
-            ]
-        )
-        ->audio()
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-            ]
-        )
-        ->hasAttached($tag3, [
-            'id' => Str::uuid(),
-        ])
-        ->hasAttached($tag2, [
-            'id' => Str::uuid(),
-        ])
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
+        ->setDigiverse($digiverse)
+        ->setTags([$tag2, $tag3])
         ->create();
 
         $content4 = Content::factory()
@@ -318,39 +162,8 @@ class RetrieveTest extends TestCase
             'description' => 'title1',
         ])
         ->for($user, 'owner')
-        ->hasAttached(
-            $digiverse,
-            [
-            'id' => Str::uuid(),
-            ]
-        )
-        ->audio()
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-            ]
-        )
-        ->hasAttached($tag1, [
-            'id' => Str::uuid(),
-        ])
-        ->hasAttached($tag2, [
-            'id' => Str::uuid(),
-        ])
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
+        ->setDigiverse($digiverse)
+        ->setTags([$tag1, $tag2])
         ->create();
 
         $content5 = Content::factory()
@@ -358,39 +171,8 @@ class RetrieveTest extends TestCase
             'description' => 'title2',
         ])
         ->for($user, 'owner')
-        ->hasAttached(
-            $digiverse,
-            [
-            'id' => Str::uuid(),
-            ]
-        )
-        ->audio()
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-            ]
-        )
-        ->hasAttached($tag1, [
-            'id' => Str::uuid(),
-        ])
-        ->hasAttached($tag3, [
-            'id' => Str::uuid(),
-        ])
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
+        ->setDigiverse($digiverse)
+        ->setTags([$tag1, $tag3])
         ->create();
 
         $content6 = Content::factory()
@@ -398,39 +180,8 @@ class RetrieveTest extends TestCase
             'description' => 'title3',
         ])
         ->for($user, 'owner')
-        ->hasAttached(
-            $digiverse,
-            [
-            'id' => Str::uuid(),
-            ]
-        )
-        ->audio()
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-            ]
-        )
-        ->hasAttached($tag3, [
-            'id' => Str::uuid(),
-        ])
-        ->hasAttached($tag2, [
-            'id' => Str::uuid(),
-        ])
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
+        ->setDigiverse($digiverse)
+        ->setTags([$tag2, $tag3])
         ->create();
 
         // when no filtering is set
@@ -549,27 +300,6 @@ class RetrieveTest extends TestCase
         ->state([
             'created_at' => now()->subMinutes(3),
         ])
-        ->has(View::factory()->count(100))
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-            ]
-        )
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
         ->create();
 
         $content4 = Content::factory()
@@ -577,26 +307,6 @@ class RetrieveTest extends TestCase
             'created_at' => now(),
         ])
         ->has(View::factory()->count(100))
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-            ]
-        )
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
         ->create();
 
 
@@ -610,26 +320,6 @@ class RetrieveTest extends TestCase
         ->has(View::factory()->count($content1_views))
         ->has(Revenue::factory()->count($content1_revnues))
         ->has(Review::factory()->count($content1_reviews))
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-            ]
-        )
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
         ->create();
         $content1_trending_points = (int) (Constants::TRENDING_VIEWS_WEIGHT * $content1_views) + (Constants::TRENDING_REVIEWS_WEIGHT * $content1_reviews * 5) + (Constants::TRENDING_PURCHASES_WEIGHT * $content1_revnues);
 
@@ -643,26 +333,6 @@ class RetrieveTest extends TestCase
         ->has(View::factory()->count($content2_views))
         ->has(Revenue::factory()->count($content2_revnues))
         ->has(Review::factory()->count($content2_reviews))
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover'
-            ]
-        )
-        ->has(Price::factory()->subscription()->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $user->id
-            ])
-        )
         ->create();
         $content2_trending_points = (int) (Constants::TRENDING_VIEWS_WEIGHT * $content2_views) + (Constants::TRENDING_REVIEWS_WEIGHT * $content2_reviews * 5) + (Constants::TRENDING_PURCHASES_WEIGHT * $content2_revnues);
 

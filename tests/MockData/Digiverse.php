@@ -40,6 +40,7 @@ class Digiverse
                 'approved_by_admin',
                 'show_only_in_collections',
                 'views',
+                'subscriptions_count',
                 'ratings_count',
                 'ratings_average',
                 'cover' => [
@@ -86,6 +87,7 @@ class Digiverse
                 'approved_by_admin',
                 'show_only_in_collections',
                 'views',
+                'subscriptions_count',
                 'ratings_count',
                 'ratings_average',
                 'cover' => [
