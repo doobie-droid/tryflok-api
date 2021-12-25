@@ -49,6 +49,7 @@ class CollectionFactory extends Factory
             'approved_by_admin' => 1,
             'show_only_in_collections' => 0,
             'views' => 0,
+            'trending_points' => 0,
         ];
     }
 

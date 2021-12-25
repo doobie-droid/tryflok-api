@@ -1,10 +1,48 @@
 <?php
 
 namespace Tests\MockData;
+use App\Models;
 
 class Digiverse
 {
-    const UNSEEDED_DIGIVERSE = [
+    public static function generateStandardCreateRequest(): array
+    {
+        $request = self::STANDARD_REQUEST;
+        $request['cover']['asset_id'] = Models\Asset::factory()->create()->id;
+        $request['tags'][] =  Models\Tag::factory()->create()->id;
+        return $request;
+    }
+
+    public static function generateStandardUpdateRequest(): array
+    {
+        $request = self::STANDARD_REQUEST;
+        $request['cover']['asset_id'] = Models\Asset::factory()->create()->id;
+        $request['tags'][] =  [
+            'action' => 'add',
+            'id' => Models\Tag::factory()->create()->id,
+        ];
+        return $request;
+    }
+
+    public static function generateDigiverseCreatedResponse(): array
+    {
+        $expected_response_structure = self::STANDARD_RESPONSE;
+        unset($expected_response_structure['data']['digiverse']['userables']);
+        $content_types_available_key = array_search('content_types_available', $expected_response_structure['data']['digiverse']);
+        unset($expected_response_structure['data']['digiverse'][$content_types_available_key]);
+        return $expected_response_structure;
+    }
+
+    public static function generateDigiverseUpdatedResponse(): array
+    {
+        $expected_response_structure = self::STANDARD_RESPONSE;
+        unset($expected_response_structure['data']['digiverse']['userables']);
+        $content_types_available_key = array_search('content_types_available', $expected_response_structure['data']['digiverse']);
+        unset($expected_response_structure['data']['digiverse'][$content_types_available_key]);
+        return $expected_response_structure;
+    }
+
+    const STANDARD_REQUEST = [
         'title' => 'The first Digiverse',
         'description' => 'Testing digiverse creation',
         'price' => [
@@ -13,15 +51,13 @@ class Digiverse
             'interval_amount' => 1,
         ],
         'tags' => [
-            '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
-            '120566de-0361-4d66-b458-321d4ede62a9'
         ],
         'cover' => [
             'asset_id' => '',
         ],
     ];
 
-    const STANDARD_DIGIVERSE_RESPONSE = [
+    const STANDARD_RESPONSE = [
         'status_code',
         'message',
         'data' => [
@@ -34,12 +70,13 @@ class Digiverse
                     'name',
                     'email',
                     'username',
+                    'profile_picture',
                 ],
                 'type',
                 'is_available',
                 'approved_by_admin',
                 'show_only_in_collections',
-                'views',
+                'content_types_available',
                 'subscriptions_count',
                 'ratings_count',
                 'ratings_average',
@@ -64,57 +101,10 @@ class Digiverse
                         'name',
                     ]
                 ],
-            ]
-        ]
-    ];
-
-    const STANDARD_DIGIVERSE_RESPONSE_WITH_CONTENTS = [
-        'status_code',
-        'message',
-        'data' => [
-            'digiverse' => [
-                'id',
-                'title',
-                'description',
-                'owner' => [
-                    'id',
-                    'name',
-                    'email',
-                    'username',
-                ],
-                'type',
-                'is_available',
-                'approved_by_admin',
-                'show_only_in_collections',
-                'views',
-                'subscriptions_count',
-                'ratings_count',
-                'ratings_average',
-                'cover' => [
-                    'url',
-                    'asset_type',
-                    'encryption_key',
-                ],
-                'prices' => [
+                'userables' => [
                     [
-                        'id',
-                        'amount',
-                        'currency',
-                        'interval',
-                        'interval_amount'
-                    ]
-                ],
-                'tags' => [
-                    [
-                        'id',
-                        'type',
-                        'name',
-                    ]
-                ],
-                'contents' => [
-                    [
-                        'id',
-                        'type',
+                        'userable_type',
+                        'userable_id',
                     ]
                 ]
             ]
