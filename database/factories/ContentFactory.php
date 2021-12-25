@@ -160,6 +160,17 @@ class ContentFactory extends Factory
         });
     }
 
+    public function noDigiverse(): self
+    {
+        return $this->afterCreating(function (Content $content) {
+            $previousDigiverse = $content->collections()->first();
+            if (! is_null($previousDigiverse)) {
+                $content->collections()->detach($previousDigiverse->id);
+                $previousDigiverse->forceDelete();
+            }
+        });
+    }
+
     public function setCover(Asset $cover): self
     {
         $this->cover = $cover;

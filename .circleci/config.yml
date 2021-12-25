@@ -10,13 +10,13 @@ jobs:
       - image: circleci/php:7.4-cli
         environment:
           MYSQL_HOST: 127.0.0.1
-          MYSQL_DB: flok
+          MYSQL_DB: flok-test
           MYSQL_USER: root
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_PASSWORD:
       - image: circleci/mysql:5.7
         environment:
-          MYSQL_DATABASE: flok
+          MYSQL_DATABASE: flok-test
       #
       - image: redis:latest
 

@@ -42,6 +42,14 @@ class Digiverse
         return $expected_response_structure;
     }
 
+    public static function generateGetAllResponse(): array
+    {
+        $expected_response_structure = self::STANDARD_RESPONSE;
+        $content_types_available_key = array_search('content_types_available', $expected_response_structure['data']['digiverse']);
+        unset($expected_response_structure['data']['digiverse'][$content_types_available_key]);
+        return $expected_response_structure;
+    }
+
     const STANDARD_REQUEST = [
         'title' => 'The first Digiverse',
         'description' => 'Testing digiverse creation',
