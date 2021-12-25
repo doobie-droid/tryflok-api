@@ -216,4 +216,217 @@ class RetrieveDigiversesTest extends TestCase
         ]);
         $this->assertTrue(count($response->getData()->data->digiverses) === 4);
     }
+
+    public function test_filter_by_tags_works()
+    {
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
+        $content = Models\Content::factory()->noDigiverse()->create();
+        $digiverse1 = Models\Collection::factory()
+                        ->digiverse()
+                        ->setTags([$tag1])
+                        ->setContents([$content])
+                        ->create();
+        $digiverse2 = Models\Collection::factory()
+                        ->digiverse()
+                        ->setTags([$tag2])
+                        ->setContents([$content])
+                        ->create();
+        $expected_response_structure = MockData\Digiverse::generateGetAllResponse();
+        $expected_response_structure['data']['digiverse']['userables'] = [];
+
+        $response = $this->json('GET', '/api/v1/digiverses?tags=' . $tag1->id);
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'digiverses' => [
+                    $expected_response_structure['data']['digiverse'],
+                ],
+            ]
+        ]);
+        $this->assertTrue(count($response->getData()->data->digiverses) === 1);
+        $digiverses = $response->getData()->data->digiverses;
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse1, 'id');
+
+        $response = $this->json('GET', '/api/v1/digiverses?tags=' . $tag2->id);
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'digiverses' => [
+                    $expected_response_structure['data']['digiverse'],
+                ],
+            ]
+        ]);
+        $this->assertTrue(count($response->getData()->data->digiverses) === 1);
+        $digiverses = $response->getData()->data->digiverses;
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse2, 'id');
+    }
+
+    public function test_filter_by_keyword_works()
+    {
+        $tag = Models\Tag::factory()->create();
+        $content = Models\Content::factory()->noDigiverse()->create();
+        $digiverse1 = Models\Collection::factory()
+                        ->digiverse()
+                        ->state([
+                            'title' => 'dsds ddtitle1dsd sds',
+                        ])
+                        ->setTags([$tag])
+                        ->setContents([$content])
+                        ->create();
+        $digiverse2 = Models\Collection::factory()
+                        ->digiverse()
+                        ->state([
+                            'title' => 'dsds sdtitle2sd sd',
+                        ])
+                        ->setTags([$tag])
+                        ->setContents([$content])
+                        ->create();
+        $digiverse3 = Models\Collection::factory()
+                        ->digiverse()
+                        ->state([
+                            'description' => 'dsds sdtitle3sd sd',
+                        ])
+                        ->setTags([$tag])
+                        ->setContents([$content])
+                        ->create();
+        $expected_response_structure = MockData\Digiverse::generateGetAllResponse();
+        $expected_response_structure['data']['digiverse']['userables'] = [];
+
+        $response = $this->json('GET', '/api/v1/digiverses?keyword=title1 title3');
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'digiverses' => [
+                    $expected_response_structure['data']['digiverse'],
+                ],
+            ]
+        ]);
+        $this->assertTrue(count($response->getData()->data->digiverses) === 2);
+        $digiverses = $response->getData()->data->digiverses;
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse1, 'id');
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse3, 'id');
+
+        $response = $this->json('GET', '/api/v1/digiverses?keyword=title2 title3');
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'digiverses' => [
+                    $expected_response_structure['data']['digiverse'],
+                ],
+            ]
+        ]);
+        $this->assertTrue(count($response->getData()->data->digiverses) === 2);
+        $digiverses = $response->getData()->data->digiverses;
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse2, 'id');
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse3, 'id');
+    }
+
+    public function test_filter_by_creators_works()
+    {
+        $user1 = Models\User::factory()->create();
+        $user2 = Models\User::factory()->create();
+        $user3 = Models\User::factory()->create();
+
+        $tag = Models\Tag::factory()->create();
+        $content = Models\Content::factory()->noDigiverse()->create();
+        $digiverse1 = Models\Collection::factory()
+                        ->digiverse()
+                        ->for($user1, 'owner')
+                        ->setTags([$tag])
+                        ->setContents([$content])
+                        ->create();
+        $digiverse2 = Models\Collection::factory()
+                        ->digiverse()
+                        ->for($user2, 'owner')
+                        ->setTags([$tag])
+                        ->setContents([$content])
+                        ->create();
+        $digiverse3 = Models\Collection::factory()
+                        ->digiverse()
+                        ->for($user3, 'owner')
+                        ->setTags([$tag])
+                        ->setContents([$content])
+                        ->create();
+        $expected_response_structure = MockData\Digiverse::generateGetAllResponse();
+        $expected_response_structure['data']['digiverse']['userables'] = [];
+
+        $response = $this->json('GET', "/api/v1/digiverses?creators={$user1->id},{$user3->id}");
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'digiverses' => [
+                    $expected_response_structure['data']['digiverse'],
+                ],
+            ]
+        ]);
+        $this->assertTrue(count($response->getData()->data->digiverses) === 2);
+        $digiverses = $response->getData()->data->digiverses;
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse1, 'id');
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse3, 'id');
+
+        $response = $this->json('GET', "/api/v1/digiverses?creators={$user2->id},{$user3->id}");
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'digiverses' => [
+                    $expected_response_structure['data']['digiverse'],
+                ],
+            ]
+        ]);
+        $this->assertTrue(count($response->getData()->data->digiverses) === 2);
+        $digiverses = $response->getData()->data->digiverses;
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse2, 'id');
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse3, 'id');
+    }
+
+    public function test_pagination_works()
+    {
+        $tag = Models\Tag::factory()->create();
+        $content = Models\Content::factory()->noDigiverse()->create();
+        $digiverse1 = Models\Collection::factory()
+                        ->digiverse()
+                        ->setTags([$tag])
+                        ->setContents([$content])
+                        ->create();
+        $digiverse2 = Models\Collection::factory()
+                        ->digiverse()
+                        ->setTags([$tag])
+                        ->setContents([$content])
+                        ->create();
+        $digiverse3 = Models\Collection::factory()
+                        ->digiverse()
+                        ->setTags([$tag])
+                        ->setContents([$content])
+                        ->create();
+
+        $expected_response_structure = MockData\Digiverse::generateGetAllResponse();
+        $expected_response_structure['data']['digiverse']['userables'] = [];
+        $response = $this->json('GET', '/api/v1/digiverses?page=1&limit=2');
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'digiverses' => [
+                    $expected_response_structure['data']['digiverse'],
+                ],
+            ]
+        ]);
+        $digiverses = $response->getData()->data->digiverses;
+        $this->assertTrue(count($digiverses) === 2);
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse1, 'id');
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse2, 'id');
+
+        $response = $this->json('GET', '/api/v1/digiverses?page=2&limit=2');
+        $response->assertStatus(200)
+        ->assertJsonStructure([
+            'data' => [
+                'digiverses' => [
+                    $expected_response_structure['data']['digiverse'],
+                ],
+            ]
+        ]);
+        $digiverses = $response->getData()->data->digiverses;
+        $this->assertTrue(count($digiverses) === 1);
+        $this->assertArrayHasObjectWithElementValue($digiverses, $digiverse3, 'id');
+    }
 }

@@ -308,10 +308,14 @@ class CollectionController extends Controller
                 $query->where('is_available', 1);
             });
 
-            foreach ($keywords as $keyword) {
-                $digiverses = $digiverses->where(function ($query) use ($keyword) {
-                    $query->where('title', 'LIKE', "%{$keyword}%")
-                    ->orWhere('description', 'LIKE', "%{$keyword}%");
+            if (! empty($keywords)) {
+                $digiverses = $digiverses->where(function ($query) use ($keywords) {
+                    $query->where('title', 'LIKE', "%{$keywords[0]}%")
+                    ->orWhere('description', 'LIKE', "%{$keywords[0]}%");
+                    for ($i = 1; $i < count($keywords); $i++) {
+                        $query->orWhere('title', 'LIKE', "%{$keywords[$i]}%")
+                            ->orWhere('description', 'LIKE', "%{$keywords[$i]}%");
+                    }
                 });
             }
 
@@ -418,10 +422,14 @@ class CollectionController extends Controller
 
             $digiverses = Collection::where('type', 'digiverse')->where('user_id', $request->user()->id);
 
-            foreach ($keywords as $keyword) {
-                $digiverses = $digiverses->where(function ($query) use ($keyword) {
-                    $query->where('title', 'LIKE', "%{$keyword}%")
-                    ->orWhere('description', 'LIKE', "%{$keyword}%");
+            if (! empty($keywords)) {
+                $digiverses = $digiverses->where(function ($query) use ($keywords) {
+                    $query->where('title', 'LIKE', "%{$keywords[0]}%")
+                    ->orWhere('description', 'LIKE', "%{$keywords[0]}%");
+                    for ($i = 1; $i < count($keywords); $i++) {
+                        $query->orWhere('title', 'LIKE', "%{$keywords[$i]}%")
+                            ->orWhere('description', 'LIKE', "%{$keywords[$i]}%");
+                    }
                 });
             }
 
