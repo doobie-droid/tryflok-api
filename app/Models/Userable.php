@@ -27,8 +27,6 @@ class Userable extends Model
      */
     protected $hidden = [
         'id',
-        'userable_id',
-        'user_id',
     ];
 
     protected $guard_name = 'api';

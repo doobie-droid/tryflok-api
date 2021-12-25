@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Http\Resources\UserResource;
+use App\Http\Resources\UserableResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CollectionResource extends JsonResource
@@ -23,6 +24,7 @@ class CollectionResource extends JsonResource
             'owner' => new UserResource($this->whenLoaded('owner')),
             'prices' => $this->whenLoaded('prices'),
             'tags' => $this->whenLoaded('tags'),
+            'userables' => UserableResource::collection($this->whenLoaded('userables')),
         ]);
     }
 

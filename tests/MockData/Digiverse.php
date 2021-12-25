@@ -104,7 +104,6 @@ class Digiverse
                 'userables' => [
                     [
                         'userable_type',
-                        'userable_id',
                     ]
                 ]
             ]
