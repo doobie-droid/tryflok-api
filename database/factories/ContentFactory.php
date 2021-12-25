@@ -18,34 +18,22 @@ class ContentFactory extends Factory
      */
     protected $model = Content::class;
 
-    /**
-     * @var Collection 
-     */ 
+    /** @var Collection */ 
     private $digiverse;
 
-    /**
-     * @var Tag[]
-     */
+    /** @var Tag[] */
     private $tags = [];
 
-    /**
-     * @var float 
-     */ 
+    /** @var float */ 
     private $priceAmount = 0;
     
-    /**
-     * @var Asset 
-     */ 
+    /** @var Asset */ 
     private $cover;
 
-    /**
-     * @var Asset 
-     */ 
+    /** @var Asset */ 
     private $asset;
 
-    /**
-     * @var Content 
-     */ 
+    /** @var Content */ 
     private $content;
 
     /**
@@ -199,9 +187,7 @@ class ContentFactory extends Factory
         });
     }
 
-    /**
-     * @param Tag[] $tags
-     */
+    /** @param Tag[] $tags */
     public function setTags(array $tags): self
     {
         $this->tags = $tags;
