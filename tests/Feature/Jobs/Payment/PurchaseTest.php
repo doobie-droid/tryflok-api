@@ -1,16 +1,10 @@
 <?php
 
-namespace Tests\Feature\Jobs;
+namespace Tests\Feature\Jobs\Payment;
 
-use App\Constants\Constants;
-use App\Constants\Roles;
+use App\Constants;
 use App\Jobs\Payment\Purchase as PurchaseJob;
-use App\Models\Benefactor;
-use App\Models\Collection;
-use App\Models\Content;
-use App\Models\Price;
-use App\Models\User;
-use App\Models\Userable;
+use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -19,68 +13,30 @@ class PurchaseTest extends TestCase
 {
     use DatabaseTransactions;
 
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
     public function test_purchase_works()
     {
-        $creator = User::factory()->create();
-        $creator->assignRole(Roles::USER);
-        $buyer = User::factory()->create();
-        $buyer->assignRole(Roles::USER);
-        $free_digiverse = Collection::factory()
+        $creator = Models\User::factory()->create();
+        $creator->assignRole(Constants\Roles::USER);
+        $buyer = Models\User::factory()->create();
+        $buyer->assignRole(Constants\Roles::USER);
+        $free_digiverse = Models\Collection::factory()
         ->for($creator, 'owner')
         ->digiverse()
-        ->has(Price::factory()
-            ->subscription()
-            ->state([
-            'amount' => 0,
-            ])
-            ->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $creator->id
-            ])
-        )
         ->create();
 
-        $free_content_in_free_digiverse = Content::factory()
+        $free_content_in_free_digiverse = Models\Content::factory()
         ->for($creator, 'owner')
-        ->has(Price::factory()->state([
-            'amount' => 0,
-        ])->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $creator->id
-            ])
-        )
         ->create();
 
-        $paid_content_in_free_digiverse = Content::factory()
+        $paid_content_in_free_digiverse = Models\Content::factory()
         ->for($creator, 'owner')
-        ->has(Price::factory()->state([
-            'amount' => 100,
-        ])->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $creator->id
-            ])
-        )
+        ->setPriceAmount(100)
         ->create();
 
-        $paid_digiverse = Collection::factory()
+        $paid_digiverse = Models\Collection::factory()
         ->for($creator, 'owner')
         ->digiverse()
-        ->has(Price::factory()->subscription()->state([
-            'amount' => 100,
-        ])->count(1))
-        ->has(
-            Benefactor::factory()->state([
-                'user_id' => $creator->id
-            ])
-        )
+        ->setPriceAmount(100)
         ->create();
 
         PurchaseJob::dispatch([
@@ -155,8 +111,8 @@ class PurchaseTest extends TestCase
             'revenueable_id' => $paid_digiverse->id,
             'amount' => 100,
             'payment_processor_fee' => 0,
-            'platform_share' => bcmul(100, Constants::NORMAL_CREATOR_CHARGE, 2),
-            'benefactor_share' => bcmul(100, 100 - Constants::NORMAL_CREATOR_CHARGE, 2),
+            'platform_share' => bcmul(100, Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
+            'benefactor_share' => bcmul(100, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
             'referral_bonus' => 0,
             'revenue_from' => 'sale',
         ]);
@@ -167,8 +123,8 @@ class PurchaseTest extends TestCase
             'revenueable_id' => $paid_content_in_free_digiverse->id,
             'amount' => 100,
             'payment_processor_fee' => 0,
-            'platform_share' => bcmul(100, Constants::NORMAL_CREATOR_CHARGE, 2),
-            'benefactor_share' => bcmul(100, 100 - Constants::NORMAL_CREATOR_CHARGE, 2),
+            'platform_share' => bcmul(100, Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
+            'benefactor_share' => bcmul(100, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
             'referral_bonus' => 0,
             'revenue_from' => 'sale',
         ]);
@@ -179,8 +135,8 @@ class PurchaseTest extends TestCase
             'revenueable_id' => $free_content_in_free_digiverse->id,
             'amount' => 0,
             'payment_processor_fee' => 0,
-            'platform_share' => bcmul(0, Constants::NORMAL_CREATOR_CHARGE, 2),
-            'benefactor_share' => bcmul(0, 100 - Constants::NORMAL_CREATOR_CHARGE, 2),
+            'platform_share' => bcmul(0, Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
+            'benefactor_share' => bcmul(0, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
             'referral_bonus' => 0,
             'revenue_from' => 'sale',
         ]);
@@ -212,7 +168,7 @@ class PurchaseTest extends TestCase
             'quantity' => 1,
         ]);
 
-        $collectionUserable = Userable::where('user_id', $buyer->id)->whereNull('parent_id')->where('userable_type', 'collection')->where('userable_id', $paid_digiverse->id)->where('status', 'available')->first();
+        $collectionUserable = Models\Userable::where('user_id', $buyer->id)->whereNull('parent_id')->where('userable_type', 'collection')->where('userable_id', $paid_digiverse->id)->where('status', 'available')->first();
         $this->assertFalse(is_null($collectionUserable));
         $this->assertDatabaseHas('subscriptions', [
             'subscriptionable_type' => 'collection',
@@ -221,7 +177,7 @@ class PurchaseTest extends TestCase
             'price_id' => $paid_digiverse->prices()->first()->id,
         ]);
 
-        $contentUserable1 = Userable::where('user_id', $buyer->id)->whereNull('parent_id')->where('userable_type', 'content')->where('userable_id', $paid_content_in_free_digiverse->id)->where('status', 'available')->first();
+        $contentUserable1 = Models\Userable::where('user_id', $buyer->id)->whereNull('parent_id')->where('userable_type', 'content')->where('userable_id', $paid_content_in_free_digiverse->id)->where('status', 'available')->first();
         $this->assertFalse(is_null($contentUserable1));
         $this->assertDatabaseMissing('subscriptions', [
             'subscriptionable_type' => 'content',
@@ -230,7 +186,7 @@ class PurchaseTest extends TestCase
             'price_id' => $paid_content_in_free_digiverse->prices()->first()->id,
         ]);
 
-        $contentUserable2 = Userable::where('user_id', $buyer->id)->whereNull('parent_id')->where('userable_type', 'content')->where('userable_id', $free_content_in_free_digiverse->id)->where('status', 'available')->first();
+        $contentUserable2 = Models\Userable::where('user_id', $buyer->id)->whereNull('parent_id')->where('userable_type', 'content')->where('userable_id', $free_content_in_free_digiverse->id)->where('status', 'available')->first();
         $this->assertFalse(is_null($contentUserable2));
         $this->assertDatabaseMissing('subscriptions', [
             'subscriptionable_type' => 'content',
