@@ -2,6 +2,8 @@
 
 namespace Tests\MockData;
 
+use App\Models;
+
 class User
 {
     const SEEDED_SUPER_ADMIN = [
@@ -76,4 +78,37 @@ class User
         'password' => 'user123',
         'password_confirmation' => 'user123',
     ];
+
+    const STANDARD_USER_RESPONSE_STRUCTURE = [
+        'status_code',
+        'message',
+        'data' => [
+            'user' => [
+                'roles',
+                'wallet',
+            ],
+            'token',
+        ]
+    ];
+
+    public static function generateStandardUserResponseJson($name, $email, $username, $roles = [])
+    {
+        $response = [
+            'data' => [
+                'user' => [
+                    'name' => $name,
+                    'email' => $email,
+                    'username' => $username,
+                    'roles' => [],
+                ],
+            ],
+        ];
+
+        foreach ($roles as $role) {
+            $response['data']['user']['roles'][] = [
+                'name' => $role,
+            ];
+        }
+        return $response;
+    }
 }

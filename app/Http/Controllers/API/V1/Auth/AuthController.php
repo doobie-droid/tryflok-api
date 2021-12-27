@@ -44,7 +44,7 @@ class AuthController extends Controller
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
                 'public_id' => uniqid(rand()),
-                'email_token' => Str::random(16),
+                'email_token' => Str::random(16) . 'YmdHis',
                 'referral_id' => strtoupper(Str::random(6)) . '-' . date('Ymd'),
             ]);
 
@@ -247,7 +247,7 @@ class AuthController extends Controller
             $token = JWTAuth::fromUser($otp->user);
             $user = User::with('roles', 'profile_picture', 'wallet')->where('id', $otp->user->id)->first();
             return $this->respondWithSuccess('Login successful', [
-                'user' => new UserResourceWithSensitive($otp->user),
+                'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
             ]);
         } catch (\Exception $exception) {

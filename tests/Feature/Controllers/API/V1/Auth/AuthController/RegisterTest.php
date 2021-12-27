@@ -6,9 +6,9 @@ use App\Constants;
 use App\Models;
 use App\Notifications\User\EmailConfirmation;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 use Tests\MockData;
 
@@ -16,46 +16,27 @@ class RegisterTest extends TestCase
 {
     use DatabaseTransactions;
     use WithFaker;
+    // TO DO: test invalid values are not registered
 
     public function test_registration_without_referrer_works()
     {
         Notification::fake();
-        $response = $this->json('POST', '/api/v1/auth/register', MockData\User::REGISTRATION_REQUEST);
+        $request = MockData\User::REGISTRATION_REQUEST;
+        $response = $this->json('POST', '/api/v1/auth/register', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure([
-            'status_code',
-            'message',
-            'data' => [
-                'user' => [
-                    'roles',
-                    'wallet',
-                ],
-                'token',
-            ]
-        ])
-        ->assertJson([
-            'data' => [
-                'user' => [
-                    'name' => MockData\User::REGISTRATION_REQUEST['name'],
-                    'email' => MockData\User::REGISTRATION_REQUEST['email'],
-                    'username' => MockData\User::REGISTRATION_REQUEST['username'],
-                    'roles' => [
-                        [
-                            'name' => Constants\Roles::USER,
-                        ]
-                    ]
-                ]
-            ]
-        ]);
-        $user = Models\User::where('email', MockData\User::REGISTRATION_REQUEST['email'])->first();
+        ->assertJsonStructure(MockData\User::STANDARD_USER_RESPONSE_STRUCTURE)
+        ->assertJson(
+            MockData\User::generateStandardUserResponseJson($request['name'], $request['email'], $request['username'], [Constants\Roles::USER])
+        );
+        $user = Models\User::where('email', $request['email'])->first();
         Notification::assertSentTo(
             [$user],
             EmailConfirmation::class
         );
 
         $this->assertDatabaseHas('users', [
-            'email' => MockData\User::REGISTRATION_REQUEST['email'],
-            'name' => MockData\User::REGISTRATION_REQUEST['name'],
+            'email' => $request['email'],
+            'name' => $request['name'],
         ]);
     }
 
@@ -67,31 +48,8 @@ class RegisterTest extends TestCase
         Notification::fake();
         $response = $this->json('POST', '/api/v1/auth/register', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure([
-            'status_code',
-            'message',
-            'data' => [
-                'user' => [
-                    'roles',
-                    'wallet',
-                ],
-                'token',
-            ]
-        ])
-        ->assertJson([
-            'data' => [
-                'user' => [
-                    'name' => $request['name'],
-                    'email' => $request['email'],
-                    'username' => $request['username'],
-                    'roles' => [
-                        [
-                            'name' => Constants\Roles::USER,
-                        ]
-                    ]
-                ]
-            ]
-        ]);
+        ->assertJsonStructure(MockData\User::STANDARD_USER_RESPONSE_STRUCTURE)
+        ->assertJson(MockData\User::generateStandardUserResponseJson($request['name'], $request['email'], $request['username'], [Constants\Roles::USER]));
         $user2 = Models\User::where('email', $request['email'])->first();
         Notification::assertSentTo(
             [$user2],
@@ -140,5 +98,34 @@ class RegisterTest extends TestCase
         $request['email'] = $this->faker->unique()->safeEmail;
         $response = $this->json('POST', '/api/v1/auth/register', $request);
         $response->assertStatus(200);
+    }
+
+    public function test_verify_email_works()
+    {
+        $email_token = Str::random(16) . 'YmdHis';
+        $user = Models\User::factory()
+        ->state([
+            'email_verified' => 0,
+            'email_token' => $email_token,
+        ])
+        ->create();
+        $user->assignRole(Constants\Roles::USER);
+
+        $request = [
+            'token' => $email_token,
+        ];
+        $response = $this->json('PATCH', '/api/v1/auth/email', $request);
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\User::STANDARD_USER_RESPONSE_STRUCTURE)
+        ->assertJsonStructure(MockData\User::STANDARD_USER_RESPONSE_STRUCTURE)
+        ->assertJson(
+            MockData\User::generateStandardUserResponseJson($user->name, $user->email, $user->username, [Constants\Roles::USER])
+        );
+
+        $this->assertDatabaseHas('users', [
+            'email' => $user->email,
+            'email_token' => '',
+            'email_verified' => 1,
+        ]);
     }
 }
