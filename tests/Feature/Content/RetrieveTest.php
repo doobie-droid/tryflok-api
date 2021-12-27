@@ -25,16 +25,6 @@ class RetrieveTest extends TestCase
     use DatabaseTransactions;
     use WithFaker;
 
-    public function test_retrieve_single_content_works()
-    {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
-        $this->be($user);
-        $content = Content::factory()->setTags([Tag::factory()->create()])->create();
-        $response = $this->json('GET', "/api/v1/contents/{$content->id}");
-        $response->assertStatus(200)->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
-    }
-
     public function test_retrieve_all_digiverse_contents_fails_with_invalid_parameters()
     {
         $digiverse = Collection::factory()->digiverse()->create();

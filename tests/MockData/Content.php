@@ -37,6 +37,21 @@ class Content
         ];
     }
 
+    public static function generateGetSingleContentResponse(): array
+    {
+        $structure = self::STANDARD_STRUCTURE;
+        $structure[] = 'access_through_ancestors';
+        $structure[] = 'userables';
+
+        return [
+            'status_code',
+            'message',
+            'data' => [
+                'content' => $structure,
+            ],
+        ];
+    }
+
     const STANDARD_STRUCTURE = [
         'id',
         'title',
