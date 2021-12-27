@@ -1,18 +1,13 @@
 <?php
 
-namespace Tests\Feature\Content;
+namespace Tests\Feature\Controllers\API\V1\ContentController;
 
-use App\Constants\Roles;
-use App\Models\Asset;
-use App\Models\Collection;
-use App\Models\Content;
-use App\Models\Price;
-use App\Models\Tag;
-use App\Models\User;
+use App\Constants;
+use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Str;
-use Tests\MockData\Content as ContentMock;
+use Tests\MockData;
 use Tests\TestCase;
 
 class UpdateTest extends TestCase
@@ -20,79 +15,20 @@ class UpdateTest extends TestCase
     use DatabaseTransactions;
     use WithFaker;
 
-    private function generateSingleContent($user)
-    {
-        $tag1 = Tag::factory()->create();
-        $tag2 = Tag::factory()->create();
-        $content = Content::factory()
-        ->state([
-            'type' => 'audio',
-            'title' => 'title before update',
-            'description' => 'description before update',
-            'is_available' => 1,
-        ])
-        ->hasAttached(
-            Asset::factory()->audio()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'content-asset',
-            ]
-        )
-        ->hasAttached(
-            Asset::factory()->count(1),
-            [
-            'id' => Str::uuid(),
-            'purpose' => 'cover',
-            ]
-        )
-        ->hasAttached($tag1, [
-            'id' => Str::uuid(),
-        ])
-        ->hasAttached($tag2, [
-            'id' => Str::uuid(),
-        ])
-        ->hasAttached(
-            Collection::factory()->digiverse(),
-            [
-                'id' => Str::uuid(),
-            ]
-        )
-        ->has(Price::factory()->state([
-            'amount' => 10,
-            'interval' => 'one-off',
-            'interval_amount' => 1,
-        ])->count(1))
-        ->for($user, 'owner')
-        ->create();
-
-        $price = $content->prices()->first();
-        $asset = $content->assets()->first();
-        $cover = $content->cover()->first();
-
-        return [
-            'content' => $content,
-            'cover' => $cover,
-            'asset' => $asset,
-            'tags' => [
-                $tag1,
-                $tag2,
-            ],
-            'price' => $price,
-        ];
-    }
-
     public function test_content_is_not_updated_with_invalid_input()
     {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
-        $testData = $this->generateSingleContent($user);
-        $content = $testData['content'];
 
-        $coverAsset = Asset::factory()->create();
-        $pdfAsset = Asset::factory()->pdf()->create();
-        $audioAsset = Asset::factory()->audio()->create();
-        $tag = Tag::factory()->create();
+        $content = Models\Content::factory()
+                    ->for($user, 'owner')
+                    ->audio()->create();
+
+        $coverAsset = Models\Asset::factory()->create();
+        $pdfAsset = Models\Asset::factory()->pdf()->create();
+        $audioAsset = Models\Asset::factory()->audio()->create();
+        $tag = Models\Tag::factory()->create();
         $complete_request = [
             'title' => 'A content',
             'description' => 'Content description',
@@ -250,8 +186,8 @@ class UpdateTest extends TestCase
          ]);
 
         //when user does not own content
-        $user2 = User::factory()->create();
-        $user2->assignRole(Roles::USER);
+        $user2 = Models\User::factory()->create();
+        $user2->assignRole(Constants\Roles::USER);
         $this->be($user2);
         $response = $this->json('PATCH', "/api/v1/contents/{$content->id}", $complete_request);
         $response->assertStatus(400);
@@ -259,19 +195,23 @@ class UpdateTest extends TestCase
 
     public function test_content_is_updated_with_valid_inputs()
     {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
-        $test_data = $this->generateSingleContent($user);
-        $content = $test_data['content'];
-        $old_asset_id = $test_data['asset']->id;
-        $old_cover_id = $test_data['cover']->id;
-        $old_tag1 = $test_data['tags'][0];
-        $old_tag2 = $test_data['tags'][1];
+        
+        $old_tag1 = Models\Tag::factory()->create();
+        $old_tag2 = Models\Tag::factory()->create();
+        $content = Models\Content::factory()
+            ->for($user, 'owner')
+            ->audio()
+            ->setTags([$old_tag1, $old_tag2])
+            ->create();
+        $old_asset_id = $content->assets()->first()->id;
+        $old_cover_id = $content->cover()->first()->id;
 
-        $cover_asset = Asset::factory()->create();
-        $audio_asset = Asset::factory()->audio()->create();
-        $tag = Tag::factory()->create();
+        $cover_asset = Models\Asset::factory()->create();
+        $audio_asset = Models\Asset::factory()->audio()->create();
+        $tag = Models\Tag::factory()->create();
         // when all inputs are present
         $complete_request = [
             'title' => 'A content',
@@ -298,7 +238,7 @@ class UpdateTest extends TestCase
 
         $response = $this->json('PATCH', "/api/v1/contents/{$content->id}", $complete_request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
+        ->assertJsonStructure(MockData\Content::generateStandardCreateResponse());
 
         $this->assertDatabaseHas('contents', [
             'id' => $content->id,
@@ -372,15 +312,19 @@ class UpdateTest extends TestCase
 
     public function test_adding_views_works()
     {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
-        $test_data = $this->generateSingleContent($user);
-        $content = $test_data['content'];
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
+        $content = Models\Content::factory()
+            ->audio()
+            ->setTags([$tag1, $tag2])
+            ->create();
 
         //when no user is logged in
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/views");
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_COVER_AND_ASSET_RESPONSE);
+        ->assertJsonStructure(MockData\Content::generateStandardCreateResponse());
 
         $this->assertDatabaseHas('views', [
             'viewable_id' => $content->id,
@@ -392,7 +336,7 @@ class UpdateTest extends TestCase
         $this->be($user);
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/views");
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_COVER_AND_ASSET_RESPONSE);
+        ->assertJsonStructure(MockData\Content::generateStandardCreateResponse());
 
         $this->assertDatabaseHas('views', [
             'viewable_id' => $content->id,
