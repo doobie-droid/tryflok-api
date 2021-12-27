@@ -66,6 +66,14 @@ class User
         'username' => 'unseeded',
         'password' => 'user123',
         'password_confirmation' => 'user123',
-        //'referral_id' => 'TLHJKB-210506',
+        'referral_id' => 'TLHJKB-210506',
+    ];
+
+    const REGISTRATION_REQUEST = [
+        'name' => 'Test User',
+        'email' => 'user5@test.com',
+        'username' => 'test_user',
+        'password' => 'user123',
+        'password_confirmation' => 'user123',
     ];
 }
