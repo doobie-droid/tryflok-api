@@ -1,15 +1,12 @@
 <?php
 
-namespace Tests\Feature\Content;
+namespace Tests\Feature\Controllers\API\V1\ContentController;
 
-use App\Constants\Roles;
-use App\Models\Asset;
-use App\Models\Collection;
-use App\Models\Content;
-use App\Models\User;
+use App\Constants;
+use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
-use Tests\MockData\Content as ContentMock;
+use Tests\MockData;
 use Tests\TestCase;
 
 class CreateTest extends TestCase
@@ -18,16 +15,18 @@ class CreateTest extends TestCase
 
     public function test_content_is_not_created_with_invalid_inputs()
     {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
-        $digiverse = Collection::factory()
+        $digiverse = Models\Collection::factory()
         ->for($user, 'owner')
         ->digiverse()
         ->create();
-        $coverAsset = Asset::factory()->create();
-        $audioAsset = Asset::factory()->audio()->create();
-        $pdfAsset = Asset::factory()->pdf()->create();
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
+        $coverAsset = Models\Asset::factory()->create();
+        $audioAsset = Models\Asset::factory()->audio()->create();
+        $pdfAsset = Models\Asset::factory()->pdf()->create();
         $completeRequest = [
             'title' => 'A content',
             'description' => 'Content description',
@@ -39,8 +38,8 @@ class CreateTest extends TestCase
                 'amount' => 10,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
-                '120566de-0361-4d66-b458-321d4ede62a9'
+                $tag1->id,
+                $tag2->id,
             ],
             'cover' => [
                 'asset_id' => $coverAsset->id,
@@ -101,15 +100,17 @@ class CreateTest extends TestCase
 
     public function test_video_content_gets_created()
     {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
-        $digiverse = Collection::factory()
+        $digiverse = Models\Collection::factory()
         ->digiverse()
         ->for($user, 'owner')
         ->create();
-        $coverAsset = Asset::factory()->create();
-        $videoAsset = Asset::factory()->video()->create();
+        $coverAsset = Models\Asset::factory()->create();
+        $videoAsset = Models\Asset::factory()->video()->create();
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
         $request = [
             'title' => 'A content ' . date('YmdHis'),
             'description' => 'Content description',
@@ -121,15 +122,15 @@ class CreateTest extends TestCase
                 'amount' => 10,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
-                '120566de-0361-4d66-b458-321d4ede62a9'
+                $tag1->id,
+                $tag2->id
             ],
             'cover' => [
                 'asset_id' => $coverAsset->id,
             ],
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
-        $response->assertStatus(200)->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
+        $response->assertStatus(200)->assertJsonStructure(MockData\Content::generateStandardCreateResponse());
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -140,7 +141,7 @@ class CreateTest extends TestCase
             'approved_by_admin' => 0,
             'show_only_in_digiverses' => 1,
         ]);
-        $content = Content::where('title', $request['title'])->first();
+        $content = Models\Content::where('title', $request['title'])->first();
         // content is attached to collection
         $this->assertDatabaseHas('collection_content', [
             'collection_id' => $digiverse->id,
@@ -149,17 +150,17 @@ class CreateTest extends TestCase
         $this->assertTrue($digiverse->contents()->where('contents.id', $content->id)->count() === 1);
         // validate tags was attached
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][0],
+            'tag_id' => $tag1->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][0])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag1->id)->count() === 1);
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][1],
+            'tag_id' => $tag2->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][1])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag2->id)->count() === 1);
 
         //validate cover was attached
         $this->assertDatabaseHas('assetables', [
@@ -201,15 +202,17 @@ class CreateTest extends TestCase
 
     public function test_audio_content_gets_created()
     {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
-        $digiverse = Collection::factory()
+        $digiverse = Models\Collection::factory()
         ->digiverse()
         ->for($user, 'owner')
         ->create();
-        $coverAsset = Asset::factory()->create();
-        $audioAsset = Asset::factory()->audio()->create();
+        $coverAsset = Models\Asset::factory()->create();
+        $audioAsset = Models\Asset::factory()->audio()->create();
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
         $request = [
             'title' => 'A content ' . date('YmdHis'),
             'description' => 'Content description',
@@ -221,8 +224,8 @@ class CreateTest extends TestCase
                 'amount' => 10,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
-                '120566de-0361-4d66-b458-321d4ede62a9'
+                $tag1->id,
+                $tag2->id,
             ],
             'cover' => [
                 'asset_id' => $coverAsset->id,
@@ -230,7 +233,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
+        ->assertJsonStructure(MockData\Content::generateStandardCreateResponse());
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -241,7 +244,7 @@ class CreateTest extends TestCase
             'approved_by_admin' => 0,
             'show_only_in_digiverses' => 1,
         ]);
-        $content = Content::where('title', $request['title'])->first();
+        $content = Models\Content::where('title', $request['title'])->first();
 
          // content is attached to collection
          $this->assertDatabaseHas('collection_content', [
@@ -252,17 +255,17 @@ class CreateTest extends TestCase
 
         //validate tags was attached
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][0],
+            'tag_id' => $tag1->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][0])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag1->id)->count() === 1);
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][1],
+            'tag_id' => $tag2->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][1])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag2->id)->count() === 1);
 
         //validate cover was attached
         $this->assertDatabaseHas('assetables', [
@@ -304,15 +307,17 @@ class CreateTest extends TestCase
 
     public function test_pdf_content_gets_created()
     {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
-        $digiverse = Collection::factory()
+        $digiverse = Models\Collection::factory()
         ->digiverse()
         ->for($user, 'owner')
         ->create();
-        $coverAsset = Asset::factory()->create();
-        $pdfAsset = Asset::factory()->pdf()->create();
+        $coverAsset = Models\Asset::factory()->create();
+        $pdfAsset = Models\Asset::factory()->pdf()->create();
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
         $request = [
             'title' => 'A content ' . date('YmdHis'),
             'description' => 'Content description',
@@ -324,8 +329,8 @@ class CreateTest extends TestCase
                 'amount' => 10,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
-                '120566de-0361-4d66-b458-321d4ede62a9'
+                $tag1->id,
+                $tag2->id,
             ],
             'cover' => [
                 'asset_id' => $coverAsset->id,
@@ -333,7 +338,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
+        ->assertJsonStructure(MockData\Content::generateStandardCreateResponse());
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -344,7 +349,7 @@ class CreateTest extends TestCase
             'approved_by_admin' => 0,
             'show_only_in_digiverses' => 1,
         ]);
-        $content = Content::where('title', $request['title'])->first();
+        $content = Models\Content::where('title', $request['title'])->first();
 
          // content is attached to collection
          $this->assertDatabaseHas('collection_content', [
@@ -355,17 +360,17 @@ class CreateTest extends TestCase
 
         //validate tags was attached
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][0],
+            'tag_id' => $tag1->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][0])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag1->id)->count() === 1);
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][1],
+            'tag_id' => $tag2->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][1])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag2->id)->count() === 1);
 
         //validate cover was attached
         $this->assertDatabaseHas('assetables', [
@@ -407,14 +412,16 @@ class CreateTest extends TestCase
 
     public function test_newsletter_content_gets_created()
     {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
-        $digiverse = Collection::factory()
+        $digiverse = Models\Collection::factory()
         ->digiverse()
         ->for($user, 'owner')
         ->create();
-        $coverAsset = Asset::factory()->create();
+        $coverAsset = Models\Asset::factory()->create();
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
         $request = [
             'title' => 'A content ' . date('YmdHis'),
             'description' => 'a escription',
@@ -426,8 +433,8 @@ class CreateTest extends TestCase
                 'amount' => 0,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
-                '120566de-0361-4d66-b458-321d4ede62a9'
+                $tag1->id,
+                $tag2->id,
             ],
             'cover' => [
                 'asset_id' => $coverAsset->id,
@@ -435,7 +442,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_ASSET_RESPONSE);
+        ->assertJsonStructure(MockData\Content::generateStandardCreateResponse());
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -446,7 +453,7 @@ class CreateTest extends TestCase
             'approved_by_admin' => 0,
             'show_only_in_digiverses' => 1,
         ]);
-        $content = Content::where('title', $request['title'])->first();
+        $content = Models\Content::where('title', $request['title'])->first();
 
          // content is attached to collection
          $this->assertDatabaseHas('collection_content', [
@@ -457,17 +464,17 @@ class CreateTest extends TestCase
 
         //validate tags was attached
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][0],
+            'tag_id' => $tag1->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][0])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag1->id)->count() === 1);
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][1],
+            'tag_id' => $tag2->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][1])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag2->id)->count() === 1);
 
         //validate cover was attached
         $this->assertDatabaseHas('assetables', [
@@ -512,14 +519,17 @@ class CreateTest extends TestCase
 
     public function test_live_audio_content_gets_created()
     {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
-        $digiverse = Collection::factory()
+        $digiverse = Models\Collection::factory()
         ->digiverse()
         ->for($user, 'owner')
         ->create();
         $scheduled_date = now()->addDays(2);
+        $coverAsset = Models\Asset::factory()->create();
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
         $request = [
             'title' => 'A content ' . date('YmdHis'),
             'description' => 'Content description',
@@ -530,14 +540,17 @@ class CreateTest extends TestCase
                 'amount' => 0,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
-                '120566de-0361-4d66-b458-321d4ede62a9'
+                $tag1->id,
+                $tag2->id,
+            ],
+            'cover' => [
+                'asset_id' => $coverAsset->id,
             ],
             'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_COVER_AND_ASSET_RESPONSE);
+        ->assertJsonStructure(MockData\Content::generateLiveContentCreateResponse());
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -550,7 +563,7 @@ class CreateTest extends TestCase
             'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
             'live_status' => 'inactive',
         ]);
-        $content = Content::where('title', $request['title'])->first();
+        $content = Models\Content::where('title', $request['title'])->first();
 
         $this->assertDatabaseHas('metas', [
             'metaable_type' => 'content',
@@ -589,17 +602,17 @@ class CreateTest extends TestCase
 
         //validate tags was attached
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][0],
+            'tag_id' => $tag1->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][0])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag1->id)->count() === 1);
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][1],
+            'tag_id' => $tag2->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][1])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag2->id)->count() === 1);
 
         //validate price was created
         $this->assertDatabaseHas('prices', [
@@ -624,14 +637,17 @@ class CreateTest extends TestCase
 
     public function test_live_video_content_gets_created()
     {
-        $user = User::factory()->create();
-        $user->assignRole(Roles::USER);
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
-        $digiverse = Collection::factory()
+        $digiverse = Models\Collection::factory()
         ->digiverse()
         ->for($user, 'owner')
         ->create();
         $scheduled_date = now()->addDays(2);
+        $coverAsset = Models\Asset::factory()->create();
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
         $request = [
             'title' => 'A content ' . date('YmdHis'),
             'description' => 'Content description',
@@ -642,14 +658,17 @@ class CreateTest extends TestCase
                 'amount' => 0,
             ],
             'tags' => [
-                '0e14760d-1d41-45aa-a820-87d6dc35f7ff',
-                '120566de-0361-4d66-b458-321d4ede62a9'
+                $tag1->id,
+                $tag2->id,
+            ],
+            'cover' => [
+                'asset_id' => $coverAsset->id,
             ],
             'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(ContentMock::CONTENT_WITH_NO_COVER_AND_ASSET_RESPONSE);
+        ->assertJsonStructure(MockData\Content::generateLiveContentCreateResponse());
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],
@@ -662,7 +681,7 @@ class CreateTest extends TestCase
             'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
             'live_status' => 'inactive',
         ]);
-        $content = Content::where('title', $request['title'])->first();
+        $content = Models\Content::where('title', $request['title'])->first();
 
         $this->assertDatabaseHas('metas', [
             'metaable_type' => 'content',
@@ -701,17 +720,17 @@ class CreateTest extends TestCase
 
         //validate tags was attached
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][0],
+            'tag_id' => $tag1->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][0])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag1->id)->count() === 1);
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $request['tags'][1],
+            'tag_id' => $tag2->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $request['tags'][1])->count() === 1);
+        $this->assertTrue($content->tags()->where('tags.id', $tag2->id)->count() === 1);
 
         //validate price was created
         $this->assertDatabaseHas('prices', [
