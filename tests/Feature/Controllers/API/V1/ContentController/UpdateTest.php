@@ -344,4 +344,56 @@ class UpdateTest extends TestCase
             'user_id' => $user->id,
         ]);
     }
+
+    public function test_attach_media_to_content_fails_if_user_does_not_own_content()
+    {
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
+        $content = Models\Content::factory()
+            ->audio()
+            ->setTags([$tag1, $tag2])
+            ->create();
+
+        $this->be($user);
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/attach-media");
+        $response->assertStatus(400);
+    }
+
+    public function test_attach_media_to_content_works()
+    {
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
+        $content = Models\Content::factory()
+            ->audio()
+            ->for($user, 'owner')
+            ->setTags([$tag1, $tag2])
+            ->create();
+        $asset1 = Models\Asset::factory()->create();
+        $asset2 = Models\Asset::factory()->create();
+        $this->be($user);
+        $request = [
+            'asset_ids' => [
+                $asset1->id,
+                $asset2->id,
+            ]
+        ];
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/attach-media", $request);
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('assetables', [
+            'assetable_type' => 'content',
+            'assetable_id' => $content->id,
+            'asset_id' => $asset1->id,
+            'purpose' => 'attached-media',
+        ]);
+        $this->assertDatabaseHas('assetables', [
+            'assetable_type' => 'content',
+            'assetable_id' => $content->id,
+            'asset_id' => $asset2->id,
+            'purpose' => 'attached-media',
+        ]);
+    }
 }

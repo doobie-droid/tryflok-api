@@ -329,17 +329,21 @@ class ContentController extends Controller
     public function attachMediaToContent(Request $request, $id)
     {
         try {
-            $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
                 'asset_ids' => ['required'], 
                 'asset_ids.*' => ['sometimes', 'nullable', 'string', 'exists:assets,id',],
             ]);
 
-            if ($validator1->fails()) {
-                return $this->respondBadRequest('Invalid or missing input fields', $validator1->errors()->toArray());
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
             $content = Content::where('id', $id)->first();
+
+            if ($request->user()->id !== $content->user_id) {
+                return $this->respondBadRequest('You cannot edit this content because you do not own it');
+            }
 
             foreach ($request->asset_ids as $asset_id) {
                 $content->assets()->attach($asset_id, [
