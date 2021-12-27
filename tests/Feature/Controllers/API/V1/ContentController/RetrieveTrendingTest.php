@@ -282,7 +282,7 @@ class RetrieveTrendingTest extends TestCase
             ->create();
         $content4 = Models\Content::factory()
             ->state([
-                'trending_points' => 10,
+                'trending_points' => 15,
             ])
             ->setTags([Models\Tag::factory()->create()])
             ->create();
