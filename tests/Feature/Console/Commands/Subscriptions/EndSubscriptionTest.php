@@ -1,72 +1,61 @@
 <?php
 
-namespace Tests\Feature\Commands;
+namespace Tests\Feature\Console\Commands\Subscriptions;
 
-use App\Models\Collection;
-use App\Models\Price;
-use App\Models\Subscription;
-use App\Models\User;
-use App\Models\Userable;
-use App\Models\Wallet;
+use App\Constants;
+use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Str;
+use Tests\MockData;
 use Tests\TestCase;
 
 class EndSubscriptionTest extends TestCase
 {
     use DatabaseTransactions;
-    use WithFaker;
 
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
     public function test_end_subscription_works()
     {
-
-        $collection = Collection::factory()
+        $collection_price = 100;
+        $collection = Models\Collection::factory()
+        ->setPriceAmount($collection_price)
         ->digiverse()
         ->create();
-        $price = Price::factory()
-        ->for($collection, 'priceable')
-        ->subscription()
-        ->create();
-        $price_in_flk = bcmul($price->amount, 100, 2);
+        $price = $collection->prices()->first();
+        $price_in_flk = bcmul($collection_price, 100, 2);
 
         // subscription has not ended
-        $user1 = User::factory()->create();
-        $user1_wallet = Wallet::factory()
+        $user1 = Models\User::factory()->create();
+        $user1_wallet = Models\Wallet::factory()
         ->for($user1, 'walletable')
         ->create();
         $user1_initial_wallet_balance = $user1_wallet->balance;
-        $user1_userable = Userable::factory()
+        $user1_userable = Models\Userable::factory()
         ->for($user1)
         ->state([
             'userable_type' => 'collection',
             'userable_id' => $collection->id,
         ])
         ->create();
-        $user1_subscription = Subscription::factory()
+        $user1_subscription = Models\Subscription::factory()
         ->for($user1_userable)
         ->for($collection, 'subscriptionable')
         ->for($price)
         ->create();
 
         // subscription has ended, is set to auto-renew and user has money
-        $user2 = User::factory()->create();
-        $user2_wallet = Wallet::factory()
+        $user2 = Models\User::factory()->create();
+        $user2_wallet = Models\Wallet::factory()
         ->for($user2, 'walletable')
         ->create();
         $user2_initial_wallet_balance = $user2_wallet->balance;
-        $user2_userable = Userable::factory()
+        $user2_userable = Models\Userable::factory()
         ->for($user2)
         ->state([
             'userable_type' => 'collection',
             'userable_id' => $collection->id,
         ])
         ->create();
-        $user2_subscription = Subscription::factory()
+        $user2_subscription = Models\Subscription::factory()
         ->for($user2_userable)
         ->for($price)
         ->for($collection, 'subscriptionable')
@@ -77,22 +66,22 @@ class EndSubscriptionTest extends TestCase
         ->create();
 
         // subscription has ended, is set to auto-renew and user does not have money
-        $user3 = User::factory()->create();
-        $user3_wallet = Wallet::factory()
+        $user3 = Models\User::factory()->create();
+        $user3_wallet = Models\Wallet::factory()
         ->for($user3, 'walletable')
         ->state([
             'balance' => 0,
         ])
         ->create();
         $user3_initial_wallet_balance = $user3_wallet->balance;
-        $user3_userable = Userable::factory()
+        $user3_userable = Models\Userable::factory()
         ->for($user3)
         ->state([
             'userable_type' => 'collection',
             'userable_id' => $collection->id,
         ])
         ->create();
-        $user3_subscription = Subscription::factory()
+        $user3_subscription = Models\Subscription::factory()
         ->for($user3_userable)
         ->for($price)
         ->for($collection, 'subscriptionable')
@@ -103,19 +92,19 @@ class EndSubscriptionTest extends TestCase
         ->create();
 
         // subscription has ended, is not set to auto-renew and user has money
-        $user4 = User::factory()->create();
-        $user4_wallet = Wallet::factory()
+        $user4 = Models\User::factory()->create();
+        $user4_wallet = Models\Wallet::factory()
         ->for($user4, 'walletable')
         ->create();
         $user4_initial_wallet_balance = $user4_wallet->balance;
-        $user4_userable = Userable::factory()
+        $user4_userable = Models\Userable::factory()
         ->for($user4)
         ->state([
             'userable_type' => 'collection',
             'userable_id' => $collection->id,
         ])
         ->create();
-        $user4_subscription = Subscription::factory()
+        $user4_subscription = Models\Subscription::factory()
         ->doNotAutoRenew()
         ->for($user4_userable)
         ->for($price)

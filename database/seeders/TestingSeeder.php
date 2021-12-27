@@ -16,8 +16,8 @@ class TestingSeeder extends Seeder
         $this->call(RolesAndPermissionSeeder::class);
         //$this->call(UsersTableSeeder::class);
         $this->call(LocationsSeeder::class);
-        // $this->call(CategorysTableSeeder::class);
-        // $this->call(TagsTableSeeder::class);
+        $this->call(CategorysTableSeeder::class);
+        $this->call(TagsTableSeeder::class);
         $this->call(LanguagesTableSeeder::class);
         //$this->call(AssetsTableSeeder::class);
         //$this->call(DigiverseTableSeeder::class);
