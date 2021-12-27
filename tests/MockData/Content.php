@@ -69,6 +69,24 @@ class Content
         ];
     }
 
+    public static function generateGetAssetsResponse(): array
+    {
+        return [
+            'status_code',
+            'message',
+            'data' => [
+                'assets' => [
+                    [
+                        'url',
+                        'id',
+                    ]
+                ],
+                'cookies',
+                'cookies_expire',
+            ],
+        ];
+    }
+
     const STANDARD_STRUCTURE = [
         'id',
         'title',
