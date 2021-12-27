@@ -1,30 +1,23 @@
 <?php
 
-namespace Tests\Feature\Content;
+namespace Tests\Feature\Controllers\API\V1\ContentController;
 
+use App\Constants;
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
-use App\Models\Content;
-use App\Models\Price;
-use App\Models\User;
-use Illuminate\Support\Str;
+use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Str;
+use Tests\MockData;
 use Tests\TestCase;
 
 class LiveTest extends TestCase
 {
     use DatabaseTransactions;
-    use WithFaker;
 
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
     public function test_start_live_works()
     {
-        $user = User::factory()->create();
-        $user2 = User::factory()->create();
+        $user = Models\User::factory()->create();
+        $user2 = Models\User::factory()->create();
 
         $user->followers()->syncWithoutDetaching([
             $user2->id => [
@@ -33,7 +26,7 @@ class LiveTest extends TestCase
         ]);
 
         $this->be($user);
-        $content = Content::factory()
+        $content = Models\Content::factory()
         ->for($user, 'owner')
         ->liveAudio()
         ->futureScheduledDate()
@@ -66,9 +59,9 @@ class LiveTest extends TestCase
 
     public function test_start_live_does_not_work_for_non_live_content()
     {
-        $user = User::factory()->create();
+        $user = Models\User::factory()->create();
         $this->be($user);
-        $content = Content::factory()
+        $content = Models\Content::factory()
         ->for($user, 'owner')
         ->audio()
         ->create();
@@ -84,10 +77,10 @@ class LiveTest extends TestCase
 
     public function test_start_live_does_not_work_if_not_creator_live_content()
     {
-        $user = User::factory()->create();
+        $user = Models\User::factory()->create();
         $this->be($user);
-        $user2 = User::factory()->create();
-        $content = Content::factory()
+        $user2 = Models\User::factory()->create();
+        $content = Models\Content::factory()
         ->for($user2, 'owner')
         ->liveAudio()
         ->create();
@@ -103,10 +96,10 @@ class LiveTest extends TestCase
 
     public function test_join_live_does_not_work_if_channel_not_started()
     {
-        $user = User::factory()->create();
+        $user = Models\User::factory()->create();
         $this->be($user);
-        $user2 = User::factory()->create();
-        $content = Content::factory()
+        $user2 = Models\User::factory()->create();
+        $content = Models\Content::factory()
         ->for($user2, 'owner')
         ->liveAudio()
         ->create();
@@ -117,16 +110,11 @@ class LiveTest extends TestCase
 
     public function test_join_live_works()
     {
-        $user = User::factory()->create();
-        $user2 = User::factory()->create();
-        $content = Content::factory()
+        $user = Models\User::factory()->create();
+        $user2 = Models\User::factory()->create();
+        $content = Models\Content::factory()
         ->for($user2, 'owner')
         ->liveAudio()
-        ->has(Price::factory()->state([
-            'amount' => 0,
-            'interval' => 'one-off',
-            'interval_amount' => 1,
-        ]))
         ->create();
         $this->be($user2);
         $this->json('POST', "/api/v1/contents/{$content->id}/live");
@@ -146,10 +134,10 @@ class LiveTest extends TestCase
 
     public function test_end_live_does_not_work_if_not_creator_live_content()
     {
-        $user = User::factory()->create();
+        $user = Models\User::factory()->create();
         
-        $user2 = User::factory()->create();
-        $content = Content::factory()
+        $user2 = Models\User::factory()->create();
+        $content = Models\Content::factory()
         ->for($user2, 'owner')
         ->liveAudio()
         ->create();
@@ -167,9 +155,9 @@ class LiveTest extends TestCase
 
     public function test_end_live_works()
     {
-        $user = User::factory()->create();
+        $user = Models\User::factory()->create();
         $this->be($user);
-        $content = Content::factory()
+        $content = Models\Content::factory()
         ->for($user, 'owner')
         ->liveAudio()
         ->create();
