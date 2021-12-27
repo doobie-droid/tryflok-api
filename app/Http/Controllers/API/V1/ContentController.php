@@ -600,7 +600,7 @@ class ContentController extends Controller
             $minPrice = $request->query('min_price', 0);
 
             $orderBy = $request->query('order_by', 'created_at');
-            $orderDirection = $request->query('order_direction', 'desc');
+            $orderDirection = $request->query('order_direction', 'asc');
 
             $activeLiveContent = $request->query('active_live_content', 'false');
 
