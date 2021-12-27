@@ -53,6 +53,7 @@ class ContentFactory extends Factory
             'approved_by_admin' => 1,
             'show_only_in_digiverses' => 1,
             'live_status' => 'inactive',
+            'trending_points' => 0,
         ];
     }
 

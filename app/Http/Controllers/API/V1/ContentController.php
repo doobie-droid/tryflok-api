@@ -841,12 +841,6 @@ class ContentController extends Controller
                 });
             }
 
-            if ($request->user() == null || $request->user()->id == null) {
-                $user_id = '';
-            } else {
-                $user_id = $request->user()->id;
-            }
-
             $contents = $contents
             ->withCount('subscribers')
             ->withCount('views')
