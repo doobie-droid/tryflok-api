@@ -23,7 +23,7 @@ Route::get('apple-app-site-association', function () {
             'apps' => [],
             'details' => [
                 [
-                    'appID' => 'DHG3RK7L57.com.flok.flok',
+                    'appID' => 'DHG3RK7L57.com.akiddie.flok',
                     'paths' => [ '*' ],
                 ],
             ],
