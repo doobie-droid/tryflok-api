@@ -127,7 +127,8 @@ class LiveTest extends TestCase
                 'rtc_token',
                 'rtm_token',
                 'channel_name',
-                'uid'
+                'uid',
+                'subscribers_count',
             ]
         ]);
     }
