@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 use Tests\MockData;
 use Tests\TestCase;
 
-class RetrieveDigiverseContentsTest extends TestCase
+class GetDigiverseContentsTest extends TestCase
 {
     use DatabaseTransactions;
 

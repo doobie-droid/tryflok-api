@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 use Tests\MockData;
 use Tests\TestCase;
 
-class RetrieveSingleTest extends TestCase
+class GetSingleTest extends TestCase
 {
     use DatabaseTransactions;
 
