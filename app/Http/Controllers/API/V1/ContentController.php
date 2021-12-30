@@ -58,13 +58,17 @@ class ContentController extends Controller
             }
 
             $user = $request->user();
+            $is_available = 0;
 
+            if (in_array($request->type, ['live-audio', 'live-video'])) {
+                $is_available = 1;
+            }
             $content = Content::create([
                 'title' => $request->title,
                 'description' => $request->description,
                 'user_id' => $user->id,
                 'type' => $request->type,
-                'is_available' => 0,
+                'is_available' => $is_available,
                 'approved_by_admin' => 0,
                 'show_only_in_digiverses' => 1,
                 'live_status' => 'inactive',
