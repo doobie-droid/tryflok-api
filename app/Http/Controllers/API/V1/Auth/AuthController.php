@@ -22,6 +22,17 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    /*public function test(Request $request)
+    {
+        $token = str_replace('Bearer ', "" , $request->header('Authorization'));
+        JWTAuth::setToken($token);
+        if (! $claim = JWTAuth::getPayload()) {
+            return response()->json(array('message' => 'user_not_found'), 404);
+        } else {
+            return response()->json(array('data' => $claim), 200);
+        }
+    }*/
+
     public function register(Request $request)
     {
         try {

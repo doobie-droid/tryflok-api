@@ -28,6 +28,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 'username' => '',
                 'is_authenticated' => false,
             ];
+           // $conn->send(json_encode($conn->httpRequest->getHeaders()));
         } catch (\Exception $exception) {
             Log::error($exception);
         }

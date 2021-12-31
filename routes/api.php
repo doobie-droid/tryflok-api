@@ -24,7 +24,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
+    
     Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
+        //Route::get('test-jwt', 'AuthController@test');
         Route::post('register', 'AuthController@register');
         Route::post('login', 'AuthController@login');
         Route::post('social-sign-in', 'AuthController@socialMediaSignIn');
