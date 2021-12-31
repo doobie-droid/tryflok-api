@@ -4,7 +4,8 @@
         "NoInlineVarDocs", 
         "ConcatenationNoSpacing", 
         "RemoveLeadingSlashNamespaces", 
-        "NoStringInterpolationWithoutBraces"
+        "NoStringInterpolationWithoutBraces",
+        "QualifiedNamesOnlyForClassName"
     ],
     "excluded": [
         "tests/",

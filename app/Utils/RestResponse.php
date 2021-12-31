@@ -98,10 +98,9 @@ trait RestResponse
      */
     public function respondWithError($message, $data = null, $headers = [ ])
     {
-        $this->setStatusCode(400);
         return $this->respond([
             'status' => false,
-            'message'     => $message,
+            'message' => $message,
             'errors' => $data,
             'status_code' => $this->getStatusCode(),
         ], $headers);

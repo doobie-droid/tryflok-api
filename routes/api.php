@@ -1,15 +1,5 @@
 <?php
 
-use App\Constants\Constants;
-use App\Http\Resources\CategoryResource;
-use App\Http\Resources\TagResource;
-use App\Models\Category;
-use App\Models\Continent;
-use App\Models\Country;
-use App\Models\Language;
-use App\Models\Tag;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -34,97 +24,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::patch('email', 'AuthController@verifyEmail');
         Route::patch('password/forgot', 'AuthController@forgotPassword');
         Route::patch('password/reset', 'AuthController@resetPassword');
-        Route::get('unauthenticated', function () {
-            return response()->json([
-                'status' => false,
-                'status_code' => 401,
-                'message' => 'Invalid token provided',
-            ], 401);
-        })->name('unauthenticated');
+        Route::get('unauthenticated', 'AuthController@respondUnauthenticated')->name('unauthenticated');
     });
 
-    Route::get('languages', function () {
-        return response()->json([
-            'message' => 'Languages retrieved successfully',
-            'status' => true,
-            'status_code' => 200,
-            'data' => [
-                'languages' => Cache::rememberForever('request:languages', function () {
-                    return Language::orderBy('name')->get();
-                }),
-            ],
-        ]);
-    });
-
-    Route::get('countries', function () {
-        return response()->json([
-            'message' => 'Countries retrieved successfully',
-            'status' => true,
-            'status_code' => 200,
-            'data' => [
-                'countries' => Cache::rememberForever('request:countries', function () {
-                    return Country::orderBy('name')->get();
-                }),
-            ],
-        ]);
-    });
-
-    Route::get('continents', function () {
-        return response()->json([
-            'message' => 'Continents retrieved successfully',
-            'status' => true,
-            'status_code' => 200,
-            'data' => [
-                'continents' => Cache::rememberForever('request:continents', function () {
-                    return Continent::orderBy('name')->get();
-                }),
-            ],
-        ]);
-    });
-
-    Route::get('categories', function (Request $request) {
-        $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
-        $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
-        if ($limit > Constants::MAX_ITEMS_LIMIT) {
-            $limit = Constants::MAX_ITEMS_LIMIT;
-        }
-        $search = urldecode($request->query('search', ''));
-
-        $categories = Category::where('name', 'LIKE', "%{$search}%")->orderBy('name')->paginate($limit, ['*'], 'page', $page);
-        return response()->json([
-            'message' => 'Categories retrieved successfully',
-            'status' => true,
-            'status_code' => 200,
-            'data' => [
-                'categories' => CategoryResource::collection($categories),
-                'current_page' => (int) $categories->currentPage(),
-                'items_per_page' => (int) $categories->perPage(),
-                'total' => (int) $categories->total(),
-            ],
-        ]);
-    });
-
-    Route::get('tags', function (Request $request) {
-        $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
-        $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
-        if ($limit > Constants::MAX_ITEMS_LIMIT) {
-            $limit = Constants::MAX_ITEMS_LIMIT;
-        }
-        $search = urldecode($request->query('search', ''));
-
-        $tags = Tag::where('name', 'LIKE', "%{$search}%")->orderBy('name')->paginate($limit, ['*'], 'page', $page);
-        return response()->json([
-            'message' => 'Tags retrieved successfully',
-            'status' => true,
-            'status_code' => 200,
-            'data' => [
-                'categories' => TagResource::collection($tags),
-                'current_page' => (int) $tags->currentPage(),
-                'items_per_page' => (int) $tags->perPage(),
-                'total' => (int) $tags->total(),
-            ],
-        ]);
-    });
+    Route::get('languages', 'LanguageController@list');
+    Route::get('countries', 'CountryController@list');
+    Route::get('continents', 'ContinentController@list');
+    Route::get('categories', 'CategoryController@list');
+    Route::get('tags', 'TagController@list');
 
     Route::group(['prefix' => 'contents'], function () {
         Route::get('trending', 'ContentController@getTrending');

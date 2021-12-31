@@ -6,7 +6,6 @@ use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
-use Tests\MockData;
 use Tests\TestCase;
 
 class CreateTest extends TestCase

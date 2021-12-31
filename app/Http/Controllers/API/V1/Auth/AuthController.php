@@ -332,4 +332,14 @@ class AuthController extends Controller
             return $this->respondBadRequest('Token has expired');
         }
     }
+
+    public function respondUnauthenticated()
+    {
+        try {
+            return $this->respondUnauthorized('Invalid token provided');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
 }
