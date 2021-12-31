@@ -3,8 +3,7 @@
 namespace Database\Factories;
 
 use App\Constants\Constants;
-use App\Models\Content;
-use App\Models\User;
+use App\Models;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class RevenueFactory extends Factory
@@ -20,9 +19,9 @@ class RevenueFactory extends Factory
         return [
             'id' => $this->faker->unique()->uuid,
             'amount' => $amount,
-            'user_id' => User::factory(),
+            'user_id' => Models\User::factory(),
             'revenueable_type' => 'content',
-            'revenueable_id' => Content::factory(),
+            'revenueable_id' => Models\Content::factory(),
             'referral_bonus' => 0,
             'added_to_payout' => 0,
             'payment_processor_fee' => 0,

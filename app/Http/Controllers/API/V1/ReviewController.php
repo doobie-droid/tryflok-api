@@ -19,8 +19,8 @@ class ReviewController extends Controller
             $validator = Validator::make($request->all(), [
                 'id' => ['required', 'string', ],
                 'type' => ['required', 'string', 'regex:(content|collection|review)',],
-                'rating' => ['sometimes', 'required', 'numeric', 'min:1', 'max:5'],
-                'comment' => ['sometimes', 'required', 'string', ],
+                'rating' => ['required_without:comment', 'numeric', 'min:1', 'max:5'],
+                'comment' => ['required_without:rating', 'string', ],
             ]);
 
             if ($validator->fails()) {
@@ -54,10 +54,14 @@ class ReviewController extends Controller
                 $review->save();
             } else {
                 //it is null, create
+                $rating = 0;
+                if (! is_null($request->rating)) {
+                    $rating = $request->rating;
+                }
                 $review = $itemModel->reviews()->create([
                     'user_id' => $request->user()->id,
                     'comment' => $request->comment,
-                    'rating' => $request->rating,
+                    'rating' => $rating,
                 ]);
             }
 

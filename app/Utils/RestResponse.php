@@ -78,6 +78,7 @@ trait RestResponse
      */
     public function respondWithSuccess($message, $data = null, $headers = [ ])
     {
+        $this->setStatusCode(200);
         return $this->respond([
             'message'     => $message,
             'status'    => true,
@@ -97,6 +98,7 @@ trait RestResponse
      */
     public function respondWithError($message, $data = null, $headers = [ ])
     {
+        $this->setStatusCode(400);
         return $this->respond([
             'status' => false,
             'message'     => $message,

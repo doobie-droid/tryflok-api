@@ -2,9 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Collection;
-use App\Models\Price;
-use App\Models\Userable;
+use App\Models;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SubscriptionFactory extends Factory
@@ -18,10 +16,10 @@ class SubscriptionFactory extends Factory
     {
         return [
             'id' => $this->faker->unique()->uuid,
-            'userable_id' => Userable::factory(),
+            'userable_id' => Models\Userable::factory(),
             'price_id' => Price::factory(),
             'subscriptionable_type' => 'collection',
-            'subscriptionable_id' => Collection::factory(),
+            'subscriptionable_id' => Models\Collection::factory(),
             'status' => 'active',
             'auto_renew' => 1,
             'start' => now(),

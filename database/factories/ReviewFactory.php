@@ -2,8 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Content;
-use App\Models\User;
+use App\Models;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ReviewFactory extends Factory
@@ -16,11 +15,11 @@ class ReviewFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => User::factory(),
+            'user_id' => Models\User::factory(),
             'rating' => 5,
             'comment' => 'A comment',
             'reviewable_type' => 'content',
-            'reviewable_id' => Content::factory(),
+            'reviewable_id' => Models\Content::factory(),
         ];
     }
 
