@@ -1,33 +1,23 @@
 <?php
 
-namespace Tests\Feature\Subscriptions;
+namespace Tests\Feature\Controllers\API\V1\SubscriptionController;
 
-use App\Models\Collection;
-use App\Models\Price;
-use App\Models\Subscription;
-use App\Models\User;
-use App\Models\Userable;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class ToggleAutoRenewTest extends TestCase
 {
     use DatabaseTransactions;
-    use WithFaker;
 
     public function test_toggle_auto_renew_does_not_work_for_invalid_data()
     {
-        $user = User::factory()->create();
-        $collection = Collection::factory()
+        $user = Models\User::factory()->create();
+        $collection = Models\Collection::factory()
         ->digiverse()
         ->create();
-        $price = Price::factory()
-        ->for($collection, 'priceable')
-        ->subscription()
-        ->create();
-        $subscription = Subscription::factory()->for($price)->create();
+        $price = $collection->prices()->first();
+        $subscription = Models\Subscription::factory()->for($price)->create();
         $this->be($user);
         // when subscription does not exist
         $response = $this->json('PATCH', '/api/v1/subscriptions/d14b5781-465c-4eca-add3-03d20dd61051', [
@@ -52,23 +42,20 @@ class ToggleAutoRenewTest extends TestCase
 
     public function test_toggle_auto_renew_works()
     {
-        $collection = Collection::factory()
+        $collection = Models\Collection::factory()
         ->digiverse()
         ->create();
-        $price = Price::factory()
-        ->for($collection, 'priceable')
-        ->subscription()
-        ->create();
+        $price = $collection->prices()->first();
 
-        $user = User::factory()->create();
-        $userable = Userable::factory()
+        $user = Models\User::factory()->create();
+        $userable = Models\Userable::factory()
         ->for($user)
         ->state([
             'userable_type' => 'collection',
             'userable_id' => $collection->id,
         ])
         ->create();
-        $subscription = Subscription::factory()
+        $subscription = Models\Subscription::factory()
         ->for($userable)
         ->for($collection, 'subscriptionable')
         ->for($price)
