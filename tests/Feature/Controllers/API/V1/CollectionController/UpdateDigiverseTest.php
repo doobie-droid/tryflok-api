@@ -50,11 +50,6 @@ class UpdateDigiverseTest extends TestCase
         $response = $this->json('PATCH', "/api/v1/digiverses/{$digiverse->id}", $request);
         $response->assertStatus(400);
 
-        // when price id is not set
-        $request = MockData\Digiverse::generateStandardUpdateRequest();
-        $response = $this->json('PATCH', "/api/v1/digiverses/{$digiverse->id}", $request);
-        $response->assertStatus(400);
-
         // when price id is invalid
         $request = MockData\Digiverse::generateStandardUpdateRequest();
         $request['price']['id'] = 'assdsds';

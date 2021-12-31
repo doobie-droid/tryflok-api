@@ -17,7 +17,7 @@ class SubscriptionFactory extends Factory
         return [
             'id' => $this->faker->unique()->uuid,
             'userable_id' => Models\Userable::factory(),
-            'price_id' => Price::factory(),
+            'price_id' => Models\Price::factory(),
             'subscriptionable_type' => 'collection',
             'subscriptionable_id' => Models\Collection::factory(),
             'status' => 'active',

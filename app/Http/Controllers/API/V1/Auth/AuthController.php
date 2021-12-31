@@ -93,11 +93,11 @@ class AuthController extends Controller
             $validator = Validator::make($request->all(), [
                 'name' => ['required_if:provider,google', 'string', 'max:255'],
                 'email' => ['required_if:provider,google', 'string', 'email', 'max:255',],
-                'provider' => ['required', 'string', 'regex:(google|apple|google-web)',],
+                'provider' => ['required', 'string', 'in:google,apple,google-web',],
                 'referral_id' => ['sometimes', 'nullable','string', 'exists:users,referral_id',],
                 'id_token' => ['required_if:provider,google,apple', 'string',],
-                'sign_in_type' => ['required', 'string', 'regex:(register|login)',],
-                'sign_in_source' => ['required_if:provider,google', 'string', 'regex:(ios|android|web)',],
+                'sign_in_type' => ['required', 'string', 'in:register,login',],
+                'sign_in_source' => ['required_if:provider,google', 'string', 'in:ios,android,web',],
                 'firebase_token' => ['sometimes', 'nullable','string',],
             ]);
 

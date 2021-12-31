@@ -22,7 +22,7 @@ class WalletController extends Controller
     {
         try {
             $validator = Validator::make($request->input(), [
-                'provider' => ['required', 'string', 'regex:(flutterwave|apple|stripe)'],
+                'provider' => ['required', 'string', 'in:flutterwave,apple,stripe'],
                 'provider_response' => ['required'],
                 'provider_response.product_id' => ['required_if:provider,apple'],
                 'provider_response.receipt_data' => ['required_if:provider,apple', 'string'],
@@ -134,11 +134,11 @@ class WalletController extends Controller
             $validator = Validator::make($request->input(), [
                 'items' => ['required',],
                 'items.*.id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
+                'items.*.type' => ['required', 'string', 'in:collection,content',],
                 'items.*.price' => ['required',],
                 'items.*.price.amount' => ['required', 'numeric', 'min:0'],
                 'items.*.price.id' => ['required', 'string','exists:prices,id'],
-                'items.*.price.interval' => ['required', 'string', 'regex:(monthly|one-off)',],
+                'items.*.price.interval' => ['required', 'string', 'in:monthly,one-off',],
                 'items.*.price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
             ]);
 

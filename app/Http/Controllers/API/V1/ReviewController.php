@@ -18,7 +18,7 @@ class ReviewController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'id' => ['required', 'string', ],
-                'type' => ['required', 'string', 'regex:(content|collection|review)',],
+                'type' => ['required', 'string', 'in:content,collection,review',],
                 'rating' => ['required_without:comment', 'numeric', 'min:1', 'max:5'],
                 'comment' => ['required_without:rating', 'string', ],
             ]);

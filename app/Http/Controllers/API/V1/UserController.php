@@ -356,7 +356,7 @@ class UserController extends Controller
             $validator = Validator::make($request->input(), [
                 'items' => ['required',],
                 'items.*.id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
+                'items.*.type' => ['required', 'string', 'in:collection,content',],
             ]);
 
             if ($validator->fails()) {
@@ -409,7 +409,7 @@ class UserController extends Controller
             $validator = Validator::make($request->input(), [
                 'items' => ['required',],
                 'items.*.id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
+                'items.*.type' => ['required', 'string', 'in:collection,content',],
             ]);
 
             if ($validator->fails()) {
@@ -566,7 +566,7 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'items' => ['required',],
                 'items.*.id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
+                'items.*.type' => ['required', 'string', 'in:collection,content',],
                 'items.*.quantity' => ['sometimes', 'required', 'numeric', 'min:1', 'max:1'],
             ]);
 
@@ -638,7 +638,7 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'items' => ['required',],
                 'items.*.id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
+                'items.*.type' => ['required', 'string', 'in:collection,content',],
             ]);
 
             if ($validator->fails()) {
@@ -716,7 +716,7 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'provider' => ['required', 'string', 'regex:(manual|flutterwave)',],
+                'provider' => ['required', 'string', 'in:manual,flutterwave',],
                 'identifier' => ['required', 'string'],
                 'country_code' => ['required', 'string'],
                 'currency_code' => ['required', 'string'],

@@ -21,7 +21,7 @@ class AssetController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'files.*' => ['required', 'file'],
-                'type' => ['required', 'string', 'regex:(image|pdf|audio|video)'],
+                'type' => ['required', 'string', 'in:image,pdf,audio,video'],
             ]);
 
             if ($validator->fails()) {

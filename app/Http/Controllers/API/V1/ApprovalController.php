@@ -23,7 +23,7 @@ class ApprovalController extends Controller
             $validator = Validator::make($request->all(), [
                 'items' => ['required',],
                 'items.*.public_id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'regex:(collection|content)',],
+                'items.*.type' => ['required', 'string', 'in:collection,content',],
             ]);
 
             if ($validator->fails()) {
@@ -245,7 +245,7 @@ class ApprovalController extends Controller
             }
             $validator = Validator::make(array_merge($request->all(), ['public_id' => $public_id]), [
                 'public_id' => ['required', 'exists:approvals,public_id'],
-                'approval_action' => ['required', 'string', 'regex:(approve|decline)',],
+                'approval_action' => ['required', 'string', 'in:approve,decline',],
             ]);
 
             $approval_request = Approval::where('public_id', $public_id)->first();
