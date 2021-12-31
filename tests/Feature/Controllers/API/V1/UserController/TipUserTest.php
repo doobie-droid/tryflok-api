@@ -1,34 +1,29 @@
 <?php
 
-namespace Tests\Feature\User;
+namespace Tests\Feature\Controllers\API\V1\UserController;
 
-use App\Constants\Constants;
+use App\Constants;
 use App\Mail\User\TippedMail;
-use App\Models\User;
-use App\Models\Userable;
-use App\Models\Wallet;
+use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
-class TippingTest extends TestCase
+class TipUserTest extends TestCase
 {
     use DatabaseTransactions;
-    use WithFaker;
 
     public function test_tipping_fails_for_invalid_data()
     {
-        $user1 = User::factory()->create();
-        Wallet::factory()
+        $user1 = Models\User::factory()->create();
+        Models\Wallet::factory()
         ->for($user1, 'walletable')
         ->create();
-        $user2 = User::factory()->create();
+        $user2 = Models\User::factory()->create();
 
         $this->be($user1);
 
-        // when user is invalid
+        /** when user is invalid */ 
         $response = $this->json('POST', '/api/v1/users/sdsdsd/tip', [
             'amount_in_flk' => '800000',
         ]);
@@ -43,7 +38,7 @@ class TippingTest extends TestCase
             ],
         ]);
 
-        // when wallet balance is less than amount
+        /** when wallet balance is less than amount */ 
         $response = $this->json('POST', "/api/v1/users/{$user2->id}/tip", [
             'amount_in_flk' => '800000',
         ]);
@@ -58,13 +53,13 @@ class TippingTest extends TestCase
     public function test_tipping_works()
     {
         Mail::fake();
-        $user1 = User::factory()->create();
-        $wallet = Wallet::factory()
+        $user1 = Models\User::factory()->create();
+        $wallet = Models\Wallet::factory()
         ->for($user1, 'walletable')
         ->create();
         $wallet_initial_balance = $wallet->balance;
-        $user2 = User::factory()->create();
-        $wallet2 = Wallet::factory()
+        $user2 = Models\User::factory()->create();
+        $wallet2 = Models\Wallet::factory()
         ->for($user2, 'walletable')
         ->create();
         $wallet2_initial_balance = $wallet2->balance;
@@ -103,8 +98,8 @@ class TippingTest extends TestCase
             'paymentable_id' => $wallet->transactions()->first()->id,
         ]);
 
-        $platform_share = bcmul($amount_in_dollars, Constants::TIPPING_CHARGE, 6);
-        $platform_charge = Constants::TIPPING_CHARGE;
+        $platform_share = bcmul($amount_in_dollars, Constants\Constants::TIPPING_CHARGE, 6);
+        $platform_charge = Constants\Constants::TIPPING_CHARGE;
         $creator_share = bcmul($amount_in_dollars, 1 - $platform_charge, 6);
         $this->assertDatabaseHas('revenues', [
             'revenueable_type' => 'user',
