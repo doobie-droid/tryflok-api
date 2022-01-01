@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Otp;
 use App\Jobs\Websocket\AuthenticateConnection;
+use App\Models\Otp;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Ratchet\ConnectionInterface;
