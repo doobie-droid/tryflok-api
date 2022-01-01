@@ -100,7 +100,7 @@ class Video implements ShouldQueue
         $this->asset->save();
         $content = $this->asset->contents()->first();
         if (! is_null($content)) {
-            $message = "Your video content titles \"{$content->title}\" is ready for viewing.";
+            $message = "Your video content titled \"{$content->title}\" is ready for viewing.";
 
             $client = new Client;
             $url = 'https://fcm.googleapis.com/fcm/send';
@@ -114,7 +114,7 @@ class Video implements ShouldQueue
                     'json' => [
                         'to' => $notification_token->token,
                         'notification' => [
-                            'title' => 'You just got tipped!',
+                            'title' => 'Content is ready',
                             'body' => $message,
                         ],
                         'data' => [
