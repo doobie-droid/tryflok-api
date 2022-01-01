@@ -192,8 +192,8 @@ class WalletController extends Controller
                 'provider_id' => $transaction->id,
                 'items' => $request->items,
             ]);
-            $this->setStatusCode(202);
-            return $this->respondWithSuccess("Items queued to be added to user's library.");
+
+            return $this->respondAccepted("Items queued to be added to user's library.");
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

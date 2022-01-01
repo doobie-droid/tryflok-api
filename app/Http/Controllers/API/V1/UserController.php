@@ -951,8 +951,7 @@ class UserController extends Controller
                 ]);
             }
 
-            $this->setStatusCode(202);
-            return $this->respondWithSuccess('Details received successfully, you should receive your payout in the next 24 hours');
+            return $this->respondAccepted('Details received successfully, you should receive your payout in the next 24 hours');
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

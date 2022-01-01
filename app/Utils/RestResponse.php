@@ -87,6 +87,17 @@ trait RestResponse
         ], $headers);
     }
 
+    public function respondAccepted(string $message, array $data = null, array $headers = [ ]): \Illuminate\Http\JsonResponse
+    {
+        $this->setStatusCode(202);
+        return $this->respond([
+            'message'     => $message,
+            'status'    => true,
+            'status_code' => $this->getStatusCode(),
+            'data' => $data,
+        ], $headers);
+    }
+
     /**
      * Will result in an error
      *

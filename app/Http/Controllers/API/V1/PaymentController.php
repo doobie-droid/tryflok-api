@@ -204,8 +204,8 @@ class PaymentController extends Controller
                 'provider_id' => 'FREE-' . Str::random(6),
                 'items' => $itemsThatCanBeAddedForFree,
             ]);
-            $this->setStatusCode(202);
-            return $this->respondWithSuccess("Item queued to be added to user's library.");
+
+            return $this->respondAccepted("Item queued to be added to user's library.");
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
