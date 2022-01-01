@@ -3,8 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -58,9 +56,5 @@ class AppServiceProvider extends ServiceProvider
             'wallet' => 'App\Models\Wallet',
             'wallet_transaction' => 'App\Models\WalletTransaction',
         ]);
-
-        ParallelTesting::setUpTestDatabase(function ($database, $token) {
-            Artisan::call('db:seed', ['--class' => 'TestingSeeder']);
-        });
     }
 }
