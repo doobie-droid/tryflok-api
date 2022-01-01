@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Otp;
+use App\Jobs\Websocket\AuthenticateConnection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Ratchet\ConnectionInterface;
@@ -28,7 +29,11 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 'username' => '',
                 'is_authenticated' => false,
             ];
-           // $conn->send(json_encode($conn->httpRequest->getHeaders()));
+
+            AuthenticateConnection::dispatch([
+                'headers' => $conn->httpRequest->getHeaders(),
+                'resource_id' => $conn->resourceId,
+            ]);
         } catch (\Exception $exception) {
             Log::error($exception);
         }
@@ -107,6 +112,9 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 case 'app-update-rtm-channel-subscribers-count':
                     $this->updateRtmChannelSubscribersCount($data, $conn);
                     break;
+                case 'app-set-connection-as-authenticated':
+                    $this->setConnectionAsAuthenticated($data, $conn);
+                    break;
                 case 'echo':
                     $echo = ['echo' => $data->message];
                     $conn->send(json_encode($echo));
@@ -115,6 +123,40 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             }
         } catch (\Exception $exception) {
             $conn->send(json_encode([
+                'event' => 'event-error',
+                'event_name' => $data->event,
+                'message' => 'Oops, an error occurred, please try again later',
+                'errors' => [],
+            ]));
+            Log::error($exception);
+            return;
+        }
+    }
+
+    private function setConnectionAsAuthenticated($data, $connection)
+    {
+        try {
+            $resource_id = $data->resource_id;
+            $resource_connection = $this->connections[$resource_id]['socket_connection'];
+            $this->connections[$resource_id]['user_id'] = $data->user_id;
+            $this->connections[$resource_id]['username'] = $data->username;
+            $this->connections[$resource_id]['profile_picture'] = $data->profile_picture;
+            $this->connections[$resource_id]['is_authenticated'] = true;
+
+            $user_connections = [];
+            if (array_key_exists($data->user_id, $this->map_user_id_to_connections)) {
+                $user_connections = $this->map_user_id_to_connections[$data->user_id];
+            }
+            $this->map_user_id_to_connections[$data->user_id] = array_unique(array_merge($user_connections, [$resource_connection->resourceId]));
+            
+            $resource_connection->send(json_encode([
+                'event' => 'event-success',
+                'event_name' => $data->event,
+                'message' => 'User authenticated successfully',
+                'data' => [],
+            ]));
+        } catch (\Exception $exception) {
+            $connection->send(json_encode([
                 'event' => 'event-error',
                 'event_name' => $data->event,
                 'message' => 'Oops, an error occurred, please try again later',
