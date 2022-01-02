@@ -127,7 +127,7 @@ class ListTest extends TestCase
     {
         $user = Models\User::factory()->create();
 
-        $users = Models\User::factory()->count(10)->create();
+        $users = Models\User::factory()->count(11)->create();
 
         foreach ($users as $userInstance) {
             $userInstance->followers()->syncWithoutDetaching([
@@ -144,6 +144,7 @@ class ListTest extends TestCase
         $users = $response->getData()->data->users;
         $this->assertEquals(count($users), 10);
         $this->assertEquals($users[0]->followers_count, 1);
+        $this->assertEquals(count($users[0]->followers), 1);
         $this->assertEquals($users[0]->followers[0]->id, $user->id);
     }
 
@@ -151,7 +152,7 @@ class ListTest extends TestCase
     {
         $user = Models\User::factory()->create();
 
-        $users = Models\User::factory()->count(10)->create();
+        $users = Models\User::factory()->count(11)->create();
 
         foreach ($users as $userInstance) {
             $user->followers()->syncWithoutDetaching([
@@ -168,6 +169,7 @@ class ListTest extends TestCase
         $users = $response->getData()->data->users;
         $this->assertEquals(count($users), 10);
         $this->assertEquals($users[0]->following_count, 1);
+        $this->assertEquals(count($users[0]->following), 1);
         $this->assertEquals($users[0]->following[0]->id, $user->id);
     }
 }

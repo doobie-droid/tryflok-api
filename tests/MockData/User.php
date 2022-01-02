@@ -129,6 +129,21 @@ class User
         return $response;
     }
 
+    public static function generateGetUserResponse()
+    {
+        $structure = self::STANDARD_STRUCTURE;
+        unset($structure['wallet']);
+        $response = [
+            'status_code',
+            'message',
+            'data' => [
+                'user' => $structure,
+            ],
+        ];
+
+        return $response;
+    }
+
     public const STANDARD_STRUCTURE = [
         'id',
         'name',
