@@ -35,4 +35,13 @@ class SubscriptionFactory extends Factory
             ];
         });
     }
+
+    public function setCreatedAt($date)
+    {
+        return $this->state(function (array $attributes) use ($date) {
+            return [
+                'created_at' => $date,
+            ];
+        });
+    }
 }

@@ -40,6 +40,15 @@ class RevenueFactory extends Factory
         });
     }
 
+    public function tip()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'revenue_from' => 'tip',
+            ];
+        });
+    }
+
     public function customAmount($amount)
     {
         return $this->state(function (array $attributes) use ($amount) {
@@ -47,6 +56,15 @@ class RevenueFactory extends Factory
                 'amount' => $amount,
                 'platform_share' => bcmul($amount, Constants::NORMAL_CREATOR_CHARGE, 6),
                 'benefactor_share' => bcmul($amount, 100 - Constants::NORMAL_CREATOR_CHARGE, 6),
+            ];
+        });
+    }
+
+    public function setCreatedAt($date)
+    {
+        return $this->state(function (array $attributes) use ($date) {
+            return [
+                'created_at' => $date,
             ];
         });
     }

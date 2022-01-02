@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Price;
+use App\Models;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PriceFactory extends Factory
@@ -12,7 +12,7 @@ class PriceFactory extends Factory
      *
      * @var string
      */
-    protected $model = Price::class;
+    protected $model = Models\Price::class;
 
     /**
      * Define the model's default state.
@@ -26,6 +26,8 @@ class PriceFactory extends Factory
             'amount' => $this->faker->randomFloat(2, 5, 100),
             'interval' => 'one-off',
             'interval_amount' => 1,
+            'priceable_type' => 'collection',
+            'priceable_id' => Models\Collection::factory(),
         ];
     }
 

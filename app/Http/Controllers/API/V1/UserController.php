@@ -1083,10 +1083,10 @@ class UserController extends Controller
 
 
             return $this->respondWithSuccess('Dashboard details retrieved successfully', [
-                'total_tips' => $request->user()->revenues()->where('revenue_from', 'tip')->count(),
-                'month_tips' => $request->user()->revenues()->where('revenue_from', 'tip')->whereDate('created_at', '>=', now()->startOfMonth())->count(),
-                'total_sales' => $request->user()->revenues()->where('revenue_from', 'sale')->count(),
-                'month_sales' => $request->user()->revenues()->where('revenue_from', 'sale')->whereDate('created_at', '>=', now()->startOfMonth())->count(),
+                'total_tips' => $request->user()->revenues()->where('revenue_from', 'tip')->sum('benefactor_share'),
+                'month_tips' => $request->user()->revenues()->where('revenue_from', 'tip')->whereDate('created_at', '>=', now()->startOfMonth())->sum('benefactor_share'),
+                'total_sales' => $request->user()->revenues()->where('revenue_from', 'sale')->sum('benefactor_share'),
+                'month_sales' => $request->user()->revenues()->where('revenue_from', 'sale')->whereDate('created_at', '>=', now()->startOfMonth())->sum('benefactor_share'),
                 'total_subscribers' => $total_subscribers_count,
                 'month_subscribers' => $month_subscribers_count,
                 'subscription_graph' => $subscription_graph,
