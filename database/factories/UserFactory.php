@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Constants\Roles;
 use App\Models\User;
+use App\Models\Asset;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -14,6 +16,12 @@ class UserFactory extends Factory
      * @var string
      */
     protected $model = User::class;
+
+    /** @var User */ 
+    private $user;
+
+    /** @var Asset */
+    private $profile_picture;
 
     /**
      * Define the model's default state.
@@ -34,6 +42,15 @@ class UserFactory extends Factory
         ];
     }
 
+    public function configure()
+    {
+        return $this->afterCreating(function (User $user) {
+           $this->user = $user;
+           $this->user->assignRole(Roles::USER);
+           $this->generateProfilePicture();
+        });
+    }
+
     /**
      * Indicate that the model's email address should be unverified.
      *
@@ -46,5 +63,20 @@ class UserFactory extends Factory
                 'email_verified' => 0,
             ];
         });
+    }
+
+    private function generateProfilePicture(): void
+    {
+        $previousPicture = $this->user->profile_picture()->first();
+        if (! is_null($previousPicture)) {
+            $this->user->profile_picture()->detach($previousPicture->id);
+            $previousPicture->forceDelete();
+        }
+        
+        $this->profile_picture = $this->profile_picture ?? Asset::factory()->create();
+        $this->user->profile_picture()->attach($this->profile_picture->id, [
+            'id' => Str::uuid(),
+            'purpose' => 'profile-picture',
+        ]);
     }
 }

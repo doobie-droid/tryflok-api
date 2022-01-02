@@ -53,8 +53,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'users'], function () {
-        Route::get('/', 'UserController@getAll');
-        Route::get('{id}', 'UserController@getSingle');
+        Route::get('/', 'UserController@list');
+        Route::get('{id}', 'UserController@get');
     });
 
     Route::group(['prefix' => 'payments'], function () {

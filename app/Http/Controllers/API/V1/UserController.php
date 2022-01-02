@@ -34,7 +34,7 @@ use \Stripe\StripeClient;
 
 class UserController extends Controller
 {
-    public function getAll(Request $request)
+    public function list(Request $request)
     {
         try {
             $page = $request->query('page', 1);
@@ -62,10 +62,14 @@ class UserController extends Controller
                 $query->where('name', Roles::USER);
             });
 
-            foreach ($keywords as $keyword) {
-                $users = $users->where(function ($query) use ($keyword) {
-                    $query->where('name', 'LIKE', "%{$keyword}%")
-                    ->orWhere('username', 'LIKE', "%{$keyword}%");
+            if (! empty($keywords)) {
+                $users = $users->where(function ($query) use ($keywords) {
+                    $query->where('name', 'LIKE', "%{$keywords[0]}%")
+                    ->orWhere('username', 'LIKE', "%{$keywords[0]}%");
+                    for ($i = 1; $i < count($keywords); $i++) {
+                        $query->orWhere('name', 'LIKE', "%{$keywords[$i]}%")
+                            ->orWhere('username', 'LIKE', "%{$keywords[$i]}%");
+                    }
                 });
             }
 
@@ -101,7 +105,7 @@ class UserController extends Controller
         }
     }
 
-    public function getSingle(Request $request, $id)
+    public function get(Request $request, $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [

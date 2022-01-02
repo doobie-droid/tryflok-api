@@ -111,4 +111,43 @@ class User
         }
         return $response;
     }
+
+    public static function generateListUsersResponse()
+    {
+        $structure = self::STANDARD_STRUCTURE;
+        unset($structure['wallet']);
+        $response = [
+            'status_code',
+            'message',
+            'data' => [
+                'users' => [
+                    $structure,
+                ]
+            ],
+        ];
+
+        return $response;
+    }
+
+    public const STANDARD_STRUCTURE = [
+        'id',
+        'name',
+        'username',
+        'email',
+        'bio',
+        'dob',
+        'referral_id',
+        'roles',
+        'followers_count',
+        'following_count',
+        'followers',
+        'following',
+        'digiverses_created_count',
+        'profile_picture' => [
+            'url',
+        ],
+        'wallet' => [
+            'balance',
+        ]
+    ];
 }
