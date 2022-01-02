@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use App\Constants\Roles;
-use App\Models\User;
 use App\Models\Asset;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
