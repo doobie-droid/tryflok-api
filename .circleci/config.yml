@@ -59,8 +59,8 @@ jobs:
           paths:
             - ./vendor
       - run: cp .env.example .env
+      - run: php artisan flok:start-websocket &
       - run: php artisan key:generate
-      - run: php artisan flok:start-websocket
       - run: php artisan migrate:fresh
       - run: php artisan db:seed --class=TestingSeeder
       - run: ./vendor/bin/tlint
