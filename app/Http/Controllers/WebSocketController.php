@@ -8,19 +8,20 @@ use App\Models\Otp;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 
 class WebSocketController extends Controller implements MessageComponentInterface
 {
-    private $redis_publisher;
+    private $identifier;
     private $connections = [];
     private $map_user_id_to_connections = [];
     private $rtm_channel_subscribers = [];
 
     public function __construct()
     {
-
+        $this->identifier = Str::random(8) . date('YmdHis');
     }
     /**
      * When a new connection is opened it will be passed to this method
