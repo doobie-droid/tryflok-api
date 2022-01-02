@@ -122,7 +122,10 @@ class User
             'data' => [
                 'users' => [
                     $structure,
-                ]
+                ],
+                'current_page',
+                'items_per_page',
+                'total',
             ],
         ];
 
@@ -142,6 +145,27 @@ class User
         ];
 
         return $response;
+    }
+
+    public static function generateListRevenuesResponse()
+    {
+        return [
+            'status_code',
+            'message',
+            'data' => [
+                'revenues' => [
+                    [
+                        'revenueable_type',
+                        'revenueable' => [
+                            'id',
+                        ],
+                    ],
+                ],
+                'current_page',
+                'items_per_page',
+                'total',
+            ],
+        ];
     }
 
     public const STANDARD_STRUCTURE = [

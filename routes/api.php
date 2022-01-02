@@ -90,7 +90,6 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'users',], function () {
             Route::patch('{id}/follow', 'UserController@followUser');
             Route::patch('{id}/unfollow', 'UserController@unfollowUser');
-            Route::get('{id}/revenues', 'UserController@getRevenues');
             Route::post('{id}/tip', 'UserController@tipUser');
         });
 
@@ -123,6 +122,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('payment-account', 'UserController@addPaymentAccount');
             Route::get('payment-account', 'UserController@getPaymentAccount');
             Route::delete('payment-account', 'UserController@removePaymentAccount');
+            Route::get('revenues', 'UserController@listRevenues');
         });
 
         Route::group(['prefix' => 'subscriptions'], function () {

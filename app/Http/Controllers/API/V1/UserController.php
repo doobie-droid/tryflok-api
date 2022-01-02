@@ -6,6 +6,7 @@ use App\Constants\Constants;
 use App\Constants\Roles;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\NotificationResource;
+use App\Http\Resources\RevenueResource;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceWithSensitive;
 use App\Jobs\Payment\Payout as PayoutToCreatorJob;
@@ -163,7 +164,7 @@ class UserController extends Controller
                     'id' => Str::uuid(),
                 ],
             ]);
-            
+
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
             } else {
@@ -469,28 +470,18 @@ class UserController extends Controller
         }
     }
 
-    public function getRevenues(Request $request, $id)
+    public function listRevenues(Request $request)
     {
         try {
-            $user = User::where('id', $id)->first();
-            if (is_null($user)) {
-                return $this->respondBadRequest('Invalid user ID supplied');
-            }
-
-            if (
-                $request->user()->id !== $id &&
-                ! $request->user()->hasRole(Roles::ADMIN) &&
-                ! $request->user()->hasRole(Roles::SUPER_ADMIN)
-            ) {
-                return $this->respondBadRequest("You do not have permission to view this user's revenues");
-            }
-
             $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
             $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
 
-            $revenues = $user->revenues()->with('revenueable')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
+            $revenues = $request->user()->revenues()->with('revenueable')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
             return $this->respondWithSuccess('Revenues retrieved successfully', [
-                'revenues' => $revenues,
+                'revenues' => RevenueResource::collection($revenues),
+                'current_page' => (int) $revenues->currentPage(),
+                'items_per_page' => (int) $revenues->perPage(),
+                'total' => (int) $revenues->total(),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);

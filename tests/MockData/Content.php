@@ -65,6 +65,9 @@ class Content
                 'contents' => [
                     $structure,
                 ],
+                'current_page',
+                'items_per_page',
+                'total',
             ],
         ];
     }
