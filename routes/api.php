@@ -100,7 +100,6 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::get('digiverses', 'CollectionController@getUserCreatedDigiverses');
             Route::get('notifications', 'UserController@getNotifications');
             Route::patch('notifications', 'UserController@markAllNotificationsAsRead');
-            Route::get('signed-cookie', 'UserController@getSignedCookies');
             Route::get('approval-requests', 'ApprovalController@getUserRequests');
             Route::get('subscriptions', 'SubscriptionController@getUserSubscriptions');
             Route::patch('fund-wallet', 'WalletController@fundWallet');

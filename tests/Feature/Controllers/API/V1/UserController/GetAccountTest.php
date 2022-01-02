@@ -9,26 +9,25 @@ use Illuminate\Support\Str;
 use Tests\MockData;
 use Tests\TestCase;
 
-class GetRevenuesTest extends TestCase
+class GetAccountTest extends TestCase
 {
     use DatabaseTransactions;
 
     public function test_list_revenues_returns_401_when_user_is_not_signed_in()
     {
         $user = Models\User::factory()->create();
-        $response = $this->json('GET', "/api/v1/account/revenues");
+        $response = $this->json('GET', "/api/v1/account");
         $response->assertStatus(401);
     }
 
-    public function test_list_revenue_works()
+    public function test_get_account_works()
     {
         $user = Models\User::factory()->create();
-        Models\Revenue::factory()
-                ->for($user, 'user')
-                ->create();
+        Models\Wallet::factory()->for($user,'walletable')->create();
         $this->be($user);
-        $response = $this->json('GET', "/api/v1/account/revenues");
+
+        $response = $this->json('GET', "/api/v1/account");
         $response->assertStatus(200)
-        ->assertJsonStructure(MockData\User::generateListRevenuesResponse());
+        ->assertJsonStructure(MockData\User::generateGetAccountResponse());
     }
 }

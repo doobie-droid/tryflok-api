@@ -147,6 +147,33 @@ class User
         return $response;
     }
 
+    public static function generateGetAccountResponse()
+    {
+        $structure = self::STANDARD_STRUCTURE;
+
+        $followers_count_key = array_search('followers_count', $structure);
+        unset($structure[$followers_count_key]);
+
+        $following_count_key = array_search('following_count', $structure);
+        unset($structure[$following_count_key]);
+
+        $followers_key = array_search('followers', $structure);
+        unset($structure[$followers_key]);
+
+        $following_key = array_search('following', $structure);
+        unset($structure[$following_key]);
+        
+        $response = [
+            'status_code',
+            'message',
+            'data' => [
+                'user' => $structure,
+            ],
+        ];
+
+        return $response;
+    }
+
     public static function generateListRevenuesResponse()
     {
         return [

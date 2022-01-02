@@ -20,7 +20,6 @@ use App\Models\User;
 use App\Models\Userable;
 use App\Models\WalletTransaction;
 use App\Rules\AssetType as AssetTypeRule;
-use Aws\CloudFront\CloudFrontClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -947,48 +946,6 @@ class UserController extends Controller
             }
 
             return $this->respondAccepted('Details received successfully, you should receive your payout in the next 24 hours');
-        } catch (\Exception $exception) {
-            Log::error($exception);
-            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
-        }
-    }
-
-    public function getSignedCookies(Request $request)
-    {
-        try {
-            $cloudFrontClient = new CloudFrontClient([
-                'profile' => 'default',
-                'version' => '2014-11-06',
-                'region' => 'us-east-1',
-            ]);
-
-            $expires = time() + (2 * 60 * 60); //2 hours from now(in seconds)
-            $resource = config('services.cloudfront.private_url') . '/*';
-            $policy = <<<POLICY
-                        {
-                            "Statement": [
-                                {
-                                    "Resource": "{$resource}",
-                                    "Condition": {
-                                        "DateLessThan": {"AWS:EpochTime": {$expires}}
-                                    }
-                                }
-                            ]
-                        }
-                        POLICY;
-            $result = $cloudFrontClient->getSignedCookie([
-                'policy' => $policy,
-                'private_key' => base64_decode(config('services.cloudfront.private_key')),
-                'key_pair_id' => config('services.cloudfront.key_id'),
-            ]);
-            $cookies = '';
-            foreach ($result as $key => $value) {
-                $cookies = $cookies . $key . '=' . $value . ';';
-            }
-            return $this->respondWithSuccess('Cookies retrieved successfully', [
-                'cookies' => $cookies,
-                'expires' => $expires,
-            ]);
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
