@@ -28,4 +28,7 @@ class Constants
     public const TRENDING_COLLECTION_WEIGHT = .1;
     public const TRENDING_COLLECTION_CONTENT_WEIGHT = .1;
     public const TRENDING_COLLECTION_SUBSCRIBERS_WEIGHT = 3;
+
+    // channel names
+    public const WEBSOCKET_MESSAGE_CHANNEL = 'websocket-message-channel';
 }

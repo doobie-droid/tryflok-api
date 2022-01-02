@@ -2,19 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\Constants;
 use App\Jobs\Websocket\AuthenticateConnection;
 use App\Models\Otp;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 
 class WebSocketController extends Controller implements MessageComponentInterface
 {
+    private $redis_publisher;
     private $connections = [];
     private $map_user_id_to_connections = [];
     private $rtm_channel_subscribers = [];
 
+    public function __construct()
+    {
+
+    }
     /**
      * When a new connection is opened it will be passed to this method
      * @param  ConnectionInterface $conn The socket/connection that just connected to your application
@@ -338,6 +345,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
 
+            Redis::publish(Constants::WEBSOCKET_MESSAGE_CHANNEL, json_encode($data));
+
             foreach ($channel_subscribers as $key => $resourceId) {
                 $message = [
                     'event' => 'message-from-rtm-channel',
@@ -379,7 +388,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
-
+            Redis::publish(Constants::WEBSOCKET_MESSAGE_CHANNEL, json_encode($data));
             foreach ($channel_subscribers as $key => $resourceId) {
                 $message = [
                     'event' => 'update-rtm-channel-subscribers-count',
