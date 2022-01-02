@@ -163,7 +163,7 @@ class UserController extends Controller
                     'id' => Str::uuid(),
                 ],
             ]);
-
+            
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
             } else {
