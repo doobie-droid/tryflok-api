@@ -100,14 +100,14 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::get('digiverses', 'CollectionController@getUserCreatedDigiverses');
             Route::get('notifications', 'UserController@getNotifications');
             Route::patch('notifications', 'UserController@markAllNotificationsAsRead');
-            Route::get('approval-requests', 'ApprovalController@getUserRequests');
+            // Route::get('approval-requests', 'ApprovalController@getUserRequests');
             Route::get('subscriptions', 'SubscriptionController@getUserSubscriptions');
             Route::patch('fund-wallet', 'WalletController@fundWallet');
             Route::post('wallet-pay', 'WalletController@payViaWallet');
             Route::get('wallet-transactions', 'WalletController@getTransactions');
             Route::post('profile', 'UserController@updateBasicData');
             Route::put('password', 'UserController@updatePassword');
-            Route::patch('token', 'UserController@refreshToken');
+            Route::patch('token', 'Auth\AuthController@refreshToken');
             Route::post('wishlist', 'UserController@addItemsToWishList');
             Route::delete('wishlist', 'UserController@removeItemsFromWishlist');
             Route::get('wishlist', 'UserController@getWishlist');

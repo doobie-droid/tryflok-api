@@ -256,6 +256,15 @@ class AuthController extends Controller
         }
     }
 
+    public function refreshToken(Request $request)
+    {
+        $user = User::with('roles', 'profile_picture', 'wallet')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
+        return $this->respondWithSuccess('Token refreshed successfully', [
+            'user' => new UserResourceWithSensitive($user),
+            'token' => auth()->refresh(),
+        ]);
+    }
+
     public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
