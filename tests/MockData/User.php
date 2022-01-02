@@ -151,6 +151,8 @@ class User
     {
         $structure = self::STANDARD_STRUCTURE;
 
+        unset($structure['wallet']);
+        
         $followers_count_key = array_search('followers_count', $structure);
         unset($structure[$followers_count_key]);
 
@@ -162,7 +164,10 @@ class User
 
         $following_key = array_search('following', $structure);
         unset($structure[$following_key]);
-        
+
+        $digiverses_created_count_key = array_search('digiverses_created_count', $structure);
+        unset($structure[$digiverses_created_count_key]);
+
         $response = [
             'status_code',
             'message',

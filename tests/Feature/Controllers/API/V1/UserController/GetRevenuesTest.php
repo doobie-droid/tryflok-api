@@ -16,7 +16,7 @@ class GetRevenuesTest extends TestCase
     public function test_list_revenues_returns_401_when_user_is_not_signed_in()
     {
         $user = Models\User::factory()->create();
-        $response = $this->json('GET', "/api/v1/account/revenues");
+        $response = $this->json('GET', '/api/v1/account/revenues');
         $response->assertStatus(401);
     }
 
@@ -27,7 +27,7 @@ class GetRevenuesTest extends TestCase
                 ->for($user, 'user')
                 ->create();
         $this->be($user);
-        $response = $this->json('GET', "/api/v1/account/revenues");
+        $response = $this->json('GET', '/api/v1/account/revenues');
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\User::generateListRevenuesResponse());
     }
