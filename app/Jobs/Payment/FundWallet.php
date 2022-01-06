@@ -77,7 +77,7 @@ class FundWallet implements ShouldQueue
                 'provider' => $this->provider,
                 'provider_id' => $this->provider_id,
             ]);
-
+            DB::commit();
             //TO DO: email user that they have increased their wallet balance
         }  catch (\Exception $exception) {
             DB::rollBack();
