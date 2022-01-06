@@ -9,6 +9,7 @@ use App\Jobs\Payment\Purchase as PurchaseJob;
 use App\Models\Collection;
 use App\Models\Content;
 use App\Models\Price;
+use App\Models\Payment;
 use App\Models\WalletTransaction;
 use App\Services\Payment\Payment as PaymentProvider;
 use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
@@ -35,12 +36,20 @@ class WalletController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
+
+            
             //the provider is being built in the cases in case an invalid provider passes through validation
             switch ($request->provider) {
                 case 'flutterwave':
                     $flutterwave = new PaymentProvider($request->provider);
                     $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
                     if (($req->status === 'success' && $req->data->status === 'successful')) {
+                        // ensure this payment has not been used before
+                        $payment = Payment::where('provider', $request->provider)->where('provider_id', $req->data->id)->first();
+                        if (!is_null($payment)) {
+                            return $this->respondWithSuccess('Payment received successfully');
+                        }
+
                         $amount_in_dollars = bcdiv($req->data->amount, 505, 2);
                         $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
                         $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
@@ -73,6 +82,13 @@ class WalletController extends Controller
                     }
 
                     $req = $stripe->chargeViaToken($request->amount_in_cents, $request->provider_response['id']);
+
+                    // ensure payment has not been used before
+                    $payment = Payment::where('provider', $request->provider)->where('provider_id', $req->id)->first();
+                    if (!is_null($payment)) {
+                        return $this->respondWithSuccess('Payment received successfully');
+                    }
+
                     if (($req->status === 'succeeded' && $req->paid === true)) {
                         FundWalletJob::dispatch([
                             'user' => $request->user(),
@@ -104,6 +120,13 @@ class WalletController extends Controller
                         ];
                         $ekc_to_dollar = bcadd(1, bcdiv((30), 100 - 30), 2);
                         $amount_in_dollars = $product_ids_to_amount[$request->provider_response['product_id']];
+
+                        // ensure payment has not been used before
+                        $payment = Payment::where('provider', $request->provider)->where('provider_id', $req->receipt->in_app[0]->transaction_id)->first();
+                        if (!is_null($payment)) {
+                            return $this->respondWithSuccess('Payment received successfully');
+                        }
+
                         FundWalletJob::dispatch([
                             'user' => $request->user(),
                             'wallet' => $request->user()->wallet()->first(),
