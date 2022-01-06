@@ -2,15 +2,15 @@
 
 namespace App\Jobs\Payment;
 
+use App\Models\Payment;
 use App\Models\WalletTransaction;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use App\Models\Payment;
+use Illuminate\Support\Facades\Log;
 
 class FundWallet implements ShouldQueue
 {
