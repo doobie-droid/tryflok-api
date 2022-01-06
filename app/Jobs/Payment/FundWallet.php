@@ -54,7 +54,17 @@ class FundWallet implements ShouldQueue
         try {
             $payment = Payment::where('provider', $this->provider)->where('provider_id', $this->provider_id)->first();
             if (! is_null($payment)) {
-                throw new InvalidArgumentException("Duplicate payment details provided for [{$payment->id}].");
+                $data = [
+                    'provider' => $this->provider,
+                    'provider_id' => $this->provider_id,
+                    'user_id' => $this->user->id,
+                    'amount_in_flk' => $this->flk,
+                    'amount_in_dollars' => $this->amount,
+                    'payment_id' => $payment->id,
+                ];
+                $data_in_json = json_encode($data);
+
+                throw new \Exception("Duplicate payment details provided with details: \n {$data_in_json}");
             }
             $newWalletBalance = bcadd($this->wallet->balance, $this->flk, 2);
             $walletTransaction = WalletTransaction::create([
