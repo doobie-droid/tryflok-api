@@ -133,6 +133,53 @@ class WalletController extends Controller
         }
     }
 
+    public function withdrawFromWallet(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->input(), [
+                'amount_in_flk' => ['required', 'integer', 'min:1000'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $payment_account = $request->user()->paymentAccounts()->first();
+            if (is_null($payment_account)) {
+                return $this->respondBadRequest('You need to add a payment account before you can withfraw from your wallet');
+            }
+
+            $wallet_balance = (float) $request->user()->wallet->balance;
+            $total_amount_in_flk = $request->amount_in_flk;
+
+            if ((float) $total_amount_in_flk > $wallet_balance) {
+                return $this->respondBadRequest('Your wallet balance is too low to make this withdrawal');
+            }
+            
+            
+            $newWalletBalance = bcsub($request->user()->wallet->balance, $total_amount_in_flk, 2);
+            $transaction = WalletTransaction::create([
+                'wallet_id' => $request->user()->wallet->id,
+                'amount' => $total_amount_in_flk,
+                'balance' => $newWalletBalance,
+                'transaction_type' => 'deduct',
+                'details' => 'Withdrawal from wallet',
+            ]);
+            $request->user()->wallet->balance = $newWalletBalance;
+            $request->user()->wallet->save();
+            // create a payout for the user
+            $amount_to_withdraw_in_dollars = bcdiv($total_amount_in_flk, 100, 6);
+            $request->user()->payouts()->create([
+                'amount' => bcmul($amount_to_withdraw_in_dollars, 100 - Constants::WALLET_WITHDRAWAL_CHARGE),
+            ]);
+
+            return $this->respondAccepted('Withdrawal successful. You should receive your money soon.');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later');
+        }
+    }
+
     public function payViaWallet(Request $request)
     {
         try {
@@ -176,7 +223,7 @@ class WalletController extends Controller
             $wallet_balance = (float) $request->user()->wallet->balance;
 
             if ($total_amount_in_flk > $wallet_balance) {
-                return $this->respondBadRequest('Your wallet balance is too low to make this purchase. Please fund your wallet with Akiddie Cowries and try again.');
+                return $this->respondBadRequest('Your wallet balance is too low to make this purchase. Please fund your wallet with Flok Cowries and try again.');
             }
 
             $newWalletBalance = bcsub($request->user()->wallet->balance, $total_amount_in_flk, 2);

@@ -103,6 +103,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             // Route::get('approval-requests', 'ApprovalController@getUserRequests');
             Route::get('subscriptions', 'SubscriptionController@getUserSubscriptions');
             Route::patch('fund-wallet', 'WalletController@fundWallet');
+            Route::patch('withdraw-from-wallet', 'WalletController@withdrawFromWallet');
             Route::post('wallet-pay', 'WalletController@payViaWallet');
             Route::get('wallet-transactions', 'WalletController@getTransactions');
             Route::post('profile', 'UserController@updateBasicData');

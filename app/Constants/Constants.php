@@ -19,6 +19,9 @@ class Constants
     public const NON_PROFIT_CREATOR_CHARGE = .10;
     public const TIPPING_CHARGE = 0;
 
+    // wallet withdrawal charge
+    public const WALLET_WITHDRAWAL_CHARGE = .05;
+
     //trending metrics
     public const TRENDING_VIEWS_WEIGHT = .1;
     public const TRENDING_CONTENT_SUBSCRIBERS_WEIGHT = .1;
