@@ -9,6 +9,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Models\Payment;
 
 class FundWallet implements ShouldQueue
 {
@@ -48,29 +50,39 @@ class FundWallet implements ShouldQueue
      */
     public function handle()
     {
-        $newWalletBalance = bcadd($this->wallet->balance, $this->flk, 2);
-        $walletTransaction = WalletTransaction::create([
-            'public_id' => uniqid(rand()),
-            'wallet_id' => $this->wallet->id,
-            'amount' => $this->flk,
-            'balance' => $newWalletBalance,
-            'transaction_type' => 'fund',
-            'details' => 'Fund wallet with ' . $this->flk . ' FLK via ' . $this->provider,
-        ]);
+        DB::beginTransaction();
+        try {
+            $payment = Payment::where('provider', $this->provider)->where('provider_id', $this->provider_id)->first();
+            if (! is_null($payment)) {
+                throw new InvalidArgumentException("Duplicate payment details provided for [{$payment->id}].");
+            }
+            $newWalletBalance = bcadd($this->wallet->balance, $this->flk, 2);
+            $walletTransaction = WalletTransaction::create([
+                'public_id' => uniqid(rand()),
+                'wallet_id' => $this->wallet->id,
+                'amount' => $this->flk,
+                'balance' => $newWalletBalance,
+                'transaction_type' => 'fund',
+                'details' => 'Fund wallet with ' . $this->flk . ' FLK via ' . $this->provider,
+            ]);
 
-        $this->wallet->balance = $newWalletBalance;
-        $this->wallet->save();
+            $this->wallet->balance = $newWalletBalance;
+            $this->wallet->save();
 
-        $walletTransaction->payments()->create([
-            'payer_id' => $this->user->id,
-            'payee_id' => $this->user->id,
-            'amount' => $this->amount,
-            'payment_processor_fee' => $this->fee,
-            'provider' => $this->provider,
-            'provider_id' => $this->provider_id,
-        ]);
+            $walletTransaction->payments()->create([
+                'payer_id' => $this->user->id,
+                'payee_id' => $this->user->id,
+                'amount' => $this->amount,
+                'payment_processor_fee' => $this->fee,
+                'provider' => $this->provider,
+                'provider_id' => $this->provider_id,
+            ]);
 
-        //TO DO: email user that they have increased their wallet balance
+            //TO DO: email user that they have increased their wallet balance
+        }  catch (\Exception $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
     }
 
     public function failed(\Throwable $exception)
