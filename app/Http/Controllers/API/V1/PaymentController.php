@@ -71,7 +71,6 @@ class PaymentController extends Controller
 
             $flutterwave = new Flutterwave;
             $resp = $flutterwave->validateAccountNumber($request->account_number, $request->bank_code);
-            Log::info(json_encode($resp));
             if (isset($resp->status) && $resp->status === 'success') {
                 return $this->respondWithSuccess('Account details resolved successfully', $resp->data);
             } else {
