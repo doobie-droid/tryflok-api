@@ -146,7 +146,7 @@ class WalletController extends Controller
 
             $payment_account = $request->user()->paymentAccounts()->first();
             if (is_null($payment_account)) {
-                return $this->respondBadRequest('You need to add a payment account before you can withfraw from your wallet');
+                return $this->respondBadRequest('You need to add a payment account before you can withdraw from your wallet');
             }
 
             $wallet_balance = (float) $request->user()->wallet->balance;

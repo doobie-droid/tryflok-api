@@ -241,7 +241,7 @@ class UserController extends Controller
     public function getAccount(Request $request)
     {
         try {
-            $user = User::with('roles', 'profile_picture', 'wallet')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
+            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
             return $this->respondWithSuccess('Account retrieved successfully', [
                 'user' => new UserResourceWithSensitive($user),
             ]);
@@ -335,7 +335,7 @@ class UserController extends Controller
                     'purpose' => 'profile-picture',
                 ]);
             }
-            $user = User::with('roles', 'profile_picture', 'wallet')->withCount('digiversesCreated')->where('id', $user->id)->first();
+            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', $user->id)->first();
             return $this->respondWithSuccess('User updated successfully', [
                 'user' => new UserResourceWithSensitive($user),
             ]);
