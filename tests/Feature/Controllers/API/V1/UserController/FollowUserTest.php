@@ -55,7 +55,7 @@ class FollowUserTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('notifications', [
-            'notifier' => $user_making_request->id,
+            'notifier_id' => $user_making_request->id,
             'notificable_type' => 'user',
             'notificable_id' => $user_making_request->id,
             'message' => "@{$user_making_request->username} followed you",
