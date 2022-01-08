@@ -51,6 +51,7 @@ class LiveTest extends TestCase
         $this->assertTrue($content->refresh()->scheduled_date->lte(now()));
 
         $this->assertDatabaseHas('notifications', [
+            'recipient_id' => $user2->id,
             'notifier_id' => $user->id,
             'notificable_type' => 'content',
             'notificable_id' => $content->id,

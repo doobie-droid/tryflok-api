@@ -128,6 +128,7 @@ class TipUserTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('notifications', [
+            'recipient_id' => $user2->id,
             'notifier_id' => $user1->id,
             'notificable_type' => 'revenue',
             'message' => "@{$user1->username} just gifted you {$creator_share_in_flk} Flok Cowries",

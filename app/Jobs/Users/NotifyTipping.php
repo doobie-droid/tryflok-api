@@ -50,6 +50,7 @@ class NotifyTipping implements ShouldQueue
             'notificable_id' => $this->revenue->id,
         ]);
         $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notification->id)->first();
+        $notification = new NotificationResource($notification);
         $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
         if (! is_null($this->tipper->profile_picture()->first())) {
             $image = $this->tipper->profile_picture()->first()->url;
@@ -70,7 +71,7 @@ class NotifyTipping implements ShouldQueue
                         'body' => $message,
                         'image' => $image,
                     ],
-                    'data' => new NotificationResource($notification),
+                    'data' => $notification,
                 ],
             ]);
         }

@@ -37,7 +37,7 @@ class NotifyFollow implements ShouldQueue
     public function handle()
     {
         $message = "@{$this->follower->username} followed you";
-        $notification = $this->follower->notifications()->create([
+        $notification = $this->user->notifications()->create([
             'notifier_id' => $this->follower->id,
             'message' => $message,
             'notificable_type' => 'user',
@@ -51,7 +51,7 @@ class NotifyFollow implements ShouldQueue
         $client = new Client;
         $url = 'https://fcm.googleapis.com/fcm/send';
         $authorization_key = config('services.google.fcm_server_key');
-        foreach ($this->follower->notificationTokens as $notification_token) {
+        foreach ($this->user->notificationTokens as $notification_token) {
             $client->post($url, [
                 'headers' => [
                     'Authorization' => "key={$authorization_key}",
