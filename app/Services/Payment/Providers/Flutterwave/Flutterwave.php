@@ -25,6 +25,15 @@ class Flutterwave extends API implements PaymentInterface
         return $this->_get('v3/banks/' . $id . '/branches');
     }
 
+    public function validateAccountNumber(string $account_number, string $bank_code): \stdClass
+    {
+        $data = [
+            'account_number' => $account_number,
+            'account_bank' => $bank_code,
+        ];
+        return $this->_post('v3/accounts/resolve', $data);
+    }
+
     /**
      * Verify a transaction
      *

@@ -58,6 +58,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'payments'], function () {
+        Route::post('flutterwave/validate-bank-details', 'PaymentController@validateBankDetailsViaFlutterwave');
         Route::get('flutterwave/banks', 'PaymentController@getFlutterwaveBanks');
         Route::get('flutterwave/banks/branches', 'PaymentController@getFlutterwaveBankBranches');
         Route::get('stripe/connect', 'UserController@addStripePaymentAccount');

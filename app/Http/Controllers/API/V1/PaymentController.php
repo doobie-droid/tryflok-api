@@ -57,6 +57,32 @@ class PaymentController extends Controller
         }
     }
 
+    public function validateBankDetailsViaFlutterwave(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->input(), [
+                'account_number' => ['required', 'string',],
+                'bank_code' => ['required'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $flutterwave = new Flutterwave;
+            $resp = $flutterwave->validateAccountNumber($request->account_number, $request->bank_code);
+            Log::info(json_encode($resp));
+            if (isset($resp->status) && $resp->status === 'success') {
+                return $this->respondWithSuccess('Account details resolved successfully', $resp->data);
+            } else {
+                return $this->respondBadRequest('Unable to resolve bank details');
+            }
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
     /* public function paystackWebhook(Request $request)
      {
          try {
