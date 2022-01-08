@@ -32,6 +32,6 @@ class TippedMail extends Mailable
         return $this->view('emails.user.tipped')->with([
             'user' => $this->user,
             'tipping_message' => $this->message,
-        ]);
+        ])->subject('You Just Got Gifted!');
     }
 }

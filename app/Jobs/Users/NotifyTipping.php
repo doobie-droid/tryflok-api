@@ -59,7 +59,7 @@ class NotifyTipping implements ShouldQueue
                 'json' => [
                     'to' => $notification_token->token,
                     'notification' => [
-                        'title' => 'You just got tipped!',
+                        'title' => 'You just got gifted!',
                         'body' => $message,
                     ],
                     'data' => [

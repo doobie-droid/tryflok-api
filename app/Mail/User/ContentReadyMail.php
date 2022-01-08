@@ -33,6 +33,6 @@ class ContentReadyMail extends Mailable
         return $this->view('emails.user.content.content-ready')->with([
             'user' => $this->user,
             'content_message' => $this->message,
-        ]);
+        ])->subject('Your Content Is Ready!');
     }
 }
