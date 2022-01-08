@@ -54,7 +54,7 @@ class LiveTest extends TestCase
             'notifier' => $user->id,
             'notificable_type' => 'content',
             'notificable_id' => $content->id,
-            'message' => "{$user->username} has started a new live",
+            'message' => "@{$user->username} has started a new live",
         ]);
     }
 

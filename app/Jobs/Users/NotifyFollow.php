@@ -4,6 +4,7 @@ namespace App\Jobs\Users;
 
 use App\Http\Resources\NotificationResource;
 use App\Models\Notification;
+use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -42,10 +43,10 @@ class NotifyFollow implements ShouldQueue
             'notificable_type' => 'user',
             'notificable_id' => $this->follower->id,
         ]);
-        $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notificaton->id)->first();
+        $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notification->id)->first();
         $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
-        if (! is_null($this->notifier->profile_picture()->first())) {
-            $image = $this->notifier->profile_picture()->first()->url;
+        if (! is_null($this->follower->profile_picture()->first())) {
+            $image = $this->follower->profile_picture()->first()->url;
         }
         $client = new Client;
         $url = 'https://fcm.googleapis.com/fcm/send';

@@ -46,12 +46,12 @@ class NotifyFollower implements ShouldQueue
     public function handle()
     {
         $notification = $this->follower->notifications()->create([
-            'notifier' => $this->notifier,
+            'notifier' => $this->notifier->id,
             'message' => $this->message,
             'notificable_type' => $this->notificable_type,
             'notificable_id' => $this->notificable_id,
         ]);
-        $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notificaton->id)->first();
+        $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notification->id)->first();
 
         $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
         if (in_array($this->notificable_type, ['collection', 'content']) 
