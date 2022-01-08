@@ -70,7 +70,7 @@ class WithdrawFromWalletTest extends TestCase
 
         $response->assertStatus(400)->assertJson([
             'status' => false,
-            'message' => 'You need to add a payment account before you can withfraw from your wallet',
+            'message' => 'You need to add a payment account before you can withdraw from your wallet',
         ]);
     }
 
