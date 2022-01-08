@@ -34,8 +34,13 @@ class Notification extends Model
         return $this->morphTo();
     }
 
-    public function user()
+    public function recipient()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'recipient');
+    }
+
+    public function notifier()
+    {
+        return $this->belongsTo(User::class, 'notifier');
     }
 }

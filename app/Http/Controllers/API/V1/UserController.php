@@ -498,7 +498,7 @@ class UserController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            $notifications = $request->user()->notifications()->orderBy('notifications.created_at', 'desc')
+            $notifications = $request->user()->notifications()->with('notifier', 'notificable')->orderBy('notifications.created_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Notifications retrieved successfully', [
