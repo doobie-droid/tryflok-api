@@ -104,9 +104,9 @@ class AuthController extends Controller
                     $iosAppClientId = config('services.google.ios_client_id');
                     $androidAppClientId = config('services.google.android_client_id');
                     $webClientId = config('services.google.web_client_id');
-                    if ($request->sign_in_source == 'ios') {
+                    if ($request->sign_in_source === 'ios') {
                         $client_id = $iosAppClientId;
-                    } else if ($request->sign_in_source == 'android') {
+                    } else if ($request->sign_in_source === 'android') {
                         $client_id = $androidAppClientId;
                     } else {
                         $client_id = $webClientId;
