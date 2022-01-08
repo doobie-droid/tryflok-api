@@ -126,5 +126,11 @@ class TipUserTest extends TestCase
             'balance' => bcadd($wallet2_initial_balance, $creator_share_in_flk, 0),
             'transaction_type' => 'fund',
         ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'notifier' => $user1->id,
+            'notificable_type' => 'revenue',
+            'message' => "@{$user1->username} just gifted you {$creator_share_in_flk} Flok Cowries",
+        ]);
     }
 }

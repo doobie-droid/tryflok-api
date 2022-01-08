@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Jobs\Content;
+namespace App\Jobs\Users;
 
-use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -12,18 +12,12 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Notification;
 use App\Http\Resources\NotificationResource;
 
-class NotifyFollower implements ShouldQueue
+class NotifyFollow implements ShouldQueue
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $message;
-    public $notificable_type;
-    public $notificable_id;
     public $follower;
-    public $notifier;
+    public $user;
     /**
      * Create a new job instance.
      *
@@ -31,11 +25,8 @@ class NotifyFollower implements ShouldQueue
      */
     public function __construct($data)
     {
-        $this->message = $data['message'];
-        $this->notificable_type = $data['notificable_type'];
-        $this->notificable_id = $data['notificable_id'];
         $this->follower = $data['follower'];
-        $this->notifier = $data['notifier'];
+        $this->user = $data['user'];
     }
 
     /**
@@ -45,22 +36,18 @@ class NotifyFollower implements ShouldQueue
      */
     public function handle()
     {
+        $message = "@{$this->follower->username} followed you";
         $notification = $this->follower->notifications()->create([
-            'notifier' => $this->notifier,
-            'message' => $this->message,
-            'notificable_type' => $this->notificable_type,
-            'notificable_id' => $this->notificable_id,
+            'notifier' => $this->follower->id,
+            'message' => $message,
+            'notificable_type' => 'user',
+            'notificable_id' => $this->follower->id,
         ]);
         $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notificaton->id)->first();
-
         $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
-        if (in_array($this->notificable_type, ['collection', 'content']) 
-            && 
-            ! is_null($notification->notificable()->first()->cover()->first())
-        ) {
-            $image = $notification->notificable()->first()->cover()->first()->url;
+        if (! is_null($this->notifier->profile_picture()->first())) {
+            $image = $this->notifier->profile_picture()->first()->url;
         }
-
         $client = new Client;
         $url = 'https://fcm.googleapis.com/fcm/send';
         $authorization_key = config('services.google.fcm_server_key');
@@ -72,8 +59,8 @@ class NotifyFollower implements ShouldQueue
                 'json' => [
                     'to' => $notification_token->token,
                     'notification' => [
-                        'title' => 'New Content Available',
-                        'body' => $this->message,
+                        'title' => 'New Follower',
+                        'body' => $message,
                         'image' => $image,
                     ],
                     'data' => new NotificationResource($notification),

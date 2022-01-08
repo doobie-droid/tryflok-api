@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class NotificationResource extends JsonResource
@@ -14,6 +15,9 @@ class NotificationResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        $parent = parent::toArray($request);
+        return array_merge($parent, [
+            'notifier' => new UserResource($this->whenLoaded('notifier')),
+        ]);
     }
 }

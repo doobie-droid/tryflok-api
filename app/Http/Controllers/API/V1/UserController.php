@@ -11,6 +11,7 @@ use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceWithSensitive;
 use App\Jobs\Payment\Payout as PayoutToCreatorJob;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
+use App\Jobs\Users\NotifyFollow as NotifyFollowJob;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\Content;
@@ -183,6 +184,11 @@ class UserController extends Controller
             ->withCount('followers', 'following')
             ->where('id', $user->id)
             ->first();
+
+            NotifyFollowJob::dispatch([
+                'follower' => $request->user(),
+                'user' => $user,
+            ]);
             return $this->respondWithSuccess('You have successfully followed this user', [
                 'user' => new UserResource($user),
             ]);
@@ -498,7 +504,7 @@ class UserController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            $notifications = $request->user()->notifications()->with('notifier', 'notificable')->orderBy('notifications.created_at', 'desc')
+            $notifications = $request->user()->notifications()->with('notifier', 'notifier.profile_picture', 'notificable')->orderBy('notifications.created_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Notifications retrieved successfully', [

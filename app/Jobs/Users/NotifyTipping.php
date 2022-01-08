@@ -11,6 +11,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Models\Notification;
+use App\Http\Resources\NotificationResource;
 
 class NotifyTipping implements ShouldQueue
 {
@@ -41,12 +43,17 @@ class NotifyTipping implements ShouldQueue
     {
         $message = "@{$this->tipper->username} just gifted you {$this->amount_in_flk} Flok Cowries";
         // TO DO: send push notification to user
-        $this->tippee->notifications()->create([
+        $notification = $this->tippee->notifications()->create([
             'notifier' => $this->tipper->id,
             'message' => $message,
             'notificable_type' => 'revenue',
             'notificable_id' => $this->revenue->id,
         ]);
+        $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notificaton->id)->first();
+        $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
+        if (! is_null($this->tipper->profile_picture()->first())) {
+            $image = $this->tipper->profile_picture()->first()->url;
+        }
         // send push notification
         $client = new Client;
         $url = 'https://fcm.googleapis.com/fcm/send';
@@ -61,12 +68,9 @@ class NotifyTipping implements ShouldQueue
                     'notification' => [
                         'title' => 'You just got gifted!',
                         'body' => $message,
+                        'image' => $image,
                     ],
-                    'data' => [
-                        'message' => $message,
-                        'notificable_type' => 'revenue',
-                        'notificable_id' => $this->revenue->id,
-                    ],
+                    'data' => new NotificationResource($notification),
                 ],
             ]);
         }

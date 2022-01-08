@@ -53,5 +53,12 @@ class FollowUserTest extends TestCase
             'user_id' => $user_to_be_followed->id,
             'follower_id' => $user_making_request->id,
         ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'notifier' => $user_making_request->id,
+            'notificable_type' => 'user',
+            'notificable_id' => $user_making_request->id,
+            'message' => "@{$user_making_request->username} has started a new live",
+        ]);
     }
 }
