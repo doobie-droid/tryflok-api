@@ -2,7 +2,9 @@
 
 namespace App\Jobs\Users;
 
+use App\Http\Resources\NotificationResource;
 use App\Mail\User\TippedMail;
+use App\Models\Notification;
 use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,8 +13,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Models\Notification;
-use App\Http\Resources\NotificationResource;
 
 class NotifyTipping implements ShouldQueue
 {
