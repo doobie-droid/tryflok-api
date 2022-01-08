@@ -1112,7 +1112,8 @@ class ContentController extends Controller
                 'notificable_id' => $content->id,
                 'notificable_type' => 'content',
                 'user' => $request->user(),
-                'message' => "{$request->user()->username} has started a new live",
+                'notifier' => $content->owner,
+                'message' => "@{$request->user()->username} has started a new live",
             ]);
 
             return $this->respondWithSuccess('Channel started successfully', [

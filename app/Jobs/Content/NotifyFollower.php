@@ -21,6 +21,7 @@ class NotifyFollower implements ShouldQueue
     public $notificable_type;
     public $notificable_id;
     public $follower;
+    public $notifier;
     /**
      * Create a new job instance.
      *
@@ -32,6 +33,7 @@ class NotifyFollower implements ShouldQueue
         $this->notificable_type = $data['notificable_type'];
         $this->notificable_id = $data['notificable_id'];
         $this->follower = $data['follower'];
+        $this->notifier = $data['notifier'];
     }
 
     /**
@@ -42,6 +44,7 @@ class NotifyFollower implements ShouldQueue
     public function handle()
     {
         $this->follower->notifications()->create([
+            'notifier' => $this->notifier,
             'message' => $this->message,
             'notificable_type' => $this->notificable_type,
             'notificable_id' => $this->notificable_id,

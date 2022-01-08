@@ -21,6 +21,7 @@ class DispatchNotificationToFollowers implements ShouldQueue
     public $notificable_id;
     public $user;
     public $message;
+    public $notifier;
     /**
      * Create a new job instance.
      *
@@ -32,6 +33,7 @@ class DispatchNotificationToFollowers implements ShouldQueue
         $this->notificable_type = $data['notificable_type'];
         $this->notificable_id = $data['notificable_id'];
         $this->user = $data['user'];
+        $this->notifier = $data['notifier'];
     }
 
     /**
@@ -42,16 +44,18 @@ class DispatchNotificationToFollowers implements ShouldQueue
     public function handle()
     {
         $message = $this->message;
+        $notifier = $this->notifier;
         $notificable_type = $this->notificable_type;
         $notificable_id = $this->notificable_id;
 
-        $this->user->followers()->chunk(100000, function ($users) use ($message, $notificable_type, $notificable_id) {
+        $this->user->followers()->chunk(100000, function ($users) use ($message, $notificable_type, $notificable_id, $notifier) {
             foreach ($users as $user) {
                 NotifyFollowerJob::dispatch([
                     'message' => $message,
                     'notificable_type' => $notificable_type,
                     'notificable_id' => $notificable_id,
                     'follower' => $user,
+                    'notifier' => $notifier,
                 ]);
             }
         });
