@@ -38,7 +38,7 @@ class NotifyFollow implements ShouldQueue
     {
         $message = "@{$this->follower->username} followed you";
         $notification = $this->follower->notifications()->create([
-            'notifier' => $this->follower->id,
+            'notifier_id' => $this->follower->id,
             'message' => $message,
             'notificable_type' => 'user',
             'notificable_id' => $this->follower->id,

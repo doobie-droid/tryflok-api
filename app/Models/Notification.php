@@ -36,11 +36,11 @@ class Notification extends Model
 
     public function recipient()
     {
-        return $this->belongsTo(User::class, 'recipient');
+        return $this->belongsTo(User::class, 'recipient_id');
     }
 
     public function notifier()
     {
-        return $this->belongsTo(User::class, 'notifier');
+        return $this->belongsTo(User::class, 'notifier_id');
     }
 }

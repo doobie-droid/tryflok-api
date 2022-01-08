@@ -9,8 +9,8 @@ class ModifyNotificationsTable extends Migration
     public function up()
     {
         Schema::table('notifications', function (Blueprint $table) {
-            $table->renameColumn('user_id', 'recipient')->default(0);
-            $table->foreignUuid('notifier');
+            $table->renameColumn('user_id', 'recipient_id')->default(0);
+            $table->foreignUuid('notifier_id');
         });
     }
 

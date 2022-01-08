@@ -46,7 +46,7 @@ class NotifyFollower implements ShouldQueue
     public function handle()
     {
         $notification = $this->follower->notifications()->create([
-            'notifier' => $this->notifier->id,
+            'notifier_id' => $this->notifier->id,
             'message' => $this->message,
             'notificable_type' => $this->notificable_type,
             'notificable_id' => $this->notificable_id,
