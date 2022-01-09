@@ -70,7 +70,6 @@ class TagsTableSeeder extends Seeder
         Tag::create(['id' => Str::uuid(), 'name' => 'reality']);
         Tag::create(['id' => Str::uuid(), 'name' => 'nudity']);
         Tag::create(['id' => Str::uuid(), 'name' => 'violence']);
-        Tag::create(['id' => Str::uuid(), 'name' => 'reality']);
         Tag::create(['id' => Str::uuid(), 'name' => 'debate']);
         Tag::create(['id' => Str::uuid(), 'name' => 'career']);
         Tag::create(['id' => Str::uuid(), 'name' => 'alternative']);
