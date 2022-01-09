@@ -105,7 +105,6 @@ class Digiverse
                 'tags' => [
                     [
                         'id',
-                        'type',
                         'name',
                     ]
                 ],

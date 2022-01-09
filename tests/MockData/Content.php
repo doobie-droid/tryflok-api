@@ -126,7 +126,6 @@ class Content
         'tags' => [
             [
                 'id',
-                'type',
                 'name',
             ]
         ],
