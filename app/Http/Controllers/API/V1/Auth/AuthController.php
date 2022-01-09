@@ -168,6 +168,10 @@ class AuthController extends Controller
 
             $token = JWTAuth::fromUser($user);
             $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', $user->id)->first();
+            $wallet = $user->wallet()->first();
+            if (is_null($wallet)) {
+                $user->wallet()->create([]);
+            }
             return $this->respondWithSuccess('Registration successful', [
                 'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
@@ -308,6 +312,10 @@ class AuthController extends Controller
                         'token' => $request->firebase_token,
                     ]);
                 }
+            }
+            $wallet = $user->wallet()->first();
+            if (is_null($wallet)) {
+                $user->wallet()->create([]);
             }
             return $this->respondWithSuccess('Password reset successfully', [
                 'user' => new UserResourceWithSensitive($user),

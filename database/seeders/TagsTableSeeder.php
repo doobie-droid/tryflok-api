@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Tag;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class TagsTableSeeder extends Seeder
 {
@@ -14,11 +15,64 @@ class TagsTableSeeder extends Seeder
      */
     public function run()
     {
-        Tag::create(['id' => '0e14760d-1d41-45aa-a820-87d6dc35f7ff', 'name' => 'horror']);
-        Tag::create(['id' => '120566de-0361-4d66-b458-321d4ede62a9', 'name' => 'crypto']);
-        Tag::create(['id' => '1693fbe5-e3a4-4338-9fc8-e305b3446d6e', 'name' => 'fashion']);
-        Tag::create(['id' => '2186c1d6-fea2-4746-ac46-0e4f445f7c9e', 'name' => 'adventure']);
-        Tag::create(['id' => '2743557a-dfb5-44e3-9537-23f2f5cc9957', 'name' => 'educative']);
-        Tag::create(['id' => '431b915f-e983-48d0-9c82-10e55e0d06d7', 'name' => 'african']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'horror']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'crypto']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'fashion']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'adventure']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'educative']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'african']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'gaming']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'sci-fi']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'fantasy']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'romance']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'comedy']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'filmmaking']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'photography']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'poetry']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'design']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'creative writing']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'live']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'sexuality']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'economics']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'lgbtq']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'christianity']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'islam']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'art']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'music']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'communism']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'socialism']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'children']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'entertainment']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'philosophy']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'ethics']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'morality']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'lifestyle']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'robotics']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'science']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'technology']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'engineering']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'software']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'software engineering']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'dance']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'sports']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'culture']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'business']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'investigative']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'documentary']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'community']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'food']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'drink']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'gymnastics']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'motivation']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'runway']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'modelling']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'pets']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'reality']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'nudity']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'violence']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'reality']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'debate']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'career']);
+        Tag::create(['id' => Str::uuid(), 'name' => 'alternative']);
     }
 }

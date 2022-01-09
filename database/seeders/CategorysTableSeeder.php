@@ -22,6 +22,6 @@ class CategorysTableSeeder extends Seeder
         Category::create(['name' => 'religion']);
         Category::create(['name' => 'drama']);
         Category::create(['name' => 'kids']);
-        Category::create(['name' => 'tv-series']);
+        Category::create(['name' => 'series']);
     }
 }

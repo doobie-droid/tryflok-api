@@ -10,8 +10,7 @@ class CreateTagsTable extends Migration
     {
         Schema::create('tags', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('type')->nullable();
-            $table->string('name'); // horror, adventure, young adult, sci-fi, kindergarten etc.
+            $table->string('name')->unique();
             $table->timestamps();
         });
     }
