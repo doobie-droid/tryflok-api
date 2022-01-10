@@ -37,6 +37,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 'username' => '',
                 'is_authenticated' => false,
             ];
+            Log::info(json_encode($conn->httpRequest->getHeaders()));
 
             AuthenticateConnection::dispatch([
                 'headers' => $conn->httpRequest->getHeaders(),
