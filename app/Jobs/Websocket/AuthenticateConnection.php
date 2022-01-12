@@ -34,11 +34,18 @@ class AuthenticateConnection implements ShouldQueue
      */
     public function handle()
     {
-        if (! array_key_exists('Authorization', $this->headers)) {
+        $authorization = [];
+        foreach ($this->headers as $key => $value) {
+            $key = strtolower($key);
+            if ($key === 'authorization') {
+                $authorization = $value;
+            }
+        }
+        if (empty($authorization)) {
             return;
         }
 
-        $token = explode(' ', $this->headers['Authorization'][0])[1];
+        $token = explode(' ', $authorization[0])[1];
         JWTAuth::setToken($token);
 
         if (! $claim = JWTAuth::getPayload()) {

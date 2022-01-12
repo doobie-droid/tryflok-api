@@ -94,6 +94,12 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('{id}/tip', 'UserController@tipUser');
         });
 
+        Route::group(['prefix' => 'analytics'], function () {
+            Route::group(['prefix' => 'sales'], function () {
+                Route::get('daily', 'AnalyticsController@getDailySales');
+            });
+        });
+
         Route::group(['prefix' => 'account'], function () {
             Route::get('/', 'UserController@getAccount');
             Route::delete('/', 'UserController@deleteAccount');

@@ -17,12 +17,14 @@ use App\Models\Collection;
 use App\Models\Content;
 use App\Models\PaymentAccount;
 use App\Models\Payout;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Models\Userable;
 use App\Models\WalletTransaction;
 use App\Rules\AssetType as AssetTypeRule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -472,7 +474,7 @@ class UserController extends Controller
             $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
             $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
 
-            $revenues = $request->user()->revenues()->with('revenueable')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
+            $revenues = $request->user()->revenues()->with('revenueable')->where('revenue_from','sale')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
             return $this->respondWithSuccess('Revenues retrieved successfully', [
                 'revenues' => RevenueResource::collection($revenues),
                 'current_page' => (int) $revenues->currentPage(),
@@ -1070,23 +1072,19 @@ class UserController extends Controller
             }
 
             // subscription graph
-            $digiverses = $request->user()->digiversesCreated()->with([
-                'subscriptions' => function ($query) use ($subcribers_graph_start_date, $subcribers_graph_end_date){
-                    $query->whereDate('created_at', '>=', $subcribers_graph_start_date)->whereDate('created_at', '<=', $subcribers_graph_end_date);
-                },
-            ])->get();
+            $digiverse_ids = $request->user()->digiversesCreated()->pluck('id');
+            $subscriptions = Subscription::select(DB::raw('count(id) as subscribers_count, date(created_at) as created_date'))
+                                            ->whereDate('created_at', '>=', $subcribers_graph_start_date)
+                                            ->whereDate('created_at', '<=', $subcribers_graph_end_date)
+                                            ->where('subscriptionable_type', 'collection')
+                                            ->whereIn('subscriptionable_id', $digiverse_ids)
+                                            ->groupBy('created_date')
+                                            ->get()->toArray();
+
             $subscription_graph = [];
-            foreach ($digiverses as $digiverse) {
-                foreach ($digiverse->subscriptions as $subscription) {
-                    $dateString = (string) $subscription->created_at->format('Y-m-d');
-                    if (! array_key_exists($dateString, $subscription_graph)) {
-                        $subscription_graph[$dateString] = 0;
-                    }
-                    $subscription_graph[$dateString] = $subscription_graph[$dateString] + 1;
-                }
+            foreach ($subscriptions as $instance) {
+                $subscription_graph[$instance['created_date']] = $instance['subscribers_count'];
             }
-
-
 
             return $this->respondWithSuccess('Dashboard details retrieved successfully', [
                 'total_tips' => $request->user()->revenues()->where('revenue_from', 'tip')->sum('benefactor_share'),
