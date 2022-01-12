@@ -20,7 +20,7 @@ class NotifyTipping implements ShouldQueue
     public $tipper;
     public $tippee;
     public $amount_in_flk;
-    public $revenue;
+    public $wallet_transaction;
     /**
      * Create a new job instance.
      *
@@ -31,7 +31,7 @@ class NotifyTipping implements ShouldQueue
         $this->tipper = $data['tipper'];
         $this->tippee = $data['tippee'];
         $this->amount_in_flk = $data['amount_in_flk'];
-        $this->revenue = $data['revenue'];
+        $this->wallet_transaction = $data['wallet_transaction'];
     }
 
     /**
@@ -46,8 +46,8 @@ class NotifyTipping implements ShouldQueue
         $notification = $this->tippee->notifications()->create([
             'notifier_id' => $this->tipper->id,
             'message' => $message,
-            'notificable_type' => 'revenue',
-            'notificable_id' => $this->revenue->id,
+            'notificable_type' => 'wallet_transaction',
+            'notificable_id' => $this->wallet_transaction->id,
         ]);
         $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notification->id)->first();
         $notification = new NotificationResource($notification);

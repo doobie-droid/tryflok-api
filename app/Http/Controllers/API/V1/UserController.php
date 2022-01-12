@@ -1026,7 +1026,7 @@ class UserController extends Controller
                 'tipper' => $request->user(),
                 'tippee' => $userToTip,
                 'amount_in_flk' => $creator_share_in_flk,
-                'revenue' => $revenue,
+                'wallet_transaction' => $transaction,
             ]);
             return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {
