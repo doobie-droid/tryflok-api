@@ -3,64 +3,49 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\TrendingResource;
-use App\Models\Review;
+use App\Http\Resources;
+use App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class AnalyticsController extends Controller
 {
-    public function trending(Request $request)
+    public function getDailySales(Request $request)
     {
         try {
-            $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
-            $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
+            $start_date = $request->query('start_date', now()->startOfMonth());
+            $end_date = $request->query('end_date', now()->endOfMonth());
 
-            if ($request->user() == null || $request->user()->id == null) {
-                $user_id = 0;
-            } else {
-                $user_id = $request->user()->id;
+            $validator = Validator::make([
+                'start_date' => $start_date,
+                'end_date' => $end_date,
+            ], [
+                'start_date' => ['required', 'date',],
+                'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            $reviews = Review::select(DB::raw('avg(rating) as rating, reviewable_type, reviewable_id'))
-            ->whereHas('reviewable', function (Builder $query) {
-                $query
-                ->where('is_available', 1)
-                ->where('show_only_in_collections', 0)
-                ->where('approved_by_admin', 1);
-            })
-            ->with([
-                'reviewable' => function ($query) use ($user_id) {
-                    $query
-                    ->with('categories', 'owner', 'prices', 'prices.continent', 'prices.country', 'cover')
-                    ->withCount([
-                        'ratings' => function ($query) {
-                            $query->where('rating', '>', 0);
-                        },
-                    ])->withAvg([
-                        'ratings' => function ($query) {
-                            $query->where('rating', '>', 0);
-                        },
-                    ], 'rating')
-                    ->with([
-                        'userables' => function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id)->where('status', 'available');
-                        },
-                    ]);
-                },
-            ])
-            ->groupBy('reviewable_type', 'reviewable_id')
-            ->orderBy('rating', 'DESC')
-            ->paginate($limit, ['*'], 'page', $page);
+            $sales = Models\Revenue::select(DB::raw('sum(benefactor_share) as share, date(created_at) as created_date'))
+                                        ->whereDate('created_at', '>=', $start_date)
+                                        ->whereDate('created_at', '<=', $end_date)
+                                        ->where('revenue_from', 'sale')
+                                        ->where('user_id', $request->user()->id)
+                                        ->groupBy('created_date')
+                                        ->get()
+                                        ->toArray();
+            
+            $sales_graph = [];
+            foreach ($sales as $instance) {
+                $sales_graph[$instance['created_date']] = $instance['share'];
+            }
 
-            return $this->respondWithSuccess('Trending retrieved successfully', [
-                'trending' => TrendingResource::collection($reviews),
-                'current_page' => (int) $reviews->currentPage(),
-                'items_per_page' => (int) $reviews->perPage(),
-                'total' => (int) $reviews->total(),
-            ]);
+            return $this->respondWithSuccess('Sales data retrieved successfully', $sales_graph);
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
