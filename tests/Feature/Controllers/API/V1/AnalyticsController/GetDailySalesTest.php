@@ -66,17 +66,19 @@ class GetDailySalesTest extends TestCase
             'status_code',
             'message',
             'data' => [
-                $day1,
-                $day2,
-                $day3,
+                'sales' => [
+                    $day1,
+                    $day2,
+                    $day3,
+                ]
             ]
         ]);
         $data = $response->getData()->data;
-        $this->assertEquals($data->$day1, bcmul($day1_expected_total, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+        $this->assertEquals($data->sales->$day1, bcmul($day1_expected_total, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
         2));
-        $this->assertEquals($data->$day2, bcmul($day2_expected_total, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+        $this->assertEquals($data->sales->$day2, bcmul($day2_expected_total, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
         2));
-        $this->assertEquals($data->$day3, bcmul($day3_expected_total, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+        $this->assertEquals($data->sales->$day3, bcmul($day3_expected_total, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
         2));
     }
 }

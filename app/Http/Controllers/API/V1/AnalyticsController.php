@@ -17,7 +17,13 @@ class AnalyticsController extends Controller
     {
         try {
             $start_date = $request->query('start_date', now()->startOfMonth());
+            if ($start_date == '') {
+                $start_date = now()->startOfMonth();
+            }
             $end_date = $request->query('end_date', now()->endOfMonth());
+            if ($end_date == '') {
+                $end_date = now()->endOfMonth();
+            }
 
             $validator = Validator::make([
                 'start_date' => $start_date,
@@ -45,7 +51,9 @@ class AnalyticsController extends Controller
                 $sales_graph[$instance['created_date']] = $instance['share'];
             }
 
-            return $this->respondWithSuccess('Sales data retrieved successfully', $sales_graph);
+            return $this->respondWithSuccess('Sales data retrieved successfully', [
+                'sales' => $sales_graph,
+            ]);
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
