@@ -29,6 +29,16 @@ class CashoutPayout extends Command
      * @return void
      */
     public function __construct()
+    {   
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    public function handle()
     {
         DB::beginTransaction();
         try {
@@ -50,17 +60,6 @@ class CashoutPayout extends Command
             DB::rollBack();
             throw $exception;
         }
-        
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
-    {
-        return 0;
+        return Command::SUCCESS;;
     }
 }

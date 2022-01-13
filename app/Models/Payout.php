@@ -56,7 +56,7 @@ class Payout extends Model
         $has_been_sent = false;
         if (
             is_null($this->failed_notification_sent) || 
-            $this->failed_notification_sent->gte(now()->subHours(12))
+            $this->failed_notification_sent->lte(now()->subHours($buffer_time))
         ) {
             $has_been_sent = true;
         }
