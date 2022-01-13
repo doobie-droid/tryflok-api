@@ -29,7 +29,7 @@ class NoPaymentAccountMail extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.user.no-payment-account')->with([
+        return $this->view('emails.user.payout.no-payment-account')->with([
             'user' => $this->user,
             'payout_message' => $this->message,
         ])->subject('Payout Failed');

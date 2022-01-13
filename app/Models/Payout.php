@@ -46,7 +46,7 @@ class Payout extends Model
 
     public function increasePayoutCashoutAttempts()
     {
-        $this->cashout_attempts = (int) $this->payout->cashout_attempts + 1;
+        $this->cashout_attempts = (int) $this->cashout_attempts + 1;
         $this->save();
     }
 

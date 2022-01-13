@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands\Payments;
 
-use App\Jobs\Users\CashoutPayout as CashoutPayoutJob;
+use App\Jobs\Payment\CashoutPayout as CashoutPayoutJob;
 use App\Models\Payout;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -35,7 +35,7 @@ class CashoutPayout extends Command
             Payout::where('claimed', 0)
                 ->where(function ($query) {
                     $query->whereNull('last_payment_request')
-                        ->orWhere('last_payment_request', '>=', now()->subHours(3));
+                        ->orWhere('last_payment_request', '<=', now()->subHours(3));
                 })
                 ->where('cancelled_by_admin', 0)
                 ->chunk(100000, function ($payouts) {

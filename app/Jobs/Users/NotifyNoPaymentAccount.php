@@ -4,6 +4,7 @@ namespace App\Jobs\Users;
 
 use App\Http\Resources\NotificationResource;
 use App\Mail\User\NoPaymentAccountMail;
+use App\Models\Notification;
 use App\Models\User;
 use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
@@ -38,9 +39,9 @@ class NotifyNoPaymentAccount implements ShouldQueue
     public function handle()
     {
         $message = "We tried paying out USD {$this->payout->amount} to you but were unable to because you have no payment account. Please add a payment account and you would recieve your payout whithin the next 24hrs";
-        $flok = User::where('email', 'contact@tryflok.com')->first();
+
         $notification = $this->user->notifications()->create([
-            'notifier_id' => $flok->id,
+            'notifier_id' => $this->user->id,
             'message' => $message,
             'notificable_type' => 'payout',
             'notificable_id' => $this->payout->id,
@@ -49,14 +50,14 @@ class NotifyNoPaymentAccount implements ShouldQueue
         $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notification->id)->first();
         $notification = new NotificationResource($notification);
         $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
-        if (! is_null($flok->profile_picture()->first())) {
-            $image = $flok->profile_picture()->first()->url;
+        if (! is_null($this->user->profile_picture()->first())) {
+            $image = $this->user->profile_picture()->first()->url;
         }
 
         $client = new Client;
         $url = 'https://fcm.googleapis.com/fcm/send';
         $authorization_key = config('services.google.fcm_server_key');
-        foreach ($this->tippee->notificationTokens as $notification_token) {
+        foreach ($this->user->notificationTokens as $notification_token) {
             $client->post($url, [
                 'headers' => [
                     'Authorization' => "key={$authorization_key}",

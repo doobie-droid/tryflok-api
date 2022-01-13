@@ -17,7 +17,14 @@ class PayoutFactory extends Factory
         return [
             'id' => $this->faker->unique()->uuid,
             'user_id' => User::factory(),
-            'amount' => 100,
+            'amount' => 3,
+            'claimed' => 0,
+            'handler' => null,
+            'reference' => null,
+            'last_payment_request' => null,
+            'cashout_attempts' => 0,
+            'cancelled_by_admin' => 0,
+            'failed_notification_sent' => null,
         ];
     }
 }
