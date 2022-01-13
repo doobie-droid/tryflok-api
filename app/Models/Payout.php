@@ -34,8 +34,7 @@ class Payout extends Model
      */
     protected $casts = [
         'last_payment_request' => 'datetime',
-        'start' => 'datetime',
-        'end' => 'datetime',
+        'failed_notification_sent' => 'datetime',
     ];
 
     protected $guard_name = 'api';
@@ -43,5 +42,43 @@ class Payout extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function increasePayoutCashoutAttempts()
+    {
+        $this->cashout_attempts = (int) $this->payout->cashout_attempts + 1;
+        $this->save();
+    }
+
+    /** @param $buffer_time is time in hours */
+    public function failedNotificationNotSent(int $buffer_time = 12): bool
+    {
+        $has_been_sent = false;
+        if (
+            is_null($this->failed_notification_sent) || 
+            $this->failed_notification_sent->gte(now()->subHours(12))
+        ) {
+            $has_been_sent = true;
+        }
+        return $has_been_sent;
+    }
+
+    public function markAsCompleted(string $reference)
+    {
+        $this->reference = $reference;
+        $this->claimed = 1;
+        $this->save();
+    }
+
+    public function setHandler(string $handler)
+    {
+        $this->handler = $handler;
+        $this->save();
+    }
+
+    public function resetCashoutAttept()
+    {
+        $this->payout->handler = null;
+        $this->payout->save();
     }
 }

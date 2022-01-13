@@ -6,6 +6,7 @@ use App\Jobs\Users\Payout as PayoutJob;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class GeneratePayout extends Command
 {
@@ -40,15 +41,22 @@ class GeneratePayout extends Command
      */
     public function handle()
     {
-        User::whereHas('revenues', function (Builder $query) {
-            $query->where('added_to_payout', 0);
-        })->chunk(100000, function ($users) {
-            foreach ($users as $user) {
-                PayoutJob::dispatch([
-                    'user' => $user,
-                ]);
-            }
-        });
+        DB::beginTransaction();
+        try {
+            User::whereHas('revenues', function (Builder $query) {
+                $query->where('added_to_payout', 0);
+            })->chunk(100000, function ($users) {
+                foreach ($users as $user) {
+                    PayoutJob::dispatch([
+                        'user' => $user,
+                    ]);
+                }
+            });
+            DB::commit();
+        }   catch (\Exception $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
         return Command::SUCCESS;
     }
 }
