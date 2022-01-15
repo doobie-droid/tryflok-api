@@ -5,8 +5,10 @@ namespace Tests\Feature\Jobs\Payment;
 use App\Constants;
 use App\Jobs\Payment\Purchase as PurchaseJob;
 use App\Models;
+use App\Mail\User\SaleMade;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class PurchaseTest extends TestCase
@@ -38,7 +40,7 @@ class PurchaseTest extends TestCase
         ->digiverse()
         ->setPriceAmount(100)
         ->create();
-
+        Mail::fake();
         PurchaseJob::dispatch([
             'total_amount' => 200,
             'total_fees' => 0,
@@ -78,6 +80,7 @@ class PurchaseTest extends TestCase
                 ],
             ],
         ]);
+        Mail::assertSent(SaleMade::class);
 
         $this->assertDatabaseHas('payments', [
             'payer_id' => $buyer->id,
@@ -112,7 +115,7 @@ class PurchaseTest extends TestCase
             'amount' => 100,
             'payment_processor_fee' => 0,
             'platform_share' => bcmul(100, Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
-            'benefactor_share' => bcmul(100, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
+            'benefactor_share' => bcmul(100, 1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
             'referral_bonus' => 0,
             'revenue_from' => 'sale',
         ]);
@@ -124,7 +127,7 @@ class PurchaseTest extends TestCase
             'amount' => 100,
             'payment_processor_fee' => 0,
             'platform_share' => bcmul(100, Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
-            'benefactor_share' => bcmul(100, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
+            'benefactor_share' => bcmul(100, 1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
             'referral_bonus' => 0,
             'revenue_from' => 'sale',
         ]);
@@ -136,7 +139,7 @@ class PurchaseTest extends TestCase
             'amount' => 0,
             'payment_processor_fee' => 0,
             'platform_share' => bcmul(0, Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
-            'benefactor_share' => bcmul(0, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
+            'benefactor_share' => bcmul(0, 1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 2),
             'referral_bonus' => 0,
             'revenue_from' => 'sale',
         ]);
