@@ -3,8 +3,9 @@
 namespace App\Jobs\Users;
 
 use App\Http\Resources\NotificationResource;
-use App\Mail\User\TippedMail;
+use App\Mail\User\NoPaymentAccountMail;
 use App\Models\Notification;
+use App\Models\User;
 use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,13 +15,11 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class NotifyTipping implements ShouldQueue
+class NotifyNoPaymentAccount implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $tipper;
-    public $tippee;
-    public $amount_in_flk;
-    public $wallet_transaction;
+    public $payout;
+    public $user;
     /**
      * Create a new job instance.
      *
@@ -28,10 +27,8 @@ class NotifyTipping implements ShouldQueue
      */
     public function __construct($data)
     {
-        $this->tipper = $data['tipper'];
-        $this->tippee = $data['tippee'];
-        $this->amount_in_flk = $data['amount_in_flk'];
-        $this->wallet_transaction = $data['wallet_transaction'];
+        $this->payout = $data['payout'];
+        $this->user = $data['user'];
     }
 
     /**
@@ -41,25 +38,26 @@ class NotifyTipping implements ShouldQueue
      */
     public function handle()
     {
-        $message = "@{$this->tipper->username} just gifted you {$this->amount_in_flk} Flok Cowries";
-        // TO DO: send push notification to user
-        $notification = $this->tippee->notifications()->create([
-            'notifier_id' => $this->tipper->id,
+        $message = "We tried paying out USD {$this->payout->amount} to you but were unable to because you have no payment account. Please add a payment account and you would recieve your payout whithin the next 24hrs";
+
+        $notification = $this->user->notifications()->create([
+            'notifier_id' => $this->user->id,
             'message' => $message,
-            'notificable_type' => 'wallet_transaction',
-            'notificable_id' => $this->wallet_transaction->id,
+            'notificable_type' => 'payout',
+            'notificable_id' => $this->payout->id,
         ]);
+
         $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notification->id)->first();
         $notification = new NotificationResource($notification);
         $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
-        if (! is_null($this->tipper->profile_picture()->first())) {
-            $image = $this->tipper->profile_picture()->first()->url;
+        if (! is_null($this->user->profile_picture()->first())) {
+            $image = $this->user->profile_picture()->first()->url;
         }
-        // send push notification
+
         $client = new Client;
         $url = 'https://fcm.googleapis.com/fcm/send';
         $authorization_key = config('services.google.fcm_server_key');
-        foreach ($this->tippee->notificationTokens as $notification_token) {
+        foreach ($this->user->notificationTokens as $notification_token) {
             $client->post($url, [
                 'headers' => [
                     'Authorization' => "key={$authorization_key}",
@@ -67,7 +65,7 @@ class NotifyTipping implements ShouldQueue
                 'json' => [
                     'to' => $notification_token->token,
                     'notification' => [
-                        'title' => 'You just got gifted!',
+                        'title' => 'Payout Failed',
                         'body' => $message,
                         'image' => $image,
                     ],
@@ -75,8 +73,9 @@ class NotifyTipping implements ShouldQueue
                 ],
             ]);
         }
-        Mail::to($this->tippee)->send(new TippedMail([
-            'user' => $this->tippee,
+
+        Mail::to($this->user)->send(new NoPaymentAccountMail([
+            'user' => $this->user,
             'message' => $message,
         ]));
     }

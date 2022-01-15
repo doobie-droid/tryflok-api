@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Console\Commands\Payouts;
+namespace Tests\Feature\Console\Commands\Payments;
 
 use App\Constants;
 use App\Models;

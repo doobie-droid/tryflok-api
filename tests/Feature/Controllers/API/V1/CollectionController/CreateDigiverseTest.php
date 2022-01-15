@@ -122,7 +122,7 @@ class CreateDigiverseTest extends TestCase
             'user_id' => $user->id,
             'type' => 'digiverse',
             'is_available' => 1,
-            'approved_by_admin' => 0,
+            'approved_by_admin' => 1,
             'show_only_in_collections' => 0,
         ]);
 

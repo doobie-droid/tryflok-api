@@ -42,7 +42,7 @@ class CollectionController extends Controller
                 'user_id' => $user->id,
                 'type' => 'digiverse',
                 'is_available' => 1,
-                'approved_by_admin' => 0,
+                'approved_by_admin' => 1,
                 'show_only_in_collections' => 0,
                 'views' => 0,
             ]);
@@ -303,9 +303,10 @@ class CollectionController extends Controller
 
             $digiverses = Collection::where('type', 'digiverse')
             ->where('is_available', 1)
+            ->where('approved_by_admin', 1)
             ->where('show_only_in_collections', 0)
             ->whereHas('contents', function (Builder $query) {
-                $query->where('is_available', 1);
+                $query->where('is_available', 1)->where('approved_by_admin', 1);
             });
 
             if (! empty($keywords)) {

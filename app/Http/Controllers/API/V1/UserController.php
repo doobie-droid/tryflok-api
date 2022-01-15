@@ -9,14 +9,12 @@ use App\Http\Resources\NotificationResource;
 use App\Http\Resources\RevenueResource;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceWithSensitive;
-use App\Jobs\Payment\Payout as PayoutToCreatorJob;
 use App\Jobs\Users\NotifyFollow as NotifyFollowJob;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\Content;
 use App\Models\PaymentAccount;
-use App\Models\Payout;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Models\Userable;
@@ -899,58 +897,6 @@ class UserController extends Controller
         }
     }
 
-    public function cashoutPayout(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'payout_id' => ['required', 'string', 'exists:payouts,id'],
-                'payment_account_id' => ['required', 'string', 'exists:payment_accounts,id', ],
-            ]);
-
-            if ($validator->fails()) {
-                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
-            }
-            $payout = Payout::where('id', $request->payout_id)->where('user_id', $request->user()->id)->first();
-            if (is_null($payout)) {
-                return $this->respondBadRequest('The payout provided does not belong to you');
-            }
-
-            $payment_account = PaymentAccount::where('id', $request->payment_account_id)->where('user_id', $request->user()->id)->first();
-            if (is_null($payment_account)) {
-                return $this->respondBadRequest('The payment account provided does not belong to you');
-            }
-
-            if ($payout->claimed === 1) {
-                return $this->respondBadRequest('This payout has already been claimed');
-            }
-
-            //make sure request was not made in the last six hours
-            if (! is_null($payout->last_payment_request) && $payout->last_payment_request->gt(now()->subHours(12))) {
-                return $this->respondBadRequest('You need to wait for at least 12 hours to make another cashout request for this payout');
-            }
-            //dispatch to payment provider to payout
-            if ($payment_account->provider === 'manual') {
-                $payout->handler = 'manual';
-                $payout->last_payment_request = now();
-                $payout->save();
-            } else {
-                $payout->last_payment_request = now();
-                $payout->handler = $payment_account->provider;
-                $payout->save();
-                //dispatch to be handled by provider
-                PayoutToCreatorJob::dispatch([
-                    'payout' => $payout,
-                    'payment_account' => $payment_account,
-                ]);
-            }
-
-            return $this->respondAccepted('Details received successfully, you should receive your payout in the next 24 hours');
-        } catch (\Exception $exception) {
-            Log::error($exception);
-            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
-        }
-    }
-
     public function tipUser(Request $request, $id)
     {
         try {
@@ -1026,7 +972,7 @@ class UserController extends Controller
                 'tipper' => $request->user(),
                 'tippee' => $userToTip,
                 'amount_in_flk' => $creator_share_in_flk,
-                'revenue' => $revenue,
+                'wallet_transaction' => $transaction,
             ]);
             return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {

@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         Commands\Subscriptions\EndSubscriptions::class,
         Commands\Payments\CheckPayoutTransferStatus::class,
         Commands\Payments\GeneratePayout::class,
+        Commands\Payments\CashoutPayout::class,
         Commands\Trending\ComputeCollectionTrending::class,
         Commands\Trending\ComputeContentTrending::class,
     ];
@@ -31,6 +32,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('flok:check-payout-transfer-status')->everyTwoMinutes();
         $schedule->command('flok:end-subscriptions')->hourly();
         $schedule->command('flok:generate-payouts')->monthly();
+        $schedule->command('flok:cashout-payouts')->everyTwoMinutes();
         $schedule->command('flok:compute-content-trending')->daily();
         $schedule->command('flok:compute-collection-trending')->daily();
     }
