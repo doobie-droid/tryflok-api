@@ -69,7 +69,7 @@ class ContentController extends Controller
                 'user_id' => $user->id,
                 'type' => $request->type,
                 'is_available' => $is_available,
-                'approved_by_admin' => 0,
+                'approved_by_admin' => 1,
                 'show_only_in_digiverses' => 1,
                 'live_status' => 'inactive',
             ]);
@@ -646,8 +646,8 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             
-            $contents = Content::where('is_available', 1)->whereHas('collections', function (Builder $query) {
-                $query->where('is_available', 1);
+            $contents = Content::where('is_available', 1)->where('approved_by_admin', 1)->whereHas('collections', function (Builder $query) {
+                $query->where('is_available', 1)->where('approved_by_admin', 1);
             });
 
             if ($request->user() == null || $request->user()->id == null) {
@@ -814,7 +814,7 @@ class ContentController extends Controller
             }
 
             if ($user_id !== $digiverse->user_id) {
-                $contents = $contents->where('is_available', 1);
+                $contents = $contents->where('is_available', 1)->where('approved_by_admin', 1);
             }
 
             if (! empty($keywords)) {

@@ -138,7 +138,7 @@ class CreateTest extends TestCase
             'user_id' => $user->id,
             'type' => 'video',
             'is_available' => 0,
-            'approved_by_admin' => 0,
+            'approved_by_admin' => 1,
             'show_only_in_digiverses' => 1,
         ]);
         $content = Models\Content::where('title', $request['title'])->first();
@@ -241,7 +241,7 @@ class CreateTest extends TestCase
             'user_id' => $user->id,
             'type' => 'audio',
             'is_available' => 0,
-            'approved_by_admin' => 0,
+            'approved_by_admin' => 1,
             'show_only_in_digiverses' => 1,
         ]);
         $content = Models\Content::where('title', $request['title'])->first();
@@ -346,7 +346,7 @@ class CreateTest extends TestCase
             'user_id' => $user->id,
             'type' => 'pdf',
             'is_available' => 0,
-            'approved_by_admin' => 0,
+            'approved_by_admin' => 1,
             'show_only_in_digiverses' => 1,
         ]);
         $content = Models\Content::where('title', $request['title'])->first();
@@ -450,7 +450,7 @@ class CreateTest extends TestCase
             'user_id' => $user->id,
             'type' => 'newsletter',
             'is_available' => 0,
-            'approved_by_admin' => 0,
+            'approved_by_admin' => 1,
             'show_only_in_digiverses' => 1,
         ]);
         $content = Models\Content::where('title', $request['title'])->first();
@@ -558,7 +558,7 @@ class CreateTest extends TestCase
             'user_id' => $user->id,
             'type' => 'live-audio',
             'is_available' => 1,
-            'approved_by_admin' => 0,
+            'approved_by_admin' => 1,
             'show_only_in_digiverses' => 1,
             'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
             'live_status' => 'inactive',
@@ -676,7 +676,7 @@ class CreateTest extends TestCase
             'user_id' => $user->id,
             'type' => 'live-video',
             'is_available' => 1,
-            'approved_by_admin' => 0,
+            'approved_by_admin' => 1,
             'show_only_in_digiverses' => 1,
             'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
             'live_status' => 'inactive',
