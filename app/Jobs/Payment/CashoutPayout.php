@@ -56,7 +56,7 @@ class CashoutPayout implements ShouldQueue
                         $this->payout->markAsCompleted($resp->data->id);
                         $this->sendPayoutSuccessfulNotification();
                     } else {
-                        $this->payout->resetCashoutAttept();
+                        $this->payout->resetCashoutAttempt();
                     }
                     break;
                 case 'stripe':
@@ -67,7 +67,7 @@ class CashoutPayout implements ShouldQueue
                         $this->payout->markAsCompleted($resp->id);
                         $this->sendPayoutSuccessfulNotification();
                     } else {
-                        $this->payout->resetCashoutAttept();
+                        $this->payout->resetCashoutAttempt();
                     }
                     break;
             }
