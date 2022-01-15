@@ -3,6 +3,7 @@
 namespace App\Jobs\Payment;
 
 use App\Constants\Constants;
+use App\Jobs\Users\NotifySale;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\Content;
@@ -78,7 +79,7 @@ class Purchase implements ShouldQueue
                 continue;
             }
 
-            $amount = $item['price']['amount'];
+            $amount = $price->amount;
             if ($this->data['total_fees'] > 0) {
                 $fee = bcmul(bcdiv($amount, $this->data['total_amount'], 6), $this->data['total_fees'], 6);
             } else {
@@ -119,7 +120,7 @@ class Purchase implements ShouldQueue
             if ($itemModel->owner->user_charge_type === 'non-profit') {
                 $platform_charge = Constants::NON_PROFIT_CREATOR_CHARGE;
             }
-            $creator_share = bcmul($net_amount, 100 - $platform_charge, 6);
+            $creator_share = bcmul($net_amount, 1 - $platform_charge, 6);
             foreach ($itemModel->benefactors as $benefactor) {
                 $benefactor->user->revenues()->create([
                     'revenueable_type' => $item['type'],
@@ -167,14 +168,20 @@ class Purchase implements ShouldQueue
                 $start = now();
                 $cloneOfStart = clone $start;
                 $end = $cloneOfStart->add($price->interval_amount, 'month');
+                $auto_renew = 0;
+                if ($price->amount == 0) {
+                    $auto_renew = 1;
+                }
                 $itemModel->subscriptions()->create([
                     'userable_id' => $parentUserable->id,
                     'price_id' => $price->id,
                     'start' => $start,
                     'end' => $end,
-                    'auto_renew' => 0,
+                    'auto_renew' => $auto_renew,
                 ]);
             }
+
+            NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
         }
     }
 
