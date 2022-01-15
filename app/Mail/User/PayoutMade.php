@@ -3,10 +3,11 @@
 namespace App\Mail\User;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class SaleMade extends Mailable
+class PayoutMade extends Mailable
 {
     use Queueable, SerializesModels;
     public $user;
@@ -29,9 +30,9 @@ class SaleMade extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.user.revenue.sale')->with([
+        return $this->view('emails.user.payout.successful')->with([
             'user' => $this->user,
-            'sale_message' => $this->message,
-        ])->subject('You Just Made A Sale!');
+            'payout_message' => $this->message,
+        ])->subject('You Just Got Paid!');
     }
 }

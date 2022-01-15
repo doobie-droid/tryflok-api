@@ -3,6 +3,7 @@
 namespace App\Jobs\Payment;
 
 use App\Jobs\Users\NotifyNoPaymentAccount;
+use App\Jobs\Users\NotifyPayoutSuccessful;
 use App\Services\Payment\Payment as PaymentProvider;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -53,8 +54,9 @@ class CashoutPayout implements ShouldQueue
                 case 'flutterwave':
                     if ($resp->status === 'success') {
                         $this->payout->markAsCompleted($resp->data->id);
+                        $this->sendPayoutSuccessfulNotification();
                     } else {
-                        $this->payout->resetCashoutAttept();
+                        $this->payout->resetCashoutAttempt();
                     }
                     break;
                 case 'stripe':
@@ -63,8 +65,9 @@ class CashoutPayout implements ShouldQueue
                         $resp->destination === $this->payment_account->identifier
                     ) {
                         $this->payout->markAsCompleted($resp->id);
+                        $this->sendPayoutSuccessfulNotification();
                     } else {
-                        $this->payout->resetCashoutAttept();
+                        $this->payout->resetCashoutAttempt();
                     }
                     break;
             }
@@ -88,5 +91,10 @@ class CashoutPayout implements ShouldQueue
         ]);
         $this->payout->failed_notification_sent = now();
         $this->payout->save();
+    }
+
+    private function sendPayoutSuccessfulNotification()
+    {
+        NotifyPayoutSuccessful::dispatch($this->payout->user()->first(), $this->payout);
     }
 }
