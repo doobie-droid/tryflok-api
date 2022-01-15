@@ -95,7 +95,6 @@ class CashoutPayout implements ShouldQueue
 
     private function sendPayoutSuccessfulNotification()
     {
-        Log::info("Notification function called");
         NotifyPayoutSuccessful::dispatch($this->payout->user()->first(), $this->payout);
     }
 }
