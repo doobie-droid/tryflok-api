@@ -92,10 +92,12 @@ class WalletController extends Controller
                     }
                     break;
                 case 'apple':
+                    Log::info($request->input());
                     $apple = new PaymentProvider($request->provider);
                     $req = $apple->verifyTransaction($request->provider_response['receipt_data']);
                     if ($req->status === 0) {
                         if ($request->provider_response['product_id'] !== $req->receipt->in_app[0]->product_id) {
+                            Log::info($request->input('Product ID supplied [' . $request->provider_response['product_id'] . '] is not same that was paid for [' . $req->receipt->in_app[0]->product_id . '].'));
                             return $this->respondBadRequest('Product ID supplied [' . $request->provider_response['product_id'] . '] is not same that was paid for [' . $req->receipt->in_app[0]->product_id . '].');
                         }
                         $product_ids_to_amount = [
