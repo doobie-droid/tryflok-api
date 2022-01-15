@@ -38,6 +38,7 @@ class NotifyPayoutSuccessful implements ShouldQueue
      */
     public function handle()
     {
+        Log::info("Job handle reached");
         $message = "You have just been paid USD {$this->payout->amount}";
 
         $notification = $this->user->notifications()->create([
