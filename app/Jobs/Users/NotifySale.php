@@ -39,7 +39,7 @@ class NotifySale implements ShouldQueue
      */
     public function handle()
     {
-        $message = "Your {$this->item_type} titled {$this->item->title} just got purchased for {$item->prices()->first()->amount}!";
+        $message = "Your {$this->item_type} titled {$this->item->title} just got purchased for {$this->item->prices()->first()->amount}!";
 
         $notification = $this->owner->notifications()->create([
             'notifier_id' => $this->owner->id,
