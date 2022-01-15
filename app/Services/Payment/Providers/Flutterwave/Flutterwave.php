@@ -58,7 +58,6 @@ class Flutterwave extends API implements PaymentInterface
     {
         $need_branch_code = ['GH', 'UG', 'TZ'];
         //TO DO: might want to implement a currency converter among providers
-        Log::info([$amount, bcmul($amount, 530, 0)]);
         $neededData = [
             'amount' => bcmul($amount, 530, 0), //convert to Naira from dollars
             'account_number' => $transferData->identifier,

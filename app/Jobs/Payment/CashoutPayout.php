@@ -47,7 +47,7 @@ class CashoutPayout implements ShouldQueue
                 return;
             }
             $this->payout->setHandler($this->payment_account->provider);
-            $amount = ceil(floatval($this->payout->amount));
+            $amount = $this->payout->amount;
             $paymentProvider = new PaymentProvider($this->payment_account->provider);
             $resp = $paymentProvider->transferFundsToRecipient($this->payment_account, $amount);
             switch ($this->payment_account->provider) {
@@ -95,6 +95,7 @@ class CashoutPayout implements ShouldQueue
 
     private function sendPayoutSuccessfulNotification()
     {
+        Log::info("Notification function called");
         NotifyPayoutSuccessful::dispatch($this->payout->user()->first(), $this->payout);
     }
 }
