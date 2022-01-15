@@ -5,7 +5,6 @@ namespace App\Jobs\Users;
 use App\Http\Resources\NotificationResource;
 use App\Mail\User\NoPaymentAccountMail;
 use App\Models\Notification;
-use App\Models\User;
 use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
