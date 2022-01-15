@@ -31,7 +31,6 @@ class PayoutMade extends Mailable
      */
     public function build()
     {
-        Log::info("Mailer was reached");
         return $this->view('emails.user.payout.successful')->with([
             'user' => $this->user,
             'payout_message' => $this->message,
