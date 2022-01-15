@@ -181,7 +181,9 @@ class Purchase implements ShouldQueue
                 ]);
             }
 
-            NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
+            if ($price->amount > 0) {
+                NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
+            }
         }
     }
 
