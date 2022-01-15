@@ -78,7 +78,7 @@ class Payout extends Model
 
     public function resetCashoutAttept()
     {
-        $this->payout->handler = null;
-        $this->payout->save();
+        $this->handler = null;
+        $this->save();
     }
 }
