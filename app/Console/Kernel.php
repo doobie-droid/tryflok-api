@@ -29,7 +29,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('flok:check-payout-transfer-status')->everyTwoMinutes();
         $schedule->command('flok:end-subscriptions')->hourly();
         $schedule->command('flok:generate-payouts')->monthly(7, '8:00');
         $schedule->command('flok:cashout-payouts')->everyTwoMinutes();

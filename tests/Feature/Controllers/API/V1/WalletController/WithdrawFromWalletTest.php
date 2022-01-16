@@ -139,8 +139,9 @@ class WithdrawFromWalletTest extends TestCase
         // assert that payout was created with deduction taken
         $amount_to_withdraw_in_dollars = bcdiv($amount_to_withdraw, 100, 6);
         $this->assertDatabaseHas('payouts', [
-            'amount' => bcmul($amount_to_withdraw_in_dollars, 100 - Constants\Constants::WALLET_WITHDRAWAL_CHARGE),
+            'amount' => bcmul($amount_to_withdraw_in_dollars, 1 - Constants\Constants::WALLET_WITHDRAWAL_CHARGE),
             'claimed' => 0,
+            'payout_date' => now()->addMonth()->startOfMonth()->addDays(6)->format('Y-m-d H:i:s'),
         ]);
     }
 }

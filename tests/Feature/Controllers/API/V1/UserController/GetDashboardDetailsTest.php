@@ -44,13 +44,13 @@ class GetDashboardDetailsTest extends TestCase
 
         $expected_total_previous_sales_revenue = bcmul(
             $previous_sales_revenues_amount * $previous_sales_revenues_count, 
-            100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
             2
         );
 
         $expected_total_current_month_sales_revenue = bcmul(
             $current_month_sales_revenues_amount * $current_month_sales_revenues_count, 
-            100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
             2
         );
 
@@ -81,13 +81,13 @@ class GetDashboardDetailsTest extends TestCase
 
         $expected_total_previous_tips_revenue = bcmul(
             $previous_tips_revenues_amount * $previous_tips_revenues_count, 
-            100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
             2
         );
 
         $expected_total_current_month_tips_revenue = bcmul(
             $current_month_tips_revenues_amount * $current_month_tips_revenues_count, 
-            100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
             2
         );
 
