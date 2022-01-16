@@ -21,7 +21,7 @@ class GeneratePayoutTest extends TestCase
         $user1_number_of_sales = 13;
         $user1_unit_price = $this->faker->randomFloat(0, 5, 100);
         $user1_total = bcmul($user1_unit_price, $user1_number_of_sales, 2);
-        $user1_final_share = bcmul($user1_total, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 6);
+        $user1_final_share = bcmul($user1_total, 1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 6);
         
         Models\Revenue::factory()
         ->for($user1)
@@ -33,7 +33,7 @@ class GeneratePayoutTest extends TestCase
         $user2_number_of_sales = 6;
         $user2_unit_price = $this->faker->randomFloat(0, 5, 100);
         $user2_total = ($user2_unit_price * $user2_number_of_sales);
-        $user2_final_share = bcmul($user2_total, 100 - Constants\Constants::NORMAL_CREATOR_CHARGE, 6);
+        $user2_final_share = bcmul($user2_total, 1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 6);
         Models\Revenue::factory()
         ->for($user2)
         ->customAmount($user2_unit_price)

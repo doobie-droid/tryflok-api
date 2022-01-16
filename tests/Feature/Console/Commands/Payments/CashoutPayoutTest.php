@@ -36,11 +36,18 @@ class CashoutPayoutTest extends TestCase
                                     'last_payment_request' => now(),
                                 ])
                                 ->create();
+        
+        $payout_date_still_in_future = Models\Payout::factory()
+                                        ->state([
+                                            'payout_date' => now()->addMonth(),
+                                        ])
+                                        ->create();
         $this->artisan('flok:cashout-payouts')->assertSuccessful();
 
         $this->assertEquals(0, $completed_payout->refresh()->cashout_attempts);
         $this->assertEquals(0, $admin_cancelled_payout->refresh()->cashout_attempts);
         $this->assertEquals(0, $newly_attempted_payout->refresh()->cashout_attempts);
+        $this->assertEquals(0, $payout_date_still_in_future->refresh()->cashout_attempts);
     }
 
     public function test_no_payment_account_notificatoin_works_correctly()

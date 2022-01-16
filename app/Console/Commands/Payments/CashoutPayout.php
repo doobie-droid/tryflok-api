@@ -47,6 +47,10 @@ class CashoutPayout extends Command
                     $query->whereNull('last_payment_request')
                         ->orWhere('last_payment_request', '<=', now()->subHours(3));
                 })
+                ->where(function ($query) {
+                    $query->whereNull('payout_date')
+                        ->orWhere('payout_date', '<=', now());
+                })
                 ->where('cancelled_by_admin', 0)
                 ->chunk(100000, function ($payouts) {
                     foreach ($payouts as $payout) {

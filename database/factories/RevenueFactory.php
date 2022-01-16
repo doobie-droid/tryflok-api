@@ -26,7 +26,7 @@ class RevenueFactory extends Factory
             'added_to_payout' => 0,
             'payment_processor_fee' => 0,
             'platform_share' => bcmul($amount, Constants::NORMAL_CREATOR_CHARGE, 6),
-            'benefactor_share' => bcmul($amount, 100 - Constants::NORMAL_CREATOR_CHARGE, 6),
+            'benefactor_share' => bcmul($amount, 1 - Constants::NORMAL_CREATOR_CHARGE, 6),
             'revenue_from' => 'sale',
         ];
     }
@@ -55,7 +55,7 @@ class RevenueFactory extends Factory
             return [
                 'amount' => $amount,
                 'platform_share' => bcmul($amount, Constants::NORMAL_CREATOR_CHARGE, 6),
-                'benefactor_share' => bcmul($amount, 100 - Constants::NORMAL_CREATOR_CHARGE, 6),
+                'benefactor_share' => bcmul($amount, 1 - Constants::NORMAL_CREATOR_CHARGE, 6),
             ];
         });
     }
