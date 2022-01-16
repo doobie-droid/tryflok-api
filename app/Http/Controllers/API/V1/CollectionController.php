@@ -116,7 +116,12 @@ class CollectionController extends Controller
             }
 
             $digiverse = Collection::where('id', $id)
-            ->with('prices', 'cover', 'owner', 'owner.profile_picture', 'tags')
+            ->with('prices', 'cover', 'tags')
+            ->with([
+                'owner' => function ($query) {
+                    $query->with('profile_picture')->withCount('followers', 'following');
+                }
+            ])
             ->withCount([
                 'ratings' => function ($query) {
                     $query->where('rating', '>', 0);

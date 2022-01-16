@@ -60,7 +60,6 @@ class CashoutPayout implements ShouldQueue
                     }
                     break;
                 case 'stripe':
-                    Log::info(json_encode($resp));
                     if (
                         isset($resp->destination) && 
                         $resp->destination === $this->payment_account->identifier
