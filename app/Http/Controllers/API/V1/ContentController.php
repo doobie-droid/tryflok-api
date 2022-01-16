@@ -502,7 +502,8 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $id)
-            ->with('prices', 'cover', 'tags')
+            ->with('prices', 'cover')
+            ->with('tags')
             ->with('collections', 'collections.prices')
             ->withCount('subscribers')
             ->withCount('views')
