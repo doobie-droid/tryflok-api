@@ -518,7 +518,7 @@ class ContentController extends Controller
             ->with([
                 'owner' => function ($query) {
                     $query->with('profile_picture')->withCount('followers', 'following');
-                }
+                },
             ])
             ->with([
                 'userables' => function ($query) use ($user_id) {
