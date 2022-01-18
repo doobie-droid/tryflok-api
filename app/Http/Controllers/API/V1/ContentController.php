@@ -502,7 +502,8 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $id)
-            ->with('prices', 'cover', 'tags')
+            ->with('prices', 'cover')
+            ->with('tags')
             ->with('collections', 'collections.prices')
             ->withCount('subscribers')
             ->withCount('views')
@@ -518,7 +519,7 @@ class ContentController extends Controller
             ->with([
                 'owner' => function ($query) {
                     $query->with('profile_picture')->withCount('followers', 'following');
-                }
+                },
             ])
             ->with([
                 'userables' => function ($query) use ($user_id) {

@@ -146,7 +146,7 @@ class AuthController extends Controller
                 $user = User::create([
                     'name' => $name,
                     'email' => $email,
-                    'username' => Str::random(8) . 'Ymd',
+                    'username' => Str::random(8) . date('Ymd'),
                     'password' => Hash::make(Str::random(8)),
                     'public_id' => uniqid(rand()),
                     'email_token' => Str::random(16),

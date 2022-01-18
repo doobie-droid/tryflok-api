@@ -120,7 +120,7 @@ class CollectionController extends Controller
             ->with([
                 'owner' => function ($query) {
                     $query->with('profile_picture')->withCount('followers', 'following');
-                }
+                },
             ])
             ->withCount([
                 'ratings' => function ($query) {
