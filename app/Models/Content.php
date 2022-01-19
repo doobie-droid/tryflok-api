@@ -179,4 +179,58 @@ class Content extends Model
         })->count();
         return $userablesCount > 0 || $parentUserablesCount > 0 || $grandParentUserablesCount > 0;
     }
+
+    public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')
+    {
+        return $mainQuery->withCount('subscribers')
+        ->withCount('revenues')
+        ->withCount('views')
+        ->with('metas')
+        ->with('collections', 'collections.prices')
+        ->withCount([
+            'ratings' => function ($query) {
+                $query->where('rating', '>', 0);
+            },
+        ])->withAvg([
+            'ratings' => function ($query) {
+                $query->where('rating', '>', 0);
+            },
+        ], 'rating')
+        ->with('cover')
+        ->with([
+            'owner' => function ($query) {
+                $query->with('profile_picture')
+                ->withCount('followers', 'following');
+            },
+        ])
+        ->with('tags')
+        ->with('prices')
+        ->with([
+            'userables' => function ($query) use ($user_id) {
+                $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
+            },
+        ])
+        ->with([
+            'access_through_ancestors' => function ($query) use ($user_id) {
+                $query->whereHas('userables', function (Builder $query) use ($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 'available');
+                })
+                ->orWhereHas('parentCollections', function (Builder $query) use ($user_id) {
+                    $query->whereHas('userables', function (Builder $query) use ($user_id) {
+                        $query->where('user_id', $user_id)->where('status', 'available');
+                    });
+                });
+            },
+        ]);
+    }
+
+    public function scopeEagerLoadSingleContentRelations($mainQuery, string $user_id = '')
+    {
+
+        return $mainQuery->with([
+            'subscribers' => function ($query) use ($user_id) {
+                $query->where('users.id', $user_id);
+            },
+        ]);
+    }
 }

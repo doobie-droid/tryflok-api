@@ -162,20 +162,7 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $content->id)
-            ->with('prices', 'cover', 'owner', 'tags')
-            ->withCount('subscribers')
-            ->withCount('views')
-            ->with('metas')
-            ->with('collections', 'collections.prices')
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
+            ->eagerLoadBaseRelations()
             ->first();
 
             return $this->respondWithSuccess('Content has been created successfully', [
@@ -211,20 +198,7 @@ class ContentController extends Controller
 
             //make sure user owns content
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)
-            ->with('prices', 'cover', 'owner', 'tags')
-            ->withCount('subscribers')
-            ->withCount('views')
-            ->with('metas')
-            ->with('collections', 'collections.prices')
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
+            ->eagerLoadBaseRelations()
             ->first();
             if (is_null($content)) {
                 return $this->respondBadRequest('You do not have permission to update this content');
@@ -502,49 +476,8 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $id)
-            ->with('prices', 'cover')
-            ->with('tags')
-            ->with('collections', 'collections.prices')
-            ->withCount('subscribers')
-            ->withCount('views')
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
-            ->with([
-                'owner' => function ($query) {
-                    $query->with('profile_picture')->withCount('followers', 'following');
-                },
-            ])
-            ->with([
-                'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
-                },
-            ])
-            ->with([
-                'access_through_ancestors' => function ($query) use ($user_id) {
-                    $query->whereHas('userables', function (Builder $query) use ($user_id) {
-                        $query->where('user_id', $user_id)->where('status', 'available');
-                    })
-                    ->orWhereHas('parentCollections', function (Builder $query) use ($user_id) {
-                        $query->whereHas('userables', function (Builder $query) use ($user_id) {
-                            $query->where('user_id', $user_id)->where('status', 'available');
-                        });
-                    });
-                },
-            ])
-            ->with([
-                'subscribers' => function ($query) use ($user_id) {
-                    $query->where('users.id', $user_id);
-                },
-            ])
-            ->with('issues')
-            ->with('metas')
+            ->eagerLoadBaseRelations($user_id)
+            ->eagerLoadSingleContentRelations($user_id)
             ->first();
             return $this->respondWithSuccess('Content retrieved successfully', [
                 'content' => new ContentResource($content),
@@ -695,40 +628,7 @@ class ContentController extends Controller
             }
 
             $contents = $contents
-            ->withCount('subscribers')
-            ->with('collections', 'collections.prices')
-            ->withCount('views')
-            ->with('metas')
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
-            ->with('cover')
-            ->with('owner', 'owner.profile_picture')
-            ->with('tags')
-            ->with('prices')
-            ->with([
-                'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
-                },
-            ])
-            ->with([
-                'access_through_ancestors' => function ($query) use ($user_id) {
-                    $query->whereHas('userables', function (Builder $query) use ($user_id) {
-                        $query->where('user_id', $user_id)->where('status', 'available');
-                    })
-                    ->orWhereHas('parentCollections', function (Builder $query) use ($user_id) {
-                        $query->whereHas('userables', function (Builder $query) use ($user_id) {
-                            $query->where('user_id', $user_id)->where('status', 'available');
-                        });
-                    });
-                },
-            ])
+            ->eagerLoadBaseRelations($user_id)
             ->orderBy('contents.trending_points', 'desc')
             ->orderBy("contents.{$orderBy}", $orderDirection)
             ->paginate($limit, ['*'], 'page', $page);
@@ -856,40 +756,7 @@ class ContentController extends Controller
             }
 
             $contents = $contents
-            ->withCount('subscribers')
-            ->withCount('views')
-            ->with('metas')
-            ->with('collections', 'collections.prices')
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
-            ->with('cover')
-            ->with('owner', 'owner.profile_picture')
-            ->with('tags')
-            ->with('prices')
-            ->with([
-                'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
-                },
-            ])
-            ->with([
-                'access_through_ancestors' => function ($query) use ($user_id) {
-                    $query->whereHas('userables', function (Builder $query) use ($user_id) {
-                        $query->where('user_id', $user_id)->where('status', 'available');
-                    })
-                    ->orWhereHas('parentCollections', function (Builder $query) use ($user_id) {
-                        $query->whereHas('userables', function (Builder $query) use ($user_id) {
-                            $query->where('user_id', $user_id)->where('status', 'available');
-                        });
-                    });
-                },
-            ])
+            ->eagerLoadBaseRelations($user_id)
             ->orderBy("contents.{$orderBy}", $orderDirection)
             ->paginate($limit, ['*'], 'page', $page);
 
@@ -1380,30 +1247,8 @@ class ContentController extends Controller
                 'user_id' => $user_id,
             ]);
 
-            $content = $content->with('prices', 'cover', 'owner', 'tags')
-            ->withCount('subscribers')
-            ->withCount('views')
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
-            ->with([
-                'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
-                },
-            ])
-            ->with([
-                'subscribers' => function ($query) use ($user_id) {
-                    $query->where('users.id', $user_id);
-                },
-            ])
-            ->with('issues')
-            ->with('metas')
+            $content = $content
+            ->eagerLoadBaseRelations()
             ->first();
 
             return $this->respondWithSuccess('View recorded successfully', [

@@ -143,10 +143,11 @@ class AuthController extends Controller
             //check if user exists
             $user = User::where('email', $email)->first();
             if (is_null($user)) {
+                $username = preg_replace("/[^a-zA-Z0-9]+/", "", $name) . "_" . date('Ymd');
                 $user = User::create([
                     'name' => $name,
                     'email' => $email,
-                    'username' => Str::random(8) . date('Ymd'),
+                    'username' => $username,
                     'password' => Hash::make(Str::random(8)),
                     'public_id' => uniqid(rand()),
                     'email_token' => Str::random(16),
