@@ -72,7 +72,7 @@ class CollectionController extends Controller
             ]);
 
             $digiverse = Collection::where('id', $digiverse->id)
-            ->withBaseRelations()
+            ->eagerLoadBaseRelations()
             ->first();
 
             return $this->respondWithSuccess('Digiverse has been created successfully.', [
@@ -102,7 +102,7 @@ class CollectionController extends Controller
             }
 
             $digiverse = Collection::where('id', $id)
-            ->withBaseRelations($user_id)
+            ->eagerLoadBaseRelations($user_id)
             ->first();
             $digiverse->content_types_available = $digiverse->contentTypesAvailable($user_id);
             return $this->respondWithSuccess('Digiverse retrieved successfully.', [
@@ -139,7 +139,7 @@ class CollectionController extends Controller
 
             $user = $request->user();
             $digiverse = Collection::where('id', $id)
-            ->withBaseRelations()
+            ->eagerLoadBaseRelations()
             ->first();
             $digiverse->fill($request->only('title', 'description', 'is_available'));
             $digiverse->save();
@@ -290,7 +290,7 @@ class CollectionController extends Controller
             }
 
             $digiverses = $digiverses
-            ->withBaseRelations($user_id)
+            ->eagerLoadBaseRelations($user_id)
             ->orderBy('collections.created_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
 
@@ -378,7 +378,7 @@ class CollectionController extends Controller
             }
 
             $digiverses = $digiverses
-            ->withBaseRelations($user_id)
+            ->eagerLoadBaseRelations($user_id)
             ->orderBy('collections.created_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
 

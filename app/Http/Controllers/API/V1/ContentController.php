@@ -162,7 +162,7 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $content->id)
-            ->withBaseRelations()
+            ->eagerLoadBaseRelations()
             ->first();
 
             return $this->respondWithSuccess('Content has been created successfully', [
@@ -198,7 +198,7 @@ class ContentController extends Controller
 
             //make sure user owns content
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)
-            ->withBaseRelations()
+            ->eagerLoadBaseRelations()
             ->first();
             if (is_null($content)) {
                 return $this->respondBadRequest('You do not have permission to update this content');
@@ -476,8 +476,8 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $id)
-            ->withBaseRelations($user_id)
-            ->withSingleContentRelations($user_id)
+            ->eagerLoadBaseRelations($user_id)
+            ->eagerLoadSingleContentRelations($user_id)
             ->first();
             return $this->respondWithSuccess('Content retrieved successfully', [
                 'content' => new ContentResource($content),
@@ -628,7 +628,7 @@ class ContentController extends Controller
             }
 
             $contents = $contents
-            ->withBaseRelations($user_id)
+            ->eagerLoadBaseRelations($user_id)
             ->orderBy('contents.trending_points', 'desc')
             ->orderBy("contents.{$orderBy}", $orderDirection)
             ->paginate($limit, ['*'], 'page', $page);
@@ -756,7 +756,7 @@ class ContentController extends Controller
             }
 
             $contents = $contents
-            ->withBaseRelations($user_id)
+            ->eagerLoadBaseRelations($user_id)
             ->orderBy("contents.{$orderBy}", $orderDirection)
             ->paginate($limit, ['*'], 'page', $page);
 
@@ -1248,7 +1248,7 @@ class ContentController extends Controller
             ]);
 
             $content = $content
-            ->withBaseRelations()
+            ->eagerLoadBaseRelations()
             ->first();
 
             return $this->respondWithSuccess('View recorded successfully', [
