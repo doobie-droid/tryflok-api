@@ -138,4 +138,37 @@ class Collection extends Model
         }
         return $content_types_available;
     }
+
+    public function withBaseRelations(string $user_id = '')
+    {
+        return $this->withCount([
+            'subscriptions' => function ($query) {
+                $query->where('status', 'active');
+            },
+        ])
+        ->withCount([
+            'ratings' => function ($query) {
+                $query->where('rating', '>', 0);
+            },
+        ])->withAvg([
+            'ratings' => function ($query) {
+                $query->where('rating', '>', 0);
+            },
+        ], 'rating')
+        ->with('cover')
+        ->with([
+            'owner' => function ($query) {
+                $query->with('profile_picture')
+                ->withCount('followers', 'following');
+            },
+        ])
+        ->with('tags')
+        ->with('prices')
+        ->with([
+            'userables' => function ($query) use ($user_id) {
+                $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
+            },
+        ])
+        ->withCount('revenues');
+    }
 }

@@ -72,21 +72,7 @@ class CollectionController extends Controller
             ]);
 
             $digiverse = Collection::where('id', $digiverse->id)
-            ->with('prices', 'cover', 'owner', 'owner.profile_picture', 'tags')
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])
-            ->withCount([
-                'subscriptions' => function ($query) {
-                    $query->where('status', 'active');
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
+            ->withBaseRelations($user_id)
             ->first();
 
             return $this->respondWithSuccess('Digiverse has been created successfully.', [
@@ -116,31 +102,7 @@ class CollectionController extends Controller
             }
 
             $digiverse = Collection::where('id', $id)
-            ->with('prices', 'cover', 'tags')
-            ->with([
-                'owner' => function ($query) {
-                    $query->with('profile_picture')->withCount('followers', 'following');
-                },
-            ])
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])
-            ->withCount([
-                'subscriptions' => function ($query) {
-                    $query->where('status', 'active');
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
-            ->with([
-                'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
-                },
-            ])
+            ->withBaseRelations($user_id)
             ->first();
             $digiverse->content_types_available = $digiverse->contentTypesAvailable($user_id);
             return $this->respondWithSuccess('Digiverse retrieved successfully.', [
@@ -177,21 +139,7 @@ class CollectionController extends Controller
 
             $user = $request->user();
             $digiverse = Collection::where('id', $id)
-            ->with('prices', 'cover', 'owner', 'tags')
-            ->withCount([
-                'subscriptions' => function ($query) {
-                    $query->where('status', 'active');
-                },
-            ])
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
+            ->withBaseRelations($user_id)
             ->first();
             $digiverse->fill($request->only('title', 'description', 'is_available'));
             $digiverse->save();
@@ -342,29 +290,7 @@ class CollectionController extends Controller
             }
 
             $digiverses = $digiverses
-            ->withCount([
-                'subscriptions' => function ($query) {
-                    $query->where('status', 'active');
-                },
-            ])
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
-            ->with('cover')
-            ->with('owner', 'owner.profile_picture')
-            ->with('tags')
-            ->with('prices')
-            ->with([
-                'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
-                },
-            ])
+            ->withBaseRelations($user_id)
             ->orderBy('collections.created_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
 
@@ -452,29 +378,8 @@ class CollectionController extends Controller
             }
 
             $digiverses = $digiverses
-            ->withCount([
-                'subscriptions' => function ($query) {
-                    $query->where('status', 'active');
-                },
-            ])
-            ->withCount([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ])->withAvg([
-                'ratings' => function ($query) {
-                    $query->where('rating', '>', 0);
-                },
-            ], 'rating')
-            ->with('cover')
-            ->with('owner', 'owner.profile_picture')
-            ->with('tags')
-            ->with('prices')
-            ->with([
-                'userables' => function ($query) use ($user_id) {
-                    $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
-                },
-            ])->orderBy('collections.created_at', 'desc')
+            ->withBaseRelations($user_id)
+            ->orderBy('collections.created_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Digiverses retrieved successfully', [

@@ -88,6 +88,7 @@ class Digiverse
                 'subscriptions_count',
                 'ratings_count',
                 'ratings_average',
+                'revenues_count',
                 'cover' => [
                     'url',
                     'asset_type',
