@@ -139,9 +139,9 @@ class Collection extends Model
         return $content_types_available;
     }
 
-    public function eagerLoadBaseRelations(string $user_id = '')
+    public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')
     {
-        return $this->withCount([
+        return $mainQuery->withCount([
             'subscriptions' => function ($query) {
                 $query->where('status', 'active');
             },

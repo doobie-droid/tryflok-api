@@ -180,9 +180,9 @@ class Content extends Model
         return $userablesCount > 0 || $parentUserablesCount > 0 || $grandParentUserablesCount > 0;
     }
 
-    public function eagerLoadBaseRelations(string $user_id = '')
+    public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')
     {
-        return $this->withCount('subscribers')
+        return $mainQuery->withCount('subscribers')
         ->withCount('revenues')
         ->withCount('views')
         ->with('metas')
@@ -224,9 +224,10 @@ class Content extends Model
         ]);
     }
 
-    public function eagerLoadSingleContentRelations(string $user_id = '')
+    public function scopeEagerLoadSingleContentRelations($mainQuery, string $user_id = '')
     {
-        return $this->with([
+
+        return $mainQuery->with([
             'subscribers' => function ($query) use ($user_id) {
                 $query->where('users.id', $user_id);
             },
