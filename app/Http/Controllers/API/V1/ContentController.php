@@ -162,7 +162,7 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $content->id)
-            ->withBaseRelations($user_id)
+            ->withBaseRelations()
             ->first();
 
             return $this->respondWithSuccess('Content has been created successfully', [
@@ -198,7 +198,7 @@ class ContentController extends Controller
 
             //make sure user owns content
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)
-            ->withBaseRelations($user_id)
+            ->withBaseRelations()
             ->first();
             if (is_null($content)) {
                 return $this->respondBadRequest('You do not have permission to update this content');
@@ -1248,7 +1248,7 @@ class ContentController extends Controller
             ]);
 
             $content = $content
-            ->withBaseRelations($user_id)
+            ->withBaseRelations()
             ->first();
 
             return $this->respondWithSuccess('View recorded successfully', [

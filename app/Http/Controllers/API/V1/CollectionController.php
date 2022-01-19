@@ -72,7 +72,7 @@ class CollectionController extends Controller
             ]);
 
             $digiverse = Collection::where('id', $digiverse->id)
-            ->withBaseRelations($user_id)
+            ->withBaseRelations()
             ->first();
 
             return $this->respondWithSuccess('Digiverse has been created successfully.', [
@@ -139,7 +139,7 @@ class CollectionController extends Controller
 
             $user = $request->user();
             $digiverse = Collection::where('id', $id)
-            ->withBaseRelations($user_id)
+            ->withBaseRelations()
             ->first();
             $digiverse->fill($request->only('title', 'description', 'is_available'));
             $digiverse->save();
