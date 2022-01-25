@@ -214,7 +214,7 @@ class ContentController extends Controller
             if (! is_null($request->is_available)) {
                 // ensure that asset content is ready before it can be marked as available
                 if (in_array($content->type, ['video', 'pdf', 'audio', 'newsletter']) && $content->assets()->first()->processing_complete != 1) {
-                    return $this->respondBadRequest("You can only mark a content as available if it's asset has successfully uploaded.");
+                    return $this->respondBadRequest("Hey there! We are making some optimizations to your content, please wait till you get a notification that it is ready then you can mark it as available.");
                 }
                 $content->is_available = $request->is_available;
             }
