@@ -131,6 +131,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::get('payment-account', 'UserController@getPaymentAccount');
             Route::delete('payment-account', 'UserController@removePaymentAccount');
             Route::get('revenues', 'UserController@listRevenues');
+            Route::post('referrer', 'UserController@addReferrer');
         });
 
         Route::group(['prefix' => 'subscriptions'], function () {

@@ -143,6 +143,35 @@ class UserController extends Controller
         }
     }
 
+    public function addReferrer(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'username' => ['required', 'string',],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $referrer = User::where('email', $request->username)->orWhere('username', $request->username)->first();
+            if (is_null($referrer)) {
+                return $this->respondBadRequest('Please provide a valid username or email');
+            }
+
+            $request->user()->referrer_id = $referrer->id;
+            $request->user()->save();
+
+            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
+            return $this->respondWithSuccess('Login successful', [
+                'user' => new UserResourceWithSensitive($user),
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
     public function followUser(Request $request, $id)
     {
         try {

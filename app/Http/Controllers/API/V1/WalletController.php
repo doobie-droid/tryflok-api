@@ -155,7 +155,7 @@ class WalletController extends Controller
 
             $user = User::where('email', $request->username)->orWhere('username', $request->username)->first();
             if (is_null($user)) {
-                return $this->respondBadRequest('Please provide a valid username');
+                return $this->respondBadRequest('Please provide a valid username or email');
             }
 
             
