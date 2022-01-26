@@ -142,7 +142,7 @@ class Purchase implements ShouldQueue
                     'payment_processor_fee' => $fee,
                     'platform_share' => bcsub($platform_share, $fee, 6),
                     'benefactor_share' => 0,
-                    'referral_bonus' => bcmul(bcsub($platform_share, $fee, 6), .025, 6),
+                    'referral_bonus' => bcmul(bcsub($net_amount, $fee, 6), Constants::REFERRAL_BONUS, 6),
                     'revenue_from' => 'referral',
                 ]);
             }
