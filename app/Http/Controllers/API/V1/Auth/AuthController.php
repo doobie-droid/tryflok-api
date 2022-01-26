@@ -49,7 +49,7 @@ class AuthController extends Controller
             ]);
 
             if (! is_null($request->referral_id)) {
-                $referrer = User::where('referral_id', $request->referral_id)->first();
+                $referrer = User::where('referral_id', $request->referral_id)->orWhere('username', $request->referral_id)->first();
                 $user->referrer_id = $referrer->id;
                 $user->save();
             }
@@ -156,6 +156,12 @@ class AuthController extends Controller
                 event(new ConfirmEmailEvent($user));
                 $user->assignRole(Roles::USER);
                 $user->wallet()->create([]);
+
+                if (! is_null($request->referral_id)) {
+                    $referrer = User::where('referral_id', $request->referral_id)->orWhere('username', $request->referral_id)->first();
+                    $user->referrer_id = $referrer->id;
+                    $user->save();
+                }
             }
 
             if (! is_null($request->firebase_token)) {
