@@ -208,7 +208,6 @@ class User
         'bio',
         'dob',
         'referral_id',
-        'referrer',
         'roles',
         'followers_count',
         'following_count',
