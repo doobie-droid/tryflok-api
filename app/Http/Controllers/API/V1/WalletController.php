@@ -9,6 +9,7 @@ use App\Jobs\Payment\Purchase as PurchaseJob;
 use App\Models\Collection;
 use App\Models\Content;
 use App\Models\Price;
+use App\Models\User;
 use App\Models\WalletTransaction;
 use App\Services\Payment\Payment as PaymentProvider;
 use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
@@ -112,6 +113,127 @@ class WalletController extends Controller
                         FundWalletJob::dispatch([
                             'user' => $request->user(),
                             'wallet' => $request->user()->wallet()->first(),
+                            'provider' => $request->provider,
+                            'provider_id' => $req->receipt->in_app[0]->transaction_id,
+                            'amount' => $amount_in_dollars,
+                            'flk' => $request->expected_flk_amount,
+                            'fee' => bcdiv(bcmul(30, $amount_in_dollars, 2), 100, 2),
+                        ]);
+                    } else {
+                        return $this->respondBadRequest('Invalid payment receipt provided for apple pay');
+                    }
+                    break;
+                default:
+                    return $this->respondBadRequest('Invalid provider specified');
+            }
+
+            return $this->respondWithSuccess('Payment received successfully');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function easyFundWallet(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->input(), [
+                'username' => ['required', 'string',],
+                'provider' => ['required', 'string', 'in:flutterwave,apple,stripe'],
+                'provider_response' => ['required'],
+                'provider_response.product_id' => ['required_if:provider,apple'],
+                'provider_response.receipt_data' => ['required_if:provider,apple', 'string'],
+                'provider_response.transaction_id' => ['required_if:provider,flutterwave'],
+                'provider_response.id' => ['required_if:provider,stripe', 'string'],
+                'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
+                'expected_flk_amount' => ['required', 'integer', 'min:1'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $user = User::where('email', $request->username)->orWhere('username', $request->username)->first();
+            if (is_null($user)) {
+                return $this->respondBadRequest('Please provide a valid username or email');
+            }
+
+            
+            //the provider is being built in the cases in case an invalid provider passes through validation
+            switch ($request->provider) {
+                case 'flutterwave':
+                    $flutterwave = new PaymentProvider($request->provider);
+                    $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
+                    if (($req->status === 'success' && $req->data->status === 'successful')) {
+
+                        $amount_in_dollars = bcdiv($req->data->amount, 505, 2);
+                        $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                        $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
+                        $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
+                        if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
+                            return $this->respondBadRequest('FLK conversion is not correct. Expects +/-3% of ' . $expected_flk_based_on_amount . ' for ' . $req->data->amount . ' Naira but got ' . $request->expected_flk_amount);
+                        }
+                        FundWalletJob::dispatch([
+                            'user' => $user,
+                            'wallet' => $user->wallet()->first(),
+                            'provider' => $request->provider,
+                            'provider_id' => $req->data->id,
+                            'amount' => $amount_in_dollars,
+                            'flk' => $request->expected_flk_amount,
+                            'fee' => bcdiv($req->data->app_fee, 505, 2)
+                        ]);
+                    } else {
+                        return $this->respondBadRequest('Invalid transaction id provided for flutterwave');
+                    }
+                    break;
+                case 'stripe':
+                    $stripe = new StripePayment;
+                    $amount_in_dollars = bcdiv($request->amount_in_cents, 100, 2);
+                    $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                    $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
+                    $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
+
+                    if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
+                        return $this->respondBadRequest('FLK conversion is not correct. Expects +/-3% of ' . $expected_flk_based_on_amount . ' for ' . $request->amount_in_cents . ' cents but got ' . $request->expected_flk_amount);
+                    }
+
+                    $req = $stripe->chargeViaToken($request->amount_in_cents, $request->provider_response['id']);
+
+                    if (($req->status === 'succeeded' && $req->paid === true)) {
+                        FundWalletJob::dispatch([
+                            'user' => $user,
+                            'wallet' => $user->wallet()->first(),
+                            'provider' => $request->provider,
+                            'provider_id' => $req->id,
+                            'amount' => $amount_in_dollars,
+                            'flk' => $request->expected_flk_amount,
+                            'fee' => bcdiv(bcadd(bcdiv(bcmul(2.9, $request->amount_in_cents, 2), 100, 2), 30, 2), 100, 2),//2.9 % + 30,
+                        ]);
+                    } else {
+                        return $this->respondBadRequest('Invalid token id provided for stripe');
+                    }
+                    break;
+                case 'apple':
+                    $apple = new PaymentProvider($request->provider);
+                    $req = $apple->verifyTransaction($request->provider_response['receipt_data']);
+                    if ($req->status === 0) {
+                        if ($request->provider_response['product_id'] !== $req->receipt->in_app[0]->product_id) {
+                            return $this->respondBadRequest('Product ID supplied [' . $request->provider_response['product_id'] . '] is not same that was paid for [' . $req->receipt->in_app[0]->product_id . '].');
+                        }
+                        $product_ids_to_amount = [
+                            '250_flc' => 3,
+                            '500_flc' => 6,
+                            '1000_flc' => 12,
+                            '3000_flc' => 36,
+                            '5000_flc' => 60,
+                            '10000_flc' => 120,
+                        ];
+                        $ekc_to_dollar = bcadd(1, bcdiv((30), 100 - 30), 2);
+                        $amount_in_dollars = $product_ids_to_amount[$request->provider_response['product_id']];
+
+                        FundWalletJob::dispatch([
+                            'user' => $user,
+                            'wallet' => $user->wallet()->first(),
                             'provider' => $request->provider,
                             'provider_id' => $req->receipt->in_app[0]->transaction_id,
                             'amount' => $amount_in_dollars,

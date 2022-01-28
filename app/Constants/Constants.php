@@ -18,6 +18,7 @@ class Constants
     public const NORMAL_CREATOR_CHARGE = .15;
     public const NON_PROFIT_CREATOR_CHARGE = .10;
     public const TIPPING_CHARGE = 0;
+    public const REFERRAL_BONUS = .01;
 
     // wallet withdrawal charge
     public const WALLET_WITHDRAWAL_CHARGE = .05;

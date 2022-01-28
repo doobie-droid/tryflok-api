@@ -49,7 +49,7 @@ class AuthController extends Controller
             ]);
 
             if (! is_null($request->referral_id)) {
-                $referrer = User::where('referral_id', $request->referral_id)->first();
+                $referrer = User::where('referral_id', $request->referral_id)->orWhere('username', $request->referral_id)->first();
                 $user->referrer_id = $referrer->id;
                 $user->save();
             }
@@ -65,7 +65,7 @@ class AuthController extends Controller
             //add wallet
             $user->wallet()->create([]);
             $token = JWTAuth::fromUser($user);
-            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', $user->id)->first();
+            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $user->id)->first();
             return $this->respondWithSuccess('Registration successful', [
                 'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
@@ -156,6 +156,12 @@ class AuthController extends Controller
                 event(new ConfirmEmailEvent($user));
                 $user->assignRole(Roles::USER);
                 $user->wallet()->create([]);
+
+                if (! is_null($request->referral_id)) {
+                    $referrer = User::where('referral_id', $request->referral_id)->orWhere('username', $request->referral_id)->first();
+                    $user->referrer_id = $referrer->id;
+                    $user->save();
+                }
             }
 
             if (! is_null($request->firebase_token)) {
@@ -168,7 +174,7 @@ class AuthController extends Controller
             }
 
             $token = JWTAuth::fromUser($user);
-            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', $user->id)->first();
+            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $user->id)->first();
             $wallet = $user->wallet()->first();
             if (is_null($wallet)) {
                 $user->wallet()->create([]);
@@ -203,7 +209,7 @@ class AuthController extends Controller
                 if (is_null($wallet)) {
                     $user->wallet()->create([]);
                 }
-                $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', Auth::user()->id)->first();
+                $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', Auth::user()->id)->first();
 
                 if (! is_null($request->firebase_token)) {
                     $firebase_token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
@@ -250,7 +256,7 @@ class AuthController extends Controller
             $otp->expires_at = now();//expire the token since it has been used
             $otp->save();
             $token = JWTAuth::fromUser($otp->user);
-            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', $otp->user->id)->first();
+            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $otp->user->id)->first();
             return $this->respondWithSuccess('Login successful', [
                 'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
@@ -263,7 +269,7 @@ class AuthController extends Controller
 
     public function refreshToken(Request $request)
     {
-        $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
+        $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
         return $this->respondWithSuccess('Token refreshed successfully', [
             'user' => new UserResourceWithSensitive($user),
             'token' => auth()->refresh(),
@@ -300,7 +306,7 @@ class AuthController extends Controller
             return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
         }
 
-        $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->where('password_token', $request->token)->first();
+        $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->where('password_token', $request->token)->first();
         if ($user) {
             $user->password = Hash::make($request->password);
             $user->password_token = null;
@@ -329,7 +335,7 @@ class AuthController extends Controller
 
     public function verifyEmail(Request $request)
     {
-        $user = User::with('roles', 'profile_picture', 'wallet')->where('email_token', $request->token)->first();
+        $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->where('email_token', $request->token)->first();
         if ($user) {
             $user->email_verified = 1;
             $user->email_token = '';

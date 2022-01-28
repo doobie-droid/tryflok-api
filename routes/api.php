@@ -58,6 +58,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'payments'], function () {
+        Route::patch('easy-fund-wallet', 'WalletController@easyFundWallet');
         Route::post('flutterwave/validate-bank-details', 'PaymentController@validateBankDetailsViaFlutterwave');
         Route::get('flutterwave/banks', 'PaymentController@getFlutterwaveBanks');
         Route::get('flutterwave/banks/branches', 'PaymentController@getFlutterwaveBankBranches');
@@ -130,6 +131,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::get('payment-account', 'UserController@getPaymentAccount');
             Route::delete('payment-account', 'UserController@removePaymentAccount');
             Route::get('revenues', 'UserController@listRevenues');
+            Route::post('referrer', 'UserController@addReferrer');
         });
 
         Route::group(['prefix' => 'subscriptions'], function () {

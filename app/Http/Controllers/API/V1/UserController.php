@@ -143,6 +143,35 @@ class UserController extends Controller
         }
     }
 
+    public function addReferrer(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'username' => ['required', 'string',],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $referrer = User::where('email', $request->username)->orWhere('username', $request->username)->first();
+            if (is_null($referrer)) {
+                return $this->respondBadRequest('Please provide a valid username or email');
+            }
+
+            $request->user()->referrer_id = $referrer->id;
+            $request->user()->save();
+
+            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
+            return $this->respondWithSuccess('Login successful', [
+                'user' => new UserResourceWithSensitive($user),
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
     public function followUser(Request $request, $id)
     {
         try {
@@ -247,7 +276,7 @@ class UserController extends Controller
     public function getAccount(Request $request)
     {
         try {
-            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
+            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
             return $this->respondWithSuccess('Account retrieved successfully', [
                 'user' => new UserResourceWithSensitive($user),
             ]);
@@ -289,7 +318,7 @@ class UserController extends Controller
             if (Hash::check($request->old, $user->password)) {
                 $user->password = Hash::make($request->password);
                 $user->save();
-                $user = User::with('roles', 'profile_picture', 'wallet')->withCount('digiversesCreated')->where('id', $user->id)->first();
+                $user = User::with('roles', 'profile_picture', 'wallet', 'referrer')->withCount('digiversesCreated')->where('id', $user->id)->first();
                 return $this->respondWithSuccess('Password changed successfully', ['user' => new UserResourceWithSensitive($user)]);
             } else {
                 return $this->respondBadRequest('Password provided is not correct.');
@@ -341,7 +370,7 @@ class UserController extends Controller
                     'purpose' => 'profile-picture',
                 ]);
             }
-            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts')->withCount('digiversesCreated')->where('id', $user->id)->first();
+            $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $user->id)->first();
             return $this->respondWithSuccess('User updated successfully', [
                 'user' => new UserResourceWithSensitive($user),
             ]);
