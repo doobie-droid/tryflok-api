@@ -259,7 +259,7 @@ class WalletController extends Controller
     {
         try {
             $validator = Validator::make($request->input(), [
-                'amount_in_flk' => ['required', 'integer', 'min:1000'],
+                'amount_in_flk' => ['required', 'integer', 'min:100'],
             ]);
 
             if ($validator->fails()) {

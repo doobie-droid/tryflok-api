@@ -930,7 +930,7 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
-                'amount_in_flk' => ['required', 'numeric', 'min:100', 'max:1000000'],
+                'amount_in_flk' => ['required', 'numeric', 'min:1', 'max:1000000'],
                 'id' => ['required', 'string', 'exists:users,id'],
             ]);
 
