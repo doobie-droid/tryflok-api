@@ -257,6 +257,7 @@ class CollectionController extends Controller
             $digiverses = Collection::where('type', 'digiverse')
             ->where('is_available', 1)
             ->where('approved_by_admin', 1)
+            ->where('is_adult', 0)
             ->where('show_only_in_collections', 0)
             ->whereHas('contents', function (Builder $query) {
                 $query->where('is_available', 1)->where('approved_by_admin', 1);

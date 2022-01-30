@@ -585,8 +585,13 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             
-            $contents = Content::where('is_available', 1)->where('approved_by_admin', 1)->whereHas('collections', function (Builder $query) {
-                $query->where('is_available', 1)->where('approved_by_admin', 1);
+            $contents = Content::where('is_available', 1)
+            ->where('is_adult', 0)
+            ->where('approved_by_admin', 1)
+            ->whereHas('collections', function (Builder $query) {
+                $query->where('is_available', 1)
+                ->where('is_adult', 0)
+                ->where('approved_by_admin', 1);
             });
 
             if ($request->user() == null || $request->user()->id == null) {
