@@ -42,7 +42,7 @@ class WithdrawFromWalletTest extends TestCase
 
         /** when no amount is less than minimum */ 
         $response = $this->json('PATCH', '/api/v1/account/withdraw-from-wallet', [
-            'amount_in_flk' => '999',
+            'amount_in_flk' => '99',
         ]);
 
         $response->assertStatus(400)->assertJson([
