@@ -52,17 +52,17 @@ class Image implements ShouldQueue
         if ($originalFileSize <= .1) {
             $compression_level = 90;
         } else if ($originalFileSize <= .2) {
-            $compression_level = 80;
+            $compression_level = 90;
         } else if ($originalFileSize < .5) {
-            $compression_level = 70;
+            $compression_level = 90;
         } else if ($originalFileSize <= 1) {
-            $compression_level = 60;
-        } else if ($originalFileSize <= 2) {
             $compression_level = 50;
+        } else if ($originalFileSize <= 2) {
+            $compression_level = 25;
         } else if ($originalFileSize <= 3) {
-            $compression_level = 40;
+            $compression_level = 20;
         } else if ($originalFileSize <= 4) {
-            $compression_level = 30;
+            $compression_level = 20;
         } else {
             $compression_level = 20;
         }
