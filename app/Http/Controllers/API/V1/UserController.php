@@ -159,6 +159,10 @@ class UserController extends Controller
                 return $this->respondBadRequest('Please provide a valid username or email');
             }
 
+            if ($rerrer->id === $request->user()->id) {
+                return $this->respondBadRequest('You cannot add yourself as a referrer');
+            }
+
             $request->user()->referrer_id = $referrer->id;
             $request->user()->save();
 

@@ -30,7 +30,7 @@ class AuthController extends Controller
                 'username' => ['required', 'max:20', 'unique:users,username', 'regex:/^[A-Za-z0-9_]*$/'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
                 'password' => ['required', 'string', 'confirmed'],
-                'referral_id' => ['sometimes', 'nullable','string', 'exists:users,referral_id'],
+                'referral_id' => ['sometimes', 'nullable','string',],
                 'firebase_token' => ['sometimes', 'nullable','string',],
             ]);
 
@@ -83,7 +83,7 @@ class AuthController extends Controller
                 'name' => ['required_if:provider,google', 'string', 'max:255'],
                 'email' => ['required_if:provider,google', 'string', 'email', 'max:255',],
                 'provider' => ['required', 'string', 'in:google,apple,google-web',],
-                'referral_id' => ['sometimes', 'nullable','string', 'exists:users,referral_id',],
+                'referral_id' => ['sometimes', 'nullable','string',],
                 'id_token' => ['required_if:provider,google,apple', 'string',],
                 'sign_in_type' => ['required', 'string', 'in:register,login',],
                 'sign_in_source' => ['required_if:provider,google', 'string', 'in:ios,android,web',],
