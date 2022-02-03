@@ -183,7 +183,11 @@ class Content extends Model
     public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')
     {
         return $mainQuery->withCount('subscribers')
-        ->withCount('revenues')
+        ->withCount([
+            'revenues' => function ($query) {
+                $query->where('revenue_from', 'sale');
+            },
+        ])
         ->withCount('views')
         ->with('metas')
         ->with('collections', 'collections.prices')
