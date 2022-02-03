@@ -50,8 +50,10 @@ class AuthController extends Controller
 
             if (! is_null($request->referral_id)) {
                 $referrer = User::where('referral_id', $request->referral_id)->orWhere('username', $request->referral_id)->first();
-                $user->referrer_id = $referrer->id;
-                $user->save();
+                if (! is_null($referrer)) {
+                    $user->referrer_id = $referrer->id;
+                    $user->save();
+                }
             }
 
             if (! is_null($request->firebase_token)) {
@@ -159,8 +161,10 @@ class AuthController extends Controller
 
                 if (! is_null($request->referral_id)) {
                     $referrer = User::where('referral_id', $request->referral_id)->orWhere('username', $request->referral_id)->first();
-                    $user->referrer_id = $referrer->id;
-                    $user->save();
+                    if (! is_null($referrer)) {
+                        $user->referrer_id = $referrer->id;
+                        $user->save();
+                    }
                 }
             }
 
