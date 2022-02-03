@@ -169,6 +169,10 @@ class Collection extends Model
                 $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
             },
         ])
-        ->withCount('revenues');
+        ->withCount([
+            'revenues' => function ($query) {
+                $query->where('revenue_from', 'sale');
+            },
+        ]);
     }
 }
