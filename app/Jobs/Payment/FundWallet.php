@@ -91,6 +91,7 @@ class FundWallet implements ShouldQueue
             //TO DO: email user that they have increased their wallet balance
         }  catch (\Exception $exception) {
             DB::rollBack();
+            Log::error($exception);
             throw $exception;
         }
     }
