@@ -41,18 +41,14 @@ class WalletController extends Controller
             //the provider is being built in the cases in case an invalid provider passes through validation
             switch ($request->provider) {
                 case 'flutterwave':
-                    Log::info('Provider was flutterwave');
                     $flutterwave = new PaymentProvider($request->provider);
                     $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
-                    Log::info(json_encode($req));
                     if (($req->status === 'success' && $req->data->status === 'successful')) {
-                        Log::info('Transaction was verified');
                         $amount_in_dollars = bcdiv($req->data->amount, 530, 2);
                         $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
                         $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
                         $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
                         if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
-                            Log::info('Transaction amount was to different');
                             return $this->respondBadRequest('FLK conversion is not correct. Expects +/-3% of ' . $expected_flk_based_on_amount . ' for ' . $req->data->amount . ' Naira but got ' . $request->expected_flk_amount);
                         }
                         
@@ -66,8 +62,6 @@ class WalletController extends Controller
                             'fee' => bcdiv($req->data->app_fee, 530, 2)
                         ]);
                     } else {
-                        Log::info('Transaction could not be verified');
-                        Log::info(json_encode($req));
                         return $this->respondBadRequest('Invalid transaction id provided for flutterwave');
                     }
                     break;
