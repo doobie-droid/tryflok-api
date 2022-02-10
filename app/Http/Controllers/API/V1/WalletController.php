@@ -37,10 +37,11 @@ class WalletController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            
+            Log::info('request got to backend');
             //the provider is being built in the cases in case an invalid provider passes through validation
             switch ($request->provider) {
                 case 'flutterwave':
+                    Log::info('Provider was flutterwave');
                     $flutterwave = new PaymentProvider($request->provider);
                     $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
                     if (($req->status === 'success' && $req->data->status === 'successful')) {
@@ -52,6 +53,7 @@ class WalletController extends Controller
                         if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
                             return $this->respondBadRequest('FLK conversion is not correct. Expects +/-3% of ' . $expected_flk_based_on_amount . ' for ' . $req->data->amount . ' Naira but got ' . $request->expected_flk_amount);
                         }
+                        Log::info('Transaction was verified');
                         FundWalletJob::dispatch([
                             'user' => $request->user(),
                             'wallet' => $request->user()->wallet()->first(),
@@ -62,6 +64,8 @@ class WalletController extends Controller
                             'fee' => bcdiv($req->data->app_fee, 505, 2)
                         ]);
                     } else {
+                        Log::info('Transaction could not be verified');
+                        Log::info(json_encode($req));
                         return $this->respondBadRequest('Invalid transaction id provided for flutterwave');
                     }
                     break;
