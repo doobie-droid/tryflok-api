@@ -48,10 +48,17 @@ class WebSocketSubscriber extends Command
     public function handle()
     {
         $ws_identity = $this->ws_identity;
-        
         Redis::subscribe([Constants::WEBSOCKET_MESSAGE_CHANNEL], function ($message) use ($ws_identity) {
             $message = json_decode($message);
-            if ($message->source_type === 'ws-node' && $message->source_id !== $ws_identity) {
+            $source_type = null;
+            $source_id = null;
+            if (isset($message->source_type)) {
+                $source_type = $message->source_type;
+            }
+            if (isset($message->source_id)) {
+                $source_id = $message->source_id;
+            }
+            if ($source_type === 'ws-node' && $source_id !== $ws_identity) {
                 $websocket_client = new \WebSocket\Client(config('services.websocket.url'));
                 $websocket_client->text(json_encode($message));
                 $websocket_client->close();
