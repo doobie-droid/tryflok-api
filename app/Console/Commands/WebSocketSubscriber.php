@@ -24,6 +24,8 @@ class WebSocketSubscriber extends Command
      */
     protected $description = 'Start the redis listener for the websocket';
 
+    private $ws_identity;
+
     /**
      * Create a new command instance.
      *
@@ -32,6 +34,10 @@ class WebSocketSubscriber extends Command
     public function __construct()
     {
         parent::__construct();
+
+        $this->ws_identity = Cache::store('redis_local')->rememberForever('ws-identity', function () {
+            return Str::random(8) . date('YmdHis');
+        });
     }
 
     /**
@@ -41,18 +47,15 @@ class WebSocketSubscriber extends Command
      */
     public function handle()
     {
-        $ws_identity = Cache::store('redis_local')->rememberForever('ws-identity', function () {
-            return Str::random(8) . date('YmdHis');
-        });
+        $ws_identity = $this->ws_identity;
         
-        Redis::subscribe(Constants::WEBSOCKET_MESSAGE_CHANNEL, function ($message) use ($ws_identity) {
-            $websocket_client = new \WebSocket\Client(config('services.websocket.url'));
-            /*$websocket_client->text(json_encode([
-                'event' => 'app-update-rtm-channel-subscribers-count',
-                'channel_name' => $channel->value,
-                'subscribers_count' => $subscribers_count,
-            ]));*/
-            $websocket_client->close();
+        Redis::subscribe([Constants::WEBSOCKET_MESSAGE_CHANNEL], function ($message) use ($ws_identity) {
+            $message = json_decode($message);
+            if ($message->source_type === 'ws-node' && $message->source_id !== $ws_identity) {
+                $websocket_client = new \WebSocket\Client(config('services.websocket.url'));
+                $websocket_client->text(json_encode($message));
+                $websocket_client->close();
+            }
         });
         return Command::SUCCESS;
     }
