@@ -14,10 +14,6 @@ jobs:
           MYSQL_USER: root
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_PASSWORD:
-        volumes:
-          - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
-          - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
-        command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
       - image: circleci/mysql:5.7
         environment:
           MYSQL_DATABASE: flok-test
