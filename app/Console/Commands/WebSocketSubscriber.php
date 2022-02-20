@@ -35,9 +35,9 @@ class WebSocketSubscriber extends Command
     {
         parent::__construct();
 
-        /*$this->ws_identity = Cache::store('redis_local')->rememberForever('ws-identity', function () {
+        $this->ws_identity = Cache::store('redis_local')->rememberForever('ws-identity', function () {
             return Str::random(8) . date('YmdHis');
-        });*/
+        });
     }
 
     /**
