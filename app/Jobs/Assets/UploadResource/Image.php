@@ -36,6 +36,7 @@ class Image implements ShouldQueue
         $this->ext = $data['ext'];
         $this->folder = $data['folder'];
         $this->full_file_name = $data['full_file_name'];
+        $this->onConnection('redis_local');
     }
 
     /**

@@ -134,6 +134,14 @@ return [
             'database' => env('REDIS_DB', '0'),
         ],
 
+        'local' => [
+            'url' => env('LOCAL_REDIS_URL'),
+            'host' => env('LOCAL_REDIS_HOST', '127.0.0.1'),
+            'password' => env('LOCAL_REDIS_PASSWORD', null),
+            'port' => env('LOCAL_REDIS_PORT', '6379'),
+            'database' => env('LOCAL_REDIS_DB', '0'),
+        ],
+
         'cache' => [
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
