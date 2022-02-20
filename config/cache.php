@@ -79,6 +79,12 @@ return [
             'lock_connection' => 'default',
         ],
 
+        'redis_local' => [
+            'driver' => 'redis',
+            'connection' => 'local_cache',
+            'lock_connection' => 'local',
+        ],
+
         'dynamodb' => [
             'driver' => 'dynamodb',
             'key' => env('AWS_ACCESS_KEY_ID'),

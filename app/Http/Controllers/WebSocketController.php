@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Constants\Constants;
 use App\Jobs\Websocket\AuthenticateConnection;
 use App\Models\Otp;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
@@ -14,14 +15,16 @@ use Ratchet\MessageComponentInterface;
 
 class WebSocketController extends Controller implements MessageComponentInterface
 {
-    private $identifier;
+    private $ws_identity;
     private $connections = [];
     private $map_user_id_to_connections = [];
     private $rtm_channel_subscribers = [];
 
     public function __construct()
     {
-        $this->identifier = Str::random(8) . date('YmdHis');
+        $this->ws_identity = Cache::store('redis_local')->rememberForever('ws-identity', function () {
+            return Str::random(8) . date('YmdHis');
+        });
     }
     /**
      * When a new connection is opened it will be passed to this method
