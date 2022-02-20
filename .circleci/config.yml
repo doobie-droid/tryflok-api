@@ -29,8 +29,6 @@ jobs:
       - run: sudo apt-get install -y git curl libonig-dev libxml2-dev libzip-dev zip unzip
       - run: sudo apt-get install -y ffmpeg
       - run: sudo apt-get install -y supervisor
-      - run: sudo pecl install -o -f redis &&  sudo rm -rf /tmp/pear &&  sudo docker-php-ext-enable redis
-      - run: sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
       - run: sudo apt install libsodium-dev
       - run: sudo docker-php-ext-configure sodium
       - run: sudo docker-php-ext-install sodium
@@ -42,6 +40,8 @@ jobs:
       - run: sudo docker-php-ext-install bcmath
       - run: sudo docker-php-ext-install gd
       - run: sudo docker-php-ext-install zip
+      - run: sudo pecl install -o -f redis &&  sudo rm -rf /tmp/pear &&  sudo docker-php-ext-enable redis
+      - run: sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
 
       # Download and cache dependencies
       - restore_cache:
