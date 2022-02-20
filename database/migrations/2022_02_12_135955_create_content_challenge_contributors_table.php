@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateContentChallengeContributorsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('content_challenge_contributors', function (Blueprint $table) {
@@ -22,11 +17,6 @@ class CreateContentChallengeContributorsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('content_challenge_contributors');

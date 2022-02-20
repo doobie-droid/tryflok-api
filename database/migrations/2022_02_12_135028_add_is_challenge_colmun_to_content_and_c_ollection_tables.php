@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class AddIsChallengeColmunToContentAndCOllectionTables extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::table('collections', function (Blueprint $table) {
@@ -22,11 +17,6 @@ class AddIsChallengeColmunToContentAndCOllectionTables extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::table('content_and_c_ollection_tables', function (Blueprint $table) {
