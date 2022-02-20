@@ -9,7 +9,6 @@ jobs:
       # Specify the version you desire here
       - image: circleci/php:7.4-cli
         environment:
-          TZ: Africa/Lagos
           MYSQL_HOST: 127.0.0.1
           MYSQL_DB: flok-test
           MYSQL_USER: root
