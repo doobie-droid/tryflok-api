@@ -46,3 +46,6 @@ services:
       - ./:/var/www
       - ./nginx-production/logs:/var/log/nginx
       - ./nginx-production:/etc/nginx/conf.d
+  
+  redis:
+    image: redis:3.0
