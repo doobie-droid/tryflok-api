@@ -152,6 +152,21 @@ class Content extends Model
         return $this->belongsToMany(Collection::class);
     }
 
+    public function challengeContestants()
+    {
+        return $this->hasMany(ContentChallengeContestant::class);
+    }
+
+    public function challengeContributions()
+    {
+        return $this->hasMany(ContentChallengeContribution::class);
+    }
+
+    public function challengeVotes()
+    {
+        return $this->hasMany(ContentChallengeVote::class);
+    }
+
     public function isFree()
     {
         $freePriceCount = $this->prices()->where('amount', 0)->count();

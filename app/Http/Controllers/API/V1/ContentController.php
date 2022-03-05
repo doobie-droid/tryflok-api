@@ -10,11 +10,14 @@ use App\Jobs\Assets\UploadResource\Html as UploadHtmlJob;
 use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJob;
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
+use App\Jobs\Users\NotifyAddedToChallenge as NotifyAddedToChallengeJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
 use App\Models\ContentIssue;
+use App\Models\User;
 use App\Rules\AssetType as AssetTypeRule;
+use App\Rules\SumCheck as SumCheckRule;
 use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
 use App\Services\LiveStream\Agora\RtmTokenBuilder as AgoraRtmToken;
 use Aws\CloudFront\CloudFrontClient;
@@ -42,10 +45,25 @@ class ContentController extends Controller
                 'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['required_if:type,newsletter', 'string'],
+                'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
+                'pot_size' => ['required_if:is_challenge,1', 'integer', 'min:0',],
+                'minimum_contribution' => ['required_if:is_challenge,1', 'integer', 'min:10',],
+                'moderator_share' => ['required_if:is_challenge,1', 'integer', 'max:10', 'min:0'],
+                'loser_share' => ['required_if:is_challenge,1', 'integer', 'max:50', 'min:0'],
+                'winner_share' => ['required_if:is_challenge,1', 'integer', 'max:100', 'min:45', 'gte:loser_share', new SumCheckRule(['moderator_share', 'loser_share'], 100)],
+                'contestants' => ['required_if:is_challenge,1', 'size:2'],
+                'contestants.*' => ['required_if:is_challenge,1', 'string', 'exists:users,id', "not_in:{$request->user()->id}"],
+
+            ], [
+                'contestants.*.not_in' => 'You cannot make yourself a competitor'
             ]);
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if (!in_array($request->type, ['live-video']) && isset($request->is_challenge) && (int) $request->is_challenge === 1) {
+                return $this->respondBadRequest("Only live video content can be a challenge");
             }
 
             $digiverse = Collection::where('id', $request->digiverse_id)->where('type', 'digiverse')->first();
@@ -59,10 +77,16 @@ class ContentController extends Controller
 
             $user = $request->user();
             $is_available = 0;
+            $is_challenge = 0;
 
             if (in_array($request->type, ['live-audio', 'live-video'])) {
                 $is_available = 1;
             }
+
+            if (isset($request->is_challenge) && (int) $request->is_challenge === 1) {
+                $is_challenge = 1;
+            }
+
             $content = Content::create([
                 'title' => $request->title,
                 'description' => $request->description,
@@ -72,6 +96,7 @@ class ContentController extends Controller
                 'approved_by_admin' => 1,
                 'show_only_in_digiverses' => 1,
                 'live_status' => 'inactive',
+                'is_challenge' => $is_challenge,
             ]);
 
             if (! is_null($request->scheduled_date)) {
@@ -98,6 +123,39 @@ class ContentController extends Controller
                         'value' => 0,
                     ],
                 ]);
+            }
+
+            if ($is_challenge === 1) {
+                $content->metas()->createMany([
+                    [
+                        'key' => 'pot_size',
+                        'value' => $request->pot_size,
+                    ],
+                    [
+                        'key' => 'minimum_contribution',
+                        'value' => $request->minimum_contribution,
+                    ],
+                    [
+                        'key' => 'moderator_share',
+                        'value' => $request->moderator_share,
+                    ],
+                    [
+                        'key' => 'winner_share',
+                        'value' => $request->winner_share,
+                    ],
+                    [
+                        'key' => 'loser_share',
+                        'value' => $request->loser_share,
+                    ],
+                ]);
+                
+                foreach ($request->contestants as $contestant_id) {
+                    $content->challengeContestants()->create([
+                        'user_id' => $contestant_id,
+                        'status' => 'pending',
+                    ]);
+                    NotifyAddedToChallengeJob::dispatch(User::where('id', $contestant_id)->first(), $content);
+                }
             }
 
             if ($request->type === 'newsletter') {

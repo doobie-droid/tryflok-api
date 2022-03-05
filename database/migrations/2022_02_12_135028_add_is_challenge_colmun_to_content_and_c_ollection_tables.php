@@ -16,11 +16,4 @@ class AddIsChallengeColmunToContentAndCOllectionTables extends Migration
             $table->boolean('is_challenge')->default(0);
         });
     }
-
-    public function down()
-    {
-        Schema::table('content_and_c_ollection_tables', function (Blueprint $table) {
-            //
-        });
-    }
 }
