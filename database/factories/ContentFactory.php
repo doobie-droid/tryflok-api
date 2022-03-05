@@ -161,6 +161,47 @@ class ContentFactory extends Factory
         });
     }
 
+    /** @param User[] $contestants */
+    public function setChallengeContestants(array $contestants): self
+    {
+        return $this->afterCreating(function (Content $content) use ($contestants) {
+            foreach ($contestants as $contestant) {
+                $content->challengeContestants()->create([
+                    'user_id' => $contestant->id,
+                    'status' => 'pending',
+                ]);
+            }
+        });
+    }
+
+    public function setChallengeDetails(int $pot_size = 0, int $minimum_contribution = 0, int $moderator_share = 10, int $winner_share = 60, int $loser_share = 30): self
+    {
+        return $this->afterCreating(function (Content $content) use ($pot_size, $minimum_contribution, $moderator_share, $winner_share, $loser_share) {
+            $content->metas()->createMany([
+                [
+                    'key' => 'pot_size',
+                    'value' => $pot_size,
+                ],
+                [
+                    'key' => 'minimum_contribution',
+                    'value' => $minimum_contribution,
+                ],
+                [
+                    'key' => 'moderator_share',
+                    'value' => $moderator_share,
+                ],
+                [
+                    'key' => 'winner_share',
+                    'value' => $winner_share,
+                ],
+                [
+                    'key' => 'loser_share',
+                    'value' => $loser_share,
+                ],
+            ]);
+        });
+    }
+
     public function noDigiverse(): self
     {
         return $this->afterCreating(function (Content $content) {

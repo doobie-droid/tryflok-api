@@ -11,6 +11,7 @@ use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJ
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
 use App\Jobs\Users\NotifyAddedToChallenge as NotifyAddedToChallengeJob;
+use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
@@ -1318,6 +1319,86 @@ class ContentController extends Controller
             return $this->respondWithSuccess('View recorded successfully', [
                 'content' => new ContentResource($content),
             ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function respondToChallenge(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'action' => ['required', 'string', 'in:accept,decline'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+
+            $contestant = $content->challengeContestants()->where('user_id', $request->user()->id)->first();
+            if (is_null($contestant)) {
+                return $this->respondBadRequest('You cannot respond to this challenge because you are not a contestant');
+            }
+
+            switch ($request->action) {
+                case 'accept':
+                    $contestant->status = 'accepted';
+                    $contestant->save();
+                    NotifyChallengeResponseJob::dispatch($content, $request->user(), $contestant->status);
+                    break;
+                case 'decline':
+                    $contestant->status = 'declined';
+                    $contestant->save();
+                    NotifyChallengeResponseJob::dispatch($content, $request->user(), $contestant->status);
+                    break;
+            }
+
+            $content = $content
+            ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+            return $this->respondWithSuccess('Your response has been recorded successfully', [
+                'content' => new ContentResource($content),
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function contributeToChallenge(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+            
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function voteOnChallenge(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+            
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

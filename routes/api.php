@@ -157,6 +157,10 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('{id}/leave-live', 'ContentController@leaveLive');
             Route::delete('{id}/live', 'ContentController@endLive');
 
+            Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge');
+            Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge');
+            Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge');
+
             Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
         });
 

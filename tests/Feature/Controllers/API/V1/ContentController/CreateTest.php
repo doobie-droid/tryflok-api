@@ -1100,6 +1100,22 @@ class CreateTest extends TestCase
             'share' => 100,
         ]);
         $this->assertTrue($content->benefactors()->count() === 1);
+
+        $this->assertDatabaseHas('notifications', [
+            'recipient_id' => $contestant1->id,
+            'notifier_id' => $user->id,
+            'notificable_type' => 'content',
+            'notificable_id' => $content->id,
+            'message' => "You have been added as a contestant to the {$content->title} challenge. You can choose to accept or decline",
+        ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'recipient_id' => $contestant2->id,
+            'notifier_id' => $user->id,
+            'notificable_type' => 'content',
+            'notificable_id' => $content->id,
+            'message' => "You have been added as a contestant to the {$content->title} challenge. You can choose to accept or decline",
+        ]);
     }
 
     /**
