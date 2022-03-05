@@ -65,6 +65,8 @@ class Content
                 ]
             ]
         ];
+
+        $structure[] = 'total_challenge_contributions';
         return [
             'status_code',
             'message',

@@ -17,6 +17,7 @@ use App\Models\Collection;
 use App\Models\Content;
 use App\Models\ContentIssue;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use App\Rules\AssetType as AssetTypeRule;
 use App\Rules\SumCheck as SumCheckRule;
 use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
@@ -1376,12 +1377,81 @@ class ContentController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
+                'amount' => ['required', 'integer',]
             ]);
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
+
+            $content = Content::where('id', $id)->first();
+            $user = $request->user();
+
+            $all_contestants_accepted = true;
+            foreach ($content->challengeContestants as $contestant) {
+                if ($contestant->status !== 'accepted') {
+                    $all_contestants_accepted = false;
+                    break;
+                }
+            }
+
+            if (! $all_contestants_accepted) {
+                return $this->respondBadRequest('Both contestants need to accept this challenge before you can contribute to it');
+            }
             
+            if ($content->live_status === 'ended') {
+                return $this->respondBadRequest('You cannot contribute to a challenge that has ended');
+            }
+
+            $pot_size = $content->metas()->where('key', 'pot_size')->first();
+            if ((int) $pot_size->value === 0) {
+                return $this->respondBadRequest('You cannot contribute to a challenge with a pot size of 0');
+            }
+
+            $minimum_contribution = $content->metas()->where('key', 'minimum_contribution')->first();
+            $previous_contribution = $content->challengeContributions()->where('user_id', $user->id)->first();
+            $total_contribution_amount = (int) $request->amount;
+            if (! is_null($previous_contribution)) {
+                $total_contribution_amount += (int) $previous_contribution->amount;
+            }
+
+            if ((int) $minimum_contribution->value > (int) $total_contribution_amount) {
+                return $this->respondBadRequest("Contribution amount must be at least {$minimum_contribution->value} Flok Cowries");
+            }
+
+            if ((int) $request->amount > (int) $user->wallet->balance) {
+                return $this->respondBadRequest("You do not have enough Flok Cowries to contribute to this challenge");
+            }
+            
+            $new_wallet_balance = bcsub($user->wallet->balance, $request->amount, 2);
+            WalletTransaction::create([
+                'wallet_id' => $user->wallet->id,
+                'amount' => $request->amount,
+                'balance' => $new_wallet_balance,
+                'transaction_type' => 'deduct',
+                'details' => "Withdrawal from wallet to contribute to {$content->title} challenge",
+            ]);
+            $user->wallet->balance = $new_wallet_balance;
+            $user->wallet->save();
+
+            if (! is_null($previous_contribution)) {
+                $previous_contribution->amount = $total_contribution_amount;
+                $previous_contribution->save();
+            } else {
+                $content->challengeContributions()->create([
+                    'user_id' => $user->id,
+                    'amount' => $request->amount,
+                ]);
+            }
+
+            $content = $content
+            ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+            return $this->respondWithSuccess('Your contribution has been recorded successfully', [
+                'content' => new ContentResource($content),
+            ]);
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

@@ -251,6 +251,7 @@ class Content extends Model
                 $query->where('users.id', $user_id);
             },
         ])
+        ->withSum('challengeContributions', 'amount')
         ->with('challengeContestants', 'challengeContestants.contestant');
     }
 }

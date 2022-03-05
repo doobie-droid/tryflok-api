@@ -151,6 +151,15 @@ class ContentFactory extends Factory
         });
     }
 
+    public function liveEnded()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'live_status' => 'ended',
+            ];
+        });
+    }
+
 
     public function setDigiverse(Collection $digiverse): self
     {
@@ -162,13 +171,19 @@ class ContentFactory extends Factory
     }
 
     /** @param User[] $contestants */
-    public function setChallengeContestants(array $contestants): self
+    public function setChallengeContestants(array $contestants, array $options = ['accept' => 0]): self
     {
-        return $this->afterCreating(function (Content $content) use ($contestants) {
+        return $this->afterCreating(function (Content $content) use ($contestants, $options) {
+            $accept_count = 0;
             foreach ($contestants as $contestant) {
+                $status = 'pending';
+                if ($options['accept'] - $accept_count > 0) {
+                    $status = 'accepted';
+                }
+                $accept_count++;
                 $content->challengeContestants()->create([
                     'user_id' => $contestant->id,
-                    'status' => 'pending',
+                    'status' => $status,
                 ]);
             }
         });

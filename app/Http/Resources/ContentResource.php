@@ -26,6 +26,7 @@ class ContentResource extends JsonResource
             'owner' => new UserResource($this->whenLoaded('owner')),
             'assets' => AssetResource::collection($this->whenLoaded('assets')),
             'metas' => $this->refactorMetas(),
+            'total_challenge_contributions' => $this->challenge_contributions_sum_amount,
         ]);
     }
 
