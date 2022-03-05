@@ -911,6 +911,14 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(400);
+        // when same user is passed twice
+        $request = $completeRequest;
+        $request['contestants'] = [
+            $contestant1->id,
+            $contestant1->id,
+        ];
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
     }
 
     public function test_challenge_content_gets_created()

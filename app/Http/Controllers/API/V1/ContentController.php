@@ -52,17 +52,17 @@ class ContentController extends Controller
                 'loser_share' => ['required_if:is_challenge,1', 'integer', 'max:50', 'min:0'],
                 'winner_share' => ['required_if:is_challenge,1', 'integer', 'max:100', 'min:45', 'gte:loser_share', new SumCheckRule(['moderator_share', 'loser_share'], 100)],
                 'contestants' => ['required_if:is_challenge,1', 'size:2'],
-                'contestants.*' => ['required_if:is_challenge,1', 'string', 'exists:users,id', "not_in:{$request->user()->id}"],
+                'contestants.*' => ['required_if:is_challenge,1', 'string', 'distinct', 'exists:users,id', "not_in:{$request->user()->id}"],
 
             ], [
-                'contestants.*.not_in' => 'You cannot make yourself a competitor'
+                'contestants.*.not_in' => 'You cannot make yourself a contestant',
             ]);
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            if (!in_array($request->type, ['live-video']) && isset($request->is_challenge) && (int) $request->is_challenge === 1) {
+            if (! in_array($request->type, ['live-video']) && isset($request->is_challenge) && (int) $request->is_challenge === 1) {
                 return $this->respondBadRequest("Only live video content can be a challenge");
             }
 
