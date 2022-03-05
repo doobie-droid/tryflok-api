@@ -221,6 +221,7 @@ class ContentController extends Controller
 
             $content = Content::where('id', $content->id)
             ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
             ->first();
 
             return $this->respondWithSuccess('Content has been created successfully', [

@@ -250,6 +250,7 @@ class Content extends Model
             'subscribers' => function ($query) use ($user_id) {
                 $query->where('users.id', $user_id);
             },
-        ]);
+        ])
+        ->with('challengeContestants', 'challengeContestants.contestant');
     }
 }

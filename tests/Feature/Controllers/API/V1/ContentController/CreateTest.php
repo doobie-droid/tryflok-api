@@ -960,7 +960,7 @@ class CreateTest extends TestCase
         ];
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)
-        ->assertJsonStructure(MockData\Content::generateLiveContentCreateResponse());
+        ->assertJsonStructure(MockData\Content::generateChallengeContentCreateResponse());
 
         $this->assertDatabaseHas('contents', [
             'title' => $request['title'],

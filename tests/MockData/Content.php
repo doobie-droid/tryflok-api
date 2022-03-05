@@ -37,6 +37,43 @@ class Content
         ];
     }
 
+    public static function generateChallengeContentCreateResponse(): array
+    {
+        $structure = self::STANDARD_STRUCTURE;
+        $metas_key = array_search('metas', $structure);
+        unset($structure[$metas_key]);
+        $structure['metas'] = [
+            'channel_name',
+            'rtc_token',
+            'rtm_token',
+            'join_count',
+            'pot_size',
+            'minimum_contribution',
+            'moderator_share',
+            'winner_share',
+            'loser_share',
+        ];
+        $structure['challenge_contestants'] = [
+            [
+                'id',
+                'status',
+                'contestant' => [
+                    'id',
+                    'name',
+                    'email',
+                    'username',
+                ]
+            ]
+        ];
+        return [
+            'status_code',
+            'message',
+            'data' => [
+                'content' => $structure,
+            ]
+        ];
+    }
+
     public static function generateGetSingleContentResponse(): array
     {
         $structure = self::STANDARD_STRUCTURE;
