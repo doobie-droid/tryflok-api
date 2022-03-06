@@ -134,6 +134,7 @@ class Content
         'title',
         'description',
         'live_status',
+        'live_ended_at',
         'scheduled_date',
         'owner' => [
             'id',

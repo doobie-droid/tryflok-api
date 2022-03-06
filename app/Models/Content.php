@@ -30,6 +30,7 @@ class Content extends Model
      */
     protected $casts = [
         'scheduled_date' => 'datetime',
+        'live_ended_at' => 'datetime',
     ];
 
 

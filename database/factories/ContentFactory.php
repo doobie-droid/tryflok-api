@@ -151,11 +151,25 @@ class ContentFactory extends Factory
         });
     }
 
-    public function liveEnded()
+    public function liveEnded($ended_at = null)
+    {
+        if (is_null($ended_at)) {
+            $ended_at = now();
+        }
+
+        return $this->state(function (array $attributes) use ($ended_at) {
+            return [
+                'live_status' => 'ended',
+                'live_ended_at' => $ended_at,
+            ];
+        });
+    }
+
+    public function isChallenge()
     {
         return $this->state(function (array $attributes) {
             return [
-                'live_status' => 'ended',
+                'is_challenge' => 1,
             ];
         });
     }
@@ -184,6 +198,31 @@ class ContentFactory extends Factory
                 $content->challengeContestants()->create([
                     'user_id' => $contestant->id,
                     'status' => $status,
+                ]);
+            }
+        });
+    }
+
+    /** @param User[] $contributors */
+    public function setChallengeContributors(array $contributors, int $amount = 500): self
+    {
+        return $this->afterCreating(function (Content $content) use ($contributors, $amount) {
+            foreach ($contributors as $contributor) {
+                $content->challengeContributions()->create([
+                    'user_id' => $contributor->id,
+                    'amount' => $amount,
+                ]);
+            }
+        });
+    }
+
+    public function setChallengeVoters(array $voters, string $contestant_id): self 
+    {
+        return $this->afterCreating(function (Content $content) use ($voters, $contestant_id) {
+            foreach ($voters as $voter) {
+                $content->challengeVotes()->create([
+                    'voter_id' => $voter->id,
+                    'contestant_id' =>  $contestant_id,
                 ]);
             }
         });

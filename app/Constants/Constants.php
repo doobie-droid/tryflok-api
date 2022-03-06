@@ -23,7 +23,7 @@ class Constants
     // wallet withdrawal charge
     public const WALLET_WITHDRAWAL_CHARGE = .05;
 
-    //trending metrics
+    // trending metrics
     public const TRENDING_VIEWS_WEIGHT = .1;
     public const TRENDING_CONTENT_SUBSCRIBERS_WEIGHT = .1;
     public const TRENDING_PURCHASES_WEIGHT = 2;
@@ -35,4 +35,7 @@ class Constants
 
     // channel names
     public const WEBSOCKET_MESSAGE_CHANNEL = 'websocket-message-channel';
+
+    // challenge 
+    public const CHALLENGE_VOTE_WINDOW_IN_MINUTES = 10;
 }

@@ -1386,6 +1386,11 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $id)->first();
+
+            if ((int) $content->is_challenge !== 1) {
+                return $this->respondBadRequest('You can only contribute to a challenge');
+            }
+
             $user = $request->user();
 
             $all_contestants_accepted = true;
@@ -1470,7 +1475,59 @@ class ContentController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
+
+            $content = Content::where('id', $id)->first();
+
+            if ((int) $content->is_challenge !== 1) {
+                return $this->respondBadRequest('You can only vote on a challenge');
+            }
+
+            if (is_null($content->live_ended_at)) {
+                return $this->respondBadRequest('You can only vote after the challenge has ended');
+            }
+
+            $voting_window = Constants::CHALLENGE_VOTE_WINDOW_IN_MINUTES;
+            if ($content->live_ended_at->lte(now()->subMinutes($voting_window))) {
+                return $this->respondBadRequest("You can only vote whithin the first {$voting_window} minutes after the live has ended");
+            }
+
+            $contestant = $content->challengeContestants()->where('user_id', $request->contestant)->first();
+            if (is_null($contestant)) {
+                return $this->respondBadRequest('You can only vote for users listed as contestants in the challenge');
+            }
+
+            $user = $request->user();
+            $user_contributed = false;
+            $contribution = $content->challengeContributions()->where('user_id', $user->id)->first();
+            if (! is_null($contribution)) {
+                $user_contributed = true;
+            }
+
+            $post_size = $content->metas()->where('key', 'pot_size')->first();
+
+            $user_vote = $content->challengeVotes()->where('voter_id', $user->id)->first();
+
+            if ((int) $post_size->value > 0 && $user_contributed === false) {
+                return $this->respondBadRequest('You can only vote on this challenge if you contribute to the pot');
+            }
+ 
+            if (! is_null($user_vote)) {
+                return $this->respondBadRequest('You have already cast a vote before');
+            }
             
+            $content->challengeVotes()->create([
+                'voter_id' => $user->id,
+                'contestant_id' =>  $request->contestant,
+            ]);
+
+            $content = $content
+            ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+            return $this->respondWithSuccess('Your vote has been recorded successfully', [
+                'content' => new ContentResource($content),
+            ]);
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
