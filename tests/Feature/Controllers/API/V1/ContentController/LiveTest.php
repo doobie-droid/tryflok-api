@@ -153,6 +153,8 @@ class LiveTest extends TestCase
             'id' => $content->id,
             'live_status' => 'ended',
         ]);
+
+        $this->assertTrue(is_null($content->refresh()->live_ended_at));
     }
 
     public function test_end_live_works()
@@ -173,5 +175,6 @@ class LiveTest extends TestCase
             'id' => $content->id,
             'live_status' => 'ended',
         ]);
+        $this->assertFalse(is_null($content->refresh()->live_ended_at));
     }
 }

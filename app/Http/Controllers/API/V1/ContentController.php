@@ -1192,6 +1192,7 @@ class ContentController extends Controller
             }
 
             $content->live_status = 'ended';
+            $content->live_ended_at = now();
             $content->save();
 
             DispatchDisableLiveUserableJob::dispatch([
@@ -1463,6 +1464,7 @@ class ContentController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
+                'contestant' => ['required', 'string', 'exists:users,id',],
             ]);
 
             if ($validator->fails()) {
