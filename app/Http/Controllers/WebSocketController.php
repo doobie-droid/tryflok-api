@@ -425,7 +425,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     {
         $sender_auth_data = $this->connections[$connection_id];
         $sender_is_authenticated = ! is_null($sender_auth_data) && is_array($sender_auth_data) && $sender_auth_data['is_authenticated'] !== true;
-        $sender_is_ws_node = $data->source_type === 'ws-node';
+        $sender_is_ws_node = isset($data->source_type) && $data->source_type === 'ws-node';
         if ($sender_is_authenticated || $sender_is_ws_node) {
             return true;
         }
