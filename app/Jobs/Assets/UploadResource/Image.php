@@ -46,7 +46,7 @@ class Image implements ShouldQueue
      */
     public function handle()
     {
-        Storage::disk('public_s3')->put($this->full_file_name, file_get_contents($this->filepath));
+        $reponse = Storage::disk('public_s3')->put($this->full_file_name, file_get_contents($this->filepath));
         $this->asset->processing_complete = 1;
         $this->asset->save();
         unlink($this->filepath);
