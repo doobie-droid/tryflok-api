@@ -71,6 +71,15 @@ return [
             'after_commit' => true,
         ],
 
+        'redis_local' => [
+            'driver' => 'redis',
+            'connection' => 'local',
+            'queue' => env('LOCAL_REDIS_QUEUE', 'local'),
+            'retry_after' => 7200,
+            'block_for' => null,
+            'after_commit' => true,
+        ],
+
     ],
 
     /*

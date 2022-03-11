@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Constants\Constants;
 use App\Jobs\Websocket\AuthenticateConnection;
 use App\Models\Otp;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
@@ -14,14 +15,16 @@ use Ratchet\MessageComponentInterface;
 
 class WebSocketController extends Controller implements MessageComponentInterface
 {
-    private $identifier;
+    private $ws_identity;
     private $connections = [];
     private $map_user_id_to_connections = [];
     private $rtm_channel_subscribers = [];
 
     public function __construct()
     {
-        $this->identifier = Str::random(8) . date('YmdHis');
+        $this->ws_identity = Cache::store('redis_local')->rememberForever('ws-identity', function () {
+            return Str::random(8) . date('YmdHis');
+        });
     }
     /**
      * When a new connection is opened it will be passed to this method
@@ -124,6 +127,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     $this->setConnectionAsAuthenticated($data, $conn);
                     break;
                 case 'echo':
+                    $this->propagateToOtherNodes($data);
                     $echo = ['echo' => $data->message];
                     $conn->send(json_encode($echo));
                 case 'notify-user':
@@ -270,8 +274,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             }
 
             //check if connection has been authenticated
-            $connection_auth_data = $this->connections[$connection->resourceId];
-            if (is_null($connection_auth_data) || ! is_array($connection_auth_data) || $connection_auth_data['is_authenticated'] !== true) {
+            if ($this->connectionIsAuthenticated($connection->resourceId, $data)) {
                 $connection->send(json_encode([
                     'event' => 'event-error',
                     'event_name' => $data->event,
@@ -328,8 +331,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             }
 
             //check if connection has been authenticated
-            $sender_auth_data = $this->connections[$connection->resourceId];
-            if (is_null($sender_auth_data) || ! is_array($sender_auth_data) || $sender_auth_data['is_authenticated'] !== true) {
+            if ($this->connectionIsAuthenticated($connection->resourceId, $data)) {
                 $connection->send(json_encode([
                     'event' => 'event-error',
                     'event_name' => $data->event,
@@ -339,14 +341,14 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 return;
             }
 
+            $this->propagateToOtherNodes($data);
+
             // send message to channel subscribers
             $channel_name = $data->channel_name;
             $channel_subscribers = [];
             if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
-
-            Redis::publish(Constants::WEBSOCKET_MESSAGE_CHANNEL, json_encode($data));
 
             foreach ($channel_subscribers as $key => $resourceId) {
                 $message = [
@@ -389,7 +391,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
-            Redis::publish(Constants::WEBSOCKET_MESSAGE_CHANNEL, json_encode($data));
+            $this->propagateToOtherNodes($data);
             foreach ($channel_subscribers as $key => $resourceId) {
                 $message = [
                     'event' => 'update-rtm-channel-subscribers-count',
@@ -416,6 +418,35 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             ]));
             Log::error($exception);
             return;
+        }
+    }
+
+    private function connectionIsAuthenticated($connection_id, $data)
+    {
+        $sender_auth_data = $this->connections[$connection_id];
+        $sender_is_authenticated = ! is_null($sender_auth_data) && is_array($sender_auth_data) && $sender_auth_data['is_authenticated'] !== true;
+        $sender_is_ws_node = isset($data->source_type) && $data->source_type === 'ws-node';
+        if ($sender_is_authenticated || $sender_is_ws_node) {
+            return true;
+        }
+        return false;
+    }
+
+    private function propagateToOtherNodes($data)
+    {
+        $data_source_type = null;
+        $data_source_id = null;
+        if (isset($data->source_type)) {
+            $data_source_type = $data->source_type;
+        }
+        if (isset($data->source_id)) {
+            $data_source_id = $data->source_id;
+        }
+
+        if ($data_source_type !== 'ws-node') {
+            $data->source_type = 'ws-node';
+            $data->source_id = $this->ws_identity;
+            Redis::publish(Constants::WEBSOCKET_MESSAGE_CHANNEL, json_encode($data));
         }
     }
 }

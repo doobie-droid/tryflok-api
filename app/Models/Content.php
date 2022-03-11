@@ -30,6 +30,7 @@ class Content extends Model
      */
     protected $casts = [
         'scheduled_date' => 'datetime',
+        'live_ended_at' => 'datetime',
     ];
 
 
@@ -152,6 +153,21 @@ class Content extends Model
         return $this->belongsToMany(Collection::class);
     }
 
+    public function challengeContestants()
+    {
+        return $this->hasMany(ContentChallengeContestant::class);
+    }
+
+    public function challengeContributions()
+    {
+        return $this->hasMany(ContentChallengeContribution::class);
+    }
+
+    public function challengeVotes()
+    {
+        return $this->hasMany(ContentChallengeVote::class);
+    }
+
     public function isFree()
     {
         $freePriceCount = $this->prices()->where('amount', 0)->count();
@@ -230,10 +246,15 @@ class Content extends Model
 
     public function scopeEagerLoadSingleContentRelations($mainQuery, string $user_id = '')
     {
-
         return $mainQuery->with([
             'subscribers' => function ($query) use ($user_id) {
                 $query->where('users.id', $user_id);
+            },
+        ])
+        ->withSum('challengeContributions', 'amount')
+        ->with([
+            'challengeContestants' => function ($query) {
+                $query->with('contestant', 'contestant.profile_picture');
             },
         ]);
     }

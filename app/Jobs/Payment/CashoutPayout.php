@@ -44,6 +44,7 @@ class CashoutPayout implements ShouldQueue
                 if ($this->payout->failedNotificationNotSent(12)) {
                     $this->sendNoPaymentAccountNotification();
                 }
+                DB::commit();
                 return;
             }
             $this->payout->setHandler($this->payment_account->provider);

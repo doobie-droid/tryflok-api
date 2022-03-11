@@ -753,6 +753,371 @@ class CreateTest extends TestCase
         $this->assertTrue($content->benefactors()->count() === 1);
     }
 
+    public function test_challenge_does_not_get_created_with_invalida_values()
+    {
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
+        $contestant1 = Models\User::factory()->create();
+        $contestant1->assignRole(Constants\Roles::USER);
+        $contestant2 = Models\User::factory()->create();
+        $contestant2->assignRole(Constants\Roles::USER);
+        $this->be($user);
+        $digiverse = Models\Collection::factory()
+        ->digiverse()
+        ->for($user, 'owner')
+        ->create();
+        $scheduled_date = now()->addDays(2);
+        $coverAsset = Models\Asset::factory()->create();
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
+        $completeRequest = [
+            'title' => 'A content ' . date('YmdHis'),
+            'description' => 'Content description',
+            'type' => 'live-video',
+            'digiverse_id' => $digiverse->id,
+            'is_available' => 0,
+            'price' => [
+                'amount' => 0,
+            ],
+            'tags' => [
+                $tag1->id,
+                $tag2->id,
+            ],
+            'cover' => [
+                'asset_id' => $coverAsset->id,
+            ],
+            'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
+            'is_challenge' => 1,
+            'pot_size' => 1000,
+            'minimum_contribution' => 10,
+            'moderator_share' => 10,
+            'winner_share' => 60,
+            'loser_share' => 30,
+            'contestants' => [
+                $contestant1->id,
+                $contestant2->id,
+            ]
+        ];
+
+        //when contesnt type is not live video
+        $request = $completeRequest;
+        $request['type'] = 'live-audio';
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        //when is_challenge is invalid
+        $request = $completeRequest;
+        $request['is_challenge'] = 'true';
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        //when pot size is invalid
+        $request = $completeRequest;
+        $request['pot_size'] = null;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['pot_size'] = 'string';
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['pot_size'] = 123232.43;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        //when minimum contribution is invalid
+        $request = $completeRequest;
+        $request['minimum_contribution'] = null;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['minimum_contribution'] = 'string';
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['minimum_contribution'] = 3454545.54;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        //when moderator share is invalid
+        $request = $completeRequest;
+        $request['moderator_share'] = null;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['moderator_share'] = 'string';
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['moderator_share'] = 15;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['moderator_share'] = -1;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        //when winner share is invalid
+        $request = $completeRequest;
+        $request['winner_share'] = null;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['winner_share'] = 'string';
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['winner_share'] = 44;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['winner_share'] = 40;
+        $request['loser_share'] = 50;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        //when loser share is omitted
+        $request = $completeRequest;
+        $request['loser_share'] = null;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['loser_share'] = 'string';
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        $request = $completeRequest;
+        $request['loser_share'] = 51;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        // when sums don't add up
+        $request = $completeRequest;
+        $request['moderator_share'] = 5;
+        $request['winner_share'] = 50;
+        $request['loser_share'] = 20;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        //when contestants are omitted
+        $request = $completeRequest;
+        $request['contestants'] = null;
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        //when contestants are invalide
+        $request = $completeRequest;
+        $request['contestants'] = [
+            $contestant1->id,
+            'sdsdsdsd',
+        ];
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        //when user tries to add themself
+        $request = $completeRequest;
+        $request['contestants'] = [
+            $contestant1->id,
+            $user->id,
+        ];
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+        // when same user is passed twice
+        $request = $completeRequest;
+        $request['contestants'] = [
+            $contestant1->id,
+            $contestant1->id,
+        ];
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(400);
+    }
+
+    public function test_challenge_content_gets_created()
+    {
+        $user = Models\User::factory()->create();
+        $user->assignRole(Constants\Roles::USER);
+        $contestant1 = Models\User::factory()->create();
+        $contestant1->assignRole(Constants\Roles::USER);
+        $contestant2 = Models\User::factory()->create();
+        $contestant2->assignRole(Constants\Roles::USER);
+        $this->be($user);
+        $digiverse = Models\Collection::factory()
+        ->digiverse()
+        ->for($user, 'owner')
+        ->create();
+        $scheduled_date = now()->addDays(2);
+        $coverAsset = Models\Asset::factory()->create();
+        $tag1 = Models\Tag::factory()->create();
+        $tag2 = Models\Tag::factory()->create();
+        $request = [
+            'title' => 'A content ' . date('YmdHis'),
+            'description' => 'Content description',
+            'type' => 'live-video',
+            'digiverse_id' => $digiverse->id,
+            'is_available' => 0,
+            'price' => [
+                'amount' => 0,
+            ],
+            'tags' => [
+                $tag1->id,
+                $tag2->id,
+            ],
+            'cover' => [
+                'asset_id' => $coverAsset->id,
+            ],
+            'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
+            'is_challenge' => 1,
+            'pot_size' => 1000,
+            'minimum_contribution' => 10,
+            'moderator_share' => 10,
+            'winner_share' => 60,
+            'loser_share' => 30,
+            'contestants' => [
+                $contestant1->id,
+                $contestant2->id,
+            ]
+        ];
+        $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(200);
+        //->assertJsonStructure(MockData\Content::generateChallengeContentCreateResponse());
+
+        $this->assertDatabaseHas('contents', [
+            'title' => $request['title'],
+            'description' => $request['description'],
+            'user_id' => $user->id,
+            'type' => 'live-video',
+            'is_available' => 1,
+            'approved_by_admin' => 1,
+            'show_only_in_digiverses' => 1,
+            'scheduled_date' => $scheduled_date->format('Y-m-d H:i:s'),
+            'live_status' => 'inactive',
+            'is_challenge' => 1,
+        ]);
+        $content = Models\Content::where('title', $request['title'])->first();
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'channel_name',
+            'value' => "{$content->id}-" . date('Ymd'),
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'join_count',
+            'value' => 0,
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'rtc_token',
+            'value' => '',
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'rtm_token',
+            'value' => '',
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'pot_size',
+            'value' => $request['pot_size'],
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'minimum_contribution',
+            'value' => $request['minimum_contribution'],
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'moderator_share',
+            'value' => $request['moderator_share'],
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'winner_share',
+            'value' => $request['winner_share'],
+        ]);
+
+        $this->assertDatabaseHas('metas', [
+            'metaable_type' => 'content',
+            'metaable_id' => $content->id,
+            'key' => 'loser_share',
+            'value' => $request['loser_share'],
+        ]);
+
+        // contestants were added
+        $this->assertDatabaseHas('content_challenge_contestants', [
+            'content_id' => $content->id,
+            'user_id' => $contestant1->id,
+            'status' => 'pending',
+        ]);
+
+        $this->assertDatabaseHas('content_challenge_contestants', [
+            'content_id' => $content->id,
+            'user_id' => $contestant2->id,
+            'status' => 'pending',
+        ]);
+
+        // content is attached to collection
+        $this->assertDatabaseHas('collection_content', [
+            'collection_id' => $digiverse->id,
+            'content_id' => $content->id
+        ]);
+        $this->assertTrue($digiverse->contents()->where('contents.id', $content->id)->count() === 1);
+
+        //validate tags was attached
+        $this->assertDatabaseHas('taggables', [
+            'tag_id' => $tag1->id,
+            'taggable_type' => 'content',
+            'taggable_id' => $content->id,
+        ]);
+        $this->assertTrue($content->tags()->where('tags.id', $tag1->id)->count() === 1);
+        $this->assertDatabaseHas('taggables', [
+            'tag_id' => $tag2->id,
+            'taggable_type' => 'content',
+            'taggable_id' => $content->id,
+        ]);
+        $this->assertTrue($content->tags()->where('tags.id', $tag2->id)->count() === 1);
+
+        //validate price was created
+        $this->assertDatabaseHas('prices', [
+            'priceable_type' => 'content',
+            'priceable_id' => $content->id,
+            'amount' => $request['price']['amount'],
+            'interval' => 'one-off',
+            'interval_amount' => 1,
+            'currency' => 'USD',
+        ]);
+        $this->assertTrue($content->prices()->count() === 1);
+
+        //validate benefactor was created
+        $this->assertDatabaseHas('benefactors', [
+            'benefactable_type' => 'content',
+            'benefactable_id' => $content->id,
+            'user_id' => $user->id,
+            'share' => 100,
+        ]);
+        $this->assertTrue($content->benefactors()->count() === 1);
+
+        $this->assertDatabaseHas('notifications', [
+            'recipient_id' => $contestant1->id,
+            'notifier_id' => $user->id,
+            'notificable_type' => 'content',
+            'notificable_id' => $content->id,
+            'message' => "You have been added as a contestant to the {$content->title} challenge. You can choose to accept or decline",
+        ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'recipient_id' => $contestant2->id,
+            'notifier_id' => $user->id,
+            'notificable_type' => 'content',
+            'notificable_id' => $content->id,
+            'message' => "You have been added as a contestant to the {$content->title} challenge. You can choose to accept or decline",
+        ]);
+    }
+
     /**
      * public function test_create_newletter_issue_works() {
         $user = User::factory()->create();

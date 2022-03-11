@@ -32,6 +32,7 @@ class Pdf implements ShouldQueue
         $this->filepath = $data['filepath'];
         $this->full_file_name = $data['full_file_name'];
         $this->encryption_key = $data['encryption_key'];
+        $this->onConnection('redis_local');
     }
 
     /**

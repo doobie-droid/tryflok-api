@@ -29,6 +29,7 @@ class CollectionController extends Controller
                 'price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
                 'tags' => ['sometimes',],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
+                'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
             ]);
 
             if ($validator->fails()) {
@@ -36,6 +37,12 @@ class CollectionController extends Controller
             }
 
             $user = $request->user();
+
+            $is_challenge = 0;
+            if (isset($request->is_challenge) && (int) $request->is_challenge === 1) {
+                $is_challenge = 1;
+            }
+
             $digiverse = Collection::create([
                 'title' => $request->title,
                 'description' => $request->description,
@@ -45,6 +52,7 @@ class CollectionController extends Controller
                 'approved_by_admin' => 1,
                 'show_only_in_collections' => 0,
                 'views' => 0,
+                'is_challenge' => $is_challenge,
             ]);
 
             $digiverse->benefactors()->create([

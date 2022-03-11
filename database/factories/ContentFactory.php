@@ -151,6 +151,29 @@ class ContentFactory extends Factory
         });
     }
 
+    public function liveEnded($ended_at = null)
+    {
+        if (is_null($ended_at)) {
+            $ended_at = now();
+        }
+
+        return $this->state(function (array $attributes) use ($ended_at) {
+            return [
+                'live_status' => 'ended',
+                'live_ended_at' => $ended_at,
+            ];
+        });
+    }
+
+    public function isChallenge()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'is_challenge' => 1,
+            ];
+        });
+    }
+
 
     public function setDigiverse(Collection $digiverse): self
     {
@@ -158,6 +181,78 @@ class ContentFactory extends Factory
         return $this->afterCreating(function (Content $content) {
             $this->content = $content;
             $this->generateDigiverse();
+        });
+    }
+
+    /** @param User[] $contestants */
+    public function setChallengeContestants(array $contestants, array $options = ['accept' => 0]): self
+    {
+        return $this->afterCreating(function (Content $content) use ($contestants, $options) {
+            $accept_count = 0;
+            foreach ($contestants as $contestant) {
+                $status = 'pending';
+                if ($options['accept'] - $accept_count > 0) {
+                    $status = 'accepted';
+                }
+                $accept_count++;
+                $content->challengeContestants()->create([
+                    'user_id' => $contestant->id,
+                    'status' => $status,
+                ]);
+            }
+        });
+    }
+
+    /** @param User[] $contributors */
+    public function setChallengeContributors(array $contributors, int $amount = 500): self
+    {
+        return $this->afterCreating(function (Content $content) use ($contributors, $amount) {
+            foreach ($contributors as $contributor) {
+                $content->challengeContributions()->create([
+                    'user_id' => $contributor->id,
+                    'amount' => $amount,
+                ]);
+            }
+        });
+    }
+
+    public function setChallengeVoters(array $voters, string $contestant_id): self 
+    {
+        return $this->afterCreating(function (Content $content) use ($voters, $contestant_id) {
+            foreach ($voters as $voter) {
+                $content->challengeVotes()->create([
+                    'voter_id' => $voter->id,
+                    'contestant_id' =>  $contestant_id,
+                ]);
+            }
+        });
+    }
+
+    public function setChallengeDetails(int $pot_size = 0, int $minimum_contribution = 0, int $moderator_share = 10, int $winner_share = 60, int $loser_share = 30): self
+    {
+        return $this->afterCreating(function (Content $content) use ($pot_size, $minimum_contribution, $moderator_share, $winner_share, $loser_share) {
+            $content->metas()->createMany([
+                [
+                    'key' => 'pot_size',
+                    'value' => $pot_size,
+                ],
+                [
+                    'key' => 'minimum_contribution',
+                    'value' => $minimum_contribution,
+                ],
+                [
+                    'key' => 'moderator_share',
+                    'value' => $moderator_share,
+                ],
+                [
+                    'key' => 'winner_share',
+                    'value' => $winner_share,
+                ],
+                [
+                    'key' => 'loser_share',
+                    'value' => $loser_share,
+                ],
+            ]);
         });
     }
 

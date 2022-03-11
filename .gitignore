@@ -20,10 +20,14 @@ yarn-error.log
 
 flok_worker.out.log
 flok_worker.err.log
+flok_media_worker.out.log
+flok_media_worker.err.log
 php-fpm_stderr.log
 php-fpm_stdout.log
 websocket_stderr.log
 websocket_stdout.log
+websocket_subscriber_stderr.log
+websocket_subscriber_stdout.log
 cron_worker.err.log
 cron_worker.out.log
 /cron/logs/cron.log

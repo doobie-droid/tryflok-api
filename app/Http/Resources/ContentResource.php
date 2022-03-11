@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Http\Resources\AssetResource;
+use App\Http\Resources\ContentChallengeContestantResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,8 +25,11 @@ class ContentResource extends JsonResource
             'prices' => $this->whenLoaded('prices'),
             'tags' => $this->whenLoaded('tags'),
             'owner' => new UserResource($this->whenLoaded('owner')),
+            'challenge_contestants' => ContentChallengeContestantResource::collection($this->whenLoaded('challengeContestants')),
             'assets' => AssetResource::collection($this->whenLoaded('assets')),
             'metas' => $this->refactorMetas(),
+            'total_challenge_contributions' => $this->challenge_contributions_sum_amount,
+            'voting_result' => $this->getVoteStructure(),
         ]);
     }
 
@@ -48,5 +52,28 @@ class ContentResource extends JsonResource
         }
 
         return $metasReworked;
+    }
+
+    private function getVoteStructure()
+    {
+        $challenge_contestants = $this->whenLoaded('challengeContestants');        
+        if (! is_null($challenge_contestants)) {
+            $total_votes = $this->challengeVotes()->count();
+            $vote_data = [
+                'total_votes' => $total_votes,
+                'contestants' => [],
+            ];
+            foreach ($challenge_contestants as $contestant_entry) {
+                $votes = $this->challengeVotes()->where('contestant_id', $contestant_entry->contestant_id)->count();
+                $data = [
+                    'contestant' => new UserResource($contestant_entry->contestant),
+                    'votes' => $votes,
+                ];
+                $vote_data['contestants'][] = $data;
+            }
+
+            return $vote_data;
+        }
+        return null;
     }
 }

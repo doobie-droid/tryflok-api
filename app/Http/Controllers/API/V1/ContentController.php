@@ -10,11 +10,16 @@ use App\Jobs\Assets\UploadResource\Html as UploadHtmlJob;
 use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJob;
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
+use App\Jobs\Users\NotifyAddedToChallenge as NotifyAddedToChallengeJob;
+use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
 use App\Models\ContentIssue;
+use App\Models\User;
+use App\Models\WalletTransaction;
 use App\Rules\AssetType as AssetTypeRule;
+use App\Rules\SumCheck as SumCheckRule;
 use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
 use App\Services\LiveStream\Agora\RtmTokenBuilder as AgoraRtmToken;
 use Aws\CloudFront\CloudFrontClient;
@@ -42,10 +47,25 @@ class ContentController extends Controller
                 'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['required_if:type,newsletter', 'string'],
+                'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
+                'pot_size' => ['required_if:is_challenge,1', 'integer', 'min:0',],
+                'minimum_contribution' => ['required_if:is_challenge,1', 'integer', 'min:10',],
+                'moderator_share' => ['required_if:is_challenge,1', 'integer', 'max:10', 'min:0'],
+                'loser_share' => ['required_if:is_challenge,1', 'integer', 'max:50', 'min:0'],
+                'winner_share' => ['required_if:is_challenge,1', 'integer', 'max:100', 'min:45', 'gte:loser_share', new SumCheckRule(['moderator_share', 'loser_share'], 100)],
+                'contestants' => ['required_if:is_challenge,1', 'size:2'],
+                'contestants.*' => ['required_if:is_challenge,1', 'string', 'distinct', 'exists:users,id', "not_in:{$request->user()->id}"],
+
+            ], [
+                'contestants.*.not_in' => 'You cannot make yourself a contestant',
             ]);
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if (! in_array($request->type, ['live-video']) && isset($request->is_challenge) && (int) $request->is_challenge === 1) {
+                return $this->respondBadRequest("Only live video content can be a challenge");
             }
 
             $digiverse = Collection::where('id', $request->digiverse_id)->where('type', 'digiverse')->first();
@@ -59,10 +79,16 @@ class ContentController extends Controller
 
             $user = $request->user();
             $is_available = 0;
+            $is_challenge = 0;
 
             if (in_array($request->type, ['live-audio', 'live-video'])) {
                 $is_available = 1;
             }
+
+            if (isset($request->is_challenge) && (int) $request->is_challenge === 1) {
+                $is_challenge = 1;
+            }
+
             $content = Content::create([
                 'title' => $request->title,
                 'description' => $request->description,
@@ -72,6 +98,7 @@ class ContentController extends Controller
                 'approved_by_admin' => 1,
                 'show_only_in_digiverses' => 1,
                 'live_status' => 'inactive',
+                'is_challenge' => $is_challenge,
             ]);
 
             if (! is_null($request->scheduled_date)) {
@@ -98,6 +125,39 @@ class ContentController extends Controller
                         'value' => 0,
                     ],
                 ]);
+            }
+
+            if ($is_challenge === 1) {
+                $content->metas()->createMany([
+                    [
+                        'key' => 'pot_size',
+                        'value' => $request->pot_size,
+                    ],
+                    [
+                        'key' => 'minimum_contribution',
+                        'value' => $request->minimum_contribution,
+                    ],
+                    [
+                        'key' => 'moderator_share',
+                        'value' => $request->moderator_share,
+                    ],
+                    [
+                        'key' => 'winner_share',
+                        'value' => $request->winner_share,
+                    ],
+                    [
+                        'key' => 'loser_share',
+                        'value' => $request->loser_share,
+                    ],
+                ]);
+                
+                foreach ($request->contestants as $contestant_id) {
+                    $content->challengeContestants()->create([
+                        'user_id' => $contestant_id,
+                        'status' => 'pending',
+                    ]);
+                    NotifyAddedToChallengeJob::dispatch(User::where('id', $contestant_id)->first(), $content);
+                }
             }
 
             if ($request->type === 'newsletter') {
@@ -163,6 +223,7 @@ class ContentController extends Controller
 
             $content = Content::where('id', $content->id)
             ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
             ->first();
 
             return $this->respondWithSuccess('Content has been created successfully', [
@@ -1131,6 +1192,7 @@ class ContentController extends Controller
             }
 
             $content->live_status = 'ended';
+            $content->live_ended_at = now();
             $content->save();
 
             DispatchDisableLiveUserableJob::dispatch([
@@ -1257,6 +1319,213 @@ class ContentController extends Controller
             ->first();
 
             return $this->respondWithSuccess('View recorded successfully', [
+                'content' => new ContentResource($content),
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function respondToChallenge(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'action' => ['required', 'string', 'in:accept,decline'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+
+            $contestant = $content->challengeContestants()->where('user_id', $request->user()->id)->first();
+            if (is_null($contestant)) {
+                return $this->respondBadRequest('You cannot respond to this challenge because you are not a contestant');
+            }
+
+            switch ($request->action) {
+                case 'accept':
+                    $contestant->status = 'accepted';
+                    $contestant->save();
+                    NotifyChallengeResponseJob::dispatch($content, $request->user(), $contestant->status);
+                    break;
+                case 'decline':
+                    $contestant->status = 'declined';
+                    $contestant->save();
+                    NotifyChallengeResponseJob::dispatch($content, $request->user(), $contestant->status);
+                    break;
+            }
+
+            $content = $content
+            ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+            return $this->respondWithSuccess('Your response has been recorded successfully', [
+                'content' => new ContentResource($content),
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function contributeToChallenge(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'amount' => ['required', 'integer',]
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+
+            if ((int) $content->is_challenge !== 1) {
+                return $this->respondBadRequest('You can only contribute to a challenge');
+            }
+
+            $user = $request->user();
+
+            $all_contestants_accepted = true;
+            foreach ($content->challengeContestants as $contestant) {
+                if ($contestant->status !== 'accepted') {
+                    $all_contestants_accepted = false;
+                    break;
+                }
+            }
+
+            if (! $all_contestants_accepted) {
+                return $this->respondBadRequest('Both contestants need to accept this challenge before you can contribute to it');
+            }
+            
+            if ($content->live_status === 'ended') {
+                return $this->respondBadRequest('You cannot contribute to a challenge that has ended');
+            }
+
+            $pot_size = $content->metas()->where('key', 'pot_size')->first();
+            if ((int) $pot_size->value === 0) {
+                return $this->respondBadRequest('You cannot contribute to a challenge with a pot size of 0');
+            }
+
+            $minimum_contribution = $content->metas()->where('key', 'minimum_contribution')->first();
+            $previous_contribution = $content->challengeContributions()->where('user_id', $user->id)->first();
+            $total_contribution_amount = (int) $request->amount;
+            if (! is_null($previous_contribution)) {
+                $total_contribution_amount += (int) $previous_contribution->amount;
+            }
+
+            if ((int) $minimum_contribution->value > (int) $total_contribution_amount) {
+                return $this->respondBadRequest("Contribution amount must be at least {$minimum_contribution->value} Flok Cowries");
+            }
+
+            if ((int) $request->amount > (int) $user->wallet->balance) {
+                return $this->respondBadRequest("You do not have enough Flok Cowries to contribute to this challenge");
+            }
+            
+            $new_wallet_balance = bcsub($user->wallet->balance, $request->amount, 2);
+            WalletTransaction::create([
+                'wallet_id' => $user->wallet->id,
+                'amount' => $request->amount,
+                'balance' => $new_wallet_balance,
+                'transaction_type' => 'deduct',
+                'details' => "Withdrawal from wallet to contribute to {$content->title} challenge",
+            ]);
+            $user->wallet->balance = $new_wallet_balance;
+            $user->wallet->save();
+
+            if (! is_null($previous_contribution)) {
+                $previous_contribution->amount = $total_contribution_amount;
+                $previous_contribution->save();
+            } else {
+                $content->challengeContributions()->create([
+                    'user_id' => $user->id,
+                    'amount' => $request->amount,
+                ]);
+            }
+
+            $content = $content
+            ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+            return $this->respondWithSuccess('Your contribution has been recorded successfully', [
+                'content' => new ContentResource($content),
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function voteOnChallenge(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'contestant' => ['required', 'string', 'exists:users,id',],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->first();
+
+            if ((int) $content->is_challenge !== 1) {
+                return $this->respondBadRequest('You can only vote on a challenge');
+            }
+
+            if (is_null($content->live_ended_at)) {
+                return $this->respondBadRequest('You can only vote after the challenge has ended');
+            }
+
+            $voting_window = Constants::CHALLENGE_VOTE_WINDOW_IN_MINUTES;
+            if ($content->live_ended_at->lte(now()->subMinutes($voting_window))) {
+                return $this->respondBadRequest("You can only vote whithin the first {$voting_window} minutes after the live has ended");
+            }
+
+            $contestant = $content->challengeContestants()->where('user_id', $request->contestant)->first();
+            if (is_null($contestant)) {
+                return $this->respondBadRequest('You can only vote for users listed as contestants in the challenge');
+            }
+
+            $user = $request->user();
+            $user_contributed = false;
+            $contribution = $content->challengeContributions()->where('user_id', $user->id)->first();
+            if (! is_null($contribution)) {
+                $user_contributed = true;
+            }
+
+            $post_size = $content->metas()->where('key', 'pot_size')->first();
+
+            $user_vote = $content->challengeVotes()->where('voter_id', $user->id)->first();
+
+            if ((int) $post_size->value > 0 && $user_contributed === false) {
+                return $this->respondBadRequest('You can only vote on this challenge if you contribute to the pot');
+            }
+ 
+            if (! is_null($user_vote)) {
+                return $this->respondBadRequest('You have already cast a vote before');
+            }
+            
+            $content->challengeVotes()->create([
+                'voter_id' => $user->id,
+                'contestant_id' =>  $request->contestant,
+            ]);
+
+            $content = $content
+            ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+            return $this->respondWithSuccess('Your vote has been recorded successfully', [
                 'content' => new ContentResource($content),
             ]);
         } catch (\Exception $exception) {

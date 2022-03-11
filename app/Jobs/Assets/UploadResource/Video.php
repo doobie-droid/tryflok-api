@@ -46,6 +46,7 @@ class Video implements ShouldQueue
         $this->full_file_name = $data['full_file_name'];
         $this->resolutions = $data['resolutions'];
         $this->hls_key_filepath = $data['hls_key_filepath'];
+        $this->onConnection('redis_local');
     }
 
     /**

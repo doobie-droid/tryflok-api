@@ -68,3 +68,6 @@ services:
 
   redis:
     image: redis:3.0
+
+  redis-local:
+    image: redis:3.0
