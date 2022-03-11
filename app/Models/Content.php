@@ -246,13 +246,12 @@ class Content extends Model
 
     public function scopeEagerLoadSingleContentRelations($mainQuery, string $user_id = '')
     {
-
         return $mainQuery->with([
             'subscribers' => function ($query) use ($user_id) {
                 $query->where('users.id', $user_id);
             },
         ])
         ->withSum('challengeContributions', 'amount')
-        ->with('challengeContestants', 'challengeContestants.contestant');
+        ->with('challengeContestants', 'challengeContestants.contestant', 'challengeContestants.contestant.profile_picture');
     }
 }

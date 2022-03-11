@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Http\Resources\AssetResource;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\ContentChallengeContestantResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ContentResource extends JsonResource
@@ -24,6 +25,7 @@ class ContentResource extends JsonResource
             'prices' => $this->whenLoaded('prices'),
             'tags' => $this->whenLoaded('tags'),
             'owner' => new UserResource($this->whenLoaded('owner')),
+            'challenge_contestants' => ContentChallengeContestantResource::collection($this->whenLoaded('challenge_contestants')),
             'assets' => AssetResource::collection($this->whenLoaded('assets')),
             'metas' => $this->refactorMetas(),
             'total_challenge_contributions' => $this->challenge_contributions_sum_amount,
