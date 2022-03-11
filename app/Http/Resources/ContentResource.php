@@ -25,7 +25,7 @@ class ContentResource extends JsonResource
             'prices' => $this->whenLoaded('prices'),
             'tags' => $this->whenLoaded('tags'),
             'owner' => new UserResource($this->whenLoaded('owner')),
-            'challenge_contestants' => ContentChallengeContestantResource::collection($this->whenLoaded('challenge_contestants')),
+            'challenge_contestants' => ContentChallengeContestantResource::collection($this->whenLoaded('challengeContestants')),
             'assets' => AssetResource::collection($this->whenLoaded('assets')),
             'metas' => $this->refactorMetas(),
             'total_challenge_contributions' => $this->challenge_contributions_sum_amount,
@@ -56,7 +56,7 @@ class ContentResource extends JsonResource
 
     private function getVoteStructure()
     {
-        $challenge_contestants = $this->whenLoaded('challenge_contestants');
+        $challenge_contestants = $this->whenLoaded('challengeContestants');        
         if (! is_null($challenge_contestants)) {
             $total_votes = $this->challengeVotes()->count();
             $vote_data = [
