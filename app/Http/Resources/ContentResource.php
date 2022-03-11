@@ -29,6 +29,7 @@ class ContentResource extends JsonResource
             'assets' => AssetResource::collection($this->whenLoaded('assets')),
             'metas' => $this->refactorMetas(),
             'total_challenge_contributions' => $this->challenge_contributions_sum_amount,
+            'voting_result' => $this->getVoteStructure(),
         ]);
     }
 
@@ -51,5 +52,28 @@ class ContentResource extends JsonResource
         }
 
         return $metasReworked;
+    }
+
+    private function getVoteStructure()
+    {
+        $challenge_contestants = $this->whenLoaded('challenge_contestants');
+        if (! is_null($challenge_contestants)) {
+            $total_votes = $this->challengeVotes()->count();
+            $vote_data = [
+                'total_votes' => $total_votes,
+                'contestants' => [],
+            ];
+            foreach ($challenge_contestants as $contestant_entry) {
+                $votes = $this->challengeVotes()->where('contestant_id', $contestant_entry->contestant_id)->count();
+                $data = [
+                    'contestant' => new UserResource($this->whenLoaded($contestant_entry->contestant)),
+                    'votes' => $votes,
+                ];
+                $vote_data['contestants'][] = $data;
+            }
+
+            return $vote_data;
+        }
+        return null;
     }
 }

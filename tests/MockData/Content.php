@@ -53,6 +53,7 @@ class Content
             'winner_share',
             'loser_share',
         ];
+        
         $structure['challenge_contestants'] = [
             [
                 'id',
@@ -62,6 +63,23 @@ class Content
                     'name',
                     'email',
                     'username',
+                    'profile_picture',
+                ]
+            ]
+        ];
+
+        $structure['voting_result'] = [
+            'total_votes',
+            'contestants' => [
+                [
+                    'contestant' => [
+                        'id',
+                        'name',
+                        'email',
+                        'username',
+                        'profile_picture',
+                    ],
+                    'votes',
                 ]
             ]
         ];

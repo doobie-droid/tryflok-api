@@ -252,6 +252,10 @@ class Content extends Model
             },
         ])
         ->withSum('challengeContributions', 'amount')
-        ->with('challengeContestants', 'challengeContestants.contestant', 'challengeContestants.contestant.profile_picture');
+        ->with([
+            'challengeContestants' => function ($query) {
+                $query->with('contestant', 'contestant.profile_picture');
+            }
+        ]);
     }
 }
