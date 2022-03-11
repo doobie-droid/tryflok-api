@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class AddLiveEndedAtToContentsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::table('contents', function (Blueprint $table) {
@@ -18,11 +13,6 @@ class AddLiveEndedAtToContentsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::table('contents', function (Blueprint $table) {

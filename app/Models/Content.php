@@ -255,7 +255,7 @@ class Content extends Model
         ->with([
             'challengeContestants' => function ($query) {
                 $query->with('contestant', 'contestant.profile_picture');
-            }
+            },
         ]);
     }
 }
