@@ -25,6 +25,7 @@ class AuthenticateConnection implements ShouldQueue
     {
         $this->headers = $data['headers'];
         $this->resource_id = $data['resource_id'];
+        $this->onConnection('redis_local');
     }
 
     /**
