@@ -77,6 +77,7 @@ class User
         'username' => 'test_user',
         'password' => 'user123',
         'password_confirmation' => 'user123',
+        'phone_number' =>'+2348000000001',
     ];
 
     const STANDARD_USER_RESPONSE_STRUCTURE = [
@@ -214,6 +215,7 @@ class User
         'followers',
         'following',
         'digiverses_created_count',
+        'phone_number',
         'profile_picture' => [
             'url',
         ],

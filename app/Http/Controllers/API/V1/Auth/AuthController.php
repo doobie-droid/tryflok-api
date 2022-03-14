@@ -32,6 +32,7 @@ class AuthController extends Controller
                 'password' => ['required', 'string', 'confirmed'],
                 'referral_id' => ['sometimes', 'nullable','string',],
                 'firebase_token' => ['sometimes', 'nullable','string',],
+                'phone_number' => ['sometimes', 'nullable', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -45,6 +46,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'public_id' => uniqid(rand()),
                 'email_token' => Str::random(16) . 'YmdHis',
+                'phone_number' => isset($request->phone_number) ? $request->phone_number : NULL,
                 'referral_id' => strtoupper(Str::random(6)) . '-' . date('Ymd'),
             ]);
 
@@ -90,6 +92,7 @@ class AuthController extends Controller
                 'sign_in_type' => ['required', 'string', 'in:register,login',],
                 'sign_in_source' => ['required_if:provider,google', 'string', 'in:ios,android,web',],
                 'firebase_token' => ['sometimes', 'nullable','string',],
+                'phone_number' => ['sometimes', 'nullable', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -154,6 +157,7 @@ class AuthController extends Controller
                     'public_id' => uniqid(rand()),
                     'email_token' => Str::random(16),
                     'referral_id' => strtoupper(Str::random(6)) . '-' . date('Ymd'),
+                    'phone_number' => isset($request->phone_number) ? $request->phone_number : NULL,
                 ]);
                 event(new ConfirmEmailEvent($user));
                 $user->assignRole(Roles::USER);
