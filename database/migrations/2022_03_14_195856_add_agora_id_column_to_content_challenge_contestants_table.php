@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class AddAgoraIdColumnToContentChallengeContestantsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::table('content_challenge_contestants', function (Blueprint $table) {
@@ -18,11 +13,6 @@ class AddAgoraIdColumnToContentChallengeContestantsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::table('content_challenge_contestants', function (Blueprint $table) {
