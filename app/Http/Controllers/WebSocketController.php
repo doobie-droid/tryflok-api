@@ -354,7 +354,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
 
-            $sender_auth_data = $this->connections[$connection_id];
+            $sender_auth_data = $this->connections[$connection->resourceId];
 
             $message = [
                 'event' => 'message-from-rtm-channel',
