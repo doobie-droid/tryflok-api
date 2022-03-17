@@ -537,16 +537,7 @@ class UserController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            $notifications = $request->user()->notifications()->with('notifier', 'notifier.profile_picture')
-            ->with([
-                'notificable' => function ($query) {
-                    if ($query->first()->is_challenge === 1 && in_array($query->first()->type, ['live-audio', 'live-video'])) {
-                        $query->eagerLoadBaseRelations()
-                        ->eagerLoadSingleContentRelations();
-                    }
-                },
-            ])
-            ->orderBy('notifications.created_at', 'desc')
+            $notifications = $request->user()->notifications()->with('notifier', 'notifier.profile_picture', 'notificable')->orderBy('notifications.created_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Notifications retrieved successfully', [
