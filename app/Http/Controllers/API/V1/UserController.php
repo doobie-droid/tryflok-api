@@ -540,7 +540,7 @@ class UserController extends Controller
             $notifications = $request->user()->notifications()->with('notifier', 'notifier.profile_picture')
             ->with([
                 'notificable' => function ($query) {
-                    if ($query->is_challenge === 1 && in_array($query->type, ['live-audio', 'live-video'])) {
+                    if ($query->first()->is_challenge === 1 && in_array($query->first()->type, ['live-audio', 'live-video'])) {
                         $query->eagerLoadBaseRelations()
                         ->eagerLoadSingleContentRelations();
                     }
