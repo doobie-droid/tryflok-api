@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
         Commands\Payments\CashoutPayout::class,
         Commands\Trending\ComputeCollectionTrending::class,
         Commands\Trending\ComputeContentTrending::class,
+        Commands\Contents\ComputeChallengeWinner::class,
     ];
 
     /**
@@ -34,6 +35,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('flok:cashout-payouts')->everyTwoMinutes();
         $schedule->command('flok:compute-content-trending')->daily();
         $schedule->command('flok:compute-collection-trending')->daily();
+        $schedule->command('flok:compute-challenge-winner')->everyTwoMinutes();
     }
 
     /**
