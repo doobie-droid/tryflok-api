@@ -33,7 +33,7 @@ class AssetType implements Rule
             return false;
         }
 
-        if ($this->type === 'newletter') {
+        if ($this->type === 'newsletter') {
             if ($asset->asset_type === 'text') {
                 return true;
             } else {
@@ -43,7 +43,7 @@ class AssetType implements Rule
         }
 
         if ($asset->asset_type !== $this->type) {
-            $this->response = "The :attribute must be an asset of type {$this->type} but type {$asset->asset_type} supplied";
+            $this->response = "The :attribute must be for an asset of type {$this->type} but type {$asset->asset_type} supplied";
             return false;
         }
 
