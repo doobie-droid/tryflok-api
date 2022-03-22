@@ -35,7 +35,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('flok:cashout-payouts')->everyTwoMinutes();
         $schedule->command('flok:compute-content-trending')->daily();
         $schedule->command('flok:compute-collection-trending')->daily();
-        $schedule->command('flok:compute-challenge-winner')->everyTwoMinutes();
+        // $schedule->command('flok:compute-challenge-winner')->everyTwoMinutes();
     }
 
     /**

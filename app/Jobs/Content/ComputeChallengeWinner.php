@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Content;
 
+use App\Constants\Constants;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;

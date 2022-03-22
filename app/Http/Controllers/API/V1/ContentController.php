@@ -351,9 +351,20 @@ class ContentController extends Controller
             }
 
             if (! is_null($request->article) && $content->type === 'newsletter') {
+                $filename = date('Ymd') . Str::random(16);
+                $folder = join_path('assets', Str::random(16) . date('Ymd'), 'text');
+                $fullFilename = join_path($folder, $filename . '.html');
+                $url = join_path(config('services.cloudfront.public_url'), $fullFilename);
+
                 $oldArticle = $content->assets()->first();
-                $oldArticle->url = $request->article;
+                $oldArticle->url = $url;
+                $oldArticle->storage_provider_id = $fullFilename;
                 $oldArticle->save();
+                UploadHtmlJob::dispatch([
+                    'asset' => $oldArticle,
+                    'article' => $request->article,
+                    'full_file_name' => $fullFilename,
+                ]);
             }
 
             return $this->respondWithSuccess('Content has been updated successfully', [
