@@ -18,7 +18,6 @@ class UpdateTest extends TestCase
     public function test_content_is_not_updated_with_invalid_input()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $content = Models\Content::factory()
@@ -187,7 +186,6 @@ class UpdateTest extends TestCase
 
         //when user does not own content
         $user2 = Models\User::factory()->create();
-        $user2->assignRole(Constants\Roles::USER);
         $this->be($user2);
         $response = $this->json('PATCH', "/api/v1/contents/{$content->id}", $complete_request);
         $response->assertStatus(400);
@@ -196,7 +194,6 @@ class UpdateTest extends TestCase
     public function test_content_is_updated_with_valid_inputs()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         
         $old_tag1 = Models\Tag::factory()->create();
@@ -313,7 +310,6 @@ class UpdateTest extends TestCase
     public function test_adding_views_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $tag1 = Models\Tag::factory()->create();
         $tag2 = Models\Tag::factory()->create();
         $content = Models\Content::factory()
@@ -348,7 +344,6 @@ class UpdateTest extends TestCase
     public function test_attach_media_to_content_fails_if_user_does_not_own_content()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $tag1 = Models\Tag::factory()->create();
         $tag2 = Models\Tag::factory()->create();
         $content = Models\Content::factory()
@@ -364,7 +359,6 @@ class UpdateTest extends TestCase
     public function test_attach_media_to_content_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $tag1 = Models\Tag::factory()->create();
         $tag2 = Models\Tag::factory()->create();
         $content = Models\Content::factory()

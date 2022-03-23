@@ -36,8 +36,8 @@ class WalletController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-
-            Log::info('request got to backend');
+            Log::info("User attempted purchase began");
+            Log::info($request->user());
             //the provider is being built in the cases in case an invalid provider passes through validation
             switch ($request->provider) {
                 case 'flutterwave':
@@ -126,7 +126,7 @@ class WalletController extends Controller
                 default:
                     return $this->respondBadRequest('Invalid provider specified');
             }
-
+            Log::info("User attempted purchase was successful");
             return $this->respondWithSuccess('Payment received successfully');
         } catch (\Exception $exception) {
             Log::error($exception);

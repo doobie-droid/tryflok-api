@@ -99,7 +99,6 @@ class GetDigiverseContentsTest extends TestCase
     public function test_unavailable_contents_do_not_get_returned_if_user_is_not_owner()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $digiverse = Models\Collection::factory()->digiverse()->create();
@@ -118,7 +117,6 @@ class GetDigiverseContentsTest extends TestCase
     public function test_unavailable_contents_get_returned_if_user_is_owner()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $digiverse = Models\Collection::factory()

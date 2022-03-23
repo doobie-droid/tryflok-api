@@ -37,6 +37,7 @@ class RegisterTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => $request['email'],
             'name' => $request['name'],
+            'phone_number' => $request['phone_number'],
         ]);
     }
 
@@ -60,6 +61,7 @@ class RegisterTest extends TestCase
             'email' => $request['email'],
             'name' => $request,
             'referrer_id' => $user->id,
+            'phone_number' => $request['phone_number'],
         ]);
     }
 
@@ -109,7 +111,6 @@ class RegisterTest extends TestCase
             'email_token' => $email_token,
         ])
         ->create();
-        $user->assignRole(Constants\Roles::USER);
 
         $request = [
             'token' => $email_token,

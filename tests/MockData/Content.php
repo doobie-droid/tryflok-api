@@ -58,6 +58,7 @@ class Content
             [
                 'id',
                 'status',
+                'agora_uid',
                 'contestant' => [
                     'id',
                     'name',

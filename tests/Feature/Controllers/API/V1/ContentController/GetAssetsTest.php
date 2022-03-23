@@ -29,7 +29,6 @@ class GetAssetsTest extends TestCase
     public function test_asset_is_not_returned_for_paid_content_when_user_has_not_paid()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $digiverse = Models\Collection::factory()->digiverse()->create();
@@ -47,7 +46,6 @@ class GetAssetsTest extends TestCase
     public function test_asset_is_not_returned_for_free_content_with_paid_ancestor_when_user_has_not_paid()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $digiverse = Models\Collection::factory()
@@ -67,7 +65,6 @@ class GetAssetsTest extends TestCase
     public function test_asset_is_returned_for_paid_content_when_user_has_paid()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $digiverse = Models\Collection::factory()->digiverse()->create();
@@ -92,7 +89,6 @@ class GetAssetsTest extends TestCase
     public function test_asset_is_returned_for_paid_content_with_paid_ancestor_when_user_has_paid_directly()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $digiverse = Models\Collection::factory()
@@ -120,7 +116,6 @@ class GetAssetsTest extends TestCase
     public function test_asset_is_returned_for_free_content_with_paid_ancestor_when_user_has_paid_via_ancestor()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $digiverse = Models\Collection::factory()
@@ -147,7 +142,6 @@ class GetAssetsTest extends TestCase
     public function test_asset_is_returned_for_paid_content_with_paid_ancestor_when_user_has_paid_via_ancestor()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $digiverse = Models\Collection::factory()

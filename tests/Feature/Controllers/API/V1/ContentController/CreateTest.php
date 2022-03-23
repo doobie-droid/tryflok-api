@@ -16,7 +16,6 @@ class CreateTest extends TestCase
     public function test_content_is_not_created_with_invalid_inputs()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->for($user, 'owner')
@@ -101,7 +100,6 @@ class CreateTest extends TestCase
     public function test_video_content_gets_created()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->digiverse()
@@ -203,7 +201,6 @@ class CreateTest extends TestCase
     public function test_audio_content_gets_created()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->digiverse()
@@ -308,7 +305,6 @@ class CreateTest extends TestCase
     public function test_pdf_content_gets_created()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->digiverse()
@@ -413,7 +409,6 @@ class CreateTest extends TestCase
     public function test_newsletter_content_gets_created()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->digiverse()
@@ -520,7 +515,6 @@ class CreateTest extends TestCase
     public function test_live_audio_content_gets_created()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->digiverse()
@@ -638,7 +632,6 @@ class CreateTest extends TestCase
     public function test_live_video_content_gets_created()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->digiverse()
@@ -756,11 +749,8 @@ class CreateTest extends TestCase
     public function test_challenge_does_not_get_created_with_invalida_values()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $contestant1 = Models\User::factory()->create();
-        $contestant1->assignRole(Constants\Roles::USER);
         $contestant2 = Models\User::factory()->create();
-        $contestant2->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->digiverse()
@@ -924,11 +914,8 @@ class CreateTest extends TestCase
     public function test_challenge_content_gets_created()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $contestant1 = Models\User::factory()->create();
-        $contestant1->assignRole(Constants\Roles::USER);
         $contestant2 = Models\User::factory()->create();
-        $contestant2->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->digiverse()

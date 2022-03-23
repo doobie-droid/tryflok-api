@@ -5,8 +5,6 @@ namespace Tests\Feature\Controllers\API\V1\ContentController;
 use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Str;
 use Tests\MockData;
 use Tests\TestCase;
@@ -18,15 +16,10 @@ class VoteOnChallengeTest extends TestCase
     public function test_vote_on_challenge_fails_for_invalid_input()
     {
         $challenger = Models\User::factory()->create();
-        $challenger->assignRole(Constants\Roles::USER);
         $contestant1 = Models\User::factory()->create();
-        $contestant1->assignRole(Constants\Roles::USER);
         $contestant2 = Models\User::factory()->create();
-        $contestant2->assignRole(Constants\Roles::USER);
         $user1 = Models\User::factory()->create();
-        $user1->assignRole(Constants\Roles::USER);
         $user2 = Models\User::factory()->create();
-        $user2->assignRole(Constants\Roles::USER);
 
         $pot_size = 1000;
 
@@ -134,13 +127,9 @@ class VoteOnChallengeTest extends TestCase
     public function test_vote_on_challenge_works()
     {
         $challenger = Models\User::factory()->create();
-        $challenger->assignRole(Constants\Roles::USER);
         $contestant1 = Models\User::factory()->create();
-        $contestant1->assignRole(Constants\Roles::USER);
         $contestant2 = Models\User::factory()->create();
-        $contestant2->assignRole(Constants\Roles::USER);
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
 
         $pot_size = 1000;
 

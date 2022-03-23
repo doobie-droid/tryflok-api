@@ -47,7 +47,14 @@ class NotifyAddedToChallenge implements ShouldQueue
             'notificable_id' => $this->content->id,
         ]);
 
-        $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notification->id)->first();
+        $notification = Notification::with('notifier', 'notifier.profile_picture')
+        ->with([
+            'notificable' => function ($query) {
+                $query->eagerLoadBaseRelations()
+                ->eagerLoadSingleContentRelations();
+            },
+        ])
+        ->where('id', $notification->id)->first();
         $notification = new NotificationResource($notification);
         $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
         if (! is_null($this->content->cover()->first())) {

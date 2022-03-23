@@ -98,7 +98,6 @@ class RetrieveDigiversesTest extends TestCase
     public function test_unavailable_digiverses_do_not_get_returned()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $tag = Models\Tag::factory()->create();
@@ -117,7 +116,6 @@ class RetrieveDigiversesTest extends TestCase
     public function test_empty_digiverses_do_not_get_returned()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $tag = Models\Tag::factory()->create();
@@ -159,7 +157,6 @@ class RetrieveDigiversesTest extends TestCase
     public function test_retrieve_digiverses_work_when_user_is_signed_in()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $tag = Models\Tag::factory()->create();
         $content = Models\Content::factory()->noDigiverse()->create();
@@ -186,7 +183,6 @@ class RetrieveDigiversesTest extends TestCase
     public function test_retrieve_digiverses_work_when_user_is_signed_in_and_has_paid()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $tag = Models\Tag::factory()->create();
         $content = Models\Content::factory()->noDigiverse()->create();

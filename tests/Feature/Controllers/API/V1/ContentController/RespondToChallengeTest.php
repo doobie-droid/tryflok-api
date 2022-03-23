@@ -18,11 +18,8 @@ class RespondToChallengeTest extends TestCase
     public function test_respond_to_challenge_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $contestant1 = Models\User::factory()->create();
-        $contestant1->assignRole(Constants\Roles::USER);
         $contestant2 = Models\User::factory()->create();
-        $contestant2->assignRole(Constants\Roles::USER);
 
         $content = Models\Content::factory()
         ->for($user, 'owner')
