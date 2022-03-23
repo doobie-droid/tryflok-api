@@ -15,7 +15,6 @@ class LoginViaOtpTest extends TestCase
     public function test_login_via_otp_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $user->otps()->create([
             'code' => 'TEST-OTP',
@@ -37,7 +36,6 @@ class LoginViaOtpTest extends TestCase
     public function test_invalid_code_does_not_work()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $request = [
             'code' => 'TEST-OTP',
@@ -49,7 +47,6 @@ class LoginViaOtpTest extends TestCase
     public function test_expired_code_does_not_work()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $user->otps()->create([
             'code' => 'TEST-OTP',

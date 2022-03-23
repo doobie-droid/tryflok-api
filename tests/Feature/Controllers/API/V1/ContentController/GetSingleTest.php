@@ -27,7 +27,6 @@ class GetSingleTest extends TestCase
     public function test_retrieve_single_content_works_when_user_is_signed_in_and_has_not_paid_for_content()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $content = Models\Content::factory()->setTags([Models\Tag::factory()->create()])->create();
@@ -55,7 +54,6 @@ class GetSingleTest extends TestCase
     public function test_retrieve_single_content_works_when_user_is_signed_in_and_has_paid_for_content_directly()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $content = Models\Content::factory()->setTags([Models\Tag::factory()->create()])->create();
@@ -84,7 +82,6 @@ class GetSingleTest extends TestCase
     public function test_retrieve_single_content_works_when_user_is_signed_in_and_has_paid_for_content_via_ancestor()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $content = Models\Content::factory()->setTags([Models\Tag::factory()->create()])->create();

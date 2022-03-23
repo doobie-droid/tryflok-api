@@ -16,7 +16,6 @@ class LoginTest extends TestCase
     public function test_login_works_via_email()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $user->assignRole(Constants\Roles::SUPER_ADMIN);
         $user->assignRole(Constants\Roles::ADMIN);
         
@@ -35,7 +34,6 @@ class LoginTest extends TestCase
         $user = Models\User::factory()->create();
         $user->assignRole(Constants\Roles::SUPER_ADMIN);
         $user->assignRole(Constants\Roles::ADMIN);
-        $user->assignRole(Constants\Roles::USER);
 
         $request = [
             'username' => $user->username,

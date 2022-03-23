@@ -15,7 +15,6 @@ class CreateTest extends TestCase
     public function test_review_is_not_created_with_invalid_inputs()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $content = Models\Content::factory()->create();
@@ -74,7 +73,6 @@ class CreateTest extends TestCase
     public function test_create_content_review_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $content = Models\Content::factory()->create();
@@ -113,7 +111,6 @@ class CreateTest extends TestCase
     public function test_create_collection_review_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $collection = Models\Collection::factory()->create();
@@ -152,7 +149,6 @@ class CreateTest extends TestCase
     public function test_create_review_review_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $review = Models\Review::factory()->create();

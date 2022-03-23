@@ -22,7 +22,6 @@ class RetrieveUserCreatedDigiversesTest extends TestCase
     public function test_retrieve_created_digiverses_fails_with_invalid_parameters()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $response = $this->json('GET', '/api/v1/account/digiverses?page=ere');
@@ -98,7 +97,6 @@ class RetrieveUserCreatedDigiversesTest extends TestCase
     public function test_unavailable_digiverses_get_returned()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $tag = Models\Tag::factory()->create();
@@ -119,7 +117,6 @@ class RetrieveUserCreatedDigiversesTest extends TestCase
     public function test_empty_digiverses_get_returned()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $tag = Models\Tag::factory()->create();
@@ -140,7 +137,6 @@ class RetrieveUserCreatedDigiversesTest extends TestCase
     public function test_filter_by_tags_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $tag1 = Models\Tag::factory()->create();
@@ -193,7 +189,6 @@ class RetrieveUserCreatedDigiversesTest extends TestCase
     public function test_filter_by_keyword_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         $tag = Models\Tag::factory()->create();

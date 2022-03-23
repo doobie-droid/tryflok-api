@@ -16,7 +16,6 @@ class SubscribeToContentTest extends TestCase
     public function test_subscribe_to_content_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->for($user, 'owner')
@@ -56,7 +55,6 @@ class SubscribeToContentTest extends TestCase
     public function test_unsubscribe_from_content_works()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
         $digiverse = Models\Collection::factory()
         ->for($user, 'owner')

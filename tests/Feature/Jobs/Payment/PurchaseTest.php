@@ -18,9 +18,7 @@ class PurchaseTest extends TestCase
     public function test_purchase_works()
     {
         $creator = Models\User::factory()->create();
-        $creator->assignRole(Constants\Roles::USER);
         $buyer = Models\User::factory()->create();
-        $buyer->assignRole(Constants\Roles::USER);
         $free_digiverse = Models\Collection::factory()
         ->for($creator, 'owner')
         ->digiverse()

@@ -18,13 +18,9 @@ class ContributeToChallengeTest extends TestCase
     public function test_contribute_to_challenge_fails_for_invalid_inputs()
     {
         $challenger = Models\User::factory()->create();
-        $challenger->assignRole(Constants\Roles::USER);
         $contestant1 = Models\User::factory()->create();
-        $contestant1->assignRole(Constants\Roles::USER);
         $contestant2 = Models\User::factory()->create();
-        $contestant2->assignRole(Constants\Roles::USER);
         $contributor = Models\User::factory()->create();
-        $contributor->assignRole(Constants\Roles::USER);
         Models\Wallet::factory()
         ->for($contributor, 'walletable')
         ->create();
@@ -103,13 +99,9 @@ class ContributeToChallengeTest extends TestCase
     public function test_contribute_to_challenge_works()
     {
         $challenger = Models\User::factory()->create();
-        $challenger->assignRole(Constants\Roles::USER);
         $contestant1 = Models\User::factory()->create();
-        $contestant1->assignRole(Constants\Roles::USER);
         $contestant2 = Models\User::factory()->create();
-        $contestant2->assignRole(Constants\Roles::USER);
         $contributor = Models\User::factory()->create();
-        $contributor->assignRole(Constants\Roles::USER);
         Models\Wallet::factory()
         ->for($contributor, 'walletable')
         ->create();

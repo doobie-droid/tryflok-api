@@ -98,7 +98,6 @@ class GetTrendingTest extends TestCase
     public function test_unavailable_contents_do_not_get_returned_if_user_is_not_owner()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         Models\Content::factory()
@@ -115,7 +114,6 @@ class GetTrendingTest extends TestCase
     public function test_unavailable_contents_does_not_get_returned_event_if_user_is_owner()
     {
         $user = Models\User::factory()->create();
-        $user->assignRole(Constants\Roles::USER);
         $this->be($user);
 
         Models\Content::factory()
