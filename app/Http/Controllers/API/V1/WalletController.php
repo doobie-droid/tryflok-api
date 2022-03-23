@@ -95,6 +95,8 @@ class WalletController extends Controller
                     $apple = new PaymentProvider($request->provider);
                     $req = $apple->verifyTransaction($request->provider_response['receipt_data']);
                     if ($req->status === 0) {
+                        Log::info("User attempted purchase");
+                        Log::info($request->user());
                         if ($request->provider_response['product_id'] !== $req->receipt->in_app[0]->product_id) {
                             return $this->respondBadRequest('Product ID supplied [' . $request->provider_response['product_id'] . '] is not same that was paid for [' . $req->receipt->in_app[0]->product_id . '].');
                         }
