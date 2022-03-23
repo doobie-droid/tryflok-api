@@ -36,7 +36,8 @@ class WalletController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-
+            Log::info("User attempted purchase began");
+            Log::info($request->user());
             //the provider is being built in the cases in case an invalid provider passes through validation
             switch ($request->provider) {
                 case 'flutterwave':
@@ -95,8 +96,6 @@ class WalletController extends Controller
                     $apple = new PaymentProvider($request->provider);
                     $req = $apple->verifyTransaction($request->provider_response['receipt_data']);
                     if ($req->status === 0) {
-                        Log::info("User attempted purchase");
-                        Log::info($request->user());
                         if ($request->provider_response['product_id'] !== $req->receipt->in_app[0]->product_id) {
                             return $this->respondBadRequest('Product ID supplied [' . $request->provider_response['product_id'] . '] is not same that was paid for [' . $req->receipt->in_app[0]->product_id . '].');
                         }
@@ -127,7 +126,7 @@ class WalletController extends Controller
                 default:
                     return $this->respondBadRequest('Invalid provider specified');
             }
-
+            Log::info("User attempted purchase was successful");
             return $this->respondWithSuccess('Payment received successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
