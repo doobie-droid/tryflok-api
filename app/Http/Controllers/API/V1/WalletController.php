@@ -37,7 +37,6 @@ class WalletController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            Log::info('request got to backend');
             //the provider is being built in the cases in case an invalid provider passes through validation
             switch ($request->provider) {
                 case 'flutterwave':

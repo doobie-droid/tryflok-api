@@ -4,7 +4,6 @@ namespace App\Jobs\Content;
 
 use App\Constants\Constants;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -36,13 +35,14 @@ class ComputeChallengeWinner implements ShouldQueue
         $moderator_share = (float) $this->challenge->metas()->where('key', 'moderator_share')->first()->value;
         $loser_share = (float) $this->challenge->metas()->where('key', 'loser_share')->first()->value;
         $total_pot = (float) $this->challenge->challengeContributions()->sum('amount');
+        $total_pot = (float) bcdiv($total_pot, 100, 6); // convert from Flok cowries to USD for sales table
         $moderator = $this->challenge->owner;
 
         $players = [];
 
         foreach ($this->challenge->challengeContestants as $contestant) {
-            $votes = (int) $this->challenge->challengeVotes()->where('contestant_id', $contestant->id)->count();
-            $players[] = ['contestant' => $contestant, 'votes' => $votes];
+            $votes = (int) $this->challenge->challengeVotes()->where('contestant_id', $contestant->user_id)->count();
+            $players[] = ['contestant' => $contestant->contestant, 'votes' => $votes];
         }
 
         $winner = NULL;
@@ -86,11 +86,11 @@ class ComputeChallengeWinner implements ShouldQueue
 
     private function grantParticipantEarnings($participant, $amount)
     {
-        $platform_share = bcmul($amount, Constants::NORMAL_CREATOR_CHARGE, 6);
         $platform_charge = Constants::NORMAL_CREATOR_CHARGE;
         if ($participant->user_charge_type === 'non-profit') {
             $platform_charge = Constants::NON_PROFIT_CREATOR_CHARGE;
         }
+        $platform_share = bcmul($amount, $platform_charge, 6);
         $participant_share = bcmul($amount, 1 - $platform_charge, 6);
 
         $participant->revenues()->create([

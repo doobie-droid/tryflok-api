@@ -115,11 +115,12 @@ class Purchase implements ShouldQueue
 
             //record sales for the benefactors of this item
             $net_amount = $amount;
-            $platform_share = bcmul($net_amount, Constants::NORMAL_CREATOR_CHARGE, 6);
+            
             $platform_charge = Constants::NORMAL_CREATOR_CHARGE;
             if ($itemModel->owner->user_charge_type === 'non-profit') {
                 $platform_charge = Constants::NON_PROFIT_CREATOR_CHARGE;
             }
+            $platform_share = bcmul($net_amount, $platform_charge, 6);
             $creator_share = bcmul($net_amount, 1 - $platform_charge, 6);
             foreach ($itemModel->benefactors as $benefactor) {
                 $benefactor->user->revenues()->create([
