@@ -168,6 +168,16 @@ class Content extends Model
         return $this->hasMany(ContentChallengeVote::class);
     }
 
+    public function liveHosts()
+    {
+        return $this->hasMany(ContentLiveHost::class);
+    }
+
+    public function liveBroadcasters()
+    {
+        return $this->hasMany(ContentLiveBroadcaster::class);
+    }
+
     public function isFree()
     {
         $freePriceCount = $this->prices()->where('amount', 0)->count();
