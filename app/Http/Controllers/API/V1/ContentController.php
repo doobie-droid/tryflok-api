@@ -125,6 +125,14 @@ class ContentController extends Controller
                         'value' => 0,
                     ],
                 ]);
+
+                $content->liveHosts()->create([
+                    'user_id' => $user->id,
+                    'designation' => 'host',
+                ]);
+                $content->liveBroadcasters()->create([
+                    'user_id' => $user->id,
+                ]);
             }
 
             if ($is_challenge === 1) {
@@ -155,6 +163,9 @@ class ContentController extends Controller
                     $content->challengeContestants()->create([
                         'user_id' => $contestant_id,
                         'status' => 'pending',
+                    ]);
+                    $content->liveBroadcasters()->create([
+                        'user_id' => $contestant_id,
                     ]);
                     NotifyAddedToChallengeJob::dispatch(User::where('id', $contestant_id)->first(), $content);
                 }

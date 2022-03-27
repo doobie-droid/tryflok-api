@@ -587,6 +587,19 @@ class CreateTest extends TestCase
             'value' => '',
         ]);
 
+        $this->assertDatabaseHas('content_live_hosts', [
+            'content_id' => $content->id,
+            'user_id' => $user->id,
+            'designation' => 'host',
+        ]);
+
+        $this->assertDatabaseHas('content_live_broadcasters', [
+            'content_id' => $content->id,
+            'user_id' => $user->id,
+            'video_stream_status' => 'inactive',
+            'audio_stream_status' => 'inactive',
+        ]);
+
         // content is attached to collection
         $this->assertDatabaseHas('collection_content', [
             'collection_id' => $digiverse->id,
@@ -1046,7 +1059,19 @@ class CreateTest extends TestCase
             'user_id' => $contestant2->id,
             'status' => 'pending',
         ]);
-
+        // contestants were made braodcasters
+        $this->assertDatabaseHas('content_live_broadcasters', [
+            'content_id' => $content->id,
+            'user_id' => $contestant1->id,
+            'video_stream_status' => 'inactive',
+            'audio_stream_status' => 'inactive',
+        ]);
+        $this->assertDatabaseHas('content_live_broadcasters', [
+            'content_id' => $content->id,
+            'user_id' => $contestant2->id,
+            'video_stream_status' => 'inactive',
+            'audio_stream_status' => 'inactive',
+        ]);
         // content is attached to collection
         $this->assertDatabaseHas('collection_content', [
             'collection_id' => $digiverse->id,

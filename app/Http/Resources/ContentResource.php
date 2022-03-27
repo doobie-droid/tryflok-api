@@ -26,6 +26,7 @@ class ContentResource extends JsonResource
             'tags' => $this->whenLoaded('tags'),
             'owner' => new UserResource($this->whenLoaded('owner')),
             'challenge_contestants' => ContentChallengeContestantResource::collection($this->whenLoaded('challengeContestants')),
+            'live_broadcasters' => ContentLiveBroadcasterResource::collection($this->whenLoaded('liveBroadcasters')),
             'assets' => AssetResource::collection($this->whenLoaded('assets')),
             'metas' => $this->refactorMetas(),
             'total_challenge_contributions' => $this->challenge_contributions_sum_amount,

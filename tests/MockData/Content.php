@@ -58,7 +58,22 @@ class Content
             [
                 'id',
                 'status',
+                'contestant' => [
+                    'id',
+                    'name',
+                    'email',
+                    'username',
+                    'profile_picture',
+                ]
+            ]
+        ];
+
+        $structure['live_broadcasters'] = [
+            [
+                'id',
                 'agora_uid',
+                'video_stream_status',
+                'audio_stream_status',
                 'contestant' => [
                     'id',
                     'name',

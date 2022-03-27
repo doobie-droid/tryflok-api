@@ -266,6 +266,10 @@ class Content extends Model
             'challengeContestants' => function ($query) {
                 $query->with('contestant', 'contestant.profile_picture');
             },
+        ])->with([
+            'liveBroadcasters' => function ($query) {
+                $query->with('broadcaster', 'broadcaster.profile_picture');
+            },
         ]);
     }
 }
