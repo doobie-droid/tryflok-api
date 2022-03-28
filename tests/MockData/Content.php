@@ -74,7 +74,7 @@ class Content
                 'agora_uid',
                 'video_stream_status',
                 'audio_stream_status',
-                'contestant' => [
+                'broadcaster' => [
                     'id',
                     'name',
                     'email',
