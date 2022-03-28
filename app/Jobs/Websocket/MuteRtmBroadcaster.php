@@ -4,28 +4,33 @@ namespace App\Jobs\Websocket;
 
 use App\Models\Content;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class UpdateContestantAgoraUid implements ShouldQueue
+class MuteRtmBroadcaster implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    public $requester_id;
     public $content_id;
-    public $contestant_id;
+    public $broadcaster_id;
     public $agora_uid;
+    public $stream;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($content_id, $contestant_id, $agora_uid)
+    public function __construct($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream)
     {
+        $this->requester_id = $requester_id;
         $this->content_id = $content_id;
-        $this->contestant_id = $contestant_id;
+        $this->broadcaster_id = $broadcaster_id;
         $this->agora_uid = $agora_uid;
+        $this->stream = $stream;
     }
 
     /**
@@ -35,19 +40,29 @@ class UpdateContestantAgoraUid implements ShouldQueue
      */
     public function handle()
     {
+        // TO DO: ensure only hosts or broadcasters themselves can mute
+
         $content = Content::where('id', $this->content_id)->first();
         if (is_null($content)) {
             return;
         }
 
-        $contestant = $contestant = $content->challengeContestants()->where('user_id', $this->contestant_id)->first();
+        $broadcaster = $content->liveBroadcasters()->where('user_id', $this->broadcaster_id)->first();
 
-        if (is_null($contestant)) {
+        if (is_null($broadcaster)) {
             return;
         }
 
-        $contestant->agora_uid = $this->agora_uid;
-        $contestant->save();
+        switch ($this->stream) {
+            case 'audio':
+                $broadcaster->audio_stream_status = 'muted';
+                break;
+            case 'video':
+                $broadcaster->video_stream_status = 'muted';
+                break;
+        }
+
+        $broadcaster->save();
     }
 
     public function failed(\Throwable $exception)

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Constants\Constants;
 use App\Jobs\Websocket\AuthenticateConnection;
-use App\Jobs\Websocket\UpdateContestantAgoraUid;
+use App\Jobs\Websocket\MuteRtmBroadcaster;
+use App\Jobs\Websocket\UnmuteRtmBroadcaster;
+use App\Jobs\Websocket\UpdateBroadcasterAgoraUid;
 use App\Models\Otp;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -106,6 +108,10 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      */
     public function onMessage(ConnectionInterface $conn, $msg){
         try {
+
+            if (! $this->messageIsFromNode($data)) {
+                $this->checkConnectionIsAuthenticated($conn);
+            }
             $event = "";
             $data = json_decode($msg);
             if (is_object($data) && property_exists($data, 'event')) {
@@ -123,6 +129,12 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     break;
                 case 'add-rtm-channel-broadcaster':
                     $this->addRtmChannelBroadcaster($data, $conn);
+                    break;
+                case 'mute-rtm-channel-broadcaster':
+                    $this->muteRtmChannelBroadcaster($data, $conn);
+                    break;
+                case 'unmute-rtm-channel-broadcaster':
+                    $this->unmuteRtmChannelBroadcaster($data, $conn);
                     break;
                 case 'app-update-rtm-channel-subscribers-count':
                     $this->updateRtmChannelSubscribersCount($data, $conn);
@@ -277,17 +289,6 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 return;
             }
 
-            //check if connection has been authenticated
-            if (! $this->connectionIsAuthenticated($connection->resourceId, $data)) {
-                $connection->send(json_encode([
-                    'event' => 'event-error',
-                    'event_name' => $data->event,
-                    'message' => 'This connection is not authenticated',
-                    'errors' => [],
-                ]));
-                return;
-            }
-
             // add connection to channel subscribers
             $channel_name = $data->channel_name;
             $channel_subscribers = [];
@@ -333,18 +334,6 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 ]));
                 return;
             }
-
-            //check if connection has been authenticated
-            if (! $this->connectionIsAuthenticated($connection->resourceId, $data)) {
-                $connection->send(json_encode([
-                    'event' => 'event-error',
-                    'event_name' => $data->event,
-                    'message' => 'This connection is not authenticated',
-                    'errors' => [],
-                ]));
-                return;
-            }
-
             $this->propagateToOtherNodes($data);
 
             // send message to channel subscribers
@@ -394,7 +383,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         try {
             $validator = Validator::make((array) $data, [
                 'channel_name' => ['required', 'string',],
-                'contestant_id' => ['required', 'string',],
+                'broadcaster_id' => ['required', 'string',],
                 'agora_uid' => ['required', 'string',],
                 'content_id' => ['required', 'string',],
             ]);
@@ -409,20 +398,10 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 return;
             }
 
-            if (! $this->connectionIsAuthenticated($connection->resourceId, $data)) {
-                $connection->send(json_encode([
-                    'event' => 'event-error',
-                    'event_name' => $data->event,
-                    'message' => 'This connection is not authenticated',
-                    'errors' => [],
-                ]));
-                return;
-            }
-
             $this->propagateToOtherNodes($data);
 
             $content_id = $data->content_id;
-            $contestant_id = $data->contestant_id;
+            $broadcaster_id = $data->broadcaster_id;
             $agora_uid = $data->agora_uid;
 
             $channel_name = $data->channel_name;
@@ -431,14 +410,166 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
 
-            // save data in db
-            UpdateContestantAgoraUid::dispatch($content_id, $contestant_id, $agora_uid);
+            if (! $this->messageIsFromNode($data)) {
+                // save data in db
+                $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
+                UpdateBroadcasterAgoraUid::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid);
+            }
 
             $message = [
                 'event' => 'broadcaster-added-to-rtm-channel',
                 'channel_name' => $channel_name,
-                'contestant_id' => $contestant_id,
+                'broadcaster_id' => $broadcaster_id,
                 'agora_uid' => $agora_uid,
+            ];
+            // TO DO: we might want to enforce that only broadcasters can update their UIDs
+            // This means that the propagation should be handled by a job that has validated the requester
+            foreach ($channel_subscribers as $key => $resourceId) {
+                // make sure the user is still connected
+                $connection_data = null;
+                if (array_key_exists($resourceId, $this->connections)) {
+                    $connection_data = $this->connections[$resourceId];
+                } else {
+                    unset($this->rtm_channel_subscribers[$channel_name][$key]);
+                }
+
+                if (! is_null($connection_data)) {
+                    $connection_data['socket_connection']->send(json_encode($message));
+                }
+            }
+
+        } catch (\Exception $exception) {
+            $connection->send(json_encode([
+                'event' => 'event-error',
+                'event_name' => $data->event,
+                'message' => 'Oops, an error occurred, please try again later',
+                'errors' => [],
+            ]));
+            Log::error($exception);
+            return;
+        }
+    }
+
+    private function muteRtmChannelBroadcaster($data, $connection)
+    {
+        try {
+            $validator = Validator::make((array) $data, [
+                'channel_name' => ['required', 'string',],
+                'broadcaster_id' => ['required', 'string',],
+                'content_id' => ['required', 'string',],
+                'agora_uid' => ['required', 'string',],
+                'stream' => ['required', 'string', 'in:audio,video'],
+            ]);
+
+            if ($validator->fails()) {
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event_name' => $data->event,
+                    'message' => 'Invalid or missing input fields',
+                    'errors' => $validator->errors()->toArray(),
+                ]));
+                return;
+            }
+
+            $this->propagateToOtherNodes($data);
+
+            $content_id = $data->content_id;
+            $broadcaster_id = $data->broadcaster_id;
+            $agora_uid = $data->agora_uid;
+            $stream = $data->stream;
+
+            $channel_name = $data->channel_name;
+            $channel_subscribers = [];
+            if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
+                $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
+            }
+
+            if (! $this->messageIsFromNode($data)) {
+                // save data in db
+                $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
+                MuteRtmBroadcaster::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream);
+            }
+
+            $message = [
+                'event' => 'broadcaster-muted-in-rtm-channel',
+                'channel_name' => $channel_name,
+                'broadcaster_id' => $broadcaster_id,
+                'agora_uid' => $agora_uid,
+                'stream' => $stream,
+            ];
+
+            foreach ($channel_subscribers as $key => $resourceId) {
+                // make sure the user is still connected
+                $connection_data = null;
+                if (array_key_exists($resourceId, $this->connections)) {
+                    $connection_data = $this->connections[$resourceId];
+                } else {
+                    unset($this->rtm_channel_subscribers[$channel_name][$key]);
+                }
+
+                if (! is_null($connection_data)) {
+                    $connection_data['socket_connection']->send(json_encode($message));
+                }
+            }
+
+        } catch (\Exception $exception) {
+            $connection->send(json_encode([
+                'event' => 'event-error',
+                'event_name' => $data->event,
+                'message' => 'Oops, an error occurred, please try again later',
+                'errors' => [],
+            ]));
+            Log::error($exception);
+            return;
+        }
+    }
+
+    private function unmuteRtmChannelBroadcaster($data, $connection)
+    {
+        try {
+            $validator = Validator::make((array) $data, [
+                'channel_name' => ['required', 'string',],
+                'broadcaster_id' => ['required', 'string',],
+                'content_id' => ['required', 'string',],
+                'agora_uid' => ['required', 'string',],
+                'stream' => ['required', 'string', 'in:audio,video'],
+            ]);
+
+            if ($validator->fails()) {
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event_name' => $data->event,
+                    'message' => 'Invalid or missing input fields',
+                    'errors' => $validator->errors()->toArray(),
+                ]));
+                return;
+            }
+
+            $this->propagateToOtherNodes($data);
+
+            $content_id = $data->content_id;
+            $broadcaster_id = $data->broadcaster_id;
+            $agora_uid = $data->agora_uid;
+            $stream = $data->stream;
+
+            $channel_name = $data->channel_name;
+            $channel_subscribers = [];
+            if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
+                $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
+            }
+
+            if (! $this->messageIsFromNode($data)) {
+                // save data in db
+                $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
+                UnmuteRtmBroadcaster::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream);
+            }
+
+            $message = [
+                'event' => 'broadcaster-unmuted-in-rtm-channel',
+                'channel_name' => $channel_name,
+                'broadcaster_id' => $broadcaster_id,
+                'agora_uid' => $agora_uid,
+                'stream' => $stream,
             ];
 
             foreach ($channel_subscribers as $key => $resourceId) {
@@ -506,15 +637,50 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         }
     }
 
-    private function connectionIsAuthenticated($connection_id, $data)
+    private function checkConnectionIsAuthenticated($connection)
     {
-        $sender_auth_data = $this->connections[$connection_id];
-        $sender_is_authenticated = (! is_null($sender_auth_data)) && is_array($sender_auth_data) && $sender_auth_data['is_authenticated'] == true;
-        $sender_is_ws_node = isset($data->source_type) && $data->source_type === 'ws-node';
-        if ($sender_is_authenticated || $sender_is_ws_node) {
-            return true;
+        $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
+        return true;
+    }
+
+    private function messageIsFromNode($data)
+    {
+        return isset($data->source_type) && $data->source_type === 'ws-node';
+    }
+
+    private function getConnectionUserId($headers)
+    {
+        try {
+            $authorization = [];
+            foreach ($headers as $key => $value) {
+                $key = strtolower($key);
+                if ($key === 'authorization') {
+                    $authorization = $value;
+                }
+            }
+
+            if (empty($authorization)) {
+                throw new Exception('No Authorization header was passed');
+            }
+
+            $token = explode(' ', $authorization[0])[1];
+            JWTAuth::setToken($token);
+
+            if (! $claim = JWTAuth::getPayload()) {
+                throw new Exception('An invalid token ws supplied');
+            }
+
+            return $claim['sub'];
+        } catch (\Exception $exception) {
+            $connection->send(json_encode([
+                'event' => 'event-error',
+                'event_name' => 'get-connection-user-id',
+                'message' => $exception->getMessage(),
+                'errors' => [],
+            ]));
+            Log::error($exception);
+            return;
         }
-        return false;
     }
 
     private function propagateToOtherNodes($data)
