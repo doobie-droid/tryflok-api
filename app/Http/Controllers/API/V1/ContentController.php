@@ -1574,7 +1574,14 @@ class ContentController extends Controller
                 ],
             ]);
 
-            return $response->getBody();
+            $headers = $response->getHeaders();
+            $content_type = "text/html";
+            foreach ($headers as $name => $value) {
+                if (strtolower($name) === 'content-type') {
+                    $content_type = $value[0];
+                }
+            }
+            return response($response->getBody())->header('Content-Type', $content_type);
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
