@@ -108,12 +108,11 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      */
     public function onMessage(ConnectionInterface $conn, $msg){
         try {
-
-            if (! $this->messageIsFromNode($data)) {
-                $this->checkConnectionIsAuthenticated($conn);
-            }
             $event = "";
             $data = json_decode($msg);
+            if (! $this->messageIsFromNodeOrApp($data)) {
+                $this->checkConnectionIsAuthenticated($conn);
+            }
             if (is_object($data) && property_exists($data, 'event')) {
                 $event = $data->event;
             }
@@ -643,9 +642,9 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         return true;
     }
 
-    private function messageIsFromNode($data)
+    private function messageIsFromNodeOrApp($data)
     {
-        return isset($data->source_type) && $data->source_type === 'ws-node';
+        return isset($data->source_type) && ($data->source_type === 'ws-node' || $data->source_type === 'app');
     }
 
     private function getConnectionUserId($headers)

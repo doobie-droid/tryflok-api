@@ -1147,6 +1147,7 @@ class ContentController extends Controller
                 'event' => 'app-update-rtm-channel-subscribers-count',
                 'channel_name' => $channel->value,
                 'subscribers_count' => $subscribers_count,
+                'source_type' => 'app',
             ]));
             $websocket_client->close();
 

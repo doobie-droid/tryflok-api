@@ -72,6 +72,7 @@ class AuthenticateConnection implements ShouldQueue
             'username' => $user->username,
             'profile_picture' => $profile_picture,
             'resource_id' => $this->resource_id,
+            'source_type' => 'app',
         ]));
         $websocket_client->close();
     }
