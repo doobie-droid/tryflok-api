@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class WebSocketController extends Controller implements MessageComponentInterface
 {
