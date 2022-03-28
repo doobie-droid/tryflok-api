@@ -28,6 +28,7 @@ class UpdateBroadcasterAgoraUid implements ShouldQueue
         $this->content_id = $content_id;
         $this->broadcaster_id = $broadcaster_id;
         $this->agora_uid = $agora_uid;
+        $this->onConnection('redis_local');
     }
 
     /**

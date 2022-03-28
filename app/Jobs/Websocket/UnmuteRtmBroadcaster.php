@@ -30,6 +30,7 @@ class UnmuteRtmBroadcaster implements ShouldQueue
         $this->broadcaster_id = $broadcaster_id;
         $this->agora_uid = $agora_uid;
         $this->stream = $stream;
+        $this->onConnection('redis_local');
     }
 
     /**
