@@ -23,6 +23,8 @@ use App\Rules\SumCheck as SumCheckRule;
 use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
 use App\Services\LiveStream\Agora\RtmTokenBuilder as AgoraRtmToken;
 use Aws\CloudFront\CloudFrontClient;
+use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -1550,6 +1552,29 @@ class ContentController extends Controller
             return $this->respondWithSuccess('Your vote has been recorded successfully', [
                 'content' => new ContentResource($content),
             ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function proxyAsset(Request $request, $path)
+    {
+        try {
+            $headers = $request->header();
+            $x_cookie = '';
+            if (array_key_exists('x-cookie', $headers)) {
+                $x_cookie = $headers['x-cookie'][0];
+            }
+            $cloudfront_url = join_path(config('services.cloudfront.private_url'), $path);
+            $client = new GuzzleClient;
+            $response = $client->get($cloudfront_url, [
+                'headers' => [
+                    'Cookie' => $x_cookie,
+                ],
+            ]);
+
+            return $response->getBody();
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

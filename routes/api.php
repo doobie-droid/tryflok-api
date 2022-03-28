@@ -39,6 +39,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}', 'ContentController@getSingle');
         Route::get('{id}/reviews', 'ContentController@getReviews');
         Route::get('{id}/assets', 'ContentController@getAssets');
+
+        Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
