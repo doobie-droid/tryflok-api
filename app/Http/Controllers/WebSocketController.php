@@ -648,6 +648,11 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         return isset($data->source_type) && ($data->source_type === 'ws-node' || $data->source_type === 'app');
     }
 
+    private function messageIsFromNode($data)
+    {
+        return isset($data->source_type) && $data->source_type === 'ws-node';
+    }
+
     private function getConnectionUserId($headers)
     {
         try {
@@ -660,14 +665,14 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             }
 
             if (empty($authorization)) {
-                throw new Exception('No Authorization header was passed');
+                throw new \Exception('No Authorization header was passed');
             }
 
             $token = explode(' ', $authorization[0])[1];
             JWTAuth::setToken($token);
 
             if (! $claim = JWTAuth::getPayload()) {
-                throw new Exception('An invalid token ws supplied');
+                throw new \Exception('An invalid token ws supplied');
             }
 
             return $claim['sub'];
