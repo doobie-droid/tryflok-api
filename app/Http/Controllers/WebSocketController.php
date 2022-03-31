@@ -410,11 +410,11 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
 
-            if (! $this->messageIsFromNode($data)) {
+            //if (! $this->messageIsFromNode($data)) {
                 // save data in db
                 $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
                 UpdateBroadcasterAgoraUid::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid);
-            }
+           // }
 
             $message = [
                 'event' => 'broadcaster-added-to-rtm-channel',
@@ -484,11 +484,11 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
 
-            if (! $this->messageIsFromNode($data)) {
+            //if (! $this->messageIsFromNode($data)) {
                 // save data in db
                 $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
                 MuteRtmBroadcaster::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream);
-            }
+            //}
 
             $message = [
                 'event' => 'broadcaster-muted-in-rtm-channel',
@@ -558,11 +558,11 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
 
-            if (! $this->messageIsFromNode($data)) {
+           // if (! $this->messageIsFromNode($data)) {
                 // save data in db
                 $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
                 UnmuteRtmBroadcaster::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream);
-            }
+           // }
 
             $message = [
                 'event' => 'broadcaster-unmuted-in-rtm-channel',
