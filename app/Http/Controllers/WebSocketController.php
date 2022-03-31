@@ -412,7 +412,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
             //if (! $this->messageIsFromNode($data)) {
                 // save data in db
-                $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
+                $requester_id = $this->getConnectionUserId($connection);
                 UpdateBroadcasterAgoraUid::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid);
            // }
 
@@ -486,7 +486,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
             //if (! $this->messageIsFromNode($data)) {
                 // save data in db
-                $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
+                $requester_id = $this->getConnectionUserId($connection);
                 MuteRtmBroadcaster::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream);
             //}
 
@@ -560,7 +560,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
            // if (! $this->messageIsFromNode($data)) {
                 // save data in db
-                $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
+                $requester_id = $this->getConnectionUserId($connection);
                 UnmuteRtmBroadcaster::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream);
            // }
 
@@ -639,7 +639,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
     private function checkConnectionIsAuthenticated($connection)
     {
-        $requester_id = $this->getConnectionUserId($connection->httpRequest->getHeaders());
+        $requester_id = $this->getConnectionUserId($connection);
         return true;
     }
 
@@ -653,11 +653,11 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         return isset($data->source_type) && $data->source_type === 'ws-node';
     }
 
-    private function getConnectionUserId($headers)
+    private function getConnectionUserId($connection)
     {
         try {
             $authorization = [];
-            foreach ($headers as $key => $value) {
+            foreach ($connection->httpRequest->getHeaders() as $key => $value) {
                 $key = strtolower($key);
                 if ($key === 'authorization') {
                     $authorization = $value;
