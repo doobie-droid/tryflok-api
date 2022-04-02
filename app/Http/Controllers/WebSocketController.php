@@ -143,7 +143,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     $this->setConnectionAsAuthenticated($data, $conn);
                     break;
                 case 'echo':
-                    $this->propagateToOtherNodes($data);
+                    $this->propagateToOtherNodes($data, $conn);
                     $echo = ['echo' => $data->message];
                     $conn->send(json_encode($echo));
                 case 'notify-user':
@@ -258,7 +258,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 ]));
                 return;
             }
-            $this->propagateToOtherNodes($data);
+            $this->propagateToOtherNodes($data, $connection);
 
             // send message to channel subscribers
             $channel_name = $data->channel_name;
@@ -322,7 +322,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 return;
             }
 
-            $this->propagateToOtherNodes($data);
+            $this->propagateToOtherNodes($data, $connection);
 
             $content_id = $data->content_id;
             $broadcaster_id = $data->broadcaster_id;
@@ -395,7 +395,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 return;
             }
 
-            $this->propagateToOtherNodes($data);
+            $this->propagateToOtherNodes($data, $connection);
 
             $content_id = $data->content_id;
             $broadcaster_id = $data->broadcaster_id;
@@ -469,7 +469,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 return;
             }
 
-            $this->propagateToOtherNodes($data);
+            $this->propagateToOtherNodes($data, $connection);
 
             $content_id = $data->content_id;
             $broadcaster_id = $data->broadcaster_id;
@@ -543,7 +543,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 return;
             }
 
-            $this->propagateToOtherNodes($data);
+            $this->propagateToOtherNodes($data, $connection);
 
             $content_id = $data->content_id;
             $broadcaster_id = $data->broadcaster_id;
@@ -599,7 +599,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
-            $this->propagateToOtherNodes($data);
+            $this->propagateToOtherNodes($data, $connection);
             $message = [
                 'event' => 'update-rtm-channel-subscribers-count',
                 'channel_name' => $channel_name,
