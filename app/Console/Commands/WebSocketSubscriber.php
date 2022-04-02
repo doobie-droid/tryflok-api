@@ -67,7 +67,7 @@ class WebSocketSubscriber extends Command
                 $websocket_client = new \WebSocket\Client(config('services.websocket.url'), [
                     'headers' => [
                         'Authorization' => $connection_token,
-                    ]
+                    ],
                 ]);
                 $websocket_client->text(json_encode($message));
                 $websocket_client->close();

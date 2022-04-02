@@ -7,7 +7,6 @@ use App\Jobs\Websocket\AuthenticateConnection;
 use App\Jobs\Websocket\MuteRtmBroadcaster;
 use App\Jobs\Websocket\UnmuteRtmBroadcaster;
 use App\Jobs\Websocket\UpdateBroadcasterAgoraUid;
-use App\Models\Otp;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;

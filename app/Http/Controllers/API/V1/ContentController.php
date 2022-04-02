@@ -24,7 +24,6 @@ use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
 use App\Services\LiveStream\Agora\RtmTokenBuilder as AgoraRtmToken;
 use Aws\CloudFront\CloudFrontClient;
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
