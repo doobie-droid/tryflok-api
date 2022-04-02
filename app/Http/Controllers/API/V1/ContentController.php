@@ -673,7 +673,7 @@ class ContentController extends Controller
             $contents = Content::where('is_available', 1)
             ->where('is_adult', 0)
             ->where('approved_by_admin', 1)
-            ->whereHas('collections', function (Builder $query) {
+            ->whereHas('digiverses', function (Builder $query) {
                 $query->where('is_available', 1)
                 ->where('is_adult', 0)
                 ->where('approved_by_admin', 1);

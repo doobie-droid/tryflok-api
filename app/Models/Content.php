@@ -148,6 +148,16 @@ class Content extends Model
         return $this->belongsToMany(Collection::class);
     }
 
+    public function basicCollections()
+    {
+        return $this->belongsToMany(Collection::class)->where('type', 'collection');
+    }
+
+    public function digiverses()
+    {
+        return $this->belongsToMany(Collection::class)->where('type', 'digiverse');
+    }
+
     public function access_through_ancestors()
     {
         return $this->belongsToMany(Collection::class);
