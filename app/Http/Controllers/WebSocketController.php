@@ -136,6 +136,9 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 case 'unmute-rtm-channel-broadcaster':
                     $this->unmuteRtmChannelBroadcaster($data, $conn);
                     break;
+                case 'request-broadcast-in-rtm-channel':
+                    $this->requestBroadcastInRtmChannel($data, $conn);
+                    break;
                 case 'app-update-rtm-channel-subscribers-count':
                     $this->updateRtmChannelSubscribersCount($data, $conn);
                     break;
@@ -566,6 +569,68 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
             $message = [
                 'event' => 'broadcaster-unmuted-in-rtm-channel',
+                'channel_name' => $channel_name,
+                'broadcaster_id' => $broadcaster_id,
+                'agora_uid' => $agora_uid,
+                'stream' => $stream,
+            ];
+
+            foreach ($channel_subscribers as $key => $resourceId) {
+                // make sure the user is still connected
+                $connection_data = null;
+                if (array_key_exists($resourceId, $this->connections)) {
+                    $connection_data = $this->connections[$resourceId];
+                } else {
+                    unset($this->rtm_channel_subscribers[$channel_name][$key]);
+                }
+
+                if (! is_null($connection_data)) {
+                    $connection_data['socket_connection']->send(json_encode($message));
+                }
+            }
+
+        } catch (\Exception $exception) {
+            $connection->send(json_encode([
+                'event' => 'event-error',
+                'event_name' => $data->event,
+                'message' => 'Oops, an error occurred, please try again later',
+                'errors' => [],
+            ]));
+            Log::error($exception);
+            return;
+        }
+    }
+
+    private function requestBroadcastInRtmChannel($data, $connection)
+    {
+        try {
+            $validator = Validator::make((array) $data, [
+                'channel_name' => ['required', 'string',],
+                'broadcaster_id' => ['required', 'string',],
+                'content_id' => ['required', 'string',],
+                'agora_uid' => ['required', 'string',],
+                'stream' => ['required', 'string', 'in:audio,video'],
+            ]);
+
+            if ($validator->fails()) {
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event_name' => $data->event,
+                    'message' => 'Invalid or missing input fields',
+                    'errors' => $validator->errors()->toArray(),
+                ]));
+                return;
+            }
+
+            $this->propagateToOtherNodes($data);
+
+            $content_id = $data->content_id;
+            $broadcaster_id = $data->broadcaster_id;
+            $agora_uid = $data->agora_uid;
+            $stream = $data->stream;
+
+            $message = [
+                'event' => 'broadcast-request-in-rtm-channel',
                 'channel_name' => $channel_name,
                 'broadcaster_id' => $broadcaster_id,
                 'agora_uid' => $agora_uid,
