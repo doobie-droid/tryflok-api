@@ -48,6 +48,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             AuthenticateConnection::dispatch([
                 'headers' => $conn->httpRequest->getHeaders(),
                 'resource_id' => $conn->resourceId,
+                'ws_identity' => $this->ws_identity,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -164,6 +165,10 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     private function setConnectionAsAuthenticated($data, $connection)
     {
         try {
+            $this->propagateToOtherNodes($data, $connection);
+            if ($data->ws_identity !== $this->ws_identity) {
+                return;
+            }
             $resource_id = $data->resource_id;
             $resource_connection = $this->connections[$resource_id]['socket_connection'];
             $this->connections[$resource_id]['user_id'] = $data->user_id;

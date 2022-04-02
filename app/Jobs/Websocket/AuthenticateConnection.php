@@ -16,6 +16,7 @@ class AuthenticateConnection implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     public $headers;
     public $resource_id;
+    public $ws_identity;
     /**
      * Create a new job instance.
      *
@@ -25,6 +26,7 @@ class AuthenticateConnection implements ShouldQueue
     {
         $this->headers = $data['headers'];
         $this->resource_id = $data['resource_id'];
+        $this->ws_identity = $data['ws_identity'];
         $this->onConnection('redis_local');
     }
 
@@ -45,6 +47,8 @@ class AuthenticateConnection implements ShouldQueue
         if (empty($authorization)) {
             return;
         }
+
+        Log::info($authorization);
 
         $token = explode(' ', $authorization[0])[1];
         JWTAuth::setToken($token);
@@ -72,6 +76,7 @@ class AuthenticateConnection implements ShouldQueue
             'username' => $user->username,
             'profile_picture' => $profile_picture,
             'resource_id' => $this->resource_id,
+            'ws_identity' => $this->ws_identity,
             'source_type' => 'app',
         ]));
         $websocket_client->close();
