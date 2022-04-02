@@ -58,8 +58,17 @@ class WebSocketSubscriber extends Command
             if (isset($message->source_id)) {
                 $source_id = $message->source_id;
             }
+            $connection_token = '';
+            if (isset($message->connection_token)) {
+                $connection_token = $message->connection_token;
+            }
+
             if ($source_type === 'ws-node' && $source_id !== $ws_identity) {
-                $websocket_client = new \WebSocket\Client(config('services.websocket.url'));
+                $websocket_client = new \WebSocket\Client(config('services.websocket.url'), [
+                    'headers' => [
+                        'Authorization' => $connection_token,
+                    ]
+                ]);
                 $websocket_client->text(json_encode($message));
                 $websocket_client->close();
             }

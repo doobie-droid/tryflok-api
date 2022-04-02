@@ -413,11 +413,11 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
 
-            //if (! $this->messageIsFromNode($data)) {
+            if (! $this->messageIsFromNode($data)) {
                 // save data in db
                 $requester_id = $this->getConnectionUserId($connection, $data);
                 UpdateBroadcasterAgoraUid::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid);
-           // }
+            }
 
             $message = [
                 'event' => 'broadcaster-added-to-rtm-channel',
@@ -487,11 +487,11 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
 
-            //if (! $this->messageIsFromNode($data)) {
+            if (! $this->messageIsFromNode($data)) {
                 // save data in db
                 $requester_id = $this->getConnectionUserId($connection, $data);
                 MuteRtmBroadcaster::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream);
-            //}
+            }
 
             $message = [
                 'event' => 'broadcaster-muted-in-rtm-channel',
@@ -561,11 +561,11 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
             }
 
-           // if (! $this->messageIsFromNode($data)) {
+            if (! $this->messageIsFromNode($data)) {
                 // save data in db
                 $requester_id = $this->getConnectionUserId($connection, $data);
                 UnmuteRtmBroadcaster::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream);
-           // }
+            }
 
             $message = [
                 'event' => 'broadcaster-unmuted-in-rtm-channel',
@@ -716,12 +716,18 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
     private function messageIsFromNodeOrApp($data)
     {
-        return isset($data->source_type) && ($data->source_type === 'ws-node' || $data->source_type === 'app');
+        if (isset($data->source_type) && ($data->source_type === 'ws-node' || $data->source_type === 'app')) {
+            return true;
+        }
+        return false;
     }
 
     private function messageIsFromNode($data)
     {
-        return isset($data->source_type) && $data->source_type === 'ws-node';
+        if (isset($data->source_type) && $data->source_type === 'ws-node') {
+            return true;
+        }
+        return false;
     }
 
     private function getConnectionUserId($connection, $data = null)
@@ -761,7 +767,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         }
     }
 
-    private function propagateToOtherNodes($data)
+    private function propagateToOtherNodes($data, $connection)
     {
         $data_source_type = null;
         $data_source_id = null;
@@ -773,8 +779,21 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         }
 
         if ($data_source_type !== 'ws-node') {
+            $connection_token = '';
+            $authorization = [];
+            foreach ($connection->httpRequest->getHeaders() as $key => $value) {
+                $key = strtolower($key);
+                if ($key === 'authorization') {
+                    $authorization = $value;
+                }
+            }
+            if (! empty($authorization)) {
+                $connection_token = $authorization[0];
+            }
+            
             $data->source_type = 'ws-node';
             $data->source_id = $this->ws_identity;
+            $data->connection_token = $connection_token;
             Redis::publish(Constants::WEBSOCKET_MESSAGE_CHANNEL, json_encode($data));
         }
     }
