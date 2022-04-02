@@ -118,9 +118,6 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $event = $data->event;
             }
             switch ($event) {
-                case 'authenticate':
-                    $this->authenticateConnection($data, $conn);
-                    break;
                 case 'join-rtm-channel':
                     $this->joinRtmChannel($data, $conn);
                     break;
@@ -181,82 +178,6 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             $this->map_user_id_to_connections[$data->user_id] = array_unique(array_merge($user_connections, [$resource_connection->resourceId]));
             
             $resource_connection->send(json_encode([
-                'event' => 'event-success',
-                'event_name' => $data->event,
-                'message' => 'User authenticated successfully',
-                'data' => [],
-            ]));
-        } catch (\Exception $exception) {
-            $connection->send(json_encode([
-                'event' => 'event-error',
-                'event_name' => $data->event,
-                'message' => 'Oops, an error occurred, please try again later',
-                'errors' => [],
-            ]));
-            Log::error($exception);
-            return;
-        }
-    }
-
-    private function authenticateConnection($data, $connection)
-    {
-        try {
-            $validator = Validator::make((array) $data, [
-                'code' => ['required', 'string',],
-                'user_id' => ['required', 'string',],
-                'username' => ['required', 'string',],
-                'profile_picture' => ['required', 'string',],
-            ]);
-
-            if ($validator->fails()) {
-                $connection->send(json_encode([
-                    'event' => 'event-error',
-                    'event_name' => $data->event,
-                    'message' => 'Invalid or missing input fields',
-                    'errors' => $validator->errors()->toArray(),
-                ]));
-                return;
-            }
-
-            $otp = Otp::where('code', $data->code)->where('user_id', $data->user_id)->where('purpose', 'authentication')->first();
-
-            if (is_null($otp)) {
-                $connection->send(json_encode([
-                    'event' => 'event-error',
-                    'event_name' => $data->event,
-                    'message' => 'Invalid OTP provided',
-                    'errors' => [],
-                ]));
-                return;
-            }
-
-            if ($otp->expires_at->lt(now())) {
-                $connection->send(json_encode([
-                    'event' => 'event-error',
-                    'event_name' => $data->event,
-                    'message' => 'Access code has expired',
-                    'errors' => [],
-                ]));
-                return;
-            }
-
-            $otp->expires_at = now();//expire the token since it has been used
-            $otp->save();
-
-            $this->connections[$connection->resourceId] = [
-                'socket_connection' => $connection,
-                'user_id' => $data->user_id,
-                'profile_picture' => $data->profile_picture,
-                'username' => $data->username,
-                'is_authenticated' => true,
-            ];
-            $user_connections = [];
-            if (array_key_exists($data->user_id, $this->map_user_id_to_connections)) {
-                $user_connections = $this->map_user_id_to_connections[$data->user_id];
-            }
-            $this->map_user_id_to_connections[$data->user_id] = array_unique(array_merge($user_connections, [$connection->resourceId]));
-            
-            $connection->send(json_encode([
                 'event' => 'event-success',
                 'event_name' => $data->event,
                 'message' => 'User authenticated successfully',
