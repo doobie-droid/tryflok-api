@@ -44,11 +44,9 @@ class AuthenticateConnection implements ShouldQueue
                 $authorization = $value;
             }
         }
-        if (empty($authorization)) {
+        if (empty($authorization) || $authorization[0] == '' || is_null($authorization[0])) {
             return;
         }
-
-        Log::info($authorization);
 
         $token = explode(' ', $authorization[0])[1];
         JWTAuth::setToken($token);
