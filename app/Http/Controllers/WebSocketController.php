@@ -641,25 +641,17 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
     private function messageIsFromNodeOrApp($data)
     {
-        Log::info("logging message is from node or app check");
-        Log::info(json_encode($data));
         if (isset($data->source_type) && ($data->source_type === 'ws-node' || $data->source_type === 'app')) {
-            Log::info("It was true");
             return true;
         }
-        Log::info("It was false");
         return false;
     }
 
     private function messageIsFromNode($data)
     {
-        Log::info("logging message is from node check");
-        Log::info(json_encode($data));
         if (isset($data->source_type) && $data->source_type === 'ws-node') {
-            Log::info("It was true");
             return true;
         }
-        Log::info("It was false");
         return false;
     }
 
