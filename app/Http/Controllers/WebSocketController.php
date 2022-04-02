@@ -112,7 +112,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             $event = "";
             $data = json_decode($msg);
             if (! $this->messageIsFromNodeOrApp($data)) {
-                $this->checkConnectionIsAuthenticated($conn);
+                $this->checkConnectionIsAuthenticated($conn, $data);
             }
             if (is_object($data) && property_exists($data, 'event')) {
                 $event = $data->event;
@@ -415,7 +415,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
             //if (! $this->messageIsFromNode($data)) {
                 // save data in db
-                $requester_id = $this->getConnectionUserId($connection);
+                $requester_id = $this->getConnectionUserId($connection, $data);
                 UpdateBroadcasterAgoraUid::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid);
            // }
 
@@ -489,7 +489,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
             //if (! $this->messageIsFromNode($data)) {
                 // save data in db
-                $requester_id = $this->getConnectionUserId($connection);
+                $requester_id = $this->getConnectionUserId($connection, $data);
                 MuteRtmBroadcaster::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream);
             //}
 
@@ -563,7 +563,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
            // if (! $this->messageIsFromNode($data)) {
                 // save data in db
-                $requester_id = $this->getConnectionUserId($connection);
+                $requester_id = $this->getConnectionUserId($connection, $data);
                 UnmuteRtmBroadcaster::dispatch($requester_id, $content_id, $broadcaster_id, $agora_uid, $stream);
            // }
 
@@ -628,6 +628,12 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             $broadcaster_id = $data->broadcaster_id;
             $agora_uid = $data->agora_uid;
             $stream = $data->stream;
+
+            $channel_name = $data->channel_name;
+            $channel_subscribers = [];
+            if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
+                $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
+            }
 
             $message = [
                 'event' => 'broadcast-request-in-rtm-channel',
@@ -702,9 +708,9 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         }
     }
 
-    private function checkConnectionIsAuthenticated($connection)
+    private function checkConnectionIsAuthenticated($connection, $data)
     {
-        $requester_id = $this->getConnectionUserId($connection);
+        $requester_id = $this->getConnectionUserId($connection, $data);
         return true;
     }
 
@@ -718,7 +724,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         return isset($data->source_type) && $data->source_type === 'ws-node';
     }
 
-    private function getConnectionUserId($connection)
+    private function getConnectionUserId($connection, $data = null)
     {
         try {
             $authorization = [];
@@ -749,6 +755,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 'errors' => [],
             ]));
             Log::error($exception);
+            Log::info("WS Identity: " . $this->ws_identity);
+            Log::info(json_encode($data));
             return;
         }
     }
