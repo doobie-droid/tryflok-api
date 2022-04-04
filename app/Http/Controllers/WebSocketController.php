@@ -688,7 +688,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             Log::error($exception);
             Log::info("WS Identity: " . $this->ws_identity);
             Log::info(json_encode($data));
-            return;
+            throw new \Exception($exception->getMessage());
         }
     }
 
