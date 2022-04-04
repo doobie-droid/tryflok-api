@@ -112,7 +112,10 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             $event = "";
             $data = json_decode($msg);
             if (! $this->messageIsFromNodeOrApp($data)) {
-                $this->checkConnectionIsAuthenticated($conn, $data);
+                $user_is_authenticated = $this->checkConnectionIsAuthenticated($conn, $data);
+                if (! $user_is_authenticated) {
+                    return;
+                }
             }
             if (is_object($data) && property_exists($data, 'event')) {
                 $event = $data->event;
@@ -636,6 +639,9 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     private function checkConnectionIsAuthenticated($connection, $data)
     {
         $requester_id = $this->getConnectionUserId($connection, $data);
+        if (is_null($requester_id) || $requester_id == '') {
+            return false;
+        }
         return true;
     }
 
@@ -688,7 +694,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             Log::error($exception);
             Log::info("WS Identity: " . $this->ws_identity);
             Log::info(json_encode($data));
-            throw new \Exception($exception->getMessage());
+            return '';
         }
     }
 
