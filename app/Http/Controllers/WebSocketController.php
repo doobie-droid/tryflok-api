@@ -673,14 +673,14 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             }
 
             if (empty($authorization)) {
-                throw new \Exception('No Authorization header was passed');
+                return '';
             }
 
             $token = explode(' ', $authorization[0])[1];
             JWTAuth::setToken($token);
 
             if (! $claim = JWTAuth::getPayload()) {
-                throw new \Exception('An invalid token ws supplied');
+                return '';
             }
 
             return $claim['sub'];
