@@ -153,7 +153,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     $this->propagateToOtherNodes($data, $conn);
                     foreach ($this->connections as $connection) {
                         $broadcast = ['broadcast' => $data->message];
-                        $connection->send(json_encode($broadcast));
+                        $connection['socket_connection']->send(json_encode($broadcast));
                     }
                 case 'notify-user':
                     break;
