@@ -203,6 +203,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 'message' => 'Oops, an error occurred, please try again later',
                 'errors' => [],
             ]));
+            Log::info(json_encode($data));
+            Log::info($this->ws_identity);
             Log::error($exception);
             return;
         }
