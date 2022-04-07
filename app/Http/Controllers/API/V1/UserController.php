@@ -1060,7 +1060,7 @@ class UserController extends Controller
                                             ->groupBy('created_date')
                                             ->get()->toArray();
 
-            $subscription_graph = [];
+            $subscription_graph = null;
             foreach ($subscriptions as $instance) {
                 $subscription_graph[$instance['created_date']] = $instance['subscribers_count'];
             }
