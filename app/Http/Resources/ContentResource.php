@@ -65,7 +65,7 @@ class ContentResource extends JsonResource
                 'contestants' => [],
             ];
             foreach ($challenge_contestants as $contestant_entry) {
-                $votes = $this->challengeVotes()->where('contestant_id', $contestant_entry->contestant_id)->count();
+                $votes = $this->challengeVotes()->where('contestant_id', $contestant_entry->user_id)->count();
                 $data = [
                     'contestant' => new UserResource($contestant_entry->contestant),
                     'votes' => $votes,
