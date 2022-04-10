@@ -610,7 +610,7 @@ class CollectionController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $digiverse = Collection::where('id', $request->digiverse_id)->first();
-            $collections = $digiverse->collections();
+            $collections = $digiverse->collections()->whereNull('archived_at');
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
@@ -777,5 +777,56 @@ class CollectionController extends Controller
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
+    }
+
+    public function archive(Request $request, $id)
+    {
+        try {
+            //make sure user owns content
+            $collection = Collection::where('id', $id)->where('user_id', $request->user()->id)
+            ->eagerLoadBaseRelations()
+            ->first();
+
+            if (is_null($collection)) {
+                return $this->respondBadRequest('You do not have permission to update this collection');
+            }
+
+            $collection->archived_at = now();
+            $collection->saved();
+            return $this->respondWithSuccess('Collection has been archived successfully', [
+                'collection' => new CollectionResource($collection),
+            ]);
+
+        }  catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function delete(Request $request, $id)
+    {
+        try {
+            //make sure user owns content
+            $collection = Collection::where('id', $id)->where('user_id', $request->user()->id)
+            ->eagerLoadBaseRelations()
+            ->first();
+            if (is_null($collection)) {
+                return $this->respondBadRequest('You do not have permission to update this collection');
+            }
+
+            // make sure there are no active purchases
+            $active_purchases = $collection->userables()->where('status', 'available')->count();
+            if ($active_purchases > 0) {
+                return $this->respondBadRequest('You cannot delete a collection that has active purchases');
+            }
+
+            $collection->delete();
+            return $this->respondWithSuccess('Collection deleted successfully', [
+                'collection' => new CollectionResource($collection),
+            ]);
+       }  catch (\Exception $exception) {
+           Log::error($exception);
+           return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+       }
     }
 }

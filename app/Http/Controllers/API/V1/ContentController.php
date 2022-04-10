@@ -388,6 +388,56 @@ class ContentController extends Controller
         }
     }
 
+    public function archive(Request $request, $id)
+    {
+        try {
+            //make sure user owns content
+            $content = Content::where('id', $id)->where('user_id', $request->user()->id)
+            ->eagerLoadBaseRelations()
+            ->first();
+
+            if (is_null($content)) {
+                return $this->respondBadRequest('You do not have permission to update this content');
+            }
+
+            $content->archived_at = now();
+            $content->saved();
+            return $this->respondWithSuccess('Content has been archived successfully', [
+                'content' => new ContentResource($content),
+            ]);
+        }  catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function delete(Request $request, $id)
+    {
+        try {
+            //make sure user owns content
+            $content = Content::where('id', $id)->where('user_id', $request->user()->id)
+            ->eagerLoadBaseRelations()
+            ->first();
+            if (is_null($content)) {
+                return $this->respondBadRequest('You do not have permission to update this content');
+            }
+
+            // make sure there are no active purchases
+            $active_purchases = $content->userables()->where('status', 'available')->count();
+            if ($active_purchases > 0) {
+                return $this->respondBadRequest('You cannot delete a content that has active purchases');
+            }
+
+            $content->delete();
+            return $this->respondWithSuccess('Content deleted successfully', [
+                'content' => new ContentResource($content),
+            ]);
+       }  catch (\Exception $exception) {
+           Log::error($exception);
+           return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+       }
+    }
+
     public function attachMediaToContent(Request $request, $id)
     {
         try {
@@ -670,6 +720,7 @@ class ContentController extends Controller
             }
             
             $contents = Content::where('is_available', 1)
+            ->whereNull('archived_at')
             ->where('is_adult', 0)
             ->where('approved_by_admin', 1)
             ->whereHas('digiverses', function (Builder $query) {
@@ -800,7 +851,7 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $collection = Collection::where('id', $request->collection_id)->first();
-            $contents = $collection->contents();
+            $contents = $collection->contents()->whereNull('archived_at');
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';

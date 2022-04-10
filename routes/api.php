@@ -150,7 +150,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'contents'], function () {
             Route::post('/', 'ContentController@create');
             Route::patch('{id}', 'ContentController@update');
-            Rout::delete('{id}', 'ContentCOntroller@delete');
+            Route::delete('{id}/archive', 'ContentController@archive');
+            Route::delete('{id}', 'ContentController@delete');
 
             Route::get('{id}/insights', 'ContentController@getContentInsights');
 
@@ -181,12 +182,18 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'digiverses'], function () {
             Route::post('/', 'CollectionController@createDigiverse');
             Route::patch('{id}', 'CollectionController@updateDigiverse');
+
+            Route::delete('{id}/archive', 'CollectionController@archive');
+            Route::delete('{id}', 'CollectionController@delete');
         });
 
         Route::group(['prefix' => 'collections'], function () {
             Route::post('/', 'CollectionController@createCollection');
             Route::patch('{id}', 'CollectionController@updateCollection');
-            Route::path('{id}/contents', 'CollectionController@addOrRemoveContent');
+            Route::patch('{id}/contents', 'CollectionController@addOrRemoveContent');
+
+            Route::delete('{id}/archive', 'CollectionController@archive');
+            Route::delete('{id}', 'CollectionController@delete');
         });
 
         Route::group(['prefix' => 'reviews'], function () {
