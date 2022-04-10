@@ -817,7 +817,7 @@ class ContentController extends Controller
 
             $max_items_count = Constants::MAX_ITEMS_LIMIT;
             $validator = Validator::make([
-                'id' => $digiverse_id,
+                'id' => $collection_id,
                 'page' => $page,
                 'limit' => $limit,
                 'keyword' => $keyword,
