@@ -734,7 +734,7 @@ class ContentController extends Controller
         }
     }
 
-    public function getDigiverseContents(Request $request, $digiverse_id)
+    public function getCollectionContents(Request $request, $collection_id)
     {
         try {
             $page = $request->query('page', 1);
@@ -799,8 +799,8 @@ class ContentController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-            $digiverse = Collection::where('id', $request->digiverse_id)->first();
-            $contents = $digiverse->contents();
+            $collection = Collection::where('id', $request->collection_id)->first();
+            $contents = $collection->contents();
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
@@ -808,7 +808,7 @@ class ContentController extends Controller
                 $user_id = $request->user()->id;
             }
 
-            if ($user_id !== $digiverse->user_id) {
+            if ($user_id !== $collection->user_id) {
                 $contents = $contents->where('is_available', 1)->where('approved_by_admin', 1);
             }
 

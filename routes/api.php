@@ -44,9 +44,16 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
-        Route::get('/', 'CollectionController@getAll');
+        Route::get('/', 'CollectionController@listDigiverses');
         Route::get('{id}', 'CollectionController@getDigiverse');
-        Route::get('{digiverse_id}/contents', 'ContentController@getDigiverseContents');
+        Route::get('{collection_id}/contents', 'ContentController@getCollectionContents');
+        Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
+        Route::get('{id}/reviews', 'CollectionController@getReviews');
+    });
+
+    Route::group(['prefix' => 'collections'], function () {
+        Route::get('{id}', 'CollectionController@getCollection');
+        Route::get('{collection_id}/contents', 'ContentController@getCollectionContents');
         Route::get('{id}/reviews', 'CollectionController@getReviews');
     });
 
@@ -143,6 +150,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'contents'], function () {
             Route::post('/', 'ContentController@create');
             Route::patch('{id}', 'ContentController@update');
+            Rout::delete('{id}', 'ContentCOntroller@delete');
 
             Route::get('{id}/insights', 'ContentController@getContentInsights');
 
@@ -173,6 +181,12 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'digiverses'], function () {
             Route::post('/', 'CollectionController@createDigiverse');
             Route::patch('{id}', 'CollectionController@updateDigiverse');
+        });
+
+        Route::group(['prefix' => 'collections'], function () {
+            Route::post('/', 'CollectionController@createCollection');
+            Route::patch('{id}', 'CollectionController@updateCollection');
+            Route::path('{id}/contents', 'CollectionController@addOrRemoveContent');
         });
 
         Route::group(['prefix' => 'reviews'], function () {
