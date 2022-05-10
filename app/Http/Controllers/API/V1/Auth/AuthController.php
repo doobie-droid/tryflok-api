@@ -172,6 +172,10 @@ class AuthController extends Controller
                 }
             }
 
+            if (is_null($user->wallet()->first())) {
+                $user->wallet()->create([]);
+            }
+
             if (! is_null($request->firebase_token)) {
                 $firebase_token = $user->notificationTokens()->where('token', $request->firebase_token)->first();
                 if (is_null($firebase_token)) {
@@ -265,6 +269,9 @@ class AuthController extends Controller
             $otp->save();
             $token = JWTAuth::fromUser($otp->user);
             $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $otp->user->id)->first();
+            if (is_null($user->wallet()->first())) {
+                $user->wallet()->create([]);
+            }
             return $this->respondWithSuccess('Login successful', [
                 'user' => new UserResourceWithSensitive($user),
                 'token' => $token,
