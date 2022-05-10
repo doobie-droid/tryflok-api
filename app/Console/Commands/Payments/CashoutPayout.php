@@ -52,6 +52,7 @@ class CashoutPayout extends Command
                         ->orWhere('payout_date', '<=', now());
                 })
                 ->where('cancelled_by_admin', 0)
+                ->where('cashout_attempts', '<=', 5)
                 ->chunk(100000, function ($payouts) {
                     foreach ($payouts as $payout) {
                         $payout->last_payment_request = now();
