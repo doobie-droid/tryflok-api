@@ -148,6 +148,16 @@ class Content extends Model
         return $this->belongsToMany(Collection::class);
     }
 
+    public function basicCollections()
+    {
+        return $this->belongsToMany(Collection::class)->where('type', 'collection');
+    }
+
+    public function digiverses()
+    {
+        return $this->belongsToMany(Collection::class)->where('type', 'digiverse');
+    }
+
     public function access_through_ancestors()
     {
         return $this->belongsToMany(Collection::class);
@@ -166,6 +176,16 @@ class Content extends Model
     public function challengeVotes()
     {
         return $this->hasMany(ContentChallengeVote::class);
+    }
+
+    public function liveHosts()
+    {
+        return $this->hasMany(ContentLiveHost::class);
+    }
+
+    public function liveBroadcasters()
+    {
+        return $this->hasMany(ContentLiveBroadcaster::class);
     }
 
     public function isFree()
@@ -255,6 +275,10 @@ class Content extends Model
         ->with([
             'challengeContestants' => function ($query) {
                 $query->with('contestant', 'contestant.profile_picture');
+            },
+        ])->with([
+            'liveBroadcasters' => function ($query) {
+                $query->with('broadcaster', 'broadcaster.profile_picture');
             },
         ]);
     }

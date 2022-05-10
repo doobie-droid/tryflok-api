@@ -949,7 +949,7 @@ class UserController extends Controller
             if ((float) $request->user()->wallet->balance < (float) $request->amount_in_flk) {
                 return $this->respondBadRequest("You do not have enough Flok cowries to send {$request->amount_in_flk} FLK");
             }
-
+            DB::beginTransaction();
             $userToTip = User::where('id', $id)->first();
             $amount_in_dollars = bcdiv($request->amount_in_flk, 100, 6);
             $newWalletBalance = bcsub($request->user()->wallet->balance, $request->amount_in_flk, 2);
@@ -1000,7 +1000,7 @@ class UserController extends Controller
             ]);
             $userToTip->wallet->balance = $newWalletBalance;
             $userToTip->wallet->save();
-
+            DB::commit();
             NotifyTippingJob::dispatch([
                 'tipper' => $request->user(),
                 'tippee' => $userToTip,
@@ -1009,6 +1009,7 @@ class UserController extends Controller
             ]);
             return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {
+            DB::rollBack();
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
@@ -1060,7 +1061,7 @@ class UserController extends Controller
                                             ->groupBy('created_date')
                                             ->get()->toArray();
 
-            $subscription_graph = [];
+            $subscription_graph = null;
             foreach ($subscriptions as $instance) {
                 $subscription_graph[$instance['created_date']] = $instance['subscribers_count'];
             }

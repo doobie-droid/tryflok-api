@@ -23,6 +23,7 @@ use App\Rules\SumCheck as SumCheckRule;
 use App\Services\LiveStream\Agora\RtcTokenBuilder as AgoraRtcToken;
 use App\Services\LiveStream\Agora\RtmTokenBuilder as AgoraRtmToken;
 use Aws\CloudFront\CloudFrontClient;
+use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -125,6 +126,14 @@ class ContentController extends Controller
                         'value' => 0,
                     ],
                 ]);
+
+                $content->liveHosts()->create([
+                    'user_id' => $user->id,
+                    'designation' => 'host',
+                ]);
+                $content->liveBroadcasters()->create([
+                    'user_id' => $user->id,
+                ]);
             }
 
             if ($is_challenge === 1) {
@@ -155,6 +164,9 @@ class ContentController extends Controller
                     $content->challengeContestants()->create([
                         'user_id' => $contestant_id,
                         'status' => 'pending',
+                    ]);
+                    $content->liveBroadcasters()->create([
+                        'user_id' => $contestant_id,
                     ]);
                     NotifyAddedToChallengeJob::dispatch(User::where('id', $contestant_id)->first(), $content);
                 }
@@ -374,6 +386,56 @@ class ContentController extends Controller
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
+    }
+
+    public function archive(Request $request, $id)
+    {
+        try {
+            //make sure user owns content
+            $content = Content::where('id', $id)->where('user_id', $request->user()->id)
+            ->eagerLoadBaseRelations()
+            ->first();
+
+            if (is_null($content)) {
+                return $this->respondBadRequest('You do not have permission to update this content');
+            }
+
+            $content->archived_at = now();
+            $content->saved();
+            return $this->respondWithSuccess('Content has been archived successfully', [
+                'content' => new ContentResource($content),
+            ]);
+        }  catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function delete(Request $request, $id)
+    {
+        try {
+            //make sure user owns content
+            $content = Content::where('id', $id)->where('user_id', $request->user()->id)
+            ->eagerLoadBaseRelations()
+            ->first();
+            if (is_null($content)) {
+                return $this->respondBadRequest('You do not have permission to update this content');
+            }
+
+            // make sure there are no active purchases
+            $active_purchases = $content->userables()->where('status', 'available')->count();
+            if ($active_purchases > 0) {
+                return $this->respondBadRequest('You cannot delete a content that has active purchases');
+            }
+
+            $content->delete();
+            return $this->respondWithSuccess('Content deleted successfully', [
+                'content' => new ContentResource($content),
+            ]);
+       }  catch (\Exception $exception) {
+           Log::error($exception);
+           return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+       }
     }
 
     public function attachMediaToContent(Request $request, $id)
@@ -658,9 +720,10 @@ class ContentController extends Controller
             }
             
             $contents = Content::where('is_available', 1)
+            ->whereNull('archived_at')
             ->where('is_adult', 0)
             ->where('approved_by_admin', 1)
-            ->whereHas('collections', function (Builder $query) {
+            ->whereHas('digiverses', function (Builder $query) {
                 $query->where('is_available', 1)
                 ->where('is_adult', 0)
                 ->where('approved_by_admin', 1);
@@ -722,7 +785,7 @@ class ContentController extends Controller
         }
     }
 
-    public function getDigiverseContents(Request $request, $digiverse_id)
+    public function getCollectionContents(Request $request, $collection_id)
     {
         try {
             $page = $request->query('page', 1);
@@ -754,7 +817,7 @@ class ContentController extends Controller
 
             $max_items_count = Constants::MAX_ITEMS_LIMIT;
             $validator = Validator::make([
-                'id' => $digiverse_id,
+                'id' => $collection_id,
                 'page' => $page,
                 'limit' => $limit,
                 'keyword' => $keyword,
@@ -787,8 +850,8 @@ class ContentController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-            $digiverse = Collection::where('id', $request->digiverse_id)->first();
-            $contents = $digiverse->contents();
+            $collection = Collection::where('id', $request->collection_id)->first();
+            $contents = $collection->contents()->whereNull('archived_at');
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
@@ -796,7 +859,7 @@ class ContentController extends Controller
                 $user_id = $request->user()->id;
             }
 
-            if ($user_id !== $digiverse->user_id) {
+            if ($user_id !== $collection->user_id) {
                 $contents = $contents->where('is_available', 1)->where('approved_by_admin', 1);
             }
 
@@ -1134,6 +1197,7 @@ class ContentController extends Controller
                 'event' => 'app-update-rtm-channel-subscribers-count',
                 'channel_name' => $channel->value,
                 'subscribers_count' => $subscribers_count,
+                'source_type' => 'app',
             ]));
             $websocket_client->close();
 
@@ -1539,6 +1603,36 @@ class ContentController extends Controller
             return $this->respondWithSuccess('Your vote has been recorded successfully', [
                 'content' => new ContentResource($content),
             ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function proxyAsset(Request $request, $path)
+    {
+        try {
+            $headers = $request->header();
+            $x_cookie = '';
+            if (array_key_exists('x-cookie', $headers)) {
+                $x_cookie = $headers['x-cookie'][0];
+            }
+            $cloudfront_url = join_path(config('services.cloudfront.private_url'), $path);
+            $client = new GuzzleClient;
+            $response = $client->get($cloudfront_url, [
+                'headers' => [
+                    'Cookie' => $x_cookie,
+                ],
+            ]);
+
+            $headers = $response->getHeaders();
+            $content_type = "text/html";
+            foreach ($headers as $name => $value) {
+                if (strtolower($name) === 'content-type') {
+                    $content_type = $value[0];
+                }
+            }
+            return response($response->getBody())->header('Content-Type', $content_type);
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

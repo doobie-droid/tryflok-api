@@ -112,6 +112,16 @@ class Collection extends Model
         return $this->belongsToMany(Content::class);
     }
 
+    public function collections()
+    {
+        return $this->childCollections()->where('type', 'collection');
+    }
+
+    public function digiverses()
+    {
+        return $this->parentCollections()->where('type', 'digiverse');
+    }
+
     public function childCollections()
     {
         return $this->belongsToMany(Collection::class, 'collection_collection', 'parent_id', 'child_id');
@@ -173,6 +183,7 @@ class Collection extends Model
             'revenues' => function ($query) {
                 $query->where('revenue_from', 'sale');
             },
-        ]);
+        ])
+        ->withCount('collections');
     }
 }

@@ -31,8 +31,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('flok:end-subscriptions')->hourly();
-        $schedule->command('flok:generate-payouts')->monthly(7, '8:00');
+        $schedule->command('flok:generate-payouts')->weeklyOn(1, '8:00');
         $schedule->command('flok:cashout-payouts')->everyTwoMinutes();
+        $schedule->command('flok:generate-user-wallet')->everyTwoMinutes();
         $schedule->command('flok:compute-content-trending')->daily();
         $schedule->command('flok:compute-collection-trending')->daily();
         $schedule->command('flok:compute-challenge-winner')->everyFiveMinutes();
