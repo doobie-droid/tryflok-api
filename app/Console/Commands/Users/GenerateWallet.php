@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Users;
 
-use Illuminate\Console\Command;
 use App\Models\User;
+use Illuminate\Console\Command;
 
 class GenerateWallet extends Command
 {
