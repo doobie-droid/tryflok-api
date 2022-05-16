@@ -56,7 +56,7 @@ class Video implements ShouldQueue
      */
     public function handle()
     {
-        $baseUrl = join_path(config('services.cloudfront.private_url'), $this->folder);
+        $baseUrl = join_path(config('flok.private_media_url'), $this->folder);
         //upload encryption key
         $nameParts = explode('/', $this->hls_key_filepath);
         $filename = end($nameParts);

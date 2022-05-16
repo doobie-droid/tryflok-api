@@ -1334,7 +1334,7 @@ class ContentController extends Controller
             ]);
 
             $expires = time() + (2 * 60 * 60); //2 hours from now(in seconds)
-            $resource = config('services.cloudfront.private_url') . '/*';
+            $resource = config('flok.private_media_url') . '/*';
             $policy = <<<POLICY
                         {
                             "Statement": [
@@ -1623,7 +1623,7 @@ class ContentController extends Controller
             if (array_key_exists('x-cookie', $headers)) {
                 $x_cookie = $headers['x-cookie'][0];
             }
-            $cloudfront_url = join_path(config('services.cloudfront.private_url'), $path);
+            $cloudfront_url = join_path(config('flok.private_media_url'), $path);
             $client = new GuzzleClient;
             $response = $client->get($cloudfront_url, [
                 'headers' => [
