@@ -293,7 +293,6 @@ class WalletController extends Controller
             $amount_to_withdraw_in_dollars = bcdiv($total_amount_in_flk, 100, 6);
             $request->user()->payouts()->create([
                 'amount' => bcmul($amount_to_withdraw_in_dollars, 1 - Constants::WALLET_WITHDRAWAL_CHARGE),
-                'payout_date' => now()->addMonth()->startOfMonth()->addDays(6),
             ]);
 
             return $this->respondAccepted('Withdrawal successful. You should receive your money soon.');
