@@ -26,6 +26,7 @@ use Aws\CloudFront\CloudFrontClient;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -1354,6 +1355,11 @@ class ContentController extends Controller
             $cookies = '';
             foreach ($result as $key => $value) {
                 $cookies = $cookies . $key . '=' . $value . ';';
+                $secure = true;
+                $path = '/';
+                $domain = '.tryflok.com';
+                $time_in_minutes = 2 * 60;
+                Cookie::queue($key, $value, $time_in_minutes, $path, $domain, $secure);
             }
             return $this->respondWithSuccess('Assets retrieved successfully', [
                 'assets' => $content->assets()->with('resolutions')->wherePivot('purpose', 'content-asset')->get(),
