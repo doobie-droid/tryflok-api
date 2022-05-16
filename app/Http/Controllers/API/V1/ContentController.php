@@ -26,6 +26,7 @@ use Aws\CloudFront\CloudFrontClient;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -1333,7 +1334,7 @@ class ContentController extends Controller
             ]);
 
             $expires = time() + (2 * 60 * 60); //2 hours from now(in seconds)
-            $resource = config('services.cloudfront.private_url') . '/*';
+            $resource = config('flok.private_media_url') . '/*';
             $policy = <<<POLICY
                         {
                             "Statement": [
@@ -1354,6 +1355,11 @@ class ContentController extends Controller
             $cookies = '';
             foreach ($result as $key => $value) {
                 $cookies = $cookies . $key . '=' . $value . ';';
+                $secure = true;
+                $path = '/';
+                $domain = '.tryflok.com';
+                $time_in_minutes = 2 * 60;
+                Cookie::queue($key, $value, $time_in_minutes, $path, $domain, $secure);
             }
             return $this->respondWithSuccess('Assets retrieved successfully', [
                 'assets' => $content->assets()->with('resolutions')->wherePivot('purpose', 'content-asset')->get(),
@@ -1617,7 +1623,7 @@ class ContentController extends Controller
             if (array_key_exists('x-cookie', $headers)) {
                 $x_cookie = $headers['x-cookie'][0];
             }
-            $cloudfront_url = join_path(config('services.cloudfront.private_url'), $path);
+            $cloudfront_url = join_path(config('flok.private_media_url'), $path);
             $client = new GuzzleClient;
             $response = $client->get($cloudfront_url, [
                 'headers' => [

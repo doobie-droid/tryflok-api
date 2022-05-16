@@ -123,7 +123,7 @@ class AssetController extends Controller
                 $ext = $file->getClientOriginalExtension();
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'video');
                 $fullFilename = join_path($folder, $filename . '.m3u8');
-                $url = join_path(config('services.cloudfront.private_url'), $fullFilename);
+                $url = join_path(config('flok.private_media_url'), $fullFilename);
 
                 $asset = Asset::create([
                     'url' => $url,
@@ -178,7 +178,7 @@ class AssetController extends Controller
                 $ext = $file->getClientOriginalExtension();
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'audio');
                 $fullFilename = join_path($folder, $filename . '.' . $ext);
-                $url = join_path(config('services.cloudfront.private_url'), $fullFilename);
+                $url = join_path(config('flok.private_media_url'), $fullFilename);
 
                 $asset = Asset::create([
                     'url' => $url,
@@ -231,7 +231,7 @@ class AssetController extends Controller
                 $ext = $file->getClientOriginalExtension();
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'pdf');
                 $fullFilename = join_path($folder, $filename . '.' . $ext);
-                $url = join_path(config('services.cloudfront.private_url'), $fullFilename);
+                $url = join_path(config('flok.private_media_url'), $fullFilename);
 
                 $asset = Asset::create([
                     'url' => $url,
