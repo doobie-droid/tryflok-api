@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
         Commands\Trending\ComputeCollectionTrending::class,
         Commands\Trending\ComputeContentTrending::class,
         Commands\Contents\ComputeChallengeWinner::class,
+        Commands\Assets\MigratePrivateAssets::class,
     ];
 
     /**
