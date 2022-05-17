@@ -43,6 +43,9 @@ class Audio implements ShouldQueue
         Storage::disk('private_s3')->put($this->full_file_name, file_get_contents($this->filepath));
         $this->asset->processing_complete = 1;
         $this->asset->save();
+        $content = $this->asset->contents()->first();
+        $content->is_available = 1;
+        $content->save();
         unlink($this->filepath);
     }
 

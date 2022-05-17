@@ -83,7 +83,7 @@ class ContentController extends Controller
             $is_available = 0;
             $is_challenge = 0;
 
-            if (in_array($request->type, ['live-audio', 'live-video'])) {
+            if (in_array($request->type, ['live-audio', 'live-video',])) {
                 $is_available = 1;
             }
 
