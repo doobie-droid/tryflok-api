@@ -47,6 +47,9 @@ class Pdf implements ShouldQueue
         $this->asset->processing_complete = 1;
         $this->asset->encryption_key = $this->encryption_key;
         $this->asset->save();
+        $content = $this->asset->contents()->first();
+        $content->is_available = 1;
+        $content->save();
         unlink($this->filepath);
     }
 
