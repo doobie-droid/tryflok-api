@@ -237,7 +237,7 @@ class CreateTest extends TestCase
             'description' => $request['description'],
             'user_id' => $user->id,
             'type' => 'audio',
-            'is_available' => 0,
+            'is_available' => 1,
             'approved_by_admin' => 1,
             'show_only_in_digiverses' => 1,
         ]);
@@ -341,7 +341,7 @@ class CreateTest extends TestCase
             'description' => $request['description'],
             'user_id' => $user->id,
             'type' => 'pdf',
-            'is_available' => 0,
+            'is_available' => 1,
             'approved_by_admin' => 1,
             'show_only_in_digiverses' => 1,
         ]);
