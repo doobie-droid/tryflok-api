@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Assets;
 
-use App\Models\Asset;
 use App\Jobs\Assets\MigratePrivate as MigratePrivateAssetJob;
+use App\Models\Asset;
 use Illuminate\Console\Command;
 
 class MigratePrivateAssets extends Command
