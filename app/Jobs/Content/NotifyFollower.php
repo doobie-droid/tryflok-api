@@ -54,8 +54,8 @@ class NotifyFollower implements ShouldQueue
         $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notification->id)->first();
 
         $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
-        if (in_array($this->notificable_type, ['collection', 'content']) 
-            && 
+        if (in_array($this->notificable_type, ['collection', 'content'])
+            &&
             ! is_null($notification->notificable()->first()->cover()->first())
         ) {
             $image = $notification->notificable()->first()->cover()->first()->url;

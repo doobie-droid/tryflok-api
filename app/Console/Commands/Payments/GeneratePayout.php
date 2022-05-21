@@ -53,7 +53,7 @@ class GeneratePayout extends Command
                 }
             });
             DB::commit();
-        }   catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             DB::rollBack();
             throw $exception;
         }

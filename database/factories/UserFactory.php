@@ -17,7 +17,7 @@ class UserFactory extends Factory
      */
     protected $model = User::class;
 
-    /** @var User */ 
+    /** @var User */
     private $user;
 
     /** @var Asset */
@@ -46,9 +46,9 @@ class UserFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (User $user) {
-           $this->user = $user;
-           $this->user->assignRole(Roles::USER);
-           $this->generateProfilePicture();
+            $this->user = $user;
+            $this->user->assignRole(Roles::USER);
+            $this->generateProfilePicture();
         });
     }
 

@@ -5,8 +5,6 @@ namespace Tests\Feature\Console\Commands\Contents;
 use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
-use Tests\MockData;
 use Tests\TestCase;
 
 class ComputeChallengeWinner extends TestCase
@@ -375,5 +373,4 @@ class ComputeChallengeWinner extends TestCase
             'revenue_from' => 'referral',
         ]);
     }
-   
 }

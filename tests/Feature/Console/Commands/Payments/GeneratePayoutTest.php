@@ -6,8 +6,6 @@ use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Str;
-use Tests\MockData;
 use Tests\TestCase;
 
 class GeneratePayoutTest extends TestCase

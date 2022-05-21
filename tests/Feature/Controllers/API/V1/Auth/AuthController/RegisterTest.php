@@ -9,8 +9,8 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
-use Tests\TestCase;
 use Tests\MockData;
+use Tests\TestCase;
 
 class RegisterTest extends TestCase
 {

@@ -57,7 +57,7 @@ class ContentResource extends JsonResource
 
     private function getVoteStructure()
     {
-        $challenge_contestants = $this->whenLoaded('challengeContestants');        
+        $challenge_contestants = $this->whenLoaded('challengeContestants');
         if (! is_null($challenge_contestants)) {
             $total_votes = $this->challengeVotes()->count();
             $vote_data = [

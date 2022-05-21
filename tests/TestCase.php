@@ -10,8 +10,8 @@ abstract class TestCase extends BaseTestCase
 
     protected function assertArrayHasObjectWithElementValue($array, $object, $element)
     {
-        foreach($array as $arrayItem) {
-            if($arrayItem->$element === $object->$element) {
+        foreach ($array as $arrayItem) {
+            if ($arrayItem->$element === $object->$element) {
                 return true;
             }
         }

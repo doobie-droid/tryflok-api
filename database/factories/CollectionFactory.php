@@ -17,19 +17,19 @@ class CollectionFactory extends Factory
      */
     protected $model = Collection::class;
 
-    /** @var Collection */ 
+    /** @var Collection */
     private $digiverse;
 
     /** @var Tag[] */
     private $tags = [];
 
-    /** @var float */ 
+    /** @var float */
     private $priceAmount = 0;
     
-    /** @var Asset */ 
+    /** @var Asset */
     private $cover;
 
-    /** @var Content[] */ 
+    /** @var Content[] */
     private $contents;
 
     /**
@@ -151,7 +151,7 @@ class CollectionFactory extends Factory
     }
 
     private function generatePrice(): void
-    {   
+    {
         $previousPrice = $this->digiverse->prices()->first();
         if (! is_null($previousPrice)) {
             $previousPrice->forceDelete();

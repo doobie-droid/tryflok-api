@@ -34,7 +34,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      * @param  ConnectionInterface $conn The socket/connection that just connected to your application
      * @throws \Exception
      */
-    public function onOpen(ConnectionInterface $conn){
+    public function onOpen(ConnectionInterface $conn)
+    {
         try {
             $this->connections[$conn->resourceId] = [
                 'socket_connection' => $conn,
@@ -59,7 +60,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      * @param  ConnectionInterface $conn The socket/connection that is closing/closed
      * @throws \Exception
      */
-    public function onClose(ConnectionInterface $conn){
+    public function onClose(ConnectionInterface $conn)
+    {
         try {
             $user_id = null;
             if (array_key_exists('user_id', $this->connections[$conn->resourceId])) {
@@ -68,8 +70,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             
             unset($this->connections[$conn->resourceId]);
             if (! is_null($user_id)) {
-                $key = array_search($conn->resourceId,$this->map_user_id_to_connections[$user_id]);
-                unset($this->map_user_id_to_connections[$user_id][$key]); 
+                $key = array_search($conn->resourceId, $this->map_user_id_to_connections[$user_id]);
+                unset($this->map_user_id_to_connections[$user_id][$key]);
             }
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -83,7 +85,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      * @param  \Exception $e
      * @throws \Exception
      */
-    public function onError(ConnectionInterface $conn, \Exception $e){
+    public function onError(ConnectionInterface $conn, \Exception $e)
+    {
         try {
             $user_id = null;
             if (array_key_exists('user_id', $this->connections[$conn->resourceId])) {
@@ -92,8 +95,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             
             unset($this->connections[$conn->resourceId]);
             if (! is_null($user_id)) {
-                $key = array_search($conn->resourceId,$this->map_user_id_to_connections[$user_id]);
-                unset($this->map_user_id_to_connections[$user_id][$key]); 
+                $key = array_search($conn->resourceId, $this->map_user_id_to_connections[$user_id]);
+                unset($this->map_user_id_to_connections[$user_id][$key]);
             }
             $conn->close();
         } catch (\Exception $exception) {
@@ -107,7 +110,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      * @param  string $msg The message received
      * @throws \Exception
      */
-    public function onMessage(ConnectionInterface $conn, $msg){
+    public function onMessage(ConnectionInterface $conn, $msg)
+    {
         try {
             $event = "";
             $data = json_decode($msg);
@@ -376,7 +380,6 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     $connection_data['socket_connection']->send(json_encode($message));
                 }
             }
-
         } catch (\Exception $exception) {
             $connection->send(json_encode([
                 'event' => 'event-error',
@@ -450,7 +453,6 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     $connection_data['socket_connection']->send(json_encode($message));
                 }
             }
-
         } catch (\Exception $exception) {
             $connection->send(json_encode([
                 'event' => 'event-error',
@@ -524,7 +526,6 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     $connection_data['socket_connection']->send(json_encode($message));
                 }
             }
-
         } catch (\Exception $exception) {
             $connection->send(json_encode([
                 'event' => 'event-error',
@@ -592,7 +593,6 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     $connection_data['socket_connection']->send(json_encode($message));
                 }
             }
-
         } catch (\Exception $exception) {
             $connection->send(json_encode([
                 'event' => 'event-error',

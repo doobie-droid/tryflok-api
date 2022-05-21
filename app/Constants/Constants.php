@@ -36,6 +36,6 @@ class Constants
     // channel names
     public const WEBSOCKET_MESSAGE_CHANNEL = 'websocket-message-channel';
 
-    // challenge 
+    // challenge
     public const CHALLENGE_VOTE_WINDOW_IN_MINUTES = 10;
 }

@@ -30,8 +30,7 @@ class AccessToken
     {
         $accessToken = new AccessToken;
 
-        if (
-            ! $accessToken->is_nonempty_string('appID', $appID) ||
+        if (! $accessToken->is_nonempty_string('appID', $appID) ||
             ! $accessToken->is_nonempty_string('appCertificate', $appCertificate) ||
             ! $accessToken->is_nonempty_string('channelName', $channelName)
         ) {
@@ -90,8 +89,7 @@ class AccessToken
             return false;
         }
 
-        if (
-            ! $this->is_nonempty_string('token', $token) ||
+        if (! $this->is_nonempty_string('token', $token) ||
             ! $this->is_nonempty_string('appCertificate', $appCertificate) ||
             ! $this->is_nonempty_string('channelName', $channelName)
         ) {

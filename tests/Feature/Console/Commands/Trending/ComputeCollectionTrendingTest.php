@@ -5,8 +5,6 @@ namespace Tests\Feature\Console\Commands\Trending;
 use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
-use Tests\MockData;
 use Tests\TestCase;
 
 class ComputeCollectionTrendingTest extends TestCase

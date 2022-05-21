@@ -69,3 +69,9 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 - run php artisan jwt:secret
 - run php artisan migrate:fresh
 - run php artisan db:seed --class=ProductionSeeder
+
+
+# For Linting
+- ./vendor/bin/tlint format
+- ./vendor/bin/tlint
+- ./vendor/bin/phpmd ./app ansi phpmd-ruleset.xml

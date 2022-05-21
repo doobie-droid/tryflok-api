@@ -45,14 +45,14 @@ class ComputeChallengeWinner implements ShouldQueue
             $players[] = ['contestant' => $contestant->contestant, 'votes' => $votes];
         }
 
-        $winner = NULL;
-        $loser = NULL;
+        $winner = null;
+        $loser = null;
         if ($players[0]['votes'] === $players[1]['votes']) {
             $winner_share = bcdiv(100 - $moderator_share, 2, 2);
             $loser_share = $winner_share;
             $winner = $players[0]['contestant'];
             $loser = $players[1]['contestant'];
-        } else if ($players[0]['votes'] > $players[1]['votes']) {
+        } elseif ($players[0]['votes'] > $players[1]['votes']) {
             $winner = $players[0]['contestant'];
             $loser = $players[1]['contestant'];
         } else {

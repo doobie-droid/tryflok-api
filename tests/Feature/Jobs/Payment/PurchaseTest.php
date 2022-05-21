@@ -4,11 +4,11 @@ namespace Tests\Feature\Jobs\Payment;
 
 use App\Constants;
 use App\Jobs\Payment\Purchase as PurchaseJob;
-use App\Models;
 use App\Mail\User\SaleMade;
+use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class PurchaseTest extends TestCase

@@ -28,8 +28,7 @@ class RtcTokenBuilder
         $token = AccessToken::init($appID, $appCertificate, $channelName, $userAccount);
         $privileges = AccessToken::PRIVILEGES;
         $token->addPrivilege($privileges['kJoinChannel'], $privilegeExpireTs);
-        if (
-            ($role == RtcTokenBuilder::ROLE_ATTENDEE) ||
+        if (($role == RtcTokenBuilder::ROLE_ATTENDEE) ||
             ($role == RtcTokenBuilder::ROLE_PUBLISHER) ||
             ($role == RtcTokenBuilder::ROLE_ADMIN)
         ) {

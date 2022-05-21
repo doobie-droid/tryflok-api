@@ -40,7 +40,7 @@ class MigratePrivate implements ShouldQueue
         if ($this->asset->asset_type === 'video') {
             $this->updateItemContent($this->asset);
 
-            foreach ($this->asset->resolutions  as $resolution) {
+            foreach ($this->asset->resolutions as $resolution) {
                 $this->updateItemUrl($resolution);
                 $this->updateItemContent($resolution);
             }

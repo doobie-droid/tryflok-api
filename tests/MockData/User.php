@@ -2,7 +2,6 @@
 
 namespace Tests\MockData;
 
-use App\Models;
 
 class User
 {

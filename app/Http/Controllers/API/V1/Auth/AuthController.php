@@ -46,7 +46,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'public_id' => uniqid(rand()),
                 'email_token' => Str::random(16) . 'YmdHis',
-                'phone_number' => isset($request->phone_number) ? $request->phone_number : NULL,
+                'phone_number' => isset($request->phone_number) ? $request->phone_number : null,
                 'referral_id' => strtoupper(Str::random(6)) . '-' . date('Ymd'),
             ]);
 
@@ -111,7 +111,7 @@ class AuthController extends Controller
                     $webClientId = config('services.google.web_client_id');
                     if ($request->sign_in_source === 'ios') {
                         $client_id = $iosAppClientId;
-                    } else if ($request->sign_in_source === 'android') {
+                    } elseif ($request->sign_in_source === 'android') {
                         $client_id = $androidAppClientId;
                     } else {
                         $client_id = $webClientId;
@@ -157,7 +157,7 @@ class AuthController extends Controller
                     'public_id' => uniqid(rand()),
                     'email_token' => Str::random(16),
                     'referral_id' => strtoupper(Str::random(6)) . '-' . date('Ymd'),
-                    'phone_number' => isset($request->phone_number) ? $request->phone_number : NULL,
+                    'phone_number' => isset($request->phone_number) ? $request->phone_number : null,
                 ]);
                 event(new ConfirmEmailEvent($user));
                 $user->assignRole(Roles::USER);

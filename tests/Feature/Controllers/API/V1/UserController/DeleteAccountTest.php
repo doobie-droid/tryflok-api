@@ -2,10 +2,8 @@
 
 namespace Tests\Feature\Controllers\API\V1\UserController;
 
-use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
 use Tests\MockData;
 use Tests\TestCase;
 
@@ -23,7 +21,7 @@ class DeleteAccountTest extends TestCase
     public function test_delete_account_works()
     {
         $user = Models\User::factory()->create();
-        Models\Wallet::factory()->for($user,'walletable')->create();
+        Models\Wallet::factory()->for($user, 'walletable')->create();
         $this->be($user);
 
         $response = $this->json('DELETE', '/api/v1/account');

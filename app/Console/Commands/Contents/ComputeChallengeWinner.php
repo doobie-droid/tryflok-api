@@ -47,13 +47,13 @@ class ComputeChallengeWinner extends Command
             Content::where('challenge_winner_computed', 0)
             ->where('is_challenge', 1)
             ->where('live_ended_at', '<=', now()->subMinutes($voting_window))
-            ->chunk(100000, function($challenges) {
+            ->chunk(100000, function ($challenges) {
                 foreach ($challenges as $challenge) {
                     ComputeChallengeWinnerJob::dispatch($challenge);
                 }
             });
             DB::commit();
-        }   catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             DB::rollBack();
             throw $exception;
         }

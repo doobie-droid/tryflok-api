@@ -37,7 +37,9 @@
         "mockery/mockery": "^1.4.2",
         "phpunit/phpunit": "^9.3.3",
         "tightenco/duster": "^0.3.2",
-        "tightenco/tlint": "^6.2.1"
+        "tightenco/tlint": "^6.2.1",
+        "pestphp/pest": "^1.21.3",
+        "phpmd/phpmd": "^2.12.0"
     },
     "autoload": {
         "psr-4": {

@@ -30,7 +30,6 @@ class MigratePrivateAssets extends Command
     public function __construct()
     {
         parent::__construct();
-
     }
 
     /**
@@ -40,7 +39,7 @@ class MigratePrivateAssets extends Command
      */
     public function handle()
     {
-        Asset::where('storage_provider', 'private-s3')->chunk(1000, function($assets) {
+        Asset::where('storage_provider', 'private-s3')->chunk(1000, function ($assets) {
             foreach ($assets as $asset) {
                 MigratePrivateAssetJob::dispatch($asset);
             }

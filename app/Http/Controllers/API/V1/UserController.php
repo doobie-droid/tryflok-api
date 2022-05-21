@@ -505,7 +505,7 @@ class UserController extends Controller
             $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
             $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
 
-            $revenues = $request->user()->revenues()->with('revenueable')->where('revenue_from','sale')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
+            $revenues = $request->user()->revenues()->with('revenueable')->where('revenue_from', 'sale')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
             return $this->respondWithSuccess('Revenues retrieved successfully', [
                 'revenues' => RevenueResource::collection($revenues),
                 'current_page' => (int) $revenues->currentPage(),

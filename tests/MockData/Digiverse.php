@@ -1,6 +1,7 @@
 <?php
 
 namespace Tests\MockData;
+
 use App\Models;
 
 class Digiverse

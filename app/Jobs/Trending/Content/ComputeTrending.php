@@ -60,14 +60,14 @@ class ComputeTrending implements ShouldQueue
         $trending_points = (int) bcadd(
             bcadd(
                 bcadd(
-                    $normalized_views, 
-                    $normalized_reviews, 
+                    $normalized_views,
+                    $normalized_reviews,
                     3
-                ), 
-                $normalized_subscribers, 
+                ),
+                $normalized_subscribers,
                 3
-            ), 
-            $normalized_purcahses, 
+            ),
+            $normalized_purcahses,
             0
         );
 

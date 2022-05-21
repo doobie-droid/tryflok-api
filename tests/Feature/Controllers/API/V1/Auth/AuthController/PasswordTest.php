@@ -2,12 +2,10 @@
 
 namespace Tests\Feature\Controllers\API\V1\Auth\AuthController;
 
-use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
-use Tests\MockData;
 
 class PasswordTest extends TestCase
 {

@@ -359,7 +359,6 @@ class CollectionController extends Controller
             return $this->respondWithSuccess('Collection contents updated successfully.', [
                 'collection' => new CollectionResource($collection),
             ]);
-
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
@@ -796,8 +795,7 @@ class CollectionController extends Controller
             return $this->respondWithSuccess('Collection has been archived successfully', [
                 'collection' => new CollectionResource($collection),
             ]);
-
-        }  catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
@@ -824,9 +822,9 @@ class CollectionController extends Controller
             return $this->respondWithSuccess('Collection deleted successfully', [
                 'collection' => new CollectionResource($collection),
             ]);
-       }  catch (\Exception $exception) {
-           Log::error($exception);
-           return $this->respondInternalError('Oops, an error occurred. Please try again later.');
-       }
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
     }
 }

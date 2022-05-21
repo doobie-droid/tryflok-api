@@ -2,14 +2,11 @@
 
 namespace Tests\Feature\Console\Commands\Payments;
 
-use App\Constants;
 use App\Mail\User\NoPaymentAccountMail;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
-use Tests\MockData;
 use Tests\TestCase;
 
 class CashoutPayoutTest extends TestCase
