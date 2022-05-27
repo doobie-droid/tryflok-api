@@ -791,7 +791,7 @@ class CollectionController extends Controller
             }
 
             $collection->archived_at = now();
-            $collection->saved();
+            $collection->save();
             return $this->respondWithSuccess('Collection has been archived successfully', [
                 'collection' => new CollectionResource($collection),
             ]);
@@ -809,13 +809,13 @@ class CollectionController extends Controller
             ->eagerLoadBaseRelations()
             ->first();
             if (is_null($collection)) {
-                return $this->respondBadRequest('You do not have permission to update this collection');
+                return $this->respondBadRequest('You do not have permission to delete this collection');
             }
 
             // make sure there are no active purchases
             $active_purchases = $collection->userables()->where('status', 'available')->count();
             if ($active_purchases > 0) {
-                return $this->respondBadRequest('You cannot delete a collection that has active purchases');
+                return $this->respondBadRequest('You cannot delete a collection that has active purchases. Archive the collection instead');
             }
 
             $collection->delete();
