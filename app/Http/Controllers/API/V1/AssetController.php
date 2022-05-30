@@ -68,7 +68,7 @@ class AssetController extends Controller
                 $ext = $file->getClientOriginalExtension();
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'image');
                 $fullFilename = join_path($folder, $filename . '.' . $ext);
-                $url = join_path(config('services.cloudfront.public_url'), $fullFilename);
+                $url = join_path(config('flok.public_media_url'), $fullFilename);
 
                 $asset = Asset::create([
                     'url' => $url,

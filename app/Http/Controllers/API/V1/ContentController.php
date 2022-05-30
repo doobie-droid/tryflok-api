@@ -177,7 +177,7 @@ class ContentController extends Controller
                 $filename = date('Ymd') . Str::random(16);
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'text');
                 $fullFilename = join_path($folder, $filename . '.html');
-                $url = join_path(config('services.cloudfront.public_url'), $fullFilename);
+                $url = join_path(config('flok.public_media_url'), $fullFilename);
                 $asset = Asset::create([
                     'url' => $url,
                     'storage_provider' => 'public-s3',
@@ -367,7 +367,7 @@ class ContentController extends Controller
                 $filename = date('Ymd') . Str::random(16);
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'text');
                 $fullFilename = join_path($folder, $filename . '.html');
-                $url = join_path(config('services.cloudfront.public_url'), $fullFilename);
+                $url = join_path(config('flok.public_media_url'), $fullFilename);
 
                 $oldArticle = $content->assets()->first();
                 $oldArticle->url = $url;
