@@ -54,11 +54,11 @@ class ComputeTrending implements ShouldQueue
 
         $this->collection->trending_points = bcadd(
             bcadd(
-                $normalized_contents,  
+                $normalized_contents,
                 $normalized_subscriptions,
                 3
-            ), 
-            $normalized_contents_trending_aggregate, 
+            ),
+            $normalized_contents_trending_aggregate,
             0
         );
         $this->collection->save();

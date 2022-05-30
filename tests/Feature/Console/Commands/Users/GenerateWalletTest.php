@@ -3,8 +3,6 @@
 namespace Tests\Feature\Console\Commands\Users;
 
 use App\Models;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class GenerateWalletTest extends TestCase

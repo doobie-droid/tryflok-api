@@ -23,7 +23,7 @@ class TipUserTest extends TestCase
 
         $this->be($user1);
 
-        /** when user is invalid */ 
+        /** when user is invalid */
         $response = $this->json('POST', '/api/v1/users/sdsdsd/tip', [
             'amount_in_flk' => '800000',
         ]);
@@ -38,7 +38,7 @@ class TipUserTest extends TestCase
             ],
         ]);
 
-        /** when wallet balance is less than amount */ 
+        /** when wallet balance is less than amount */
         $response = $this->json('POST', "/api/v1/users/{$user2->id}/tip", [
             'amount_in_flk' => '800000',
         ]);

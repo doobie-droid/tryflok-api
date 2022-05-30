@@ -5,8 +5,8 @@ namespace Tests\Feature\Controllers\API\V1\Auth\AuthController;
 use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Tests\TestCase;
 use Tests\MockData;
+use Tests\TestCase;
 
 class LoginViaOtpTest extends TestCase
 {

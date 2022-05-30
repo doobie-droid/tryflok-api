@@ -177,7 +177,7 @@ class ContentController extends Controller
                 $filename = date('Ymd') . Str::random(16);
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'text');
                 $fullFilename = join_path($folder, $filename . '.html');
-                $url = join_path(config('services.cloudfront.public_url'), $fullFilename);
+                $url = join_path(config('flok.public_media_url'), $fullFilename);
                 $asset = Asset::create([
                     'url' => $url,
                     'storage_provider' => 'public-s3',
@@ -367,7 +367,7 @@ class ContentController extends Controller
                 $filename = date('Ymd') . Str::random(16);
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'text');
                 $fullFilename = join_path($folder, $filename . '.html');
-                $url = join_path(config('services.cloudfront.public_url'), $fullFilename);
+                $url = join_path(config('flok.public_media_url'), $fullFilename);
 
                 $oldArticle = $content->assets()->first();
                 $oldArticle->url = $url;
@@ -406,7 +406,7 @@ class ContentController extends Controller
             return $this->respondWithSuccess('Content has been archived successfully', [
                 'content' => new ContentResource($content),
             ]);
-        }  catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
@@ -433,10 +433,10 @@ class ContentController extends Controller
             return $this->respondWithSuccess('Content deleted successfully', [
                 'content' => new ContentResource($content),
             ]);
-       }  catch (\Exception $exception) {
-           Log::error($exception);
-           return $this->respondInternalError('Oops, an error occurred. Please try again later.');
-       }
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
     }
 
     public function attachMediaToContent(Request $request, $id)
@@ -444,7 +444,7 @@ class ContentController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
-                'asset_ids' => ['required'], 
+                'asset_ids' => ['required'],
                 'asset_ids.*' => ['sometimes', 'nullable', 'string', 'exists:assets,id',],
             ]);
 
@@ -623,7 +623,8 @@ class ContentController extends Controller
         }
     }
 
-    public function getContentInsights(Request $request, $id) {
+    public function getContentInsights(Request $request, $id)
+    {
         try {
             $validator = Validator::make(['id' => $id], [
                 'id' => ['required', 'string', 'exists:contents,id'],
@@ -1372,7 +1373,7 @@ class ContentController extends Controller
         }
     }
 
-    public function addViews(Request $request, $id) 
+    public function addViews(Request $request, $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [

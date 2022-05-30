@@ -2,25 +2,25 @@
 
 namespace App\Console\Commands\Assets;
 
-use App\Jobs\Assets\MigratePrivate as MigratePrivateAssetJob;
+use App\Jobs\Assets\MigratePublic as MigratePublicAssetJob;
 use App\Models\Asset;
 use Illuminate\Console\Command;
 
-class MigratePrivateAssets extends Command
+class MigratePublicAssets extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'flok:migrate-private-assets';
+    protected $signature = 'flok:migrate-public-assets';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Change the domain name for private assets';
+    protected $description = 'Change the domain name for public assets';
 
     /**
      * Create a new command instance.
@@ -39,9 +39,9 @@ class MigratePrivateAssets extends Command
      */
     public function handle()
     {
-        Asset::where('storage_provider', 'private-s3')->chunk(1000, function ($assets) {
+        Asset::where('storage_provider', 'public-s3')->chunk(1000, function ($assets) {
             foreach ($assets as $asset) {
-                MigratePrivateAssetJob::dispatch($asset);
+                MigratePublicAssetJob::dispatch($asset);
             }
         });
         return 0;

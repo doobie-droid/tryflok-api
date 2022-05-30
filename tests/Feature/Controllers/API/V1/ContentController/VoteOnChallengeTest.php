@@ -5,8 +5,6 @@ namespace Tests\Feature\Controllers\API\V1\ContentController;
 use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
-use Tests\MockData;
 use Tests\TestCase;
 
 class VoteOnChallengeTest extends TestCase
@@ -100,7 +98,7 @@ class VoteOnChallengeTest extends TestCase
         ->isChallenge()
         ->futureScheduledDate()
         ->setChallengeContestants([$contestant1, $contestant2], ['accept' => 2])
-        ->setChallengeDetails($pot_size )
+        ->setChallengeDetails($pot_size)
         ->create();
         $response = $this->json('PATCH', "/api/v1/contents/{$content6->id}/vote-on-challenge", [
             'contestant' => $contestant1->id,

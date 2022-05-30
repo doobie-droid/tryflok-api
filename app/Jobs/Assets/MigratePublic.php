@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
-class MigratePrivate implements ShouldQueue
+class MigratePublic implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -24,8 +24,8 @@ class MigratePrivate implements ShouldQueue
      */
     public function __construct(Asset $asset)
     {
-        $this->old_domain = config('services.cloudfront.private_url');
-        $this->new_domain = config('flok.private_media_url');
+        $this->old_domain = config('services.cloudfront.public_url');
+        $this->new_domain = config('flok.public_media_url');
         $this->asset = $asset;
     }
 
@@ -63,18 +63,18 @@ class MigratePrivate implements ShouldQueue
 
     private function getNewM3u8Content($provider_id)
     {
-        $old_contents = Storage::disk('private_s3')->get($provider_id);
+        $old_contents = Storage::disk('public_s3')->get($provider_id);
         return str_replace($this->old_domain, $this->new_domain, $old_contents);
     }
 
     private function deleteOldContent($provider_id)
     {
-        Storage::disk('private_s3')->delete($provider_id);
+        Storage::disk('public_s3')->delete($provider_id);
     }
 
     private function setNewContent($provider_id, $content)
     {
-        Storage::disk('private_s3')->put($provider_id, $content);
+        Storage::disk('public_s3')->put($provider_id, $content);
     }
 
     private function getNewUrl($old_url)

@@ -5,8 +5,8 @@ namespace Tests\Feature\Controllers\API\V1\Auth\AuthController;
 use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Tests\TestCase;
 use Tests\MockData;
+use Tests\TestCase;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LoginTest extends TestCase
@@ -26,7 +26,7 @@ class LoginTest extends TestCase
         $response = $this->json('POST', '/api/v1/auth/login', $request);
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\User::STANDARD_USER_RESPONSE_STRUCTURE)
-        ->assertJson( MockData\User::generateStandardUserResponseJson($user->name, $user->email, $user->username, [Constants\Roles::SUPER_ADMIN, Constants\Roles::ADMIN, Constants\Roles::USER]));
+        ->assertJson(MockData\User::generateStandardUserResponseJson($user->name, $user->email, $user->username, [Constants\Roles::SUPER_ADMIN, Constants\Roles::ADMIN, Constants\Roles::USER]));
     }
 
     public function test_login_works_via_username()
@@ -42,7 +42,7 @@ class LoginTest extends TestCase
         $response = $this->json('POST', '/api/v1/auth/login', $request);
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\User::STANDARD_USER_RESPONSE_STRUCTURE)
-        ->assertJson( MockData\User::generateStandardUserResponseJson($user->name, $user->email, $user->username, [Constants\Roles::SUPER_ADMIN, Constants\Roles::ADMIN, Constants\Roles::USER]));
+        ->assertJson(MockData\User::generateStandardUserResponseJson($user->name, $user->email, $user->username, [Constants\Roles::SUPER_ADMIN, Constants\Roles::ADMIN, Constants\Roles::USER]));
     }
 
     public function test_refresh_token_works()

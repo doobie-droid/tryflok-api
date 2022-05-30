@@ -57,8 +57,7 @@ class Delegator implements ShouldQueue
             'provider' => 'paystack',
             'provider_id' => $this->data['data']['reference'],
         ];
-        if (
-            $this->data['data']['metadata'] != null &&
+        if ($this->data['data']['metadata'] != null &&
             $this->data['data']['metadata'] != 0 &&
             is_array($this->data['data']['metadata']) &&
             array_key_exists('payment_data', $this->data['data']['metadata'])

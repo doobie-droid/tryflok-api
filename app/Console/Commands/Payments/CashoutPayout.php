@@ -29,7 +29,7 @@ class CashoutPayout extends Command
      * @return void
      */
     public function __construct()
-    {   
+    {
         parent::__construct();
     }
 
@@ -61,10 +61,11 @@ class CashoutPayout extends Command
                     }
                 });
             DB::commit();
-        }   catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             DB::rollBack();
             throw $exception;
         }
-        return Command::SUCCESS;;
+        return Command::SUCCESS;
+        ;
     }
 }

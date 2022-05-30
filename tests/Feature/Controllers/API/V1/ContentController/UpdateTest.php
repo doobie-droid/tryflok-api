@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Controllers\API\V1\ContentController;
 
-use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;

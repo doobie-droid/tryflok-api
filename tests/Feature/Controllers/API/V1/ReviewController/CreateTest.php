@@ -2,10 +2,8 @@
 
 namespace Tests\Feature\Controllers\API\V1\ReviewController;
 
-use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class CreateTest extends TestCase
@@ -97,15 +95,15 @@ class CreateTest extends TestCase
             'type' => 'content',
             'id' => $content->id,
             'comment' => 'it was good',
-        ];
-        $response = $this->json('POST', '/api/v1/reviews', $request);
-        $response->assertStatus(200);
+         ];
+         $response = $this->json('POST', '/api/v1/reviews', $request);
+         $response->assertStatus(200);
 
-        $this->assertDatabaseHas('reviews', [
+         $this->assertDatabaseHas('reviews', [
             'reviewable_type' => 'content',
             'reviewable_id' => $content->id,
             'comment' => $request['comment'],
-        ]);
+         ]);
     }
 
     public function test_create_collection_review_works()
@@ -135,15 +133,15 @@ class CreateTest extends TestCase
             'type' => 'collection',
             'id' => $collection->id,
             'comment' => 'it was good',
-        ];
-        $response = $this->json('POST', '/api/v1/reviews', $request);
-        $response->assertStatus(200);
+         ];
+         $response = $this->json('POST', '/api/v1/reviews', $request);
+         $response->assertStatus(200);
 
-        $this->assertDatabaseHas('reviews', [
+         $this->assertDatabaseHas('reviews', [
             'reviewable_type' => 'collection',
             'reviewable_id' => $collection->id,
             'comment' => $request['comment'],
-        ]);
+         ]);
     }
 
     public function test_create_review_review_works()
@@ -173,14 +171,14 @@ class CreateTest extends TestCase
             'type' => 'review',
             'id' => $review->id,
             'comment' => 'it was good',
-        ];
-        $response = $this->json('POST', '/api/v1/reviews', $request);
-        $response->assertStatus(200);
+         ];
+         $response = $this->json('POST', '/api/v1/reviews', $request);
+         $response->assertStatus(200);
 
-        $this->assertDatabaseHas('reviews', [
+         $this->assertDatabaseHas('reviews', [
             'reviewable_type' => 'review',
             'reviewable_id' => $review->id,
             'comment' => $request['comment'],
-        ]);
+         ]);
     }
 }

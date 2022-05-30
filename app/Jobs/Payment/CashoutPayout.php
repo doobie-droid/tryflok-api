@@ -35,7 +35,7 @@ class CashoutPayout implements ShouldQueue
      * @return void
      */
     public function handle()
-    {   
+    {
         DB::beginTransaction();
         try {
             $this->payout->increasePayoutCashoutAttempts();
@@ -61,8 +61,7 @@ class CashoutPayout implements ShouldQueue
                     }
                     break;
                 case 'stripe':
-                    if (
-                        isset($resp->destination) && 
+                    if (isset($resp->destination) &&
                         $resp->destination === $this->payment_account->identifier
                     ) {
                         $this->payout->markAsCompleted($resp->id);
@@ -73,7 +72,7 @@ class CashoutPayout implements ShouldQueue
                     break;
             }
             DB::commit();
-        }   catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             DB::rollBack();
             throw $exception;
         }

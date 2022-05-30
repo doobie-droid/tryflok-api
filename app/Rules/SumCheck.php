@@ -14,7 +14,7 @@ class SumCheck implements Rule
      * Create a new rule instance.
      *
      * @param string[] $fields
-     * 
+     *
      * @return void
      */
     public function __construct(array $fields, float $expected_sum)

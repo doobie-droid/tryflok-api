@@ -15,8 +15,8 @@ class CreateSalesTable extends Migration
             $table->unsignedDecimal('amount', 9, 2);
             $table->string('currency')->default('USD');
             $table->unsignedDecimal('payment_processor_fee', 9, 2);
-            $table->unsignedDecimal('platform_share', 9, 2); 
-            $table->unsignedDecimal('benefactor_share', 9, 2); 
+            $table->unsignedDecimal('platform_share', 9, 2);
+            $table->unsignedDecimal('benefactor_share', 9, 2);
             $table->unsignedDecimal('referral_bonus', 7, 2);
             $table->boolean('added_to_payout')->default(0);
             $table->timestamps();

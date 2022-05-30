@@ -5,8 +5,6 @@ namespace Tests\Feature\Controllers\API\V1\AnalyticsController;
 use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
-use Tests\MockData;
 use Tests\TestCase;
 
 class GetDailySalesTest extends TestCase
@@ -74,11 +72,20 @@ class GetDailySalesTest extends TestCase
             ]
         ]);
         $data = $response->getData()->data;
-        $this->assertEquals($data->sales->$day1, bcmul($day1_expected_total, 1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
-        2));
-        $this->assertEquals($data->sales->$day2, bcmul($day2_expected_total, 1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
-        2));
-        $this->assertEquals($data->sales->$day3, bcmul($day3_expected_total, 1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
-        2));
+        $this->assertEquals($data->sales->$day1, bcmul(
+            $day1_expected_total,
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE,
+            2
+        ));
+        $this->assertEquals($data->sales->$day2, bcmul(
+            $day2_expected_total,
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE,
+            2
+        ));
+        $this->assertEquals($data->sales->$day3, bcmul(
+            $day3_expected_total,
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE,
+            2
+        ));
     }
 }

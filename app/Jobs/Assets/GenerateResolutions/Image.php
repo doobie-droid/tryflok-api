@@ -52,17 +52,17 @@ class Image implements ShouldQueue
 
         if ($originalFileSize <= .1) {
             $compression_level = 90;
-        } else if ($originalFileSize <= .2) {
+        } elseif ($originalFileSize <= .2) {
             $compression_level = 90;
-        } else if ($originalFileSize < .5) {
+        } elseif ($originalFileSize < .5) {
             $compression_level = 90;
-        } else if ($originalFileSize <= 1) {
+        } elseif ($originalFileSize <= 1) {
             $compression_level = 50;
-        } else if ($originalFileSize <= 2) {
+        } elseif ($originalFileSize <= 2) {
             $compression_level = 25;
-        } else if ($originalFileSize <= 3) {
+        } elseif ($originalFileSize <= 3) {
             $compression_level = 20;
-        } else if ($originalFileSize <= 4) {
+        } elseif ($originalFileSize <= 4) {
             $compression_level = 20;
         } else {
             $compression_level = 20;
@@ -71,7 +71,8 @@ class Image implements ShouldQueue
         $compressed_folder_path = join_path(
             storage_path(),
             '/app/uploads/images',
-            $this->asset->id);
+            $this->asset->id
+        );
             $compressed_file_name = 'compressesed-' . date('Ymdhis') . '.' .  $this->ext;
         $destination = join_path($compressed_folder_path, $compressed_file_name);
         $this->compressed_filepath = $destination;
@@ -130,8 +131,8 @@ class Image implements ShouldQueue
                 imagegif($image, $destination);
                 break;
             case 'image/png':
-                $pngQuality = abs(9 - bcdiv($quality, 10, 0)); 
-                $im = new \Imagick($this->filepath); 
+                $pngQuality = abs(9 - bcdiv($quality, 10, 0));
+                $im = new \Imagick($this->filepath);
                 $im->setImageFormat('PNG8');
                 $colors = min(255, $im->getImageColors());
                 $im->quantizeImage($colors, \Imagick::COLORSPACE_RGB, 0, false, false);

@@ -8,7 +8,6 @@
         "QualifiedNamesOnlyForClassName"
     ],
     "excluded": [
-        "tests/",
         "supervisord/",
         "storage/",
         "php/",

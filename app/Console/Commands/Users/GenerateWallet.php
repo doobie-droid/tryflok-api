@@ -44,7 +44,7 @@ class GenerateWallet extends Command
                     $user->wallet()->create([]);
                 }
             });
-        }   catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             throw $exception;
         }
         return 0;

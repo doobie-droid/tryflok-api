@@ -165,7 +165,6 @@ class WalletController extends Controller
                     $flutterwave = new PaymentProvider($request->provider);
                     $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
                     if (($req->status === 'success' && $req->data->status === 'successful')) {
-
                         $amount_in_dollars = bcdiv($req->data->amount, 505, 2);
                         $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
                         $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);

@@ -18,22 +18,22 @@ class ContentFactory extends Factory
      */
     protected $model = Content::class;
 
-    /** @var Collection */ 
+    /** @var Collection */
     private $digiverse;
 
     /** @var Tag[] */
     private $tags = [];
 
-    /** @var float */ 
+    /** @var float */
     private $priceAmount = 0;
     
-    /** @var Asset */ 
+    /** @var Asset */
     private $cover;
 
-    /** @var Asset */ 
+    /** @var Asset */
     private $asset;
 
-    /** @var Content */ 
+    /** @var Content */
     private $content;
 
     /**
@@ -216,7 +216,7 @@ class ContentFactory extends Factory
         });
     }
 
-    public function setChallengeVoters(array $voters, string $contestant_id): self 
+    public function setChallengeVoters(array $voters, string $contestant_id): self
     {
         return $this->afterCreating(function (Content $content) use ($voters, $contestant_id) {
             foreach ($voters as $voter) {
@@ -382,7 +382,7 @@ class ContentFactory extends Factory
     }
 
     private function generatePrice(): void
-    {   
+    {
         $previousPrice = $this->content->prices()->first();
         if (! is_null($previousPrice)) {
             $previousPrice->forceDelete();

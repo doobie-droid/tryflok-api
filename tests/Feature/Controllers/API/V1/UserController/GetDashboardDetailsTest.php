@@ -5,8 +5,6 @@ namespace Tests\Feature\Controllers\API\V1\UserController;
 use App\Constants;
 use App\Models;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Str;
-use Tests\MockData;
 use Tests\TestCase;
 
 class GetDashboardDetailsTest extends TestCase
@@ -43,20 +41,20 @@ class GetDashboardDetailsTest extends TestCase
             ->create();
 
         $expected_total_previous_sales_revenue = bcmul(
-            $previous_sales_revenues_amount * $previous_sales_revenues_count, 
-            1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+            $previous_sales_revenues_amount * $previous_sales_revenues_count,
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE,
             2
         );
 
         $expected_total_current_month_sales_revenue = bcmul(
-            $current_month_sales_revenues_amount * $current_month_sales_revenues_count, 
-            1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+            $current_month_sales_revenues_amount * $current_month_sales_revenues_count,
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE,
             2
         );
 
         $expected_total_sales_revenue = bcadd(
-            $expected_total_previous_sales_revenue, 
-            $expected_total_current_month_sales_revenue, 
+            $expected_total_previous_sales_revenue,
+            $expected_total_current_month_sales_revenue,
             2
         );
 
@@ -80,20 +78,20 @@ class GetDashboardDetailsTest extends TestCase
             ->create();
 
         $expected_total_previous_tips_revenue = bcmul(
-            $previous_tips_revenues_amount * $previous_tips_revenues_count, 
-            1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+            $previous_tips_revenues_amount * $previous_tips_revenues_count,
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE,
             2
         );
 
         $expected_total_current_month_tips_revenue = bcmul(
-            $current_month_tips_revenues_amount * $current_month_tips_revenues_count, 
-            1 - Constants\Constants::NORMAL_CREATOR_CHARGE, 
+            $current_month_tips_revenues_amount * $current_month_tips_revenues_count,
+            1 - Constants\Constants::NORMAL_CREATOR_CHARGE,
             2
         );
 
         $expected_total_tips_revenue = bcadd(
-            $expected_total_previous_tips_revenue, 
-            $expected_total_current_month_tips_revenue, 
+            $expected_total_previous_tips_revenue,
+            $expected_total_current_month_tips_revenue,
             2
         );
 
