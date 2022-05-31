@@ -880,7 +880,7 @@ class UserController extends Controller
             $account_links = StripeAccountLink::create([
                 'account' => $stripeAccount->identifier,
                 'refresh_url' => config('flok.backend_url') . 'api/v1/payments/stripe/connect?id=' . $user->id . '&country=' . $country,
-                'return_url' => config('flok.frontend_url') . 'user/' . $user->id . '/account',
+                'return_url' => config('flok.frontend_url'),
                 'type' => 'account_onboarding',
             ]);
 
