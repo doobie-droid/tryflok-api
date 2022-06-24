@@ -25,20 +25,22 @@ class WithdrawFromWalletTest extends TestCase
         ]);
         $this->be($user);
 
-        /** when no amount is  passed */
+        /**
+ * when no amount is  passed
+*/
          $response = $this->json('PATCH', '/api/v1/account/withdraw-from-wallet', []);
 
         $response->assertStatus(400)->assertJson([
             'status' => false,
             'message' => 'Invalid or missing input fields',
             'errors' => [
-                'amount_in_flk' => [
-
-                ],
+                'amount_in_flk' => [],
             ],
         ]);
 
-        /** when no amount is less than minimum */
+        /**
+ * when no amount is less than minimum
+*/
         $response = $this->json('PATCH', '/api/v1/account/withdraw-from-wallet', [
             'amount_in_flk' => '99',
         ]);
@@ -47,9 +49,7 @@ class WithdrawFromWalletTest extends TestCase
             'status' => false,
             'message' => 'Invalid or missing input fields',
             'errors' => [
-                'amount_in_flk' => [
-
-                ],
+                'amount_in_flk' => [],
             ],
         ]);
     }

@@ -50,7 +50,7 @@ class Video implements ShouldQueue
     public function handle()
     {
         set_time_limit($this->timeout);
-        $ffmpeg =  FFMpeg::create([
+        $ffmpeg = FFMpeg::create([
             'timeout'          => 7200,
         ]);
         $resource = $ffmpeg->open($this->filepath);
@@ -64,7 +64,7 @@ class Video implements ShouldQueue
         ->setHlsTime(30)
         ->setHlsBaseUrl($baseUrl)
         ->x264()
-        ->autoGenerateRepresentations([480, 720, 1080, ]);
+        ->autoGenerateRepresentations([480, 720, 1080 ]);
         $hlsenc->save(join_path($localTempFolder, $this->filename . '.m3u8'));
         // populate data
         unlink($this->filepath);

@@ -45,9 +45,7 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var array
      */
-    protected $casts = [
-
-    ];
+    protected $casts = [];
 
     protected $guard_name = 'api';
 

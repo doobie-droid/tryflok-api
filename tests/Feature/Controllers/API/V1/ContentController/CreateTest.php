@@ -119,7 +119,7 @@ class CreateTest extends TestCase
             ],
             'tags' => [
                 $tag1->id,
-                $tag2->id
+                $tag2->id,
             ],
             'cover' => [
                 'asset_id' => $coverAsset->id,
@@ -486,7 +486,7 @@ class CreateTest extends TestCase
         $this->assertDatabaseHas('assetables', [
             'assetable_type' => 'content',
             'assetable_id' => $content->id,
-            'asset_id' =>  $content->assets()->first()->id,
+            'asset_id' => $content->assets()->first()->id,
             'purpose' => 'content-asset',
         ]);
         //validate price was created

@@ -43,7 +43,7 @@ class Stripe extends API implements PaymentInterface
     {
         //note that the amount supplied here is in dollars and must be converted to cents
         $amount_in_cents = bcmul($amount, 100, 0);
-        $response =  $this->_post('v1/transfers', [
+        $response = $this->_post('v1/transfers', [
         'amount' => $amount_in_cents,
         'currency' => 'usd',
         'destination' => $transferData->identifier,
@@ -70,7 +70,7 @@ class Stripe extends API implements PaymentInterface
      */
     public function getTransferStatus($id)
     {
-        $response =  $this->_get('v1/transfers/' . $id);
+        $response = $this->_get('v1/transfers/' . $id);
         return $response;
     }
     /**

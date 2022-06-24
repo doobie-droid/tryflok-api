@@ -97,7 +97,7 @@ class Purchase implements ShouldQueue
                     'user_id' => $payer->id,
                     'cartable_id' => $itemModel->id,
                     'cartable_type' => $item['type'],
-                    'quantity' =>  1,
+                    'quantity' => 1,
                     'checked_out' => 1,
                     'status' => 'completed',
                 ]);
@@ -165,7 +165,7 @@ class Purchase implements ShouldQueue
             }
 
             //if subscription create subscription record
-            if ($item['type'] === 'collection' && $price->interval  === 'monthly') {
+            if ($item['type'] === 'collection' && $price->interval === 'monthly') {
                 $start = now();
                 $cloneOfStart = clone $start;
                 $end = $cloneOfStart->add($price->interval_amount, 'month');

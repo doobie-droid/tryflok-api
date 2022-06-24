@@ -98,7 +98,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::get('{public_id}/messages', 'ApprovalController@getApprovalMessages');
         });
 
-        Route::group(['prefix' => 'users',], function () {
+        Route::group(['prefix' => 'users'], function () {
             Route::patch('{id}/follow', 'UserController@followUser');
             Route::patch('{id}/unfollow', 'UserController@unfollowUser');
             Route::post('{id}/tip', 'UserController@tipUser');

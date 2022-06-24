@@ -17,19 +17,29 @@ class CollectionFactory extends Factory
      */
     protected $model = Collection::class;
 
-    /** @var Collection */
+    /**
+ * @var Collection
+*/
     private $digiverse;
 
-    /** @var Tag[] */
+    /**
+ * @var Tag[]
+*/
     private $tags = [];
 
-    /** @var float */
+    /**
+ * @var float
+*/
     private $priceAmount = 0;
     
-    /** @var Asset */
+    /**
+ * @var Asset
+*/
     private $cover;
 
-    /** @var Content[] */
+    /**
+ * @var Content[]
+*/
     private $contents;
 
     /**
@@ -108,7 +118,9 @@ class CollectionFactory extends Factory
         });
     }
 
-    /** @param Tag[] $tags */
+    /**
+ * @param Tag[] $tags
+*/
     public function setTags(array $tags): self
     {
         $this->tags = $tags;
@@ -118,7 +130,9 @@ class CollectionFactory extends Factory
         });
     }
 
-    /** @param Content[] $contents */
+    /**
+ * @param Content[] $contents
+*/
     public function setContents(array $contents): self
     {
         $this->contents = $contents;

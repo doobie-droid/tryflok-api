@@ -17,10 +17,14 @@ class UserFactory extends Factory
      */
     protected $model = User::class;
 
-    /** @var User */
+    /**
+ * @var User
+*/
     private $user;
 
-    /** @var Asset */
+    /**
+ * @var Asset
+*/
     private $profile_picture;
 
     /**

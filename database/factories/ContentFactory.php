@@ -18,22 +18,34 @@ class ContentFactory extends Factory
      */
     protected $model = Content::class;
 
-    /** @var Collection */
+    /**
+ * @var Collection
+*/
     private $digiverse;
 
-    /** @var Tag[] */
+    /**
+ * @var Tag[]
+*/
     private $tags = [];
 
-    /** @var float */
+    /**
+ * @var float
+*/
     private $priceAmount = 0;
     
-    /** @var Asset */
+    /**
+ * @var Asset
+*/
     private $cover;
 
-    /** @var Asset */
+    /**
+ * @var Asset
+*/
     private $asset;
 
-    /** @var Content */
+    /**
+ * @var Content
+*/
     private $content;
 
     /**
@@ -184,7 +196,9 @@ class ContentFactory extends Factory
         });
     }
 
-    /** @param User[] $contestants */
+    /**
+ * @param User[] $contestants
+*/
     public function setChallengeContestants(array $contestants, array $options = ['accept' => 0]): self
     {
         return $this->afterCreating(function (Content $content) use ($contestants, $options) {
@@ -203,7 +217,9 @@ class ContentFactory extends Factory
         });
     }
 
-    /** @param User[] $contributors */
+    /**
+ * @param User[] $contributors
+*/
     public function setChallengeContributors(array $contributors, int $amount = 500): self
     {
         return $this->afterCreating(function (Content $content) use ($contributors, $amount) {
@@ -222,7 +238,7 @@ class ContentFactory extends Factory
             foreach ($voters as $voter) {
                 $content->challengeVotes()->create([
                     'voter_id' => $voter->id,
-                    'contestant_id' =>  $contestant_id,
+                    'contestant_id' => $contestant_id,
                 ]);
             }
         });
@@ -294,7 +310,9 @@ class ContentFactory extends Factory
         });
     }
 
-    /** @param Tag[] $tags */
+    /**
+ * @param Tag[] $tags
+*/
     public function setTags(array $tags): self
     {
         $this->tags = $tags;

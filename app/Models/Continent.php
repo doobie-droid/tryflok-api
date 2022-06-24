@@ -24,7 +24,7 @@ class Continent extends Model
      *
      * @var array
      */
-    protected $hidden = [ ];
+    protected $hidden = [];
 
     protected $guard_name = 'api';
 }

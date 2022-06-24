@@ -50,9 +50,9 @@ class UserController extends Controller
                 'limit' => $limit,
                 'keyword' => $keyword,
             ], [
-                'page' => ['required', 'integer', 'min:1',],
-                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
-                'keyword' => ['sometimes', 'string', 'max:200',],
+                'page' => ['required', 'integer', 'min:1'],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}"],
+                'keyword' => ['sometimes', 'string', 'max:200'],
             ]);
 
             if ($validator->fails()) {
@@ -147,7 +147,7 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'username' => ['required', 'string',],
+                'username' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -337,8 +337,8 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make(array_merge($request->all()), [
-                'name' => ['sometimes', 'nullable', 'string', ],
-                'username' => ['sometimes', 'nullable', 'regex:/^[A-Za-z0-9_]*$/',],
+                'name' => ['sometimes', 'nullable', 'string' ],
+                'username' => ['sometimes', 'nullable', 'regex:/^[A-Za-z0-9_]*$/'],
                 'dob' => ['sometimes', 'nullable', 'date'],
                 'profile_picture' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'bio' => ['sometimes', 'nullable', 'string'],
@@ -388,9 +388,9 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->input(), [
-                'items' => ['required',],
-                'items.*.id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'in:collection,content',],
+                'items' => ['required'],
+                'items.*.id' => ['required', 'string' ],
+                'items.*.type' => ['required', 'string', 'in:collection,content'],
             ]);
 
             if ($validator->fails()) {
@@ -441,9 +441,9 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->input(), [
-                'items' => ['required',],
-                'items.*.id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'in:collection,content',],
+                'items' => ['required'],
+                'items.*.id' => ['required', 'string' ],
+                'items.*.type' => ['required', 'string', 'in:collection,content'],
             ]);
 
             if ($validator->fails()) {
@@ -529,8 +529,8 @@ class UserController extends Controller
                 'page' => $page,
                 'limit' => $limit,
             ], [
-                'page' => ['required', 'integer', 'min:1',],
-                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
+                'page' => ['required', 'integer', 'min:1'],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}"],
             ]);
 
             if ($validator->fails()) {
@@ -588,9 +588,9 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'items' => ['required',],
-                'items.*.id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'in:collection,content',],
+                'items' => ['required'],
+                'items.*.id' => ['required', 'string' ],
+                'items.*.type' => ['required', 'string', 'in:collection,content'],
                 'items.*.quantity' => ['sometimes', 'required', 'numeric', 'min:1', 'max:1'],
             ]);
 
@@ -660,9 +660,9 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'items' => ['required',],
-                'items.*.id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'in:collection,content',],
+                'items' => ['required'],
+                'items.*.id' => ['required', 'string' ],
+                'items.*.type' => ['required', 'string', 'in:collection,content'],
             ]);
 
             if ($validator->fails()) {
@@ -740,7 +740,7 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'provider' => ['required', 'string', 'in:manual,flutterwave',],
+                'provider' => ['required', 'string', 'in:manual,flutterwave'],
                 'identifier' => ['required', 'string'],
                 'country_code' => ['required', 'string'],
                 'currency_code' => ['required', 'string'],
@@ -908,7 +908,7 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'accounts' => ['required',],
+                'accounts' => ['required'],
                 'accounts.*' => ['required', 'string', 'exists:payment_accounts,id'],
             ]);
 
@@ -1025,7 +1025,7 @@ class UserController extends Controller
                 'subscribers_graph_start_date' => $subcribers_graph_start_date,
                 'subscribers_graph_end_date' => $subcribers_graph_end_date,
             ], [
-                'subscribers_graph_start_date' => ['required', 'date',],
+                'subscribers_graph_start_date' => ['required', 'date'],
                 'subscribers_graph_end_date' => ['required', 'date', 'after_or_equal:subscribers_graph_start_date'],
             ]);
 

@@ -68,7 +68,7 @@ class Flutterwave extends API implements PaymentInterface
         if (in_array($transferData->country_code, $need_branch_code)) {
             $neededData['destination_branch_code'] = $transferData->branch_code;
         }
-        $response =  $this->_post('v3/transfers', $neededData);
+        $response = $this->_post('v3/transfers', $neededData);
         return $response;
     }
 
@@ -81,7 +81,7 @@ class Flutterwave extends API implements PaymentInterface
      */
     public function getTransferStatus($id)
     {
-        $response =  $this->_get('v3/transfers/' . $id);
+        $response = $this->_get('v3/transfers/' . $id);
         return $response;
     }
 

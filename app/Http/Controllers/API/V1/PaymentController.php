@@ -61,7 +61,7 @@ class PaymentController extends Controller
     {
         try {
             $validator = Validator::make($request->input(), [
-                'account_number' => ['required', 'string',],
+                'account_number' => ['required', 'string'],
                 'bank_code' => ['required'],
             ]);
 
@@ -134,14 +134,14 @@ class PaymentController extends Controller
                 'provider_response' => ['required'],
                 'user' => ['required'],
                 'user.public_id' => ['required', 'string', 'exists:users,public_id'],
-                'items' => ['required',],
-                'items.*.public_id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'in:collection,content',],
-                'items.*.price' => ['required',],
-                'items.*.price.amount' => ['required', 'numeric',],
-                'items.*.price.public_id' => ['required', 'string',],
-                'items.*.price.interval' => ['required', 'string', 'in:year,month,week,day,one-off',],
-                'items.*.price.interval_amount' => ['required', 'numeric',],
+                'items' => ['required'],
+                'items.*.public_id' => ['required', 'string' ],
+                'items.*.type' => ['required', 'string', 'in:collection,content'],
+                'items.*.price' => ['required'],
+                'items.*.price.amount' => ['required', 'numeric'],
+                'items.*.price.public_id' => ['required', 'string'],
+                'items.*.price.interval' => ['required', 'string', 'in:year,month,week,day,one-off'],
+                'items.*.price.interval_amount' => ['required', 'numeric'],
             ]);
 
             if ($validator->fails()) {
@@ -185,14 +185,14 @@ class PaymentController extends Controller
     {
         try {
             $validator = Validator::make($request->input(), [
-                'items' => ['required',],
-                'items.*.id' => ['required', 'string', ],
-                'items.*.type' => ['required', 'string', 'in:collection,content',],
-                'items.*.price' => ['required',],
+                'items' => ['required'],
+                'items.*.id' => ['required', 'string' ],
+                'items.*.type' => ['required', 'string', 'in:collection,content'],
+                'items.*.price' => ['required'],
                 'items.*.price.amount' => ['required', 'numeric', 'min:0', 'max:0'],
                 'items.*.price.id' => ['required', 'string', 'exists:prices,id'],
-                'items.*.price.interval' => ['required', 'string', 'in:monthly,one-off',],
-                'items.*.price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer',],
+                'items.*.price.interval' => ['required', 'string', 'in:monthly,one-off'],
+                'items.*.price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
             ]);
 
             if ($validator->fails()) {

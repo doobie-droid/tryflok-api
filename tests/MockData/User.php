@@ -75,7 +75,7 @@ class User
         'username' => 'test_user',
         'password' => 'user123',
         'password_confirmation' => 'user123',
-        'phone_number' =>'+2348000000001',
+        'phone_number' => '+2348000000001',
     ];
 
     const STANDARD_USER_RESPONSE_STRUCTURE = [

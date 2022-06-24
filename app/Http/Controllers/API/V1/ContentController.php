@@ -41,17 +41,17 @@ class ContentController extends Controller
                 'description' => ['required', 'string'],
                 'digiverse_id' => ['required','exists:collections,id'],
                 'cover.asset_id' => ['required_if:type,pdf,audio,video,newsletter', 'string', 'exists:assets,id', new AssetTypeRule('image')],
-                'price' => ['required',],
+                'price' => ['required'],
                 'price.amount' => ['required', 'min:0', 'numeric', 'max:1000'],
-                'tags' => ['sometimes',],
+                'tags' => ['sometimes'],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
                 'type' => ['required', 'string', 'in:pdf,audio,video,newsletter,live-audio,live-video'],
                 'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['required_if:type,newsletter', 'string'],
                 'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
-                'pot_size' => ['required_if:is_challenge,1', 'integer', 'min:0',],
-                'minimum_contribution' => ['required_if:is_challenge,1', 'integer', 'min:10',],
+                'pot_size' => ['required_if:is_challenge,1', 'integer', 'min:0'],
+                'minimum_contribution' => ['required_if:is_challenge,1', 'integer', 'min:10'],
                 'moderator_share' => ['required_if:is_challenge,1', 'integer', 'max:10', 'min:0'],
                 'loser_share' => ['required_if:is_challenge,1', 'integer', 'max:50', 'min:0'],
                 'winner_share' => ['required_if:is_challenge,1', 'integer', 'max:100', 'min:45', 'gte:loser_share', new SumCheckRule(['moderator_share', 'loser_share'], 100)],
@@ -254,11 +254,11 @@ class ContentController extends Controller
             $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
                 'title' => ['sometimes', 'nullable', 'string', 'max:200', 'min:1'],
-                'description' => ['sometimes', 'nullable', 'string',],
+                'description' => ['sometimes', 'nullable', 'string'],
                 'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'price' => ['sometimes', 'nullable'],
                 'price.amount' => ['sometimes', 'nullable', 'min:0', 'numeric', 'max:1000'],
-                'tags' => ['sometimes',],
+                'tags' => ['sometimes'],
                 'tags.*.id' => ['required', 'string', 'exists:tags,id'],
                 'tags.*.action' => ['required', 'string', 'in:add,remove'],
                 'is_available' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
@@ -278,7 +278,7 @@ class ContentController extends Controller
                 return $this->respondBadRequest('You do not have permission to update this content');
             }
 
-            $validator2 =  Validator::make(array_merge($request->all()), [
+            $validator2 = Validator::make(array_merge($request->all()), [
                 'asset_id' => ['sometimes', 'nullable', 'exists:assets,id', new AssetTypeRule($content->type)],
             ]);
             if ($validator2->fails()) {
@@ -308,7 +308,7 @@ class ContentController extends Controller
 
             $content->save();
 
-            if (! is_null($request->cover) && array_key_exists('asset_id', $request->cover)  && ! is_null($request->cover['asset_id']) && $request->cover['asset_id'] != '') {
+            if (! is_null($request->cover) && array_key_exists('asset_id', $request->cover) && ! is_null($request->cover['asset_id']) && $request->cover['asset_id'] != '') {
                 $oldCover = $content->cover()->first();
                 if (! is_null($oldCover)) {
                     $content->cover()->detach($oldCover->id);
@@ -445,7 +445,7 @@ class ContentController extends Controller
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
                 'asset_ids' => ['required'],
-                'asset_ids.*' => ['sometimes', 'nullable', 'string', 'exists:assets,id',],
+                'asset_ids.*' => ['sometimes', 'nullable', 'string', 'exists:assets,id'],
             ]);
 
             if ($validator->fails()) {
@@ -476,9 +476,9 @@ class ContentController extends Controller
     {
         try {
             $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
-                'id' => ['required', 'string', 'exists:contents,id',],
-                'title' => ['required', 'string', 'max:200', 'min:1',],
-                'description' => ['required', 'string',],
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'title' => ['required', 'string', 'max:200', 'min:1'],
+                'description' => ['required', 'string'],
             ]);
 
             if ($validator1->fails()) {
@@ -513,10 +513,10 @@ class ContentController extends Controller
     {
         try {
             $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
-                'id' => ['required', 'string', 'exists:contents,id',],
-                'issue_id' => ['required', 'string', 'exists:content_issues,id',],
-                'title' => ['sometimes', 'nullable', 'string', 'max:200', 'min:1',],
-                'description' => ['sometimes', 'nullable', 'string',],
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'issue_id' => ['required', 'string', 'exists:content_issues,id'],
+                'title' => ['sometimes', 'nullable', 'string', 'max:200', 'min:1'],
+                'description' => ['sometimes', 'nullable', 'string'],
             ]);
 
             if ($validator1->fails()) {
@@ -557,8 +557,8 @@ class ContentController extends Controller
     {
         try {
             $validator1 = Validator::make(array_merge($request->all(), ['id' => $id]), [
-                'id' => ['required', 'string', 'exists:contents,id',],
-                'issue_id' => ['required', 'string', 'exists:content_issues,id',],
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'issue_id' => ['required', 'string', 'exists:content_issues,id'],
             ]);
 
             if ($validator1->fails()) {
@@ -701,19 +701,19 @@ class ContentController extends Controller
                 'type' => $types,
                 'active_live_content' => $activeLiveContent,
             ], [
-                'page' => ['required', 'integer', 'min:1',],
-                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
-                'keyword' => ['sometimes', 'string', 'max:200',],
-                'max_price' => ['required', 'integer', 'min:-1',],
-                'min_price' => ['required', 'integer', 'min:0',],
+                'page' => ['required', 'integer', 'min:1'],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}"],
+                'keyword' => ['sometimes', 'string', 'max:200'],
+                'max_price' => ['required', 'integer', 'min:-1'],
+                'min_price' => ['required', 'integer', 'min:0'],
                 'order_by' => ['required', 'string', 'in:created_at,price,views,reviews,scheduled_date'],
                 'order_direction' => ['required', 'string', 'in:asc,desc'],
-                'types' => ['sometimes',],
-                'type.*' => ['required', 'string',],
-                'tags' => ['sometimes',],
-                'tags.*' => ['required', 'string', 'exists:tags,id',],
-                'creators' => ['sometimes',],
-                'creators.*' => ['required', 'string', 'exists:users,id',],
+                'types' => ['sometimes'],
+                'type.*' => ['required', 'string'],
+                'tags' => ['sometimes'],
+                'tags.*' => ['required', 'string', 'exists:tags,id'],
+                'creators' => ['sometimes'],
+                'creators.*' => ['required', 'string', 'exists:users,id'],
                 'active_live_content' => ['sometimes', 'in:true,false'],
             ]);
 
@@ -833,19 +833,19 @@ class ContentController extends Controller
                 'active_live_content' => $activeLiveContent,
             ], [
                 'id' => ['required', 'string', 'exists:collections,id'],
-                'page' => ['required', 'integer', 'min:1',],
-                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
-                'keyword' => ['sometimes', 'string', 'max:200',],
-                'max_price' => ['required', 'integer', 'min:-1',],
-                'min_price' => ['required', 'integer', 'min:0',],
+                'page' => ['required', 'integer', 'min:1'],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}"],
+                'keyword' => ['sometimes', 'string', 'max:200'],
+                'max_price' => ['required', 'integer', 'min:-1'],
+                'min_price' => ['required', 'integer', 'min:0'],
                 'order_by' => ['required', 'string', 'in:created_at,price,views,reviews,scheduled_date'],
                 'order_direction' => ['required', 'string', 'in:asc,desc'],
-                'types' => ['sometimes',],
-                'type.*' => ['required', 'string',],
-                'tags' => ['sometimes',],
-                'tags.*' => ['required', 'string', 'exists:tags,id',],
-                'creators' => ['sometimes',],
-                'creators.*' => ['required', 'string', 'exists:users,id',],
+                'types' => ['sometimes'],
+                'type.*' => ['required', 'string'],
+                'tags' => ['sometimes'],
+                'tags.*' => ['required', 'string', 'exists:tags,id'],
+                'creators' => ['sometimes'],
+                'creators.*' => ['required', 'string', 'exists:users,id'],
                 'active_live_content' => ['sometimes', 'in:true,false'],
             ]);
 
@@ -933,9 +933,9 @@ class ContentController extends Controller
                 'keyword' => $keyword,
             ], [
                 'id' => ['required', 'string', 'exists:contents,id'],
-                'page' => ['required', 'integer', 'min:1',],
-                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
-                'keyword' => ['sometimes', 'string', 'max:200',],
+                'page' => ['required', 'integer', 'min:1'],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}"],
+                'keyword' => ['sometimes', 'string', 'max:200'],
             ]);
 
             if ($validator->fails()) {
@@ -1189,7 +1189,7 @@ class ContentController extends Controller
 
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
-            $join_count->value = (int)$join_count->value + 1;
+            $join_count->value = (int) $join_count->value + 1;
             $join_count->save();
             $expires = time() + (24 * 60 * 60); // let token last for 24hrs
             // $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, $uid, AgoraRtcToken::ROLE_ATTENDEE, $expires);
@@ -1460,7 +1460,7 @@ class ContentController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
-                'amount' => ['required', 'integer',]
+                'amount' => ['required', 'integer'],
             ]);
 
             if ($validator->fails()) {
@@ -1551,7 +1551,7 @@ class ContentController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
-                'contestant' => ['required', 'string', 'exists:users,id',],
+                'contestant' => ['required', 'string', 'exists:users,id'],
             ]);
 
             if ($validator->fails()) {
@@ -1599,7 +1599,7 @@ class ContentController extends Controller
             
             $content->challengeVotes()->create([
                 'voter_id' => $user->id,
-                'contestant_id' =>  $request->contestant,
+                'contestant_id' => $request->contestant,
             ]);
 
             $content = $content

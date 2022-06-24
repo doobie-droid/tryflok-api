@@ -14,7 +14,7 @@ use Psr\Http\Message\ResponseInterface;
 
 abstract class API implements APIInterface
 {
-    protected $secret ;
+    protected $secret;
 
     protected $perPage;
 
@@ -90,7 +90,7 @@ abstract class API implements APIInterface
     {
         try {
             $results = $this->getClient()->{$httpMethod}($url, ['json' => $parameters]);
-            $res  = json_decode((string)$results->getBody(), true);
+            $res  = json_decode((string) $results->getBody(), true);
             return response()->json($res)->getData();
         } catch (ClientException $exception) {
             return response()->json([
@@ -109,12 +109,14 @@ abstract class API implements APIInterface
     private function getClient()
     {
         return new Client([
-            'base_uri' => $this->baseUrl(), 'handler' => $this->createHandler()
+            'base_uri' => $this->baseUrl(),
+        'handler' => $this->createHandler()
         ]);
     }
 
     /**
      * Create the Client Handler
+     *
      * @return HandlerStack
      */
     private function createHandler()

@@ -17,7 +17,9 @@ class CreateTest extends TestCase
 
         $content = Models\Content::factory()->create();
 
-        /** when an invalid type is supplied */
+        /**
+ * when an invalid type is supplied
+*/
         $request = [
             'type' => 'sdsd',
             'id' => $content->id,
@@ -26,7 +28,9 @@ class CreateTest extends TestCase
         $response = $this->json('POST', '/api/v1/reviews', $request);
         $response->assertStatus(400);
 
-        /** when no id is supplied */
+        /**
+ * when no id is supplied
+*/
         $request = [
             'type' => 'content',
             'rating' => 3,
@@ -34,7 +38,9 @@ class CreateTest extends TestCase
         $response = $this->json('POST', '/api/v1/reviews', $request);
         $response->assertStatus(400);
 
-        /** when an invalid rating is supplied */
+        /**
+ * when an invalid rating is supplied
+*/
         $request = [
             'type' => 'content',
             'id' => $content->id,
@@ -59,7 +65,9 @@ class CreateTest extends TestCase
         $response = $this->json('POST', '/api/v1/reviews', $request);
         $response->assertStatus(400);
 
-        /** when both rating and comment are not supplied  */
+        /**
+ * when both rating and comment are not supplied
+*/
         $request = [
             'type' => 'content',
             'id' => $content->id,
@@ -75,7 +83,9 @@ class CreateTest extends TestCase
 
         $content = Models\Content::factory()->create();
 
-        /** when only rating is supplied */
+        /**
+ * when only rating is supplied
+*/
         $request = [
             'type' => 'content',
             'id' => $content->id,
@@ -90,7 +100,9 @@ class CreateTest extends TestCase
             'rating' => $request['rating'],
         ]);
 
-         /** when only comment is supplied */
+         /**
+ * when only comment is supplied
+*/
          $request = [
             'type' => 'content',
             'id' => $content->id,
@@ -113,7 +125,9 @@ class CreateTest extends TestCase
 
         $collection = Models\Collection::factory()->create();
 
-        /** when only rating is supplied */
+        /**
+ * when only rating is supplied
+*/
         $request = [
             'type' => 'collection',
             'id' => $collection->id,
@@ -128,7 +142,9 @@ class CreateTest extends TestCase
             'rating' => $request['rating'],
         ]);
 
-         /** when only comment is supplied */
+         /**
+ * when only comment is supplied
+*/
          $request = [
             'type' => 'collection',
             'id' => $collection->id,
@@ -151,7 +167,9 @@ class CreateTest extends TestCase
 
         $review = Models\Review::factory()->create();
 
-        /** when only rating is supplied */
+        /**
+ * when only rating is supplied
+*/
         $request = [
             'type' => 'review',
             'id' => $review->id,
@@ -166,7 +184,9 @@ class CreateTest extends TestCase
             'rating' => $request['rating'],
         ]);
 
-         /** when only comment is supplied */
+         /**
+ * when only comment is supplied
+*/
          $request = [
             'type' => 'review',
             'id' => $review->id,

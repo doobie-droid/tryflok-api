@@ -10,7 +10,7 @@ class Digiverse
     {
         $request = self::STANDARD_REQUEST;
         $request['cover']['asset_id'] = Models\Asset::factory()->create()->id;
-        $request['tags'][] =  Models\Tag::factory()->create()->id;
+        $request['tags'][] = Models\Tag::factory()->create()->id;
         return $request;
     }
 
@@ -18,7 +18,7 @@ class Digiverse
     {
         $request = self::STANDARD_REQUEST;
         $request['cover']['asset_id'] = Models\Asset::factory()->create()->id;
-        $request['tags'][] =  [
+        $request['tags'][] = [
             'action' => 'add',
             'id' => Models\Tag::factory()->create()->id,
         ];
@@ -59,8 +59,7 @@ class Digiverse
             'interval' => 'monthly',
             'interval_amount' => 1,
         ],
-        'tags' => [
-        ],
+        'tags' => [],
         'cover' => [
             'asset_id' => '',
         ],
@@ -101,21 +100,21 @@ class Digiverse
                         'amount',
                         'currency',
                         'interval',
-                        'interval_amount'
-                    ]
+                        'interval_amount',
+                    ],
                 ],
                 'tags' => [
                     [
                         'id',
                         'name',
-                    ]
+                    ],
                 ],
                 'userables' => [
                     [
                         'userable_type',
-                    ]
+                    ],
                 ]
-            ]
+            ],
         ]
     ];
 }

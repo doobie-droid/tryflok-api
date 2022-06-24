@@ -20,7 +20,6 @@ class ContentSeeder extends Seeder
     {
         /**
          * Add Content
-         *
          */
         $unpaidOneOffVideoContent = Content::create(MockContent::SEEDED_UNPAID_ONE_OFF_VIDEO);
         //add benefactors
@@ -235,7 +234,6 @@ class ContentSeeder extends Seeder
 
         /**
          * Add Collection
-         *
          */
         $collection = Collection::create(MockCollection::SEEDED_UNPAID_COLLECTION);
         //add benefactors
@@ -272,7 +270,7 @@ class ContentSeeder extends Seeder
             'currency' => 'USD',
         ]);
         //add content
-        $collection->contents()->attach([1,2,3,4]);
+        $collection->contents()->attach([1, 2, 3, 4]);
 
         //seed the userables
         Userable::create([
@@ -546,7 +544,6 @@ class ContentSeeder extends Seeder
 
         /**
          * Add Collection
-         *
          */
         $collection = Collection::create(MockCollection::SEEDED_UNPAID_COLLECTION2);
         //add benefactors
@@ -583,7 +580,7 @@ class ContentSeeder extends Seeder
             'currency' => 'USD',
         ]);
         //add content
-        $collection->contents()->attach([1,2,]);
+        $collection->contents()->attach([1, 2]);
 
         $parentCollectionWithSubs = Collection::create(MockCollection::SEEDED_COLLECTION_WITH_SUB);
         //add benefactors
@@ -620,7 +617,7 @@ class ContentSeeder extends Seeder
             'currency' => 'USD',
         ]);
         //add content
-        $parentCollectionWithSubs->contents()->attach([1,]);
+        $parentCollectionWithSubs->contents()->attach([1]);
 
 
         $sub1Level1 = Collection::create(MockCollection::SEEDED_SUB_COLLECTION_1_LEVEL_1);
@@ -635,7 +632,7 @@ class ContentSeeder extends Seeder
             'mime_type' => 'image/png',
         ]);
         //add content
-        $sub1Level1->contents()->attach([1,]);
+        $sub1Level1->contents()->attach([1]);
 
         $sub2Level1 = Collection::create(MockCollection::SEEDED_SUB_COLLECTION_2_LEVEL_1);
         //add cover
@@ -649,7 +646,7 @@ class ContentSeeder extends Seeder
             'mime_type' => 'image/png',
         ]);
         //add content
-        $sub2Level1->contents()->attach([1,]);
+        $sub2Level1->contents()->attach([1]);
 
         $sub1Child1 = Collection::create(MockCollection::SEEDED_SUB_COLLECTION_1_LEVEL_1_CHILD_1);
         //add cover
@@ -663,7 +660,7 @@ class ContentSeeder extends Seeder
             'mime_type' => 'image/png',
         ]);
         //add content
-        $sub1Child1->contents()->attach([1,]);
+        $sub1Child1->contents()->attach([1]);
 
         $sub1Child2 = Collection::create(MockCollection::SEEDED_SUB_COLLECTION_1_LEVEL_1_CHILD_2);
         //add cover
@@ -677,7 +674,7 @@ class ContentSeeder extends Seeder
             'mime_type' => 'image/png',
         ]);
         //add content
-        $sub1Child2->contents()->attach([1,]);
+        $sub1Child2->contents()->attach([1]);
 
         $sub2Child1 = Collection::create(MockCollection::SEEDED_SUB_COLLECTION_2_LEVEL_1_CHILD_1);
         //add cover
@@ -691,7 +688,7 @@ class ContentSeeder extends Seeder
             'mime_type' => 'image/png',
         ]);
         //add content
-        $sub2Child1->contents()->attach([1,]);
+        $sub2Child1->contents()->attach([1]);
 
         $sub2Child2 = Collection::create(MockCollection::SEEDED_SUB_COLLECTION_2_LEVEL_1_CHILD_2);
         //add cover
@@ -705,11 +702,11 @@ class ContentSeeder extends Seeder
             'mime_type' => 'image/png',
         ]);
         //add content
-        $sub2Child2->contents()->attach([1,]);
+        $sub2Child2->contents()->attach([1]);
 
         //attach the child collections
-        $parentCollectionWithSubs->childCollections()->attach([$sub1Level1->id,$sub2Level1->id]);
-        $sub1Level1->childCollections()->attach([$sub1Child1->id,$sub1Child2->id]);
-        $sub2Level1->childCollections()->attach([$sub2Child1->id,$sub2Child2->id]);
+        $parentCollectionWithSubs->childCollections()->attach([$sub1Level1->id, $sub2Level1->id]);
+        $sub1Level1->childCollections()->attach([$sub1Child1->id, $sub1Child2->id]);
+        $sub2Level1->childCollections()->attach([$sub2Child1->id, $sub2Child2->id]);
     }
 }
