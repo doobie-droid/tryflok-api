@@ -1,22 +1,15 @@
-<?php
-
-namespace Tests\Feature\Controllers\API\V1\Auth\AuthController;
-
+<?
 use App\Constants;
 use App\Models;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\MockData;
-use Tests\TestCase;
 
-class LoginViaOtpTest extends TestCase
-{
-    use DatabaseTransactions;
+beforeEach(function () {
+    $this->user = Models\User::factory()->create();
+    $this->be($this->user);
+});
 
-    public function test_login_via_otp_works()
-    {
-        $user = Models\User::factory()->create();
-        $this->be($user);
-        $user->otps()->create([
+test('login via otp works', function(){
+        $this->user->otps()->create([
             'code' => 'TEST-OTP',
             'purpose' => 'authentication',
             'expires_at' => now()->addMinutes(2),
@@ -29,34 +22,26 @@ class LoginViaOtpTest extends TestCase
         ->assertJsonStructure(MockData\User::STANDARD_USER_RESPONSE_STRUCTURE)
         ->assertJsonStructure(MockData\User::STANDARD_USER_RESPONSE_STRUCTURE)
         ->assertJson(
-            MockData\User::generateStandardUserResponseJson($user->name, $user->email, $user->username, [Constants\Roles::USER])
+            MockData\User::generateStandardUserResponseJson($this->user->name, $this->user->email, $this->user->username, [Constants\Roles::USER])
         );
-    }
+});
+test('invalid code does not work', function(){
+    $request = [
+        'code' => 'TEST-OTP',
+    ];
+    $response = $this->json('POST', '/api/v1/auth/otp-login', $request);
+    $response->assertStatus(400);
+});
 
-    public function test_invalid_code_does_not_work()
-    {
-        $user = Models\User::factory()->create();
-        $this->be($user);
-        $request = [
-            'code' => 'TEST-OTP',
-        ];
-        $response = $this->json('POST', '/api/v1/auth/otp-login', $request);
-        $response->assertStatus(400);
-    }
-
-    public function test_expired_code_does_not_work()
-    {
-        $user = Models\User::factory()->create();
-        $this->be($user);
-        $user->otps()->create([
-            'code' => 'TEST-OTP',
-            'purpose' => 'authentication',
-            'expires_at' => now()->subMinutes(2),
-        ]);
-        $request = [
-            'code' => 'TEST-OTP',
-        ];
-        $response = $this->json('POST', '/api/v1/auth/otp-login', $request);
-        $response->assertStatus(400);
-    }
-}
+test('expired code does not work', function(){
+    $this->user->otps()->create([
+        'code' => 'TEST-OTP',
+        'purpose' => 'authentication',
+        'expires_at' => now()->subMinutes(2),
+    ]);
+    $request = [
+        'code' => 'TEST-OTP',
+    ];
+    $response = $this->json('POST', '/api/v1/auth/otp-login', $request);
+    $response->assertStatus(400);
+});

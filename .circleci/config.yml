@@ -61,5 +61,4 @@ jobs:
       - run: php artisan key:generate
       - run: php artisan migrate:fresh
       - run: php artisan db:seed --class=TestingSeeder
-      - run: ./vendor/bin/tlint
-      - run: php artisan test
+      - run: ./vendor/bin/pest ./tests/Pest/Feature
