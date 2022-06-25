@@ -10,13 +10,13 @@ jobs:
       - image: circleci/php:7.4-cli
         environment:
           MYSQL_HOST: 127.0.0.1
-          MYSQL_DB: flok-test
+          MYSQL_DB: flok
           MYSQL_USER: root
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_PASSWORD:
       - image: circleci/mysql:5.7
         environment:
-          MYSQL_DATABASE: flok-test
+          MYSQL_DATABASE: flok
       #
       - image: redis:latest
 
@@ -51,7 +51,7 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run: composer install -n --prefer-dist
+- run: composer install -n --prefer-dist --ignore-platform-reqs
 
       - save_cache:
           key: v1-dependencies-{{ checksum "composer.json" }}
