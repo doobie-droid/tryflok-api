@@ -3,7 +3,8 @@ use App\Constants;
 use App\Models;
 use Tests\MockData;
 use App\Notifications\User\EmailConfirmation;
-
+use Illuminate\Foundation\Testing\WithFaker;
+uses(WithFaker::class);
 
 beforeEach(function(){
     $this->request = MockData\User::REGISTRATION_REQUEST;
