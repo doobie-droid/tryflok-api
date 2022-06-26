@@ -1,17 +1,16 @@
-<?php 
+<?php
 
-test('list continents works', function()
+test('list tags works', function()
 {
-    $response = $this->json('GET', '/api/v1/continents');
+    $response = $this->json('GET', '/api/v1/tags');
         $response->assertStatus(200)->assertJsonStructure([
             'status',
             'message',
             'data' => [
-                'continents' => [
+                'tags' => [
                     [
                         'id',
                         'name',
-                        'iso_code',
                     ],
                 ],
             ],

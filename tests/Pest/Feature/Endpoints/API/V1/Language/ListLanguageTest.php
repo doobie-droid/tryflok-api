@@ -1,6 +1,6 @@
 <?php 
 
-test('list language works', function()
+test('list languages works', function()
 {
     $response = $this->json('GET', '/api/v1/languages');
         $response->assertStatus(200)->assertJsonStructure([
