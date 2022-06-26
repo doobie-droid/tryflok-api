@@ -1,4 +1,4 @@
-<?
+<?php
 use App\Models;
 
 test('update password works', function(){
