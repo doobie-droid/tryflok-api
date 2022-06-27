@@ -148,7 +148,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'contents'], function () {
-            Route::post('/', 'ContentController@create');
+            Route::post('/', 'ContentController@create')->name('create');
             Route::patch('{id}', 'ContentController@update');
             Route::delete('{id}/archive', 'ContentController@archive');
             Route::delete('{id}', 'ContentController@delete');
@@ -169,7 +169,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::delete('{id}/live', 'ContentController@endLive');
 
             Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge');
-            Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge');
+            Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge')->name('contribute-to-challenge');
             Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge');
 
             Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
