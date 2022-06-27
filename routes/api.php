@@ -38,7 +38,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::post('{id}/views', 'ContentController@addViews');
         Route::get('{id}', 'ContentController@getSingle');
         Route::get('{id}/reviews', 'ContentController@getReviews');
-        Route::get('{id}/assets', 'ContentController@getAssets');
+        Route::get('{id}/assets', 'ContentController@getAssets')->name('get-assets');
 
         Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
     });
