@@ -16,21 +16,21 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     
     Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
-        Route::post('register', 'AuthController@register');
-        Route::post('login', 'AuthController@login');
+        Route::post('register', 'AuthController@register')->name('register');
+        Route::post('login', 'AuthController@login')->name('login');
         Route::post('social-sign-in', 'AuthController@socialMediaSignIn');
-        Route::post('otp-login', 'AuthController@loginViaOtp');
+        Route::post('otp-login', 'AuthController@loginViaOtp')->name('otp-login');
         Route::patch('email', 'AuthController@verifyEmail');
-        Route::patch('password/forgot', 'AuthController@forgotPassword');
-        Route::patch('password/reset', 'AuthController@resetPassword');
+        Route::patch('password/forgot', 'AuthController@forgotPassword')->name('forgot-password');
+        Route::patch('password/reset', 'AuthController@resetPassword')->name('reset-password');
         Route::get('unauthenticated', 'AuthController@respondUnauthenticated')->name('unauthenticated');
     });
 
-    Route::get('languages', 'LanguageController@list');
-    Route::get('countries', 'CountryController@list');
-    Route::get('continents', 'ContinentController@list');
-    Route::get('categories', 'CategoryController@list');
-    Route::get('tags', 'TagController@list');
+    Route::get('languages', 'LanguageController@list')->name('list-languages');
+    Route::get('countries', 'CountryController@list')->name('list-countries');
+    Route::get('continents', 'ContinentController@list')->name('list-continents');
+    Route::get('categories', 'CategoryController@list')->name('list-categories');
+    Route::get('tags', 'TagController@list')->name('list-tags');
 
     Route::group(['prefix' => 'contents'], function () {
         Route::get('trending', 'ContentController@getTrending');
