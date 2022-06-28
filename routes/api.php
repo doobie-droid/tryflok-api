@@ -144,7 +144,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'subscriptions'], function () {
-            Route::patch('{id}', 'SubscriptionController@toggleAutorenew');
+            Route::patch('{id}', 'SubscriptionController@toggleAutorenew')->name('toggle-auto-renew');
         });
 
         Route::group(['prefix' => 'contents'], function () {
