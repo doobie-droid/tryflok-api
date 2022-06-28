@@ -657,7 +657,7 @@ class ContentController extends Controller
         }
     }
 
-    public function getTrending(Request $request)
+    public function listTrending(Request $request)
     {
         try {
             $page = $request->query('page', 1);
@@ -787,7 +787,7 @@ class ContentController extends Controller
         }
     }
 
-    public function getCollectionContents(Request $request, $collection_id)
+    public function listContents(Request $request, $collection_id)
     {
         try {
             $page = $request->query('page', 1);

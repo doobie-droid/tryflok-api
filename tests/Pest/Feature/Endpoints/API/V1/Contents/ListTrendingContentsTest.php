@@ -105,3 +105,17 @@ test('unavailable contents do not get returned if user is not owner', function()
         $contents = $response->getData()->data->contents;
         $this->assertEquals($contents, []);
 });
+
+test('unavailable contents does not get returned event if user is owner', function()
+{
+    Models\Content::factory()
+            ->unavailable()
+            ->for($this->user, 'owner')
+            ->setTags([Models\Tag::factory()->create()])
+            ->count(4)
+            ->create();
+        $response = $this->json('GET', "/api/v1/contents/trending?page=1&limit=10");
+        $response->assertStatus(200);
+        $contents = $response->getData()->data->contents;
+        $this->assertEquals($contents, []);
+});

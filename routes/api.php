@@ -33,7 +33,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::get('tags', 'TagController@list')->name('list-tags');
 
     Route::group(['prefix' => 'contents'], function () {
-        Route::get('trending', 'ContentController@getTrending');
+        Route::get('trending', 'ContentController@listTrending')->name('list-trending-contents');
 
         Route::post('{id}/views', 'ContentController@addViews');
         Route::get('{id}', 'ContentController@show')->name('show-content');
@@ -46,7 +46,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::group(['prefix' => 'digiverses'], function () {
         Route::get('/', 'CollectionController@listDigiverses');
         Route::get('{id}', 'CollectionController@showDigiverse')->name('show-digiverse');
-        Route::get('{collection_id}/contents', 'ContentController@getCollectionContents');
+        Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-digiverse-contents');
         Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
         Route::get('{id}/reviews', 'CollectionController@getReviews');
     });
