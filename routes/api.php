@@ -180,7 +180,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'digiverses'], function () {
-            Route::post('/', 'CollectionController@createDigiverse');
+            Route::post('/', 'CollectionController@createDigiverse')->name('create-digiverse');
             Route::patch('{id}', 'CollectionController@updateDigiverse');
 
             Route::delete('{id}/archive', 'CollectionController@archive');
