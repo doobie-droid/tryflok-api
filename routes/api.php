@@ -33,20 +33,20 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::get('tags', 'TagController@list')->name('list-tags');
 
     Route::group(['prefix' => 'contents'], function () {
-        Route::get('trending', 'ContentController@getTrending');
+        Route::get('trending', 'ContentController@listTrending')->name('list-trending-contents');
 
         Route::post('{id}/views', 'ContentController@addViews');
-        Route::get('{id}', 'ContentController@getSingle');
+        Route::get('{id}', 'ContentController@show')->name('show-content');
         Route::get('{id}/reviews', 'ContentController@getReviews');
-        Route::get('{id}/assets', 'ContentController@getAssets');
+        Route::get('{id}/assets', 'ContentController@listAssets')->name('list-content-assets');
 
         Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
         Route::get('/', 'CollectionController@listDigiverses');
-        Route::get('{id}', 'CollectionController@getDigiverse');
-        Route::get('{collection_id}/contents', 'ContentController@getCollectionContents');
+        Route::get('{id}', 'CollectionController@showDigiverse')->name('show-digiverse');
+        Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-digiverse-contents');
         Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
         Route::get('{id}/reviews', 'CollectionController@getReviews');
     });
@@ -148,7 +148,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'contents'], function () {
-            Route::post('/', 'ContentController@create');
+            Route::post('/', 'ContentController@create')->name('create-content');
             Route::patch('{id}', 'ContentController@update');
             Route::delete('{id}/archive', 'ContentController@archive');
             Route::delete('{id}', 'ContentController@delete');
@@ -169,7 +169,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::delete('{id}/live', 'ContentController@endLive');
 
             Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge');
-            Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge');
+            Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge')->name('contribute-to-challenge');
             Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge');
 
             Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
