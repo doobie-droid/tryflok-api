@@ -35,7 +35,7 @@ use \Stripe\StripeClient;
 
 class UserController extends Controller
 {
-    public function list(Request $request)
+    public function listUser(Request $request)
     {
         try {
             $page = $request->query('page', 1);
@@ -106,7 +106,7 @@ class UserController extends Controller
         }
     }
 
-    public function get(Request $request, $id)
+    public function showUser(Request $request, $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [
