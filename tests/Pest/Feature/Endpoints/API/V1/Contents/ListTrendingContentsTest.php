@@ -106,16 +106,182 @@ test('unavailable contents do not get returned if user is not owner', function()
         $this->assertEquals($contents, []);
 });
 
-test('unavailable contents does not get returned event if user is owner', function()
+        test('unavailable contents does not get returned event if user is owner', function()
+        {
+            Models\Content::factory()
+                    ->unavailable()
+                    ->for($this->user, 'owner')
+                    ->setTags([Models\Tag::factory()->create()])
+                    ->count(4)
+                    ->create();
+                $response = $this->json('GET', "/api/v1/contents/trending?page=1&limit=10");
+                $response->assertStatus(200);
+                $contents = $response->getData()->data->contents;
+                $this->assertEquals($contents, []);
+});
+
+test('pagination works', function()
 {
-    Models\Content::factory()
-            ->unavailable()
-            ->for($this->user, 'owner')
+            $content1 = Models\Content::factory()
             ->setTags([Models\Tag::factory()->create()])
-            ->count(4)
             ->create();
-        $response = $this->json('GET', "/api/v1/contents/trending?page=1&limit=10");
-        $response->assertStatus(200);
+        $content2 = Models\Content::factory()
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        $content3 = Models\Content::factory()
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+
+        $response = $this->json('GET', "/api/v1/contents/trending?page=1&limit=2");
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\Content::generateGetDigiverseContentsResponse());
         $contents = $response->getData()->data->contents;
-        $this->assertEquals($contents, []);
+        $this->assertTrue(count($contents) === 2);
+        $this->assertArrayHasObjectWithElementValue($contents, $content1, 'id');
+        $this->assertArrayHasObjectWithElementValue($contents, $content2, 'id');
+
+        $response = $this->json('GET', "/api/v1/contents/trending?page=2&limit=2");
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\Content::generateGetDigiverseContentsResponse());
+        $contents = $response->getData()->data->contents;
+        $this->assertTrue(count($contents) === 1);
+        $this->assertArrayHasObjectWithElementValue($contents, $content3, 'id');
+});
+
+test('filter by tags work', function()
+{
+        $tag1 = Models\Tag::factory()->create();
+            $tag2 = Models\Tag::factory()->create();
+
+            $content1 = Models\Content::factory()
+                ->setTags([$tag1])
+                ->create();
+            $content2 = Models\Content::factory()
+                ->setTags([$tag2])
+                ->create();
+
+            $response = $this->json('GET', "/api/v1/contents/trending?tags={$tag1->id}");
+            $response->assertStatus(200)
+            ->assertJsonStructure(MockData\Content::generateGetDigiverseContentsResponse());
+            $this->assertTrue(count($response->getData()->data->contents) === 1);
+            $contents = $response->getData()->data->contents;
+            $this->assertArrayHasObjectWithElementValue($contents, $content1, 'id');
+
+            $response = $this->json('GET', "/api/v1/contents/trending?tags={$tag2->id}");
+            $response->assertStatus(200)
+            ->assertJsonStructure(MockData\Content::generateGetDigiverseContentsResponse());
+            $this->assertTrue(count($response->getData()->data->contents) === 1);
+            $contents = $response->getData()->data->contents;
+            $this->assertArrayHasObjectWithElementValue($contents, $content2, 'id');
+});
+
+test('filter by keywords work', function()
+{
+            $content1 = Models\Content::factory()
+            ->state([
+                'title' => 'dsds ddtitle1dsd sds',
+            ])
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        $content2 = Models\Content::factory()
+            ->state([
+                'title' => 'dsds ddtitle2dsd sds',
+            ])
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        $content3 = Models\Content::factory()
+            ->state([
+                'description' => 'dsds ddtitle3dsd sds',
+            ])
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        $response = $this->json('GET', "/api/v1/contents/trending?keyword=title1 title3");
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\Content::generateGetDigiverseContentsResponse());
+        $contents = $response->getData()->data->contents;
+        $this->assertEquals(count($contents), 2);
+        $this->assertArrayHasObjectWithElementValue($contents, $content1, 'id');
+        $this->assertArrayHasObjectWithElementValue($contents, $content3, 'id');
+
+        $response = $this->json('GET', "/api/v1/contents/trending?keyword=title2 title3");
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\Content::generateGetDigiverseContentsResponse());
+        $contents = $response->getData()->data->contents;
+        $this->assertEquals(count($contents), 2);
+        $this->assertArrayHasObjectWithElementValue($contents, $content2, 'id');
+        $this->assertArrayHasObjectWithElementValue($contents, $content3, 'id');
+});
+
+test('filter by creators works', function()
+{
+        $user1 = Models\User::factory()->create();
+        $user2 = Models\User::factory()->create();
+        $user3 = Models\User::factory()->create();
+
+        $tag = Models\Tag::factory()->create();
+
+        $content1 = Models\Content::factory()
+            ->for($user1, 'owner')
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        $content2 = Models\Content::factory()
+            ->for($user2, 'owner')
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        $content3 = Models\Content::factory()
+            ->for($user3, 'owner')
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        
+        $response = $this->json('GET', "/api/v1/contents/trending?creators={$user1->id},{$user3->id}");
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\Content::generateGetDigiverseContentsResponse());
+        $contents = $response->getData()->data->contents;
+        $this->assertEquals(count($contents), 2);
+        $this->assertArrayHasObjectWithElementValue($contents, $content1, 'id');
+        $this->assertArrayHasObjectWithElementValue($contents, $content3, 'id');
+
+        $response = $this->json('GET', "/api/v1/contents/trending?creators={$user2->id},{$user3->id}");
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\Content::generateGetDigiverseContentsResponse());
+        $contents = $response->getData()->data->contents;
+        $this->assertEquals(count($contents), 2);
+        $this->assertArrayHasObjectWithElementValue($contents, $content2, 'id');
+        $this->assertArrayHasObjectWithElementValue($contents, $content3, 'id');
+});
+
+test('order by trending works', function()
+{
+            $content1 = Models\Content::factory()
+            ->state([
+                'trending_points' => 50,
+            ])
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        $content2 = Models\Content::factory()
+            ->state([
+                'trending_points' => 100,
+            ])
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        $content3 = Models\Content::factory()
+            ->state([
+                'trending_points' => 10,
+            ])
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        $content4 = Models\Content::factory()
+            ->state([
+                'trending_points' => 15,
+            ])
+            ->setTags([Models\Tag::factory()->create()])
+            ->create();
+        $response = $this->json('GET', "/api/v1/contents/trending");
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\Content::generateGetDigiverseContentsResponse());
+        $contents = $response->getData()->data->contents;
+        $this->assertEquals($contents[0]->id, $content2->id);
+        $this->assertEquals($contents[1]->id, $content1->id);
+        $this->assertEquals($contents[2]->id, $content4->id);
+        $this->assertEquals($contents[3]->id, $content3->id);
 });
