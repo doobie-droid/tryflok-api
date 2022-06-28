@@ -44,7 +44,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
-        Route::get('/', 'CollectionController@listDigiverses');
+        Route::get('/', 'CollectionController@listDigiverses')->name('list-digiverses');
         Route::get('{id}', 'CollectionController@showDigiverse')->name('show-digiverse');
         Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-digiverse-contents');
         Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
@@ -114,7 +114,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::get('/', 'UserController@getAccount');
             Route::delete('/', 'UserController@deleteAccount');
             Route::get('dashboard', 'UserController@getDashboardDetails');
-            Route::get('digiverses', 'CollectionController@getUserCreatedDigiverses');
+            Route::get('digiverses', 'CollectionController@listUserCreatedDigiverses')->name('list-user-created-digiverses');
             Route::get('notifications', 'UserController@getNotifications');
             Route::patch('notifications', 'UserController@markAllNotificationsAsRead');
             // Route::get('approval-requests', 'ApprovalController@getUserRequests');
@@ -181,7 +181,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'digiverses'], function () {
             Route::post('/', 'CollectionController@createDigiverse')->name('create-digiverse');
-            Route::patch('{id}', 'CollectionController@updateDigiverse');
+            Route::patch('{id}', 'CollectionController@updateDigiverse')->name('update-digiverse');
 
             Route::delete('{id}/archive', 'CollectionController@archive');
             Route::delete('{id}', 'CollectionController@delete');
