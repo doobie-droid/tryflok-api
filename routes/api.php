@@ -168,7 +168,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('{id}/leave-live', 'ContentController@leaveLive')->name('leave-live');
             Route::delete('{id}/live', 'ContentController@endLive')->name('end-live');
 
-            Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge');
+            Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge')->name('respond-to-challenge');
             Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge')->name('contribute-to-challenge');
             Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge');
 
