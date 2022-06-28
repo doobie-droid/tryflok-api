@@ -36,7 +36,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('trending', 'ContentController@getTrending');
 
         Route::post('{id}/views', 'ContentController@addViews');
-        Route::get('{id}', 'ContentController@getSingle');
+        Route::get('{id}', 'ContentController@getSingle')->name('get-single');
         Route::get('{id}/reviews', 'ContentController@getReviews');
         Route::get('{id}/assets', 'ContentController@listAssets')->name('list-content-assets');
 
