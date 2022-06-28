@@ -593,7 +593,7 @@ class ContentController extends Controller
         }
     }
 
-    public function getSingle(Request $request, $id)
+    public function show(Request $request, $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [

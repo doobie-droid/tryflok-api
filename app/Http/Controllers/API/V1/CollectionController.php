@@ -173,7 +173,7 @@ class CollectionController extends Controller
         }
     }
 
-    public function getDigiverse(Request $request, $id)
+    public function showDigiverse(Request $request, $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [
