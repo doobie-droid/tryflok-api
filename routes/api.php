@@ -197,7 +197,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'reviews'], function () {
-            Route::post('/', 'ReviewController@create');
+            Route::post('/', 'ReviewController@create')->name('create-review');
         });
 
         Route::group(['prefix' => 'payments'], function () {
