@@ -139,7 +139,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('payment-account', 'UserController@addPaymentAccount');
             Route::get('payment-account', 'UserController@getPaymentAccount');
             Route::delete('payment-account', 'UserController@removePaymentAccount');
-            Route::get('revenues', 'UserController@listRevenues');
+            Route::get('revenues', 'UserController@listRevenues')->name('list-revenues');
             Route::post('referrer', 'UserController@addReferrer');
         });
 
