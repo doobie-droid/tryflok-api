@@ -160,7 +160,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('{id}/issues', 'ContentController@publishIssue');
             Route::get('{id}/issues', 'ContentController@getIssues');
 
-            Route::post('{id}/subscription', 'ContentController@subscribeToContent');
+            Route::post('{id}/subscription', 'ContentController@subscribeToContent')->name('subscribe-to-content');
             Route::delete('{id}/subscription', 'ContentController@unsubscribeFromContent');
 
             Route::post('{id}/live', 'ContentController@startLive')->name('start-live');
