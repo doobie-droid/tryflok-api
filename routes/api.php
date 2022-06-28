@@ -113,7 +113,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'account'], function () {
             Route::get('/', 'UserController@showAccount')->name('show-account');
             Route::delete('/', 'UserController@deleteAccount')->name('delete-account');
-            Route::get('dashboard', 'UserController@getDashboardDetails');
+            Route::get('dashboard', 'UserController@showDashboardDetails')->name('show-dashboard-details');
             Route::get('digiverses', 'CollectionController@listUserCreatedDigiverses')->name('list-user-created-digiverses');
             Route::get('notifications', 'UserController@getNotifications');
             Route::patch('notifications', 'UserController@markAllNotificationsAsRead');

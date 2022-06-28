@@ -1015,7 +1015,7 @@ class UserController extends Controller
         }
     }
 
-    public function getDashboardDetails(Request $request)
+    public function showDashboardDetails(Request $request)
     {
         try {
             $subcribers_graph_start_date = $request->query('subscribers_graph_start_date', now()->startOfMonth());
