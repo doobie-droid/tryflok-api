@@ -1224,7 +1224,6 @@ class ContentController extends Controller
             ], [
                 'id' => ['required', 'string', 'exists:contents,id'],
             ]);
-
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
