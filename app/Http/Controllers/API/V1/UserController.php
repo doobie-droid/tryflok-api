@@ -277,7 +277,7 @@ class UserController extends Controller
         }
     }
 
-    public function getAccount(Request $request)
+    public function showAccount(Request $request)
     {
         try {
             $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
