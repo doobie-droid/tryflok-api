@@ -100,7 +100,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'users'], function () {
             Route::patch('{id}/follow', 'UserController@followUser')->name('follow-user');
-            Route::patch('{id}/unfollow', 'UserController@unfollowUser');
+            Route::patch('{id}/unfollow', 'UserController@unfollowUser')->name('unfollow-user');
             Route::post('{id}/tip', 'UserController@tipUser');
         });
 
