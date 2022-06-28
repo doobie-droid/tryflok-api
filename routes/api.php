@@ -170,7 +170,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
             Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge')->name('respond-to-challenge');
             Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge')->name('contribute-to-challenge');
-            Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge');
+            Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge')->name('vote-on-challenge');
 
             Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
         });
