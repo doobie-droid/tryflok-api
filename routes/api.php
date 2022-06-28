@@ -38,14 +38,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::post('{id}/views', 'ContentController@addViews');
         Route::get('{id}', 'ContentController@getSingle');
         Route::get('{id}/reviews', 'ContentController@getReviews');
-        Route::get('{id}/assets', 'ContentController@getAssets')->name('get-assets');
+        Route::get('{id}/assets', 'ContentController@listAssets')->name('list-content-assets');
 
         Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
         Route::get('/', 'CollectionController@listDigiverses');
-        Route::get('{id}', 'CollectionController@getDigiverse');
+        Route::get('{id}', 'CollectionController@getDigiverse')->name('get-digiverse-contents');
         Route::get('{collection_id}/contents', 'ContentController@getCollectionContents');
         Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
         Route::get('{id}/reviews', 'CollectionController@getReviews');
@@ -148,7 +148,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'contents'], function () {
-            Route::post('/', 'ContentController@create')->name('create');
+            Route::post('/', 'ContentController@create')->name('create-content');
             Route::patch('{id}', 'ContentController@update');
             Route::delete('{id}/archive', 'ContentController@archive');
             Route::delete('{id}', 'ContentController@delete');

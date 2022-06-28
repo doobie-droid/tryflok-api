@@ -1305,7 +1305,7 @@ class ContentController extends Controller
         }
     }
 
-    public function getAssets(Request $request, $id)
+    public function listAssets(Request $request, $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [

@@ -91,10 +91,10 @@ test('asset is returned for free content with paid ancestor when user has paid v
 
 test('asset is returned for paid content with paid ancestor when user has paid via ancestor', function()
 {
-            $digiverse = Models\Collection::factory()
-            ->digiverse()
-            ->setPriceAmount(100)
-            ->create();
+        $digiverse = Models\Collection::factory()
+        ->digiverse()
+        ->setPriceAmount(100)
+        ->create();
         $content = Models\Content::factory()
         ->setDigiverse($digiverse)
         ->setPriceAmount(100)
