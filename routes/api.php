@@ -163,10 +163,10 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('{id}/subscription', 'ContentController@subscribeToContent');
             Route::delete('{id}/subscription', 'ContentController@unsubscribeFromContent');
 
-            Route::post('{id}/live', 'ContentController@startLive');
-            Route::patch('{id}/live', 'ContentController@joinLive');
-            Route::patch('{id}/leave-live', 'ContentController@leaveLive');
-            Route::delete('{id}/live', 'ContentController@endLive');
+            Route::post('{id}/live', 'ContentController@startLive')->name('start-live');
+            Route::patch('{id}/live', 'ContentController@joinLive')->name('join-live');
+            Route::patch('{id}/leave-live', 'ContentController@leaveLive')->name('leave-live');
+            Route::delete('{id}/live', 'ContentController@endLive')->name('end-live');
 
             Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge');
             Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge')->name('contribute-to-challenge');
