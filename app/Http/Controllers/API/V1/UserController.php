@@ -35,7 +35,7 @@ use \Stripe\StripeClient;
 
 class UserController extends Controller
 {
-    public function listUser(Request $request)
+    public function listUsers(Request $request)
     {
         try {
             $page = $request->query('page', 1);
