@@ -149,7 +149,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'contents'], function () {
             Route::post('/', 'ContentController@create')->name('create-content');
-            Route::patch('{id}', 'ContentController@update');
+            Route::patch('{id}', 'ContentController@update')->name('update-content');
             Route::delete('{id}/archive', 'ContentController@archive');
             Route::delete('{id}', 'ContentController@delete');
 
