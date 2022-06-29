@@ -35,6 +35,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::group(['prefix' => 'contents'], function () {
         Route::get('trending', 'ContentController@getTrending');
 
+        Route::patch('{id}/live', 'ContentController@joinLive');
+        
         Route::post('{id}/views', 'ContentController@addViews');
         Route::get('{id}', 'ContentController@getSingle');
         Route::get('{id}/reviews', 'ContentController@getReviews');
@@ -164,7 +166,6 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::delete('{id}/subscription', 'ContentController@unsubscribeFromContent');
 
             Route::post('{id}/live', 'ContentController@startLive');
-            Route::patch('{id}/live', 'ContentController@joinLive');
             Route::patch('{id}/leave-live', 'ContentController@leaveLive');
             Route::delete('{id}/live', 'ContentController@endLive');
 
