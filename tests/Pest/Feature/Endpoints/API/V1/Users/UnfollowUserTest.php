@@ -2,6 +2,8 @@
 
 use App\Models;
 use Tests\MockData;
+use Illuminate\Support\Str;
+
 
 test('unfollow user returns 401 when user is not signed in', function()
 {

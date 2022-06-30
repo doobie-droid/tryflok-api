@@ -2,6 +2,8 @@
 
 use App\Constants;
 use App\Models;
+use Illuminate\Support\Str;
+
 use Tests\MockData;
 
 it('fails with invalid parameters', function()
@@ -68,13 +70,12 @@ it('fails with invalid parameters', function()
 
 it('works when user is not signed in', function()
 {
-    // Models\User::factory()->count(4)->create();
+    Models\User::factory()->count(4)->create();
 
     $response = $this->json('GET', '/api/v1/users');
     $response->assertStatus(200)
     ->assertJsonStructure(MockData\User::generateListUsersResponse());
     $users = $response->getData()->data->users;
-    // $this->assertEquals(count($users), 4);
 });
 
 test('filter by keyword works', function()
