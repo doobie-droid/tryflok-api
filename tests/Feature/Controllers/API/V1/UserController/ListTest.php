@@ -79,7 +79,7 @@ class ListTest extends TestCase
     {
         Models\User::factory()->count(4)->create();
 
-        $response = $this->json('GET', '/api/v1/users');
+        $response = $this->json('GET', '/api/v1/users');    
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\User::generateListUsersResponse());
         $users = $response->getData()->data->users;
@@ -151,7 +151,6 @@ class ListTest extends TestCase
 public function test_following_info_is_returned_correctly()
     {
         $user = Models\User::factory()->create();
-
         $users = Models\User::factory()->count(11)->create();
 
         foreach ($users as $userInstance) {

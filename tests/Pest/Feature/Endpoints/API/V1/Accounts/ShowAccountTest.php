@@ -4,7 +4,7 @@ use App\Models;
 use Tests\MockData;
 
 
-test('get account returns 401 when user is not signed in', function()
+it('returns 401 when user is not signed in', function()
 {
         $user = Models\User::factory()->create();
         $response = $this->json('GET', '/api/v1/account');

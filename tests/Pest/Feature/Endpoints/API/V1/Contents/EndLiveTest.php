@@ -2,7 +2,7 @@
 
 use App\Models;
 
-test('end live does not work if not creator live content', function()
+it('fails if creator does not own live content', function()
 {
         $user = Models\User::factory()->create();
             

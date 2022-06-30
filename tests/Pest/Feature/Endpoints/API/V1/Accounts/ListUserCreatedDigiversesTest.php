@@ -4,13 +4,13 @@ use App\Constants;
 use App\Models;
 use Tests\MockData;
 
-test('list created digiverses fails when user not signed in', function()
+it('fails when user not signed in', function()
 {
     $response = $this->json('GET', '/api/v1/account/digiverses');
     $response->assertStatus(401);
 });
 
-test('list created digiverses fails with invalid parameters', function()
+it('fails with invalid parameters', function()
 {
     $user = Models\User::factory()->create();
         $this->be($user);

@@ -2,7 +2,7 @@
 
 use App\Models;
 
-test('join live does not work if channel not started', function()
+it('fails if channel not started', function()
 {
         $user = Models\User::factory()->create();
         $this->be($user);
