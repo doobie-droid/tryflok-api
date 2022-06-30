@@ -119,15 +119,18 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         try {
             $event = "";
             $data = json_decode($msg);
-            if (! $this->messageIsFromNodeOrApp($data)) {
-                $user_is_authenticated = $this->checkConnectionIsAuthenticated($conn, $data);
-                if (! $user_is_authenticated) {
-                    return;
-                }
-            }
             if (is_object($data) && property_exists($data, 'event')) {
                 $event = $data->event;
             }
+            if (! $this->messageIsFromNodeOrApp($data)) {
+                $user_is_authenticated = $this->checkConnectionIsAuthenticated($conn, $data);
+                if (! $user_is_authenticated && $event !== 'join-rtm-channel') {
+                    // only allow unauthenticated requests come from server node or api
+                    // or requests that have to do with joining a channel
+                    return;
+                }
+            }
+           
             switch ($event) {
                 case 'join-rtm-channel':
                     $this->joinRtmChannel($data, $conn);
@@ -223,7 +226,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         try {
             $validator = Validator::make((array) $data, [
                 'channel_name' => ['required', 'string'],
-                'user_id' => ['required', 'string'],
+                //'user_id' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
