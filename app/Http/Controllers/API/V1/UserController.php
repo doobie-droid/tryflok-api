@@ -35,7 +35,7 @@ use \Stripe\StripeClient;
 
 class UserController extends Controller
 {
-    public function list(Request $request)
+    public function listUsers(Request $request)
     {
         try {
             $page = $request->query('page', 1);
@@ -106,7 +106,7 @@ class UserController extends Controller
         }
     }
 
-    public function get(Request $request, $id)
+    public function showUser(Request $request, $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [
@@ -277,7 +277,7 @@ class UserController extends Controller
         }
     }
 
-    public function getAccount(Request $request)
+    public function showAccount(Request $request)
     {
         try {
             $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
@@ -1015,7 +1015,7 @@ class UserController extends Controller
         }
     }
 
-    public function getDashboardDetails(Request $request)
+    public function showDashboardDetails(Request $request)
     {
         try {
             $subcribers_graph_start_date = $request->query('subscribers_graph_start_date', now()->startOfMonth());

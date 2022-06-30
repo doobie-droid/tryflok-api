@@ -44,7 +44,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
-        Route::get('/', 'CollectionController@listDigiverses');
+        Route::get('/', 'CollectionController@listDigiverses')->name('list-digiverses');
         Route::get('{id}', 'CollectionController@showDigiverse')->name('show-digiverse');
         Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-digiverse-contents');
         Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
@@ -62,8 +62,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'users'], function () {
-        Route::get('/', 'UserController@list');
-        Route::get('{id}', 'UserController@get');
+        Route::get('/', 'UserController@listUsers')->name('list-users');
+        Route::get('{id}', 'UserController@showUser')->name('show-user');
     });
 
     Route::group(['prefix' => 'payments'], function () {
@@ -99,9 +99,9 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'users'], function () {
-            Route::patch('{id}/follow', 'UserController@followUser');
-            Route::patch('{id}/unfollow', 'UserController@unfollowUser');
-            Route::post('{id}/tip', 'UserController@tipUser');
+            Route::patch('{id}/follow', 'UserController@followUser')->name('follow-user');
+            Route::patch('{id}/unfollow', 'UserController@unfollowUser')->name('unfollow-user');
+            Route::post('{id}/tip', 'UserController@tipUser')->name('tip-user');
         });
 
         Route::group(['prefix' => 'analytics'], function () {
@@ -111,16 +111,16 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'account'], function () {
-            Route::get('/', 'UserController@getAccount');
-            Route::delete('/', 'UserController@deleteAccount');
-            Route::get('dashboard', 'UserController@getDashboardDetails');
-            Route::get('digiverses', 'CollectionController@getUserCreatedDigiverses');
+            Route::get('/', 'UserController@showAccount')->name('show-account');
+            Route::delete('/', 'UserController@deleteAccount')->name('delete-account');
+            Route::get('dashboard', 'UserController@showDashboardDetails')->name('show-dashboard-details');
+            Route::get('digiverses', 'CollectionController@listUserCreatedDigiverses')->name('list-user-created-digiverses');
             Route::get('notifications', 'UserController@getNotifications');
             Route::patch('notifications', 'UserController@markAllNotificationsAsRead');
             // Route::get('approval-requests', 'ApprovalController@getUserRequests');
             Route::get('subscriptions', 'SubscriptionController@getUserSubscriptions');
             Route::patch('fund-wallet', 'WalletController@fundWallet');
-            Route::patch('withdraw-from-wallet', 'WalletController@withdrawFromWallet');
+            Route::patch('withdraw-from-wallet', 'WalletController@withdrawFromWallet')->name('withdraw-from-wallet');
             Route::post('wallet-pay', 'WalletController@payViaWallet');
             Route::get('wallet-transactions', 'WalletController@getTransactions');
             Route::post('profile', 'UserController@updateBasicData');
@@ -139,17 +139,17 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('payment-account', 'UserController@addPaymentAccount');
             Route::get('payment-account', 'UserController@getPaymentAccount');
             Route::delete('payment-account', 'UserController@removePaymentAccount');
-            Route::get('revenues', 'UserController@listRevenues');
+            Route::get('revenues', 'UserController@listRevenues')->name('list-revenues');
             Route::post('referrer', 'UserController@addReferrer');
         });
 
         Route::group(['prefix' => 'subscriptions'], function () {
-            Route::patch('{id}', 'SubscriptionController@toggleAutorenew');
+            Route::patch('{id}', 'SubscriptionController@toggleAutorenew')->name('toggle-auto-renew');
         });
 
         Route::group(['prefix' => 'contents'], function () {
             Route::post('/', 'ContentController@create')->name('create-content');
-            Route::patch('{id}', 'ContentController@update');
+            Route::patch('{id}', 'ContentController@update')->name('update-content');
             Route::delete('{id}/archive', 'ContentController@archive');
             Route::delete('{id}', 'ContentController@delete');
 
@@ -160,17 +160,17 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('{id}/issues', 'ContentController@publishIssue');
             Route::get('{id}/issues', 'ContentController@getIssues');
 
-            Route::post('{id}/subscription', 'ContentController@subscribeToContent');
+            Route::post('{id}/subscription', 'ContentController@subscribeToContent')->name('subscribe-to-content');
             Route::delete('{id}/subscription', 'ContentController@unsubscribeFromContent');
 
-            Route::post('{id}/live', 'ContentController@startLive');
-            Route::patch('{id}/live', 'ContentController@joinLive');
-            Route::patch('{id}/leave-live', 'ContentController@leaveLive');
-            Route::delete('{id}/live', 'ContentController@endLive');
+            Route::post('{id}/live', 'ContentController@startLive')->name('start-live');
+            Route::patch('{id}/live', 'ContentController@joinLive')->name('join-live');
+            Route::patch('{id}/leave-live', 'ContentController@leaveLive')->name('leave-live');
+            Route::delete('{id}/live', 'ContentController@endLive')->name('end-live');
 
-            Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge');
+            Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge')->name('respond-to-challenge');
             Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge')->name('contribute-to-challenge');
-            Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge');
+            Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge')->name('vote-on-challenge');
 
             Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
         });
@@ -180,8 +180,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'digiverses'], function () {
-            Route::post('/', 'CollectionController@createDigiverse');
-            Route::patch('{id}', 'CollectionController@updateDigiverse');
+            Route::post('/', 'CollectionController@createDigiverse')->name('create-digiverse');
+            Route::patch('{id}', 'CollectionController@updateDigiverse')->name('update-digiverse');
 
             Route::delete('{id}/archive', 'CollectionController@archive');
             Route::delete('{id}', 'CollectionController@delete');
@@ -197,7 +197,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'reviews'], function () {
-            Route::post('/', 'ReviewController@create');
+            Route::post('/', 'ReviewController@create')->name('create-review');
         });
 
         Route::group(['prefix' => 'payments'], function () {

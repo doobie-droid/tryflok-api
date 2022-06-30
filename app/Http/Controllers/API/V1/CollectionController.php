@@ -663,7 +663,7 @@ class CollectionController extends Controller
         }
     }
 
-    public function getUserCreatedDigiverses(Request $request)
+    public function listUserCreatedDigiverses(Request $request)
     {
         try {
             $page = $request->query('page', 1);

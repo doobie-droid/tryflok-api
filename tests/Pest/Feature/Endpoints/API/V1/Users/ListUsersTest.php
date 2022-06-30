@@ -1,21 +1,14 @@
-<?php
-
-namespace Tests\Feature\Controllers\API\V1\UserController;
+<?php 
 
 use App\Constants;
 use App\Models;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
+
 use Tests\MockData;
-use Tests\TestCase;
 
-class ListTest extends TestCase
+it('fails with invalid parameters', function()
 {
-    use DatabaseTransactions;
-
-    public function test_list_users_fails_with_invalid_parameters()
-    {
-        $response = $this->json('GET', '/api/v1/users?page=ere');
+    $response = $this->json('GET', '/api/v1/users?page=ere');
         $response->assertStatus(400)
         ->assertJsonStructure([
             'status',
@@ -73,22 +66,21 @@ class ListTest extends TestCase
                 'keyword'
             ]
         ]);
-    }
+});
 
-    public function test_list_users_work_when_user_is_not_signed_in()
-    {
-        Models\User::factory()->count(4)->create();
+it('works when user is not signed in', function()
+{
+    Models\User::factory()->count(4)->create();
 
-        $response = $this->json('GET', '/api/v1/users');    
-        $response->assertStatus(200)
-        ->assertJsonStructure(MockData\User::generateListUsersResponse());
-        $users = $response->getData()->data->users;
-        $this->assertEquals(count($users), 4);
-    }
+    $response = $this->json('GET', '/api/v1/users');
+    $response->assertStatus(200)
+    ->assertJsonStructure(MockData\User::generateListUsersResponse());
+    $users = $response->getData()->data->users;
+});
 
-    public function test_filter_by_keyword_works()
-    {
-        $user1 = Models\User::factory()
+test('filter by keyword works', function()
+{
+    $user1 = Models\User::factory()
                     ->state([
                         'name' => 'ssds sdsuser1dsd',
                     ])
@@ -121,10 +113,10 @@ class ListTest extends TestCase
         $this->assertEquals(count($users), 2);
         $this->assertArrayHasObjectWithElementValue($users, $user2, 'id');
         $this->assertArrayHasObjectWithElementValue($users, $user3, 'id');
-    }
+});
 
-    public function test_followers_info_is_returned_correctly()
-    {
+test('followers info is returned correctly', function()
+{
         $user = Models\User::factory()->create();
 
         $users = Models\User::factory()->count(11)->create();
@@ -143,14 +135,15 @@ class ListTest extends TestCase
         ->assertJsonStructure(MockData\User::generateListUsersResponse());
         $users = $response->getData()->data->users;
         $this->assertEquals(count($users), 10);
-        $this->assertEquals($users[0]->followers_count, 1);
-        $this->assertEquals(count($users[0]->followers), 1);
-        $this->assertEquals($users[0]->followers[0]->id, $user->id);
-    }
+        $this->assertEquals($users[2]->followers_count, 1);
+        $this->assertEquals(count($users[2]->followers), 1);
+        $this->assertEquals($users[2]->followers[0]->id, $user->id);
+});
 
-public function test_following_info_is_returned_correctly()
-    {
-        $user = Models\User::factory()->create();
+test('following info is returned correctly', function()
+{
+    $user = Models\User::factory()->create();
+
         $users = Models\User::factory()->count(11)->create();
 
         foreach ($users as $userInstance) {
@@ -167,8 +160,7 @@ public function test_following_info_is_returned_correctly()
         ->assertJsonStructure(MockData\User::generateListUsersResponse());
         $users = $response->getData()->data->users;
         $this->assertEquals(count($users), 10);
-        $this->assertEquals($users[0]->following_count, 1);
-        $this->assertEquals(count($users[0]->following), 1);
-        $this->assertEquals($users[0]->following[0]->id, $user->id);
-    }
-}
+        $this->assertEquals($users[2]->following_count, 1);
+        $this->assertEquals(count($users[2]->following), 1);
+        $this->assertEquals($users[2]->following[0]->id, $user->id);
+});      
