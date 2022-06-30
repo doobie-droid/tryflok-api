@@ -134,9 +134,9 @@ test('followers info is returned correctly', function()
         ->assertJsonStructure(MockData\User::generateListUsersResponse());
         $users = $response->getData()->data->users;
         $this->assertEquals(count($users), 10);
-        $this->assertEquals($users[0]->followers_count, 1);
-        $this->assertEquals(count($users[0]->followers), 1);
-        $this->assertEquals($users[0]->followers[0]->id, $user->id);
+        $this->assertEquals($users[2]->followers_count, 1);
+        $this->assertEquals(count($users[2]->followers), 1);
+        $this->assertEquals($users[2]->followers[0]->id, $user->id);
 });
 
 test('following info is returned correctly', function()
@@ -159,7 +159,7 @@ test('following info is returned correctly', function()
         ->assertJsonStructure(MockData\User::generateListUsersResponse());
         $users = $response->getData()->data->users;
         $this->assertEquals(count($users), 10);
-        $this->assertEquals($users[0]->following_count, 1);
-        $this->assertEquals(count($users[0]->following), 1);
-        $this->assertEquals($users[0]->following[0]->id, $user->id);
+        $this->assertEquals($users[2]->following_count, 1);
+        $this->assertEquals(count($users[2]->following), 1);
+        $this->assertEquals($users[2]->following[0]->id, $user->id);
 });      
