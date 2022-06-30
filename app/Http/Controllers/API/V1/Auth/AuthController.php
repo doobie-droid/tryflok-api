@@ -30,8 +30,8 @@ class AuthController extends Controller
                 'username' => ['required', 'max:20', 'unique:users,username', 'regex:/^[A-Za-z0-9_]*$/'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
                 'password' => ['required', 'string', 'confirmed'],
-                'referral_id' => ['sometimes', 'nullable','string',],
-                'firebase_token' => ['sometimes', 'nullable','string',],
+                'referral_id' => ['sometimes', 'nullable','string'],
+                'firebase_token' => ['sometimes', 'nullable','string'],
                 'phone_number' => ['sometimes', 'nullable', 'string'],
             ]);
 
@@ -85,13 +85,13 @@ class AuthController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'name' => ['required_if:provider,google', 'string', 'max:255'],
-                'email' => ['required_if:provider,google', 'string', 'email', 'max:255',],
-                'provider' => ['required', 'string', 'in:google,apple,google-web',],
-                'referral_id' => ['sometimes', 'nullable','string',],
-                'id_token' => ['required_if:provider,google,apple', 'string',],
-                'sign_in_type' => ['required', 'string', 'in:register,login',],
-                'sign_in_source' => ['required_if:provider,google', 'string', 'in:ios,android,web',],
-                'firebase_token' => ['sometimes', 'nullable','string',],
+                'email' => ['required_if:provider,google', 'string', 'email', 'max:255'],
+                'provider' => ['required', 'string', 'in:google,apple,google-web'],
+                'referral_id' => ['sometimes', 'nullable','string'],
+                'id_token' => ['required_if:provider,google,apple', 'string'],
+                'sign_in_type' => ['required', 'string', 'in:register,login'],
+                'sign_in_source' => ['required_if:provider,google', 'string', 'in:ios,android,web'],
+                'firebase_token' => ['sometimes', 'nullable','string'],
                 'phone_number' => ['sometimes', 'nullable', 'string'],
             ]);
 
@@ -206,8 +206,8 @@ class AuthController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'username' => ['required', 'string', 'max:255'],
-                'password' => ['required', 'string',],
-                'firebase_token' => ['sometimes', 'nullable','string',],
+                'password' => ['required', 'string'],
+                'firebase_token' => ['sometimes', 'nullable','string'],
             ]);
 
             if ($validator->fails()) {
@@ -248,7 +248,7 @@ class AuthController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'code' => ['required', 'string', 'exists:otps,code',],
+                'code' => ['required', 'string', 'exists:otps,code'],
             ]);
 
             if ($validator->fails()) {
@@ -315,7 +315,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'token' => ['required', 'string'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
-            'firebase_token' => ['sometimes', 'nullable','string',],
+            'firebase_token' => ['sometimes', 'nullable','string'],
         ]);
         if ($validator->fails()) {
             return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());

@@ -166,7 +166,7 @@ class RetrieveUserCreatedDigiversesTest extends TestCase
                 'digiverses' => [
                     $expected_response_structure['data']['digiverse'],
                 ],
-            ]
+            ],
         ]);
         $this->assertTrue(count($response->getData()->data->digiverses) === 1);
         $digiverses = $response->getData()->data->digiverses;
@@ -179,7 +179,7 @@ class RetrieveUserCreatedDigiversesTest extends TestCase
                 'digiverses' => [
                     $expected_response_structure['data']['digiverse'],
                 ],
-            ]
+            ],
         ]);
         $this->assertTrue(count($response->getData()->data->digiverses) === 1);
         $digiverses = $response->getData()->data->digiverses;
@@ -233,7 +233,7 @@ class RetrieveUserCreatedDigiversesTest extends TestCase
                 'digiverses' => [
                     $expected_response_structure['data']['digiverse'],
                 ],
-            ]
+            ],
         ]);
         $this->assertTrue(count($response->getData()->data->digiverses) === 2);
         $digiverses = $response->getData()->data->digiverses;
@@ -247,7 +247,7 @@ class RetrieveUserCreatedDigiversesTest extends TestCase
                 'digiverses' => [
                     $expected_response_structure['data']['digiverse'],
                 ],
-            ]
+            ],
         ]);
         $this->assertTrue(count($response->getData()->data->digiverses) === 2);
         $digiverses = $response->getData()->data->digiverses;

@@ -36,7 +36,6 @@ return [
 
     /**
      * Upload Preset From Cloudinary Dashboard
-     *
      */
     'upload_preset' => env('CLOUDINARY_UPLOAD_PRESET'),
 ];

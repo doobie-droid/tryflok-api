@@ -37,8 +37,8 @@ class LiveTest extends TestCase
                 'rtc_token',
                 'rtm_token',
                 'channel_name',
-                'uid'
-            ]
+                'uid',
+            ],
         ]);
 
         $this->assertDatabaseHas('contents', [
@@ -128,7 +128,7 @@ class LiveTest extends TestCase
                 'channel_name',
                 'uid',
                 'subscribers_count',
-            ]
+            ],
         ]);
     }
 

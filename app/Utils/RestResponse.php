@@ -40,7 +40,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response
      */
-    public function respond($data, $headers = [ ])
+    public function respond($data, $headers = [])
     {
         return Response::json($data, $this->getStatusCode(), $headers);
     }
@@ -54,7 +54,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the paginated results
      */
-    protected function respondWithPagination(LengthAwarePaginator $items, $data, $headers = [ ])
+    protected function respondWithPagination(LengthAwarePaginator $items, $data, $headers = [])
     {
         $data = array_merge($data, [
             'pagination' => [
@@ -76,7 +76,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the message
      */
-    public function respondWithSuccess($message, $data = null, $headers = [ ])
+    public function respondWithSuccess($message, $data = null, $headers = [])
     {
         $this->setStatusCode(200);
         return $this->respond([
@@ -87,7 +87,7 @@ trait RestResponse
         ], $headers);
     }
 
-    public function respondAccepted(string $message, array $data = null, array $headers = [ ]): \Illuminate\Http\JsonResponse
+    public function respondAccepted(string $message, array $data = null, array $headers = []): \Illuminate\Http\JsonResponse
     {
         $this->setStatusCode(202);
         return $this->respond([
@@ -107,7 +107,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the error message
      */
-    public function respondWithError($message, $data = null, $headers = [ ])
+    public function respondWithError($message, $data = null, $headers = [])
     {
         return $this->respond([
             'status' => false,
@@ -116,7 +116,7 @@ trait RestResponse
             'status_code' => $this->getStatusCode(),
         ], $headers);
     }
-    public function respondWithFile($filePath, $fileName, $headers = [ ])
+    public function respondWithFile($filePath, $fileName, $headers = [])
     {
         return Response::download($filePath, $fileName, $headers);
     }
@@ -128,7 +128,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the message
      */
-    protected function respondCreated($message = 'Item created', $headers = [ ])
+    protected function respondCreated($message = 'Item created', $headers = [])
     {
         $this->setStatusCode(IlluminateResponse::HTTP_CREATED);
         return $this->respondWithSuccess($message, $headers);
@@ -141,7 +141,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the error code
      */
-    protected function respondBadRequest($message = 'Bad request', $data = null, $headers = [ ])
+    protected function respondBadRequest($message = 'Bad request', $data = null, $headers = [])
     {
         $this->setStatusCode(IlluminateResponse::HTTP_BAD_REQUEST);
         return $this->respondWithError($message, $data, $headers);
@@ -155,7 +155,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the error code
      */
-    protected function respondUnauthorized($message = 'Unauthorized', $errors = [], $headers = [ ])
+    protected function respondUnauthorized($message = 'Unauthorized', $errors = [], $headers = [])
     {
         $this->setStatusCode(IlluminateResponse::HTTP_UNAUTHORIZED);
         return $this->respondWithError($message, $errors, $headers);
@@ -169,7 +169,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the error message
      */
-    protected function respondForbidden($message = 'Forbidden', $headers = [ ])
+    protected function respondForbidden($message = 'Forbidden', $headers = [])
     {
         $this->setStatusCode(IlluminateResponse::HTTP_FORBIDDEN);
         return $this->respondWithError($message, $headers);
@@ -196,7 +196,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the error message
      */
-    protected function respondNotAllowed($message = 'Method not allowed', $headers = [ ])
+    protected function respondNotAllowed($message = 'Method not allowed', $headers = [])
     {
         $this->setStatusCode(IlluminateResponse::HTTP_METHOD_NOT_ALLOWED);
         return $this->respondWithError($message, $headers);
@@ -209,7 +209,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the error code
      */
-    protected function respondUnprocessableEntity($message = 'Unprocessable', $headers = [ ])
+    protected function respondUnprocessableEntity($message = 'Unprocessable', $headers = [])
     {
         $this->setStatusCode(IlluminateResponse::HTTP_UNPROCESSABLE_ENTITY);
         return $this->respondWithError($message, $headers);
@@ -223,7 +223,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the error message
      */
-    protected function respondTooManyRequests($message = 'Too many requests', $headers = [ ])
+    protected function respondTooManyRequests($message = 'Too many requests', $headers = [])
     {
         $this->setStatusCode(IlluminateResponse::HTTP_TOO_MANY_REQUESTS);
         return $this->respondWithError($message, $headers);
@@ -236,7 +236,7 @@ trait RestResponse
      *
      * @return \Illuminate\Http\JsonResponse The JSON-response with the error message
      */
-    protected function respondInternalError($message = 'Internal Error', $headers = [ ])
+    protected function respondInternalError($message = 'Internal Error', $headers = [])
     {
         $this->setStatusCode(IlluminateResponse::HTTP_INTERNAL_SERVER_ERROR);
         return $this->respondWithError($message, $headers);

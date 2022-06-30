@@ -6,18 +6,21 @@ interface APIInterface
 {
     /**
      * Returns API base URL
+     *
      * @return string
      */
     public function baseUrl();
 
     /**
      * Returns the number of items to return per page
+     *
      * @return void
      */
     public function getPerPage();
 
     /**
      * Set the number of items  to return per page
+     *
      * @param  int $perPage
      * @return $this
      */
@@ -25,6 +28,7 @@ interface APIInterface
 
     /**
      * Send a GET request
+     *
      * @param string $url
      * @param array $parameter
      * @return array
@@ -33,6 +37,7 @@ interface APIInterface
 
     /**
      * Send a header request
+     *
      * @param string $url
      * @param array $parameter
      * @return array
@@ -41,6 +46,7 @@ interface APIInterface
 
     /**
      * Send a Delete Request
+     *
      * @param null $url
      * @param array $parameter
      * @return mixed
@@ -49,6 +55,7 @@ interface APIInterface
 
     /**
      * Send a PUT  request
+     *
      * @param string $url
      * @param array $parameter
      * @return array
@@ -57,6 +64,7 @@ interface APIInterface
 
     /**
      * Send a PATCH request
+     *
      * @param string $url
      * @param array $parameter
      * @return array
@@ -65,13 +73,16 @@ interface APIInterface
 
     /**
      * Send a POST request
+     *
      * @param string $url
      * @param array $parameter
      * @return array
      */
     public function _post($url = null, array $parameter = []);
 
-    /**Send an OPTION request
+    /**
+* Send an OPTION request
+     *
      * @param string $url
      * @param array $parameter
      * @return array
@@ -82,6 +93,7 @@ interface APIInterface
 
     /**
      * executes the HTTP request.
+     *
      * @param string $httpMethod
      * @param string url
      * @param array $parameters

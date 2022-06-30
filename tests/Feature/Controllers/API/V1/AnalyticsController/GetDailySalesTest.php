@@ -68,7 +68,7 @@ class GetDailySalesTest extends TestCase
                     $day1,
                     $day2,
                     $day3,
-                ]
+                ],
             ]
         ]);
         $data = $response->getData()->data;

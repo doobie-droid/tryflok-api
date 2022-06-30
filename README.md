@@ -73,5 +73,5 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 # For Linting
 - ./vendor/bin/tlint format
-- ./vendor/bin/tlint
-- ./vendor/bin/phpmd ./app ansi phpmd-ruleset.xml
+- ./vendor/bin/phpcbf
+- ./vendor/bin/phpcs

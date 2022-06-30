@@ -51,7 +51,7 @@ class LoginTest extends TestCase
         $this->be($user);
         $token = JWTAuth::fromUser($user);
         $server = [
-            'HTTP_Authorization' => 'Bearer ' . $token
+            'HTTP_Authorization' => 'Bearer ' . $token,
         ];
     
         $response = $this->json('PATCH', '/api/v1/account/token', [], $server);

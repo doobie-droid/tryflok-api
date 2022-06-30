@@ -23,11 +23,11 @@ class CollectionController extends Controller
                 'title' => ['required', 'string'],
                 'description' => ['required', 'string'],
                 'cover.asset_id' => ['required', 'string', 'exists:assets,id', new AssetTypeRule('image')],
-                'price' => ['required',],
+                'price' => ['required'],
                 'price.amount' => ['required', 'min:0', 'numeric', 'max:10000'],
                 'price.interval' => ['required', 'string', 'in:one-off,monthly'],
                 'price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
-                'tags' => ['sometimes',],
+                'tags' => ['sometimes'],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
                 'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
             ]);
@@ -100,9 +100,9 @@ class CollectionController extends Controller
                 'title' => ['required', 'string'],
                 'description' => ['required', 'string'],
                 'cover.asset_id' => ['required', 'string', 'exists:assets,id', new AssetTypeRule('image')],
-                'price' => ['required',],
+                'price' => ['required'],
                 'price.amount' => ['required', 'min:0', 'numeric', 'max:10000'],
-                'tags' => ['sometimes',],
+                'tags' => ['sometimes'],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
             ]);
 
@@ -242,12 +242,12 @@ class CollectionController extends Controller
                 'description' => ['sometimes', 'nullable', 'string'],
                 'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'is_available' => ['sometimes', 'integer', 'min:0', 'max:1'],
-                'price' => ['sometimes', 'nullable',],
+                'price' => ['sometimes', 'nullable'],
                 'price.id' => ['sometimes', 'exists:prices,id'],
                 'price.amount' => ['sometimes', 'min:0', 'numeric', 'max:1000'],
                 'price.interval' => ['sometimes', 'string', 'in:one-off,monthly'],
-                'price.interval_amount' => ['sometimes', 'nullable', 'integer', 'size:1',],
-                'tags' => ['sometimes',],
+                'price.interval_amount' => ['sometimes', 'nullable', 'integer', 'size:1'],
+                'tags' => ['sometimes'],
                 'tags.*.id' => ['required', 'string', 'exists:tags,id'],
                 'tags.*.action' => ['required', 'string', 'in:add,remove'],
             ]);
@@ -325,7 +325,7 @@ class CollectionController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:collections,id'],
-                'contents' => ['required',],
+                'contents' => ['required'],
                 'contents.*.id' => ['required', 'string', 'exists:contents,id'],
                 'contents.*.action' => ['required', 'string', 'in:add,remove'],
             ]);
@@ -373,9 +373,9 @@ class CollectionController extends Controller
                 'description' => ['sometimes', 'nullable', 'string'],
                 'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'is_available' => ['sometimes', 'integer', 'min:0', 'max:1'],
-                'price' => ['sometimes', 'nullable',],
+                'price' => ['sometimes', 'nullable'],
                 'price.amount' => ['sometimes', 'min:0', 'numeric', 'max:1000'],
-                'tags' => ['sometimes',],
+                'tags' => ['sometimes'],
                 'tags.*.id' => ['required', 'string', 'exists:tags,id'],
                 'tags.*.action' => ['required', 'string', 'in:add,remove'],
             ]);
@@ -475,17 +475,17 @@ class CollectionController extends Controller
                 'order_by' => $orderBy,
                 'order_direction' => $orderDirection,
             ], [
-                'page' => ['required', 'integer', 'min:1',],
-                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
-                'keyword' => ['sometimes', 'string', 'max:200',],
-                'max_price' => ['required', 'integer', 'min:-1',],
-                'min_price' => ['required', 'integer', 'min:0',],
+                'page' => ['required', 'integer', 'min:1'],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}"],
+                'keyword' => ['sometimes', 'string', 'max:200'],
+                'max_price' => ['required', 'integer', 'min:-1'],
+                'min_price' => ['required', 'integer', 'min:0'],
                 'order_by' => ['required', 'string', 'in:created_at,price,views,reviews'],
                 'order_direction' => ['required', 'string', 'in:asc,desc'],
-                'tags' => ['sometimes',],
-                'tags.*' => ['required', 'string', 'exists:tags,id',],
-                'creators' => ['sometimes',],
-                'creators.*' => ['required', 'string', 'exists:users,id',],
+                'tags' => ['sometimes'],
+                'tags.*' => ['required', 'string', 'exists:tags,id'],
+                'creators' => ['sometimes'],
+                'creators.*' => ['required', 'string', 'exists:users,id'],
             ]);
 
             if ($validator->fails()) {
@@ -590,19 +590,19 @@ class CollectionController extends Controller
                 'type' => $types,
             ], [
                 'id' => ['required', 'string', 'exists:collections,id'],
-                'page' => ['required', 'integer', 'min:1',],
-                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
-                'keyword' => ['sometimes', 'string', 'max:200',],
-                'max_price' => ['required', 'integer', 'min:-1',],
-                'min_price' => ['required', 'integer', 'min:0',],
+                'page' => ['required', 'integer', 'min:1'],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}"],
+                'keyword' => ['sometimes', 'string', 'max:200'],
+                'max_price' => ['required', 'integer', 'min:-1'],
+                'min_price' => ['required', 'integer', 'min:0'],
                 'order_by' => ['required', 'string', 'in:created_at,price,views,reviews,scheduled_date'],
                 'order_direction' => ['required', 'string', 'in:asc,desc'],
-                'types' => ['sometimes',],
-                'type.*' => ['required', 'string',],
-                'tags' => ['sometimes',],
-                'tags.*' => ['required', 'string', 'exists:tags,id',],
-                'creators' => ['sometimes',],
-                'creators.*' => ['required', 'string', 'exists:users,id',],
+                'types' => ['sometimes'],
+                'type.*' => ['required', 'string'],
+                'tags' => ['sometimes'],
+                'tags.*' => ['required', 'string', 'exists:tags,id'],
+                'creators' => ['sometimes'],
+                'creators.*' => ['required', 'string', 'exists:users,id'],
             ]);
 
             if ($validator->fails()) {
@@ -694,15 +694,15 @@ class CollectionController extends Controller
                 'order_by' => $orderBy,
                 'order_direction' => $orderDirection,
             ], [
-                'page' => ['required', 'integer', 'min:1',],
-                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}",],
-                'keyword' => ['sometimes', 'string', 'max:200',],
-                'max_price' => ['required', 'integer', 'min:-1',],
-                'min_price' => ['required', 'integer', 'min:0',],
+                'page' => ['required', 'integer', 'min:1'],
+                'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}"],
+                'keyword' => ['sometimes', 'string', 'max:200'],
+                'max_price' => ['required', 'integer', 'min:-1'],
+                'min_price' => ['required', 'integer', 'min:0'],
                 'order_by' => ['required', 'string', 'in:created_at,price,views,reviews'],
                 'order_direction' => ['required', 'string', 'in:asc,desc'],
-                'tags' => ['sometimes',],
-                'tags.*' => ['required', 'string', 'exists:tags,id',],
+                'tags' => ['sometimes'],
+                'tags.*' => ['required', 'string', 'exists:tags,id'],
             ]);
 
             if ($validator->fails()) {

@@ -40,7 +40,7 @@ class UpdateTest extends TestCase
                 [
                     'id' => $tag->id,
                     'action' => 'add',
-                ]
+                ],
             ],
             'cover' => [
                 'asset_id' => $coverAsset->id,
@@ -153,7 +153,7 @@ class UpdateTest extends TestCase
             [
                 'id' => $tag->id,
                 'action' => 'adfdf',
-            ]
+            ],
         ];
         $response = $this->json('PATCH', "/api/v1/contents/{$content->id}", $request);
         $response->assertStatus(400)
@@ -171,7 +171,7 @@ class UpdateTest extends TestCase
             [
                 'id' => 'fdfdf-sdfdfdf-2343',
                 'action' => 'add',
-            ]
+            ],
          ];
          $response = $this->json('PATCH', "/api/v1/contents/{$content->id}", $request);
          $response->assertStatus(400)
@@ -224,7 +224,7 @@ class UpdateTest extends TestCase
                 [
                     'id' => $old_tag1->id,
                     'action' => 'remove',
-                ]
+                ],
             ],
             'cover' => [
                 'asset_id' => $cover_asset->id,
@@ -372,7 +372,7 @@ class UpdateTest extends TestCase
             'asset_ids' => [
                 $asset1->id,
                 $asset2->id,
-            ]
+            ],
         ];
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/attach-media", $request);
         $response->assertStatus(200);

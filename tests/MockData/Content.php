@@ -65,7 +65,7 @@ class Content
                     'username',
                     'profile_picture',
                 ]
-            ]
+            ],
         ];
 
         $structure['live_broadcasters'] = [
@@ -81,7 +81,7 @@ class Content
                     'username',
                     'profile_picture',
                 ]
-            ]
+            ],
         ];
 
         $structure['voting_result'] = [
@@ -96,7 +96,7 @@ class Content
                         'profile_picture',
                     ],
                     'votes',
-                ]
+                ],
             ]
         ];
 
@@ -155,7 +155,7 @@ class Content
                     [
                         'url',
                         'id',
-                    ]
+                    ],
                 ],
                 'cookies',
                 'cookies_expire',
@@ -195,14 +195,14 @@ class Content
                 'amount',
                 'currency',
                 'interval',
-                'interval_amount'
-            ]
+                'interval_amount',
+            ],
         ],
         'tags' => [
             [
                 'id',
                 'name',
-            ]
+            ],
         ],
         'metas',
     ];
@@ -221,7 +221,7 @@ class Content
                 'id',
                 'title',
                 'description',
-            ]
+            ],
         ]
     ];
 }

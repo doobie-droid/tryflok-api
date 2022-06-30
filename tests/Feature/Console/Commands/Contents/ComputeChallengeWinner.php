@@ -165,8 +165,8 @@ class ComputeChallengeWinner extends TestCase
         ->liveEnded(now()->subMinutes($voting_window))
         ->setChallengeContestants([$winner, $loser], ['accept' => 2])
         ->setChallengeDetails($pot_size, 0, $moderator_share, $winner_share, $loser_share)
-        ->setChallengeVoters([$voter1,], $winner->id)
-        ->setChallengeVoters([$voter2,], $loser->id)
+        ->setChallengeVoters([$voter1], $winner->id)
+        ->setChallengeVoters([$voter2], $loser->id)
         ->setChallengeContributors([$voter1, $voter2, $voter3], 1000)
         ->create();
 

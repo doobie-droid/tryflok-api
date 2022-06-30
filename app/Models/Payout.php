@@ -50,7 +50,9 @@ class Payout extends Model
         $this->save();
     }
 
-    /** @param $buffer_time is time in hours */
+    /**
+ * @param $buffer_time is time in hours
+*/
     public function failedNotificationNotSent(int $buffer_time = 12): bool
     {
         $has_been_sent = false;

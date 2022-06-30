@@ -31,6 +31,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     }
     /**
      * When a new connection is opened it will be passed to this method
+     *
      * @param  ConnectionInterface $conn The socket/connection that just connected to your application
      * @throws \Exception
      */
@@ -57,6 +58,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     
      /**
      * This is called before or after a socket is closed (depends on how it's closed).  SendMessage to $conn will not result in an error if it has already been closed.
+      *
      * @param  ConnectionInterface $conn The socket/connection that is closing/closed
      * @throws \Exception
      */
@@ -81,6 +83,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      /**
      * If there is an error with one of the sockets, or somewhere in the application where an Exception is thrown,
      * the Exception is sent back down the stack, handled by the Server and bubbled back up the application through this method
+      *
      * @param  ConnectionInterface $conn
      * @param  \Exception $e
      * @throws \Exception
@@ -106,6 +109,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     
      /**
      * Triggered when a client sends data through the socket
+      *
      * @param  \Ratchet\ConnectionInterface $conn The socket/connection that sent the message to your application
      * @param  string $msg The message received
      * @throws \Exception
@@ -115,15 +119,18 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         try {
             $event = "";
             $data = json_decode($msg);
-            if (! $this->messageIsFromNodeOrApp($data)) {
-                $user_is_authenticated = $this->checkConnectionIsAuthenticated($conn, $data);
-                if (! $user_is_authenticated) {
-                    return;
-                }
-            }
             if (is_object($data) && property_exists($data, 'event')) {
                 $event = $data->event;
             }
+            if (! $this->messageIsFromNodeOrApp($data)) {
+                $user_is_authenticated = $this->checkConnectionIsAuthenticated($conn, $data);
+                if (! $user_is_authenticated && $event !== 'join-rtm-channel') {
+                    // only allow unauthenticated requests come from server node or api
+                    // or requests that have to do with joining a channel
+                    return;
+                }
+            }
+           
             switch ($event) {
                 case 'join-rtm-channel':
                     $this->joinRtmChannel($data, $conn);
@@ -218,8 +225,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     {
         try {
             $validator = Validator::make((array) $data, [
-                'channel_name' => ['required', 'string',],
-                'user_id' => ['required', 'string',],
+                'channel_name' => ['required', 'string'],
+                //'user_id' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -263,9 +270,9 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     {
         try {
             $validator = Validator::make((array) $data, [
-                'channel_name' => ['required', 'string',],
-                'user_id' => ['required', 'string',],
-                'message' => ['required', 'string',],
+                'channel_name' => ['required', 'string'],
+                'user_id' => ['required', 'string'],
+                'message' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -325,10 +332,10 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     {
         try {
             $validator = Validator::make((array) $data, [
-                'channel_name' => ['required', 'string',],
-                'broadcaster_id' => ['required', 'string',],
-                'agora_uid' => ['required', 'string',],
-                'content_id' => ['required', 'string',],
+                'channel_name' => ['required', 'string'],
+                'broadcaster_id' => ['required', 'string'],
+                'agora_uid' => ['required', 'string'],
+                'content_id' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -396,10 +403,10 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     {
         try {
             $validator = Validator::make((array) $data, [
-                'channel_name' => ['required', 'string',],
-                'broadcaster_id' => ['required', 'string',],
-                'content_id' => ['required', 'string',],
-                'agora_uid' => ['required', 'string',],
+                'channel_name' => ['required', 'string'],
+                'broadcaster_id' => ['required', 'string'],
+                'content_id' => ['required', 'string'],
+                'agora_uid' => ['required', 'string'],
                 'stream' => ['required', 'string', 'in:audio,video'],
             ]);
 
@@ -469,10 +476,10 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     {
         try {
             $validator = Validator::make((array) $data, [
-                'channel_name' => ['required', 'string',],
-                'broadcaster_id' => ['required', 'string',],
-                'content_id' => ['required', 'string',],
-                'agora_uid' => ['required', 'string',],
+                'channel_name' => ['required', 'string'],
+                'broadcaster_id' => ['required', 'string'],
+                'content_id' => ['required', 'string'],
+                'agora_uid' => ['required', 'string'],
                 'stream' => ['required', 'string', 'in:audio,video'],
             ]);
 
@@ -542,10 +549,10 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     {
         try {
             $validator = Validator::make((array) $data, [
-                'channel_name' => ['required', 'string',],
-                'broadcaster_id' => ['required', 'string',],
-                'content_id' => ['required', 'string',],
-                'agora_uid' => ['required', 'string',],
+                'channel_name' => ['required', 'string'],
+                'broadcaster_id' => ['required', 'string'],
+                'content_id' => ['required', 'string'],
+                'agora_uid' => ['required', 'string'],
                 'stream' => ['required', 'string', 'in:audio,video'],
             ]);
 
