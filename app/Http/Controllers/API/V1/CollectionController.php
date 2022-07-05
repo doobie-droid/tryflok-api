@@ -173,7 +173,7 @@ class CollectionController extends Controller
         }
     }
 
-    public function getDigiverse(Request $request, $id)
+    public function showDigiverse(Request $request, $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [
@@ -663,7 +663,7 @@ class CollectionController extends Controller
         }
     }
 
-    public function getUserCreatedDigiverses(Request $request)
+    public function listUserCreatedDigiverses(Request $request)
     {
         try {
             $page = $request->query('page', 1);

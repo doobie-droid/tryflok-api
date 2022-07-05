@@ -10,8 +10,13 @@
 | need to change it using the "uses()" function to bind a different classes or traits.
 |
 */
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
+
+uses(DatabaseTransactions::class, Tests\TestCase::class)->in('Pest/Feature');
 uses(Tests\TestCase::class)->in('Feature');
+
+
 
 /*
 |--------------------------------------------------------------------------
