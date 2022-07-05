@@ -1181,24 +1181,26 @@ class ContentController extends Controller
                 return $this->respondBadRequest('You cannot join a broadcast that has not been started');
             }
 
-            $content->subscribers()->syncWithoutDetaching([
-                $request->user()->id => [
-                    'id' => Str::uuid(),
-                ],
-            ]);
-
+            if ($user_id !== '') {
+                $content->subscribers()->syncWithoutDetaching([
+                    $request->user()->id => [
+                        'id' => Str::uuid(),
+                    ],
+                ]);
+            }
+            
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
             $join_count->value = (int) $join_count->value + 1;
             $join_count->save();
             $expires = time() + (24 * 60 * 60); // let token last for 24hrs
             // $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, $uid, AgoraRtcToken::ROLE_ATTENDEE, $expires);
-            $subscribers_count = $content->subscribers()->count();
+           // $subscribers_count = $content->subscribers()->count();
             $websocket_client = new \WebSocket\Client(config('services.websocket.url'));
             $websocket_client->text(json_encode([
                 'event' => 'app-update-rtm-channel-subscribers-count',
                 'channel_name' => $channel->value,
-                'subscribers_count' => $subscribers_count,
+                'subscribers_count' => (int) $join_count->value,
                 'source_type' => 'app',
             ]));
             $websocket_client->close();
@@ -1208,7 +1210,7 @@ class ContentController extends Controller
                 'rtm_token' => $rtm_token->value,
                 'channel_name' => $channel->value,
                 'uid' => (int) $uid,
-                'subscribers_count' => $subscribers_count,
+                'subscribers_count' => (int) $join_count->value,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);

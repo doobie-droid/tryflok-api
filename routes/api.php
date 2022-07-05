@@ -35,6 +35,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::group(['prefix' => 'contents'], function () {
         Route::get('trending', 'ContentController@listTrending')->name('list-trending-contents');
 
+        Route::patch('{id}/live', 'ContentController@joinLive');
+        
         Route::post('{id}/views', 'ContentController@addViews');
         Route::get('{id}', 'ContentController@show')->name('show-content');
         Route::get('{id}/reviews', 'ContentController@getReviews');
