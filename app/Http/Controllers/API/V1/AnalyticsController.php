@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AnalyticsController extends Controller
 {
-    public function getDailySales(Request $request)
+    public function listDailySales(Request $request)
     {
         try {
             $start_date = $request->query('start_date', now()->startOfMonth());

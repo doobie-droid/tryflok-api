@@ -106,7 +106,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'analytics'], function () {
             Route::group(['prefix' => 'sales'], function () {
-                Route::get('daily', 'AnalyticsController@getDailySales');
+                Route::get('daily', 'AnalyticsController@listDailySales')->name('list-daily-sales');
             });
         });
 

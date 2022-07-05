@@ -17,8 +17,8 @@ test('delete account works', function()
         $this->be($user);
 
         $response = $this->json('DELETE', '/api/v1/account');
-        $response->assertStatus(200);
-        //->assertJsonStructure(MockData\User::generateGetAccountResponse());
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\User::generateGetAccountResponse());
         $user_returned = $response->getData()->data->user;
         $this->assertTrue($user_returned->deleted_at != null);
 });
