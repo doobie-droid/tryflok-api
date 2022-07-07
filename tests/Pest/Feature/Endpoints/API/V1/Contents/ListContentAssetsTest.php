@@ -26,14 +26,14 @@ test('asset gets returned for free content', function()
         $response = $this->json('GET', "/api/v1/contents/{$content->id}/assets");
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\Content::generateGetAssetsResponse());
-})->skip();
+});
 
 test('asset is not returned for paid content when user has not paid', function()
 {
         $response = $this->json('GET', "/api/v1/contents/{$this->content->id}/assets");
         $response->assertStatus(400);
         $this->assertEquals($response->getData()->message, 'You are not permitted to view the assets of this content');
-})->skip(); 
+}); 
 
 test('asset is not returned for free content with paid ancestor when user has not paid', function()
 {
@@ -51,7 +51,7 @@ test('asset is not returned for free content with paid ancestor when user has no
         $response->assertStatus(400);
         $this->assertEquals($response->getData()->message, 'You are not permitted to view the assets of this content');
 
-})->skip();
+});
 
 test('asset is returned for paid content when user has paid', function()
 {
@@ -64,7 +64,7 @@ test('asset is returned for paid content when user has paid', function()
         $response = $this->json('GET', "/api/v1/contents/{$this->content->id}/assets");
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\Content::generateGetAssetsResponse());
-})->skip();
+});
 
 test('asset is returned for free content with paid ancestor when user has paid via ancestor', function()
 {
@@ -111,4 +111,4 @@ test('asset is returned for paid content with paid ancestor when user has paid v
         $response = $this->json('GET', "/api/v1/contents/{$content->id}/assets");
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\Content::generateGetAssetsResponse());
-})->skip();
+});
