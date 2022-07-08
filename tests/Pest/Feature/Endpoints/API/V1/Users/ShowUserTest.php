@@ -5,11 +5,20 @@ use Tests\MockData;
 use Illuminate\Support\Str;
 
 
-test('get works when user is not signed in', function()
+it('works when user is not signed in', function()
 {
         $user_to_get = Models\User::factory()->create();
 
         $response = $this->json('GET', "/api/v1/users/{$user_to_get->id}");
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\User::generateGetUserResponse());
+});
+
+it('works when username is passed', function()
+{
+        $user_to_get = Models\User::factory()->create();
+
+        $response = $this->json('GET', "/api/v1/users/{$user_to_get->username}");
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\User::generateGetUserResponse());
 });
