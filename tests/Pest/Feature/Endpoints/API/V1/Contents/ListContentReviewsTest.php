@@ -23,7 +23,7 @@ test('list content review works', function()
             
 });
 
-it('returns a 404 when invalid content ID is supplied', function()
+it('returns a 400 when invalid content ID is supplied', function()
 {           
             $response = $this->json('GET', "/api/v1/contents/{-1}/reviews");
             $response->assertStatus(400);
