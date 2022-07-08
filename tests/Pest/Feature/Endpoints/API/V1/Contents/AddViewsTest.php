@@ -9,10 +9,17 @@ test('add views works', function()
         $this->be($user);
         $content = Models\Content::factory()
         ->create();
+        
 
-        $request = MockData\View::generateStandardAddViewRequest();
+        $request = [
+            'id' => '1',
+            'user_id' => $user->id,
+            'viewable_type' => 'content',
+            'viewable_id' => $content->id,
+        ];
         $expected_response_structure = MockData\View::generateAddViewResponse();
-        $response = $this->json('POST', '/api/v1/contents/{$content->id}/views', $request);
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/views", $request);
+        dd($response->getData()->data);
         $response->assertStatus(200)
         ->assertJsonStructure($expected_response_structure);
 
