@@ -21,6 +21,7 @@ class NotifyTipping implements ShouldQueue
     private $tippee;
     private $amount_in_flk;
     private $wallet_transaction;
+    private $custom_message;
     /**
      * Create a new job instance.
      *
@@ -32,7 +33,7 @@ class NotifyTipping implements ShouldQueue
         $this->tippee = $data['tippee'];
         $this->amount_in_flk = $data['amount_in_flk'];
         $this->wallet_transaction = $data['wallet_transaction'];
-        $this->custom_message = $data['custom_message'];
+        $this->custom_message = array_key_exists('custom_message', $data) ? $data['custom_message'] : '';
     }
 
     /**

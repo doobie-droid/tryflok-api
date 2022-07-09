@@ -45,9 +45,9 @@ class FundWallet implements ShouldQueue
         $this->flk = $data['flk'];
         $this->amount = $data['amount'];
         $this->fee = $data['fee'];
-        $this->fund_type = $data['fund_type'];
-        $this->funder_name = $data['funder_name'];
-        $this->fund_note = $data['fund_note'];
+        $this->fund_type = array_key_exists('fund_type', $data) ? $data['fund_type'] : '';
+        $this->funder_name = array_key_exists('funder_name', $data) ? $data['funder_name'] : '';
+        $this->fund_note = array_key_exists('fund_note', $data) ? $data['fund_note'] : '';
     }
 
     /**
