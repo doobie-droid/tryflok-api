@@ -147,6 +147,8 @@ class WalletController extends Controller
                 'provider_response.id' => ['required_if:provider,stripe', 'string'],
                 'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
                 'expected_flk_amount' => ['required', 'integer', 'min:1'],
+                'fund_type' => ['sometimes', 'string', 'in:tip,self'],
+                'note' => ['sometimes', 'string', 'max: 300'],
             ]);
 
             if ($validator->fails()) {
@@ -158,7 +160,6 @@ class WalletController extends Controller
                 return $this->respondBadRequest('Please provide a valid username or email');
             }
 
-            
             //the provider is being built in the cases in case an invalid provider passes through validation
             switch ($request->provider) {
                 case 'flutterwave':
