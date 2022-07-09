@@ -82,6 +82,16 @@ class PaymentController extends Controller
         }
     }
 
+    public function flutterwaveWebhook(Request $request)
+    {
+        try {
+            Log::info($request->data);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
+    }
+
     /* public function paystackWebhook(Request $request)
      {
          try {

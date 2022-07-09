@@ -70,9 +70,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::group(['prefix' => 'payments'], function () {
         Route::patch('easy-fund-wallet', 'WalletController@easyFundWallet');
-        Route::post('flutterwave/validate-bank-details', 'PaymentController@validateBankDetailsViaFlutterwave');
-        Route::get('flutterwave/banks', 'PaymentController@getFlutterwaveBanks');
-        Route::get('flutterwave/banks/branches', 'PaymentController@getFlutterwaveBankBranches');
+
+        Route::group(['prefix' => 'flutterwave'], function () {
+            Route::post('validate-bank-details', 'PaymentController@validateBankDetailsViaFlutterwave');
+            Route::get('banks', 'PaymentController@getFlutterwaveBanks');
+            Route::get('banks/branches', 'PaymentController@getFlutterwaveBankBranches');
+            Route::post('webhook', 'PaymentController@flutterwaveWebhook');
+        });
+        
         Route::get('stripe/connect', 'UserController@addStripePaymentAccount');
     });
 });
