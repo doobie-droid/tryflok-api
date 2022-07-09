@@ -110,11 +110,8 @@ class UserController extends Controller
     {
         try {
 
-            $user = User::where('id', $id)->first();
-            if (is_null($user)) {
-                $user = User::where('username', $id)->first();
-            }
-
+            $user = User::where('id', $id)->orWhere('username', $id)->orWhere('email', $id)->first();
+   
             if (is_null($user)) {
                 return $this->respondBadRequest('User not found');
             }
