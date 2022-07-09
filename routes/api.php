@@ -77,8 +77,15 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
             Route::get('banks/branches', 'PaymentController@getFlutterwaveBankBranches');
             Route::post('webhook', 'PaymentController@flutterwaveWebhook');
         });
-        
-        Route::get('stripe/connect', 'UserController@addStripePaymentAccount');
+
+        Route::group(['prefix' => 'stripe'], function () {
+            Route::get('connect', 'UserController@addStripePaymentAccount');
+            Route::post('webhook', 'PaymentController@stripeWebhook');
+        });
+
+        Route::group(['prefix' => 'apple-pay'], function () {
+            Route::post('webhook', 'PaymentController@applePayWebhook');
+        });
     });
 });
 
