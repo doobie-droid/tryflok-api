@@ -148,7 +148,8 @@ class WalletController extends Controller
                 'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
                 'expected_flk_amount' => ['required', 'integer', 'min:1'],
                 'fund_type' => ['sometimes', 'string', 'in:tip,self'],
-                'note' => ['sometimes', 'string', 'max: 300'],
+                'funder_name' => ['required_if:fund_type,tip', 'string'],
+                'fund_note' => ['sometimes', 'string', 'max: 300'],
             ]);
 
             if ($validator->fails()) {
@@ -180,7 +181,10 @@ class WalletController extends Controller
                             'provider_id' => $req->data->id,
                             'amount' => $amount_in_dollars,
                             'flk' => $request->expected_flk_amount,
-                            'fee' => bcdiv($req->data->app_fee, 505, 2)
+                            'fee' => bcdiv($req->data->app_fee, 505, 2),
+                            'fund_type' => $request->fund_type,
+                            'funder_name' => $request->funder_name,
+                            'fund_note' => $request->fund_note,
                         ]);
                     } else {
                         return $this->respondBadRequest('Invalid transaction id provided for flutterwave');
@@ -207,7 +211,10 @@ class WalletController extends Controller
                             'provider_id' => $req->id,
                             'amount' => $amount_in_dollars,
                             'flk' => $request->expected_flk_amount,
-                            'fee' => bcdiv(bcadd(bcdiv(bcmul(2.9, $request->amount_in_cents, 2), 100, 2), 30, 2), 100, 2),//2.9 % + 30,
+                            'fee' => bcdiv(bcadd(bcdiv(bcmul(2.9, $request->amount_in_cents, 2), 100, 2), 30, 2), 100, 2),/*2.9 % + 30,*/
+                            'fund_type' => $request->fund_type,
+                            'funder_name' => $request->funder_name,
+                            'fund_note' => $request->fund_note,
                         ]);
                     } else {
                         return $this->respondBadRequest('Invalid token id provided for stripe');
@@ -239,6 +246,9 @@ class WalletController extends Controller
                             'amount' => $amount_in_dollars,
                             'flk' => $request->expected_flk_amount,
                             'fee' => bcdiv(bcmul(30, $amount_in_dollars, 2), 100, 2),
+                            'fund_type' => $request->fund_type,
+                            'funder_name' => $request->funder_name,
+                            'fund_note' => $request->fund_note,
                         ]);
                     } else {
                         return $this->respondBadRequest('Invalid payment receipt provided for apple pay');

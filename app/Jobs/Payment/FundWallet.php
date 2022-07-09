@@ -4,6 +4,7 @@ namespace App\Jobs\Payment;
 
 use App\Models\Payment;
 use App\Models\WalletTransaction;
+use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -26,6 +27,9 @@ class FundWallet implements ShouldQueue
     private $flk;
     private $amount;
     private $fee;
+    private $fund_type;
+    private $funder_name;
+    private $fund_note;
 
     /**
      * Create a new job instance.
@@ -41,6 +45,9 @@ class FundWallet implements ShouldQueue
         $this->flk = $data['flk'];
         $this->amount = $data['amount'];
         $this->fee = $data['fee'];
+        $this->fund_type = $data['fund_type'];
+        $this->funder_name = $data['funder_name'];
+        $this->fund_note = $data['fund_note'];
     }
 
     /**
@@ -88,7 +95,16 @@ class FundWallet implements ShouldQueue
                 'provider_id' => $this->provider_id,
             ]);
             DB::commit();
-            //TO DO: email user that they have increased their wallet balance
+            if ($this->fund_type == 'tip') {
+                $custom_message = "You just got a gift of {$this->flk} from {$this->funder_name} with the note '{$this->fund_note}'";
+                NotifyTippingJob::dispatch([
+                    'tipper' => $this->user,
+                    'tippee' => $this->user,
+                    'amount_in_flk' => $this->flk,
+                    'wallet_transaction' => $walletTransaction,
+                    'custom_message' => $custom_message
+                ]);
+            }
         } catch (\Exception $exception) {
             DB::rollBack();
             Log::error($exception);
