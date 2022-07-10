@@ -44,7 +44,7 @@ class WalletController extends Controller
                     $flutterwave = new PaymentProvider($request->provider);
                     $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
                     if (($req->status === 'success' && $req->data->status === 'successful')) {
-                        $amount_in_dollars = bcdiv($req->data->amount, 570, 2);
+                        $amount_in_dollars = bcdiv($req->data->amount, Constants::NAIRA_TO_DOLLAR, 2);
                         $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
                         $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
                         $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
@@ -59,7 +59,7 @@ class WalletController extends Controller
                             'provider_id' => $req->data->id,
                             'amount' => $amount_in_dollars,
                             'flk' => $request->expected_flk_amount,
-                            'fee' => bcdiv($req->data->app_fee, 570, 2)
+                            'fee' => bcdiv($req->data->app_fee, Constants::NAIRA_TO_DOLLAR, 2)
                         ]);
                     } else {
                         return $this->respondBadRequest('Invalid transaction id provided for flutterwave');
@@ -167,7 +167,7 @@ class WalletController extends Controller
                     $flutterwave = new PaymentProvider($request->provider);
                     $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
                     if (($req->status === 'success' && $req->data->status === 'successful')) {
-                        $amount_in_dollars = bcdiv($req->data->amount, 505, 2);
+                        $amount_in_dollars = bcdiv($req->data->amount, Constants::NAIRA_TO_DOLLAR, 2);
                         $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
                         $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
                         $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, bcdiv(3, 100, 2), 2);
@@ -181,7 +181,7 @@ class WalletController extends Controller
                             'provider_id' => $req->data->id,
                             'amount' => $amount_in_dollars,
                             'flk' => $request->expected_flk_amount,
-                            'fee' => bcdiv($req->data->app_fee, 505, 2),
+                            'fee' => bcdiv($req->data->app_fee, Constants::NAIRA_TO_DOLLAR, 2),
                             'fund_type' => $request->fund_type,
                             'funder_name' => $request->funder_name,
                             'fund_note' => $request->fund_note,

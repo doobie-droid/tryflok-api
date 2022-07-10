@@ -2,6 +2,7 @@
 
 namespace App\Services\Payment\Providers\Flutterwave;
 
+use App\Constants\Constants;
 use App\Models\PaymentAccount;
 use App\Services\Payment\PaymentInterface;
 use App\Services\Payment\Providers\Flutterwave\API;
@@ -58,7 +59,7 @@ class Flutterwave extends API implements PaymentInterface
         $need_branch_code = ['GH', 'UG', 'TZ'];
         //TO DO: might want to implement a currency converter among providers
         $neededData = [
-            'amount' => bcmul($amount, 570, 0), //convert to Naira from dollars
+            'amount' => bcmul($amount, Constants::NAIRA_TO_DOLLAR, 0), //convert to Naira from dollars
             'account_number' => $transferData->identifier,
             'account_bank' => $transferData->bank_code,
             'currency' => 'NGN',
