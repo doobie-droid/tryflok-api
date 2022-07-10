@@ -96,7 +96,7 @@ class FundWallet implements ShouldQueue
             ]);
             DB::commit();
             if ($this->fund_type == 'tip') {
-                $custom_message = "You just got a gift of {$this->flk} from {$this->funder_name} with the note '{$this->fund_note}'";
+                $custom_message = "You just got a gift of {$this->flk} Flok cowries from {$this->funder_name} with the note '{$this->fund_note}'";
                 NotifyTippingJob::dispatch([
                     'tipper' => $this->user,
                     'tippee' => $this->user,
