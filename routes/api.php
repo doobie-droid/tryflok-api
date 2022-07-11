@@ -49,18 +49,18 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('/', 'CollectionController@listDigiverses')->name('list-digiverses');
         Route::get('{id}', 'CollectionController@showDigiverse')->name('show-digiverse');
         Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-digiverse-contents');
-        Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
+        Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections')->name('list-digiverse-collections');
         Route::get('{id}/reviews', 'CollectionController@getReviews');
     });
 
     Route::group(['prefix' => 'collections'], function () {
-        Route::get('{id}', 'CollectionController@getCollection');
+        Route::get('{id}', 'CollectionController@listCollections')->name('list-collections');
         Route::get('{collection_id}/contents', 'ContentController@getCollectionContents');
         Route::get('{id}/reviews', 'CollectionController@getReviews');
     });
 
     Route::group(['prefix' => 'reviews'], function () {
-        Route::get('{id}/reviews', 'ReviewController@getReviews');
+        Route::get('{id}/reviews', 'ReviewController@listReviews')->name('list-reviews');
     });
 
     Route::group(['prefix' => 'users'], function () {

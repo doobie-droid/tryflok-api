@@ -74,7 +74,7 @@ class ReviewController extends Controller
         }
     }
 
-    public function getReviews(Request $request, $id)
+    public function listReviews(Request $request, $id)
     {
         try {
             $review = Review::where('id', $id)->first();
