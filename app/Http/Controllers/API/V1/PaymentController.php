@@ -89,7 +89,7 @@ class PaymentController extends Controller
 
             $flutterwave = new Flutterwave;
             $req = $flutterwave->verifyTransaction($request->data['id']);
-            Log::info($req);
+            Log::info(json_encode($req));
         } catch(\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError("Oops, an error occurred. Please try again later.");
