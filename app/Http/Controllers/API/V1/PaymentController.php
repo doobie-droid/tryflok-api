@@ -88,7 +88,7 @@ class PaymentController extends Controller
             Log::info($request->data);
 
             $flutterwave = new Flutterwave;
-            $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
+            $req = $flutterwave->verifyTransaction($request->data->id);
             Log::info($req);
         } catch(\Exception $exception) {
             Log::error($exception);
