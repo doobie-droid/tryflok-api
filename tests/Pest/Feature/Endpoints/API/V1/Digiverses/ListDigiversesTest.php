@@ -124,7 +124,7 @@ test('empty digiverses do not get returned', function()
 
 test('retrieve digiverses work when user is not signed in', function()
 {
-    $tag = Models\Tag::factory()->create();
+        $tag = Models\Tag::factory()->create();
         $content = Models\Content::factory()->noDigiverse()->create();
         Models\Collection::factory()
                         ->digiverse()
@@ -148,7 +148,7 @@ test('retrieve digiverses work when user is not signed in', function()
 
 test('retrieve digiverses work when user is signed in', function()
 {
-    $user = Models\User::factory()->create();
+        $user = Models\User::factory()->create();
         $this->be($user);
         $tag = Models\Tag::factory()->create();
         $content = Models\Content::factory()->noDigiverse()->create();
