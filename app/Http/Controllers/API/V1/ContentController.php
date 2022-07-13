@@ -730,7 +730,7 @@ class ContentController extends Controller
                 ->where('is_adult', 0)
                 ->where('approved_by_admin', 1);
             })->where(function ($query) {
-                $query->whereNull('live_ended_at')->orWhereDate('live_ended_at', '<=', now()->subHours(12));
+                $query->whereNull('live_ended_at')->orWhereDate('live_ended_at', '>=', now()->subHours(12));
             });
 
             if ($request->user() == null || $request->user()->id == null) {
