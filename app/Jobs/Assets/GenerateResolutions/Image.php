@@ -81,7 +81,7 @@ class Image implements ShouldQueue
     {
         $image = ImageManipulator::make($source);
         $image->orientate();
-        $image->resize(500, 500, function ($constraint) {
+        $image->resize(700, 700, function ($constraint) {
             $constraint->aspectRatio();
             $constraint->upsize();
         });
