@@ -11,10 +11,12 @@ return [
         'flutterwave' => [
             'secret_key' => env('FLUTTERWAVE_SECRET_KEY'),
             'public_key' => env('FLUTTERWAVE_PUBLIC_KEY'),
+            'webhook_secret' => env('FLUTTERWAVE_WEBHOOK_HASH'),
         ],
         'stripe' => [
             'secret_key' => env('STRIPE_SECRET_KEY'),
             'public_key' => env('STRIPE_PUBLIC_KEY'),
+            'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
         ],
         'apple' => [
             'secret_key' => env('APPLE_PAY_SECRET_KEY'),

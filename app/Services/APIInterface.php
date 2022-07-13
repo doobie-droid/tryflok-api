@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Payment\Providers\Flutterwave;
+namespace App\Services;
 
 interface APIInterface
 {

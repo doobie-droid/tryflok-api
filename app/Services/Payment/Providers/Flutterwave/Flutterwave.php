@@ -6,94 +6,50 @@ use App\Constants\Constants;
 use App\Models\PaymentAccount;
 use App\Services\Payment\PaymentInterface;
 use App\Services\Payment\Providers\Flutterwave\API;
+use Illuminate\Contracts\Foundation\App;
+use  App\Services\Payment\Providers\Flutterwave\Main;
+use  App\Services\Payment\Providers\Flutterwave\Test;
 
-class Flutterwave extends API implements PaymentInterface
+class Flutterwave
 {
-    /**
-     * Get list of Banks supported by flutterwave
-     *
-     * @param array $options ['country_code',]
-     *
-     * @return array
-     */
-    public function getBanks($options)
+    protected $driver;
+
+    public function __construct()
     {
-        return $this->_get('v3/banks/' . $options['country_code']);
+        if (config('app.env') == 'testing') {
+            $this->driver = new Test;
+        } else {
+            $this->driver = new Main;
+        }
+    }
+ 
+    public function getBanks(string $country_code): \stdClass
+    {
+        return $this->driver->getBanks($country_code);
     }
 
-    public function getBankBranch($id)
+    public function getBankBranch(string $bank_id): \stdClass
     {
-        return $this->_get('v3/banks/' . $id . '/branches');
+        return $this->driver->getBankBranch($bank_id);
     }
 
     public function validateAccountNumber(string $account_number, string $bank_code): \stdClass
     {
-        $data = [
-            'account_number' => $account_number,
-            'account_bank' => $bank_code,
-        ];
-        return $this->_post('v3/accounts/resolve', $data);
+        return $this->driver->validateAccountNumber($account_number, $bank_code);
     }
 
-    /**
-     * Verify a transaction
-     *
-     * @param string $id
-     * @return array
-     */
-    public function verifyTransaction($id)
+    public function verifyTransaction(string $id): \stdClass
     {
-        return $this->_get('v3/transactions/' . $id . '/verify');
+        return $this->driver->verifyTransaction($id);
     }
 
-    /**
-     * Transfer funds to a recipient
-     *
-     * @param App\Models\PaymentAccount $transferData
-     * @param float $amount
-     *  ['amount', 'bank_code', 'account_number', 'branch_code', 'country_code', 'reference']
-     * @return array
-     */
-    public function transferFundsToRecipient(PaymentAccount $transferData, $amount)
+    public function transferFundsToRecipient(PaymentAccount $transferData, float $amount): \stdClass
     {
-        $need_branch_code = ['GH', 'UG', 'TZ'];
-        //TO DO: might want to implement a currency converter among providers
-        $neededData = [
-            'amount' => bcmul($amount, Constants::NAIRA_TO_DOLLAR, 0), //convert to Naira from dollars
-            'account_number' => $transferData->identifier,
-            'account_bank' => $transferData->bank_code,
-            'currency' => 'NGN',
-            'reference' => uniqid() . date('Ymd-His'),
-        ];
-
-        if (in_array($transferData->country_code, $need_branch_code)) {
-            $neededData['destination_branch_code'] = $transferData->branch_code;
-        }
-        $response = $this->_post('v3/transfers', $neededData);
-        return $response;
+        return $this->driver->transferFundsToRecipient($transferData, $amount);
     }
 
-    /**
-     * Get status of a transfer
-     *
-     * @param integer $id
-     *
-     * @return array
-     */
-    public function getTransferStatus($id)
+    public function getTransferStatus(string $id): \stdClass
     {
-        $response = $this->_get('v3/transfers/' . $id);
-        return $response;
-    }
-
-    /**
-     * Charge a customer
-     *
-     * @param [array] $chargeData => [authorization_code, email, amount]
-     * @return array
-     */
-    public function chargeCustomer($chargeData)
-    {
-        throw new Exception('Flutterwave does not implement chargeCustomer method');
+        return $this->driver->getTransferStatus($id);
     }
 }

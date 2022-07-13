@@ -69,13 +69,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'payments'], function () {
-        Route::patch('easy-fund-wallet', 'WalletController@easyFundWallet');
+        Route::patch('easy-fund-wallet', 'WalletController@fundWallet')->name('easy-fund-wallet');
 
         Route::group(['prefix' => 'flutterwave'], function () {
             Route::post('validate-bank-details', 'PaymentController@validateBankDetailsViaFlutterwave');
             Route::get('banks', 'PaymentController@getFlutterwaveBanks');
             Route::get('banks/branches', 'PaymentController@getFlutterwaveBankBranches');
-            Route::post('webhook', 'PaymentController@flutterwaveWebhook');
+            Route::post('webhook', 'PaymentController@flutterwaveWebhook')->name('flutterwave-webhook');
         });
 
         Route::group(['prefix' => 'stripe'], function () {
@@ -133,7 +133,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('notifications', 'UserController@markAllNotificationsAsRead');
             // Route::get('approval-requests', 'ApprovalController@getUserRequests');
             Route::get('subscriptions', 'SubscriptionController@getUserSubscriptions');
-            Route::patch('fund-wallet', 'WalletController@fundWallet');
+            Route::patch('fund-wallet', 'WalletController@fundWallet')->name('fund-wallet');
             Route::patch('withdraw-from-wallet', 'WalletController@withdrawFromWallet')->name('withdraw-from-wallet');
             Route::post('wallet-pay', 'WalletController@payViaWallet');
             Route::get('wallet-transactions', 'WalletController@getTransactions');
