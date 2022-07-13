@@ -10,8 +10,14 @@
 | need to change it using the "uses()" function to bind a different classes or traits.
 |
 */
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
 
+
+uses(DatabaseTransactions::class, Tests\TestCase::class)->in('Pest/Feature');
 uses(Tests\TestCase::class)->in('Feature');
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -39,7 +45,7 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function stub_request(string $url, array $response)
 {
-    // ..
+    Cache::put($url, json_encode($response));
 }

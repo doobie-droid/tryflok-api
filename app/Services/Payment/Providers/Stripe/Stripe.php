@@ -3,84 +3,39 @@
 namespace App\Services\Payment\Providers\Stripe;
 
 use App\Models\PaymentAccount;
-use App\Services\Payment\PaymentInterface;
-use App\Services\Payment\Providers\Stripe\API;
+use App\Services\Payment\Providers\Stripe\Main;
+use App\Services\Payment\Providers\Stripe\Test;
 
-class Stripe extends API implements PaymentInterface
+class Stripe
 {
-    /**
-     * Get list of Banks supported by flutterwave
-     *
-     * @param array $options ['country_code',]
-     *
-     * @return array
-     */
-    public function getBanks($options)
+    protected $driver;
+
+    public function __construct()
     {
-        throw new Exception('Stripe does not implement getBanks method');
+        if (config('app.env') == 'testing') {
+            $this->driver = new Test;
+        } else {
+            $this->driver = new Main;
+        }
     }
 
-    /**
-     * Verify a transaction
-     *
-     * @param string $id
-     * @return array
-     */
-    public function verifyTransaction($id)
+    public function verifyTransaction(string $id): \stdClass
     {
-        return $this->_get('v1/charges/' . $id);
+        return $this->driver->verifyTransaction($id);
     }
 
-    /**
-     * Transfer funds to a recipient
-     *
-     * @param App\Models\PaymentAccount $transferData
-     * @param float $amount
-     *  ['amount', 'currency_code', 'country_code', 'identifier']
-     * @return array
-     */
-    public function transferFundsToRecipient(PaymentAccount $transferData, $amount)
+    public function transferFundsToRecipient(PaymentAccount $transferData, float $amount): \stdClass
     {
-        //note that the amount supplied here is in dollars and must be converted to cents
-        $amount_in_cents = bcmul($amount, 100, 0);
-        $response = $this->_post('v1/transfers', [
-        'amount' => $amount_in_cents,
-        'currency' => 'usd',
-        'destination' => $transferData->identifier,
-        ]);
-        return $response;
+        return $this->driver->transferFundsToRecipient($transferData, $amount);
     }
 
-    public function chargeViaToken($amount, $token)
+    public function chargeViaToken(int $amount, string $token): \stdClass
     {
-        //note that the amount provided here is in cents
-        return $this->_post('v1/charges', [
-            'amount' => (int) $amount,
-            'currency' => 'usd',
-            'source' => $token,
-        ]);
+        return $this->driver->chargeViaToken($amount, $token);
     }
 
-    /**
-     * Get status of a transfer
-     *
-     * @param integer $id
-     *
-     * @return array
-     */
-    public function getTransferStatus($id)
+    public function getTransferStatus(string $id): \stdClass
     {
-        $response = $this->_get('v1/transfers/' . $id);
-        return $response;
-    }
-    /**
-     * Charge a customer
-     *
-     * @param [array] $chargeData => [authorization_code, email, amount]
-     * @return array
-     */
-    public function chargeCustomer($chargeData)
-    {
-        throw new Exception('Stripe does not implement chargeCustomer method');
+        return $this->driver->getTransferStatus($id);
     }
 }

@@ -35,7 +35,7 @@ use \Stripe\StripeClient;
 
 class UserController extends Controller
 {
-    public function list(Request $request)
+    public function listUsers(Request $request)
     {
         try {
             $page = $request->query('page', 1);
@@ -106,15 +106,14 @@ class UserController extends Controller
         }
     }
 
-    public function get(Request $request, $id)
+    public function showUser(Request $request, $id)
     {
         try {
-            $validator = Validator::make(['id' => $id], [
-                'id' => ['required', 'string', 'exists:users,id'],
-            ]);
 
-            if ($validator->fails()) {
-                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            $user = User::where('id', $id)->orWhere('username', $id)->orWhere('email', $id)->first();
+   
+            if (is_null($user)) {
+                return $this->respondBadRequest('User not found');
             }
 
             if ($request->user() == null || $request->user()->id == null) {
@@ -133,7 +132,7 @@ class UserController extends Controller
                     $query->where('users.id', $user_id);
                 },
             ])
-            ->withCount('followers', 'following')->where('id', $id)->first();
+            ->withCount('followers', 'following')->where('id', $user->id)->first();
             return $this->respondWithSuccess('User retrieved successfully', [
                 'user' => new UserResource($user),
             ]);
@@ -277,7 +276,7 @@ class UserController extends Controller
         }
     }
 
-    public function getAccount(Request $request)
+    public function showAccount(Request $request)
     {
         try {
             $user = User::with('roles', 'profile_picture', 'wallet', 'paymentAccounts', 'referrer')->withCount('digiversesCreated')->where('id', $request->user()->id)->first();
@@ -1015,7 +1014,7 @@ class UserController extends Controller
         }
     }
 
-    public function getDashboardDetails(Request $request)
+    public function showDashboardDetails(Request $request)
     {
         try {
             $subcribers_graph_start_date = $request->query('subscribers_graph_start_date', now()->startOfMonth());

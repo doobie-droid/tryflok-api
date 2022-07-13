@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\Constants\Constants;
 use App\Http\Controllers\Controller;
 use App\Jobs\Payment\Flutterwave\Purchase as FlutterwavePurchaseHandler;
+use App\Jobs\Payment\FundWallet as FundWalletJob;
 use App\Jobs\Payment\Paystack\Purchase as PaystackPurchaseHandler;
 use App\Jobs\Payment\Purchase as PurchaseJob;
 use App\Jobs\Payment\Stripe\Purchase as StripePurchaseHandler;
 use App\Models\Collection;
 use App\Models\Content;
-use App\Services\Payment\Payment as PaymentProvider;
+use App\Models\User;
+use App\Services\Payment\Providers\ApplePay\ApplePay;
 use App\Services\Payment\Providers\Flutterwave\Flutterwave;
+use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +32,7 @@ class PaymentController extends Controller
                 return $this->respondBadRequest('Country is not supported for Flutterwave Payouts');
             }
             $flutterwave = new Flutterwave;
-            $resp = $flutterwave->getBanks(['country_code' => $country_code]);
+            $resp = $flutterwave->getBanks($country_code);
             return $this->respondWithSuccess('Banks retrieved successfully', [
                 'banks' => $resp->data,
             ]);
@@ -82,49 +86,90 @@ class PaymentController extends Controller
         }
     }
 
-    /* public function paystackWebhook(Request $request)
-     {
-         try {
-             $paystack = new PaymentProvider('paystack');
-             $req = $paystack->verifyTransaction($request->data['reference']);
-             if (($req->status && $req->data->status == "success")) {
-                 //delegate the process
-                 PaystackDelegator::dispatch($request->input());
-                 return $this->respondWithSuccess("Payment received successfully");
-             } else {
-                 Log::info("Invalid Transaction Was Attempted");
-                 Log::info($request);
-                 return $this->respondBadRequest("Oops, an error occurred. Please try again later.");
-             }
-         } catch(\Exception $exception) {
-             Log::error($exception);
-             return $this->respondInternalError("Oops, an error occurred. Please try again later.");
-         }
-     }*/
-
-    public function testPaymentWebhook(Request $request)
+    public function flutterwaveWebhook(Request $request)
     {
-        if (! App::environment('testing') && ! App::environment('local')) {
-            return $this->respondBadRequest('End-point is not available');
-        }
         try {
-            $paystack = new PaymentProvider('test');
-            $req = $paystack->verifyTransaction($request->data['reference']);
-            if (($req->status && $req->data->status == 'success')) {
-                //delegate the process
-                PaystackDelegator::dispatch($request->input());
-                return $this->respondWithSuccess('Payment received successfully');
-            } else {
-                Log::info('Invalid Transaction Was Attempted');
+            $webhook_secret = config('payment.providers.flutterwave.webhook_secret');
+            $signature = $request->header('verif-hash');
+
+            if (!$signature || ($signature !== $webhook_secret)) {
+                Log::info("Invalid webhook attempted, wrong secret");
                 Log::info($request);
-                return $this->respondBadRequest('Oops, an error occurred. Please try again later.');
+                return $this->respondWithSuccess('Payment received successfully');
             }
-        } catch (\Exception $exception) {
+
+            $flutterwave = new Flutterwave;
+            $req = $flutterwave->verifyTransaction($request->data['id']);
+            if ($req->status !== 'success' || $req->data->status !== 'successful') {
+                Log::info("Invalid webhook attempted, invalid transaction or unsuccessful transaction");
+                Log::info($request);
+
+                return $this->respondWithSuccess('Payment received successfully');
+            }
+
+            switch ($request->event) {
+                case 'charge.completed':
+                    
+                    if (! is_null($req->data->meta) && 
+                        is_object($req->data->meta) && 
+                        !is_null($req->data->meta->payment_for) &&
+                        $req->data->meta->payment_for === 'cowry_purchase'
+                    ) {
+                        $meta = $req->data->meta;
+                        $username = $req->data->meta->username ? $meta->username : '';
+                        $fund_type = $req->data->meta->fund_type ? $meta->fund_type : '';
+                        $funder_name = $req->data->meta->funder_name ? $meta->funder_name : '';
+                        $fund_note = $req->data->meta->fund_note ? $meta->fund_note : '';
+
+                        $amount_in_dollars = bcdiv($req->data->amount, Constants::NAIRA_TO_DOLLAR, 2);
+                        $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+
+                        $user = User::where('email', $username)->orWhere('username', $username)->first();
+                        if ($user) {
+                            FundWalletJob::dispatch([
+                                'user' => $user,
+                                'wallet' => $user->wallet()->first(),
+                                'provider' => 'flutterwave',
+                                'provider_id' => $req->data->id,
+                                'amount' => $amount_in_dollars,
+                                'flk' => $expected_flk_based_on_amount,
+                                'fee' => bcdiv($req->data->app_fee, Constants::NAIRA_TO_DOLLAR, 2),
+                                'fund_type' => $fund_type,
+                                'funder_name' => $funder_name,
+                                'fund_note' => $fund_note,
+                            ]);
+                        }
+                    }
+                    break;
+
+            }
+            
+            return $this->respondWithSuccess('Payment received successfully');
+        } catch(\Exception $exception) {
             Log::error($exception);
-            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
         }
     }
 
+    public function stripeWebhook(Request $request)
+    {
+        try {
+            Log::info($request->data);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
+    }
+
+    public function applePayWebhook(Request $request)
+    {
+        try {
+            Log::info($request->data);
+        } catch(\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError("Oops, an error occurred. Please try again later.");
+        }
+    }
 
     public function processPaymentForProviders(Request $request)
     {
