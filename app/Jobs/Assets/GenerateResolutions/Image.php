@@ -48,26 +48,6 @@ class Image implements ShouldQueue
      */
     public function handle()
     {
-        $compression_level = 80;
-        $originalFileSize = filesize($this->filepath) * 1024 * 1024; // multiply by 1024 * 1024 to convert to MB
-
-        if ($originalFileSize <= .1) {
-            $compression_level = 90;
-        } elseif ($originalFileSize <= .2) {
-            $compression_level = 90;
-        } elseif ($originalFileSize < .5) {
-            $compression_level = 90;
-        } elseif ($originalFileSize <= 1) {
-            $compression_level = 50;
-        } elseif ($originalFileSize <= 2) {
-            $compression_level = 25;
-        } elseif ($originalFileSize <= 3) {
-            $compression_level = 20;
-        } elseif ($originalFileSize <= 4) {
-            $compression_level = 20;
-        } else {
-            $compression_level = 20;
-        }
         // compress image
         $compressed_folder_path = join_path(
             storage_path(),
@@ -78,7 +58,7 @@ class Image implements ShouldQueue
         $destination = join_path($compressed_folder_path, $compressed_file_name);
         $this->compressed_filepath = $destination;
         mkdir($compressed_folder_path, 0777, true);
-        $this->compressImage($this->filepath, $destination, $compression_level);
+        $this->compressImage($this->filepath, $destination);
         UploadImageJob::dispatch([
             'asset' => $this->asset,
             'filepath' => $destination,
@@ -97,7 +77,7 @@ class Image implements ShouldQueue
         unlink($this->compressed_filepath);
     }
 
-    private function compressImage($source, $destination, $quality)
+    private function compressImage($source, $destination)
     {
         $image = ImageManipulator::make($source);
         $image->orientate();
@@ -105,6 +85,27 @@ class Image implements ShouldQueue
             $constraint->aspectRatio();
             $constraint->upsize();
         });
+        $compression_level = 80;
+        $file_size = $image->filesize() * 1024 * 1024; // multiply by 1024 * 1024 to convert to MB
+
+        if ($file_size <= .1) {
+            $compression_level = 90;
+        } elseif ($file_size <= .2) {
+            $compression_level = 90;
+        } elseif ($file_size < .5) {
+            $compression_level = 90;
+        } elseif ($file_size <= 1) {
+            $compression_level = 50;
+        } elseif ($file_size <= 2) {
+            $compression_level = 25;
+        } elseif ($file_size <= 3) {
+            $compression_level = 20;
+        } elseif ($file_size <= 4) {
+            $compression_level = 20;
+        } else {
+            $compression_level = 20;
+        }
+        $image->encode('jpg', $compression_level);
         $image->save($destination);
     }
 }
