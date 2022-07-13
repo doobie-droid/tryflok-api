@@ -5,17 +5,11 @@ use Tests\MockData;
 
 test('list content review works', function()
 {
-    $user = Models\User::factory()->create();
+
+    $review = Models\Review::factory()->create();
     
-
-    $review = Models\Review::factory()
-    ->for($user, 'user')
-    ->create();
-    $this->be($user);
-
-    dd($review->id);
-
-    $response = $this->json('GET', "/api/v1/reviews/{$review->id}/reviews");
+    $response = $this->json('GET', "/api/v1/reviews/{$review->id}/reviews?page=1&limit=2");
+    dd($response);
     $response->assertStatus(200)
     ->assertJsonStructure(MockData\Review::generatelistReviewResponse());
 });
