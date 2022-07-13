@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use \Image as ImageManipulator;
 
 class Image implements ShouldQueue
 {
@@ -98,49 +99,12 @@ class Image implements ShouldQueue
 
     private function compressImage($source, $destination, $quality)
     {
-        $imageInfo = getimagesize($source);
-        $mimetype = $imageInfo['mime'];
-        $image = $this->createImageFromMimeType($source, $mimetype);
-        $this->generateCompressedImageBasedOnMimeType($image, $destination, $imageInfo, $quality);
-    }
-
-    private function createImageFromMimeType($source, $mimetype)
-    {
-        switch ($mimetype) {
-            case 'image/jpeg':
-                return imagecreatefromjpeg($source);
-                break;
-            case 'image/gif':
-                return imagecreatefromgif($source);
-                break;
-            case 'image/png':
-                return imagecreatefrompng($source);
-                break;
-            default:
-                return imagecreatefromjpeg($source);
-        }
-    }
-
-    private function generateCompressedImageBasedOnMimeType($image, $destination, $imageInfo, $quality)
-    {
-        switch ($imageInfo['mime']) {
-            case 'image/jpeg':
-                imagejpeg($image, $destination, $quality);
-                break;
-            case 'image/gif':
-                imagegif($image, $destination);
-                break;
-            case 'image/png':
-                $pngQuality = abs(9 - bcdiv($quality, 10, 0));
-                $im = new \Imagick($this->filepath);
-                $im->setImageFormat('PNG8');
-                $colors = min(255, $im->getImageColors());
-                $im->quantizeImage($colors, \Imagick::COLORSPACE_RGB, 0, false, false);
-                $im->setImageDepth(16);
-                $im->writeImage($destination);
-                break;
-            default:
-                imagejpeg($image, $destination, $quality);
-        }
+        $image = ImageManipulator::make($source);
+        $image->orientate();
+        $image->resize(350, 350, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+        $image->save($destination);
     }
 }
