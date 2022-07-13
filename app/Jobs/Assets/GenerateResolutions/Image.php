@@ -9,7 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use \Image as ImageManipulator;
+use Intervention\Image\Facades\Image as ImageManipulator;
 
 class Image implements ShouldQueue
 {
