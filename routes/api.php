@@ -37,9 +37,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
         Route::patch('{id}/live', 'ContentController@joinLive');
         
-        Route::post('{id}/views', 'ContentController@addViews');
+        Route::post('{id}/views', 'ContentController@addViews')->name('add-content-views');
         Route::get('{id}', 'ContentController@show')->name('show-content');
-        Route::get('{id}/reviews', 'ContentController@getReviews');
+        Route::get('{id}/reviews', 'ContentController@listReviews')->name('list-content-reviews');
         Route::get('{id}/assets', 'ContentController@listAssets')->name('list-content-assets');
 
         Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
