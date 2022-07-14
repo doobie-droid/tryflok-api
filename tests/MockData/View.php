@@ -19,7 +19,7 @@ class View
             'status_code',
             'message',
             'data' => [
-                'reviews' => [
+                'views' => [
                         'data' => [
                             [
                             'user_id',
