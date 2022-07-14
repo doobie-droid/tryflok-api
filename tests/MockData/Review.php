@@ -13,14 +13,18 @@ public static function generatelistReviewResponse(): array
         'message',
         'data' => [
             'reviews' => [
-                'id',
-                'user_id',
-                'rating',
-                'comment',
-                'reviewable_id',
-                'reviewable_type',
+                'data' => [
+                    '0'=>[
+                        'id',
+                        'user_id',
+                        'rating',
+                        'comment',
+                        'reviewable_id',
+                        'reviewable_type',
+                    ],
                 
             ],
+        ],
         ],
     ];
         
