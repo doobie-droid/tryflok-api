@@ -1,4 +1,5 @@
-<?php
+<?php 
+
 use App\Models;
 use Tests\MockData;
 
