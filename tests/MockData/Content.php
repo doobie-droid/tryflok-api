@@ -162,6 +162,7 @@ class Content
             ],
         ];
     }
+    
 
     const STANDARD_STRUCTURE = [
         'id',
