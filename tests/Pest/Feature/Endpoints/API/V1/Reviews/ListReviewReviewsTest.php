@@ -3,13 +3,13 @@
 use App\Models;
 use Tests\MockData;
 
-test('list review works', function()
+test('list review review works', function()
 {
     $review = Models\Review::factory()->create();
     $review_review = $review->reviews()->create([
         'user_id' => $review->user->id,
         'comment' => 'A comment',
-        'rating' => 5
+        'rating' => 5,
     ]);
     $response = $this->json('GET', "/api/v1/reviews/{$review->id}/reviews");
     $response->assertStatus(200)
