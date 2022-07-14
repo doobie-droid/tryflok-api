@@ -1,4 +1,7 @@
 <?php
+use App\Models;
+use Tests\MockData;
+
 test('add views works', function()
 {
         $user = Models\User::factory()->create();
