@@ -203,7 +203,7 @@ class CollectionController extends Controller
         }
     }
 
-    public function getCollection(Request $request, $id)
+    public function showCollection(Request $request, $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [

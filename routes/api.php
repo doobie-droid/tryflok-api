@@ -54,7 +54,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'collections'], function () {
-        Route::get('{id}', 'CollectionController@getCollection');
+        Route::get('{id}', 'CollectionController@showCollection')->name('show-collection');
         Route::get('{collection_id}/contents', 'ContentController@getCollectionContents');
         Route::get('{id}/reviews', 'CollectionController@getReviews');
     });
