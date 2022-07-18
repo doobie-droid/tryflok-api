@@ -50,7 +50,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}', 'CollectionController@showDigiverse')->name('show-digiverse');
         Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-digiverse-contents');
         Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
-        Route::get('{id}/reviews', 'CollectionController@getReviews');
+        Route::get('{id}/reviews', 'CollectionController@listReviews')->name('list-digiverse-reviews');
     });
 
     Route::group(['prefix' => 'collections'], function () {

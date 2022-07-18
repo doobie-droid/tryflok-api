@@ -27,7 +27,3 @@ test('add views works', function()
 
         ]);
 });
-
-
-
-
