@@ -18,7 +18,7 @@ test('list content review works', function()
 
             $response = $this->json('GET', "/api/v1/contents/{$content->id}/reviews");
             $response->assertStatus(200)
-            ->assertJsonStructure(MockData\Review::generateGetReviewResponse());
+            ->assertJsonStructure(MockData\Review::generatelistReviewResponse());
             $this->assertEquals($response->getData()->data->reviews->data[0]->user_id, $user->id);
             
 });

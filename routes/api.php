@@ -60,7 +60,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'reviews'], function () {
-        Route::get('{id}/reviews', 'ReviewController@getReviews');
+        Route::get('{id}/reviews', 'ReviewController@listReviews')->name('list-review-reviews');
     });
 
     Route::group(['prefix' => 'users'], function () {
