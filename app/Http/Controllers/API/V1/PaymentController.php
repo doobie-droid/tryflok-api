@@ -110,16 +110,16 @@ class PaymentController extends Controller
             switch ($request->event) {
                 case 'charge.completed':
                     
-                    if (! is_null($req->data->meta) && 
+                    if (property_exists($req->data, 'meta') && 
                         is_object($req->data->meta) && 
-                        !is_null($req->data->meta->payment_for) &&
+                        property_exists($req->data->meta, 'payment_for') &&
                         $req->data->meta->payment_for === 'cowry_purchase'
                     ) {
                         $meta = $req->data->meta;
-                        $username = $req->data->meta->username ? $meta->username : '';
-                        $fund_type = $req->data->meta->fund_type ? $meta->fund_type : '';
-                        $funder_name = $req->data->meta->funder_name ? $meta->funder_name : '';
-                        $fund_note = $req->data->meta->fund_note ? $meta->fund_note : '';
+                        $username = property_exists($meta, 'username') ? $meta->username : '';
+                        $fund_type = property_exists($meta, 'fund_type') ? $meta->fund_type : '';
+                        $funder_name = property_exists($meta, 'funder_name') ? $meta->funder_name : '';
+                        $fund_note = property_exists($meta, 'fund_note') ? $meta->fund_note : '';
 
                         $amount_in_dollars = bcdiv($req->data->amount, Constants::NAIRA_TO_DOLLAR, 2);
                         $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
