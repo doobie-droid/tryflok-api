@@ -84,4 +84,23 @@ class Collection
         'type' => 'book',
         'is_available' => 1,
     ];
+
+    public static function generateGetResponse(): array
+    {
+        return [
+            'data' => [
+                'collection' => [
+                    'id',
+                    'title',
+                    'description',
+                    'user_id', // owner of collection
+                    'type', // book, series, channel, digiverse
+                    'is_available',
+                    'approved_by_admin',
+                    'show_only_in_collections',
+                    'views',
+                ]
+            ]
+        ];
+    }
 }
