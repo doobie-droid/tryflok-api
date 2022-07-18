@@ -17,10 +17,11 @@ use Illuminate\Support\Facades\Mail;
 class NotifyTipping implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $tipper;
-    public $tippee;
-    public $amount_in_flk;
-    public $wallet_transaction;
+    private $tipper;
+    private $tippee;
+    private $amount_in_flk;
+    private $wallet_transaction;
+    private $custom_message;
     /**
      * Create a new job instance.
      *
@@ -32,6 +33,7 @@ class NotifyTipping implements ShouldQueue
         $this->tippee = $data['tippee'];
         $this->amount_in_flk = $data['amount_in_flk'];
         $this->wallet_transaction = $data['wallet_transaction'];
+        $this->custom_message = array_key_exists('custom_message', $data) ? $data['custom_message'] : '';
     }
 
     /**
@@ -42,6 +44,9 @@ class NotifyTipping implements ShouldQueue
     public function handle()
     {
         $message = "@{$this->tipper->username} just gifted you {$this->amount_in_flk} Flok Cowries";
+        if (! is_null($this->custom_message) && $this->custom_message !== '') {
+            $message = $this->custom_message;
+        }
         // TO DO: send push notification to user
         $notification = $this->tippee->notifications()->create([
             'notifier_id' => $this->tipper->id,

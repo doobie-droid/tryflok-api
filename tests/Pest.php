@@ -11,6 +11,7 @@
 |
 */
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
 
 
 uses(DatabaseTransactions::class, Tests\TestCase::class)->in('Pest/Feature');
@@ -44,7 +45,7 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function stub_request(string $url, array $response)
 {
-    // ..
+    Cache::put($url, json_encode($response));
 }

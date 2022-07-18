@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Intervention\Image\Facades\Image as ImageManipulator;
 
 class Image implements ShouldQueue
 {
@@ -47,26 +48,6 @@ class Image implements ShouldQueue
      */
     public function handle()
     {
-        $compression_level = 80;
-        $originalFileSize = filesize($this->filepath) * 1024 * 1024; // multiply by 1024 * 1024 to convert to MB
-
-        if ($originalFileSize <= .1) {
-            $compression_level = 90;
-        } elseif ($originalFileSize <= .2) {
-            $compression_level = 90;
-        } elseif ($originalFileSize < .5) {
-            $compression_level = 90;
-        } elseif ($originalFileSize <= 1) {
-            $compression_level = 50;
-        } elseif ($originalFileSize <= 2) {
-            $compression_level = 25;
-        } elseif ($originalFileSize <= 3) {
-            $compression_level = 20;
-        } elseif ($originalFileSize <= 4) {
-            $compression_level = 20;
-        } else {
-            $compression_level = 20;
-        }
         // compress image
         $compressed_folder_path = join_path(
             storage_path(),
@@ -77,7 +58,7 @@ class Image implements ShouldQueue
         $destination = join_path($compressed_folder_path, $compressed_file_name);
         $this->compressed_filepath = $destination;
         mkdir($compressed_folder_path, 0777, true);
-        $this->compressImage($this->filepath, $destination, $compression_level);
+        $this->compressImage($this->filepath, $destination);
         UploadImageJob::dispatch([
             'asset' => $this->asset,
             'filepath' => $destination,
@@ -96,51 +77,35 @@ class Image implements ShouldQueue
         unlink($this->compressed_filepath);
     }
 
-    private function compressImage($source, $destination, $quality)
+    private function compressImage($source, $destination)
     {
-        $imageInfo = getimagesize($source);
-        $mimetype = $imageInfo['mime'];
-        $image = $this->createImageFromMimeType($source, $mimetype);
-        $this->generateCompressedImageBasedOnMimeType($image, $destination, $imageInfo, $quality);
-    }
+        $image = ImageManipulator::make($source);
+        $image->orientate();
+        $image->resize(700, 700, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+        $compression_level = 80;
+        $file_size = $image->filesize() * 1024 * 1024; // multiply by 1024 * 1024 to convert to MB
 
-    private function createImageFromMimeType($source, $mimetype)
-    {
-        switch ($mimetype) {
-            case 'image/jpeg':
-                return imagecreatefromjpeg($source);
-                break;
-            case 'image/gif':
-                return imagecreatefromgif($source);
-                break;
-            case 'image/png':
-                return imagecreatefrompng($source);
-                break;
-            default:
-                return imagecreatefromjpeg($source);
+        if ($file_size <= .1) {
+            $compression_level = 90;
+        } elseif ($file_size <= .2) {
+            $compression_level = 90;
+        } elseif ($file_size < .5) {
+            $compression_level = 90;
+        } elseif ($file_size <= 1) {
+            $compression_level = 50;
+        } elseif ($file_size <= 2) {
+            $compression_level = 25;
+        } elseif ($file_size <= 3) {
+            $compression_level = 20;
+        } elseif ($file_size <= 4) {
+            $compression_level = 20;
+        } else {
+            $compression_level = 20;
         }
-    }
-
-    private function generateCompressedImageBasedOnMimeType($image, $destination, $imageInfo, $quality)
-    {
-        switch ($imageInfo['mime']) {
-            case 'image/jpeg':
-                imagejpeg($image, $destination, $quality);
-                break;
-            case 'image/gif':
-                imagegif($image, $destination);
-                break;
-            case 'image/png':
-                $pngQuality = abs(9 - bcdiv($quality, 10, 0));
-                $im = new \Imagick($this->filepath);
-                $im->setImageFormat('PNG8');
-                $colors = min(255, $im->getImageColors());
-                $im->quantizeImage($colors, \Imagick::COLORSPACE_RGB, 0, false, false);
-                $im->setImageDepth(16);
-                $im->writeImage($destination);
-                break;
-            default:
-                imagejpeg($image, $destination, $quality);
-        }
+        $image->encode('jpg', $compression_level);
+        $image->save($destination);
     }
 }

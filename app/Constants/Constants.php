@@ -4,6 +4,8 @@ namespace App\Constants;
 
 class Constants
 {
+    // Convertion Rates
+    public const NAIRA_TO_DOLLAR = 605;
     // cache
     public const MONTH_CACHE_TIME = 259200;
     public const DAY_CACHE_TIME = 86400;

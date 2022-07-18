@@ -49,17 +49,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('/', 'CollectionController@listDigiverses')->name('list-digiverses');
         Route::get('{id}', 'CollectionController@showDigiverse')->name('show-digiverse');
         Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-digiverse-contents');
-        Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
-        Route::get('{id}/reviews', 'CollectionController@listReviews')->name('list-digiverse-reviews');
-    });
+        Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections')->name('list-digiverse-collections');
 
     Route::group(['prefix' => 'collections'], function () {
         Route::get('{id}', 'CollectionController@showCollection')->name('show-collection');
         Route::get('{collection_id}/contents', 'ContentController@getCollectionContents');
         Route::get('{id}/reviews', 'CollectionController@listReviews')->name('list-collection-reviews');
     });
-
-    Route::group(['prefix' => 'reviews'], function () {
         Route::get('{id}/reviews', 'ReviewController@listReviews')->name('list-review-reviews');
     });
 
@@ -69,11 +65,23 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'payments'], function () {
-        Route::patch('easy-fund-wallet', 'WalletController@easyFundWallet');
-        Route::post('flutterwave/validate-bank-details', 'PaymentController@validateBankDetailsViaFlutterwave');
-        Route::get('flutterwave/banks', 'PaymentController@getFlutterwaveBanks');
-        Route::get('flutterwave/banks/branches', 'PaymentController@getFlutterwaveBankBranches');
-        Route::get('stripe/connect', 'UserController@addStripePaymentAccount');
+        Route::patch('easy-fund-wallet', 'WalletController@fundWallet')->name('easy-fund-wallet');
+
+        Route::group(['prefix' => 'flutterwave'], function () {
+            Route::post('validate-bank-details', 'PaymentController@validateBankDetailsViaFlutterwave');
+            Route::get('banks', 'PaymentController@getFlutterwaveBanks');
+            Route::get('banks/branches', 'PaymentController@getFlutterwaveBankBranches');
+            Route::post('webhook', 'PaymentController@flutterwaveWebhook')->name('flutterwave-webhook');
+        });
+
+        Route::group(['prefix' => 'stripe'], function () {
+            Route::get('connect', 'UserController@addStripePaymentAccount');
+            Route::post('webhook', 'PaymentController@stripeWebhook');
+        });
+
+        Route::group(['prefix' => 'apple-pay'], function () {
+            Route::post('webhook', 'PaymentController@applePayWebhook');
+        });
     });
 });
 
@@ -121,7 +129,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('notifications', 'UserController@markAllNotificationsAsRead');
             // Route::get('approval-requests', 'ApprovalController@getUserRequests');
             Route::get('subscriptions', 'SubscriptionController@getUserSubscriptions');
-            Route::patch('fund-wallet', 'WalletController@fundWallet');
+            Route::patch('fund-wallet', 'WalletController@fundWallet')->name('fund-wallet');
             Route::patch('withdraw-from-wallet', 'WalletController@withdrawFromWallet')->name('withdraw-from-wallet');
             Route::post('wallet-pay', 'WalletController@payViaWallet');
             Route::get('wallet-transactions', 'WalletController@getTransactions');

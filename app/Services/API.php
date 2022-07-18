@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\Payment\Providers\Stripe;
+namespace App\Services;
 
-use App\Services\Payment\Providers\Stripe\APIInterface;
+use App\Services\APIInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
@@ -20,12 +20,12 @@ abstract class API implements APIInterface
 
     public function __construct()
     {
-        $this->secret = config('payment.providers.stripe.secret_key');
+
     }
 
     public function baseUrl()
     {
-        return 'https://api.stripe.com/';
+        throw new Exception('This must be implemented by children');
     }
 
     /**
@@ -84,12 +84,12 @@ abstract class API implements APIInterface
      * @param string $httpMethod
      * @param $url
      * @param array $parameters
-     * @return Object
+     * @return array
      */
     public function execute($httpMethod, $url, array $parameters = [])
     {
         try {
-            $results = $this->getClient()->{$httpMethod}($url, ['form_params' => $parameters]);
+            $results = $this->getClient()->{$httpMethod}($url, ['json' => $parameters]);
             $res  = json_decode((string) $results->getBody(), true);
             return response()->json($res)->getData();
         } catch (ClientException $exception) {
@@ -110,7 +110,7 @@ abstract class API implements APIInterface
     {
         return new Client([
             'base_uri' => $this->baseUrl(),
-        'handler' => $this->createHandler()
+            'handler' => $this->createHandler()
         ]);
     }
 
@@ -122,16 +122,23 @@ abstract class API implements APIInterface
     private function createHandler()
     {
         $stack  = HandlerStack::create();
-        $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
-            $request = $request->withHeader('Authorization', 'Bearer ' . $this->secret);
-            $request = $request->withHeader('Content-Type', 'application/x-www-form-urlencoded');
-            return $request;
-        }));
+        $stack = $this->setupStackHeaders($stack);
 
         $stack->push(Middleware::retry(function ($retries, RequestInterface $request, ResponseInterface $response = null, TransferException $exception = null) {
             return $retries < 3 && ($exception instanceof ConnectException || ($response && $response->getStatusCode() >= 500));
         }, function ($retries) {
             return (int) pow(2, $retries) * 1000;
+        }));
+
+        return $stack;
+    }
+
+    private function setupStackHeaders($stack)
+    {
+        $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
+            $request = $request->withHeader('Authorization', 'Bearer ' . $this->secret);
+            $request = $request->withHeader('Content-Type', 'application/json');
+            return $request;
         }));
 
         return $stack;

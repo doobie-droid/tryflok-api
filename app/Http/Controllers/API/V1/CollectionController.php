@@ -498,7 +498,11 @@ class CollectionController extends Controller
             ->where('is_adult', 0)
             ->where('show_only_in_collections', 0)
             ->whereHas('contents', function (Builder $query) {
-                $query->where('is_available', 1)->where('approved_by_admin', 1);
+                $query->where('is_available', 1)->where('approved_by_admin', 1)
+                ->whereNull('archived_at')
+                ->where(function ($query) {
+                    $query->whereNull('live_ended_at')->orWhereDate('live_ended_at', '>=', now()->subHours(12));
+                });
             });
 
             if (! empty($keywords)) {
