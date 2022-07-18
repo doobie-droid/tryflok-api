@@ -5,6 +5,8 @@ namespace App\Jobs\Payment;
 use App\Jobs\Users\NotifyNoPaymentAccount;
 use App\Jobs\Users\NotifyPayoutSuccessful;
 use App\Services\Payment\Payment as PaymentProvider;
+use App\Services\Payment\Providers\Flutterwave\Flutterwave;
+use App\Services\Payment\Providers\Stripe\Stripe;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -49,7 +51,7 @@ class CashoutPayout implements ShouldQueue
             }
             $this->payout->setHandler($this->payment_account->provider);
             $amount = $this->payout->amount;
-            $paymentProvider = new PaymentProvider($this->payment_account->provider);
+            $paymentProvider = $this->createPaymentProviderInstance($this->payment_account->provider);
             $resp = $paymentProvider->transferFundsToRecipient($this->payment_account, $amount);
             switch ($this->payment_account->provider) {
                 case 'flutterwave':
@@ -96,5 +98,26 @@ class CashoutPayout implements ShouldQueue
     private function sendPayoutSuccessfulNotification()
     {
         NotifyPayoutSuccessful::dispatch($this->payout->user()->first(), $this->payout);
+    }
+
+    private function createPaymentProviderInstance(string $provider)
+    {
+        $providerInstance = null;
+
+        switch ($provider) {
+            case 'flutterwave':
+                $providerInstance = new Flutterwave;
+                break;
+            case 'stripe':
+                $providerInstance = new Stripe;
+                break;
+            default:
+                throw new InvalidArgumentException(sprintf(
+                    'The provider is not supported for payouts',
+                    $provider
+                ));
+        }
+
+        return $providerInstance;
     }
 }
