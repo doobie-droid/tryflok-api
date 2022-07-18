@@ -18,7 +18,7 @@ test('list digiverse review works', function()
 
             $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}/reviews");
             $response->assertStatus(200)
-            ->assertJsonStructure(MockData\Review::generateGetReviewResponse());
+            ->assertJsonStructure(MockData\Review::generatelistReviewResponse());
            $this->assertEquals($response->getData()->data->reviews->data[0]->user_id, $digiverse->user_id);
             
 });

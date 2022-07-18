@@ -37,9 +37,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
         Route::patch('{id}/live', 'ContentController@joinLive');
         
-        Route::post('{id}/views', 'ContentController@addViews')->name('add-content-views');
+        Route::post('{id}/views', 'ContentController@addViews');
         Route::get('{id}', 'ContentController@show')->name('show-content');
-        Route::get('{id}/reviews', 'ContentController@listReviews')->name('list-content-reviews');
+        Route::get('{id}/reviews', 'ContentController@listReviews');
         Route::get('{id}/assets', 'ContentController@listAssets')->name('list-content-assets');
 
         Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
@@ -49,14 +49,19 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('/', 'CollectionController@listDigiverses')->name('list-digiverses');
         Route::get('{id}', 'CollectionController@showDigiverse')->name('show-digiverse');
         Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-digiverse-contents');
-        Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections')->name('list-digiverse-collections');
+        Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
+        Route::get('{id}/reviews', 'CollectionController@listReviews');
+    });
 
     Route::group(['prefix' => 'collections'], function () {
         Route::get('{id}', 'CollectionController@getCollection');
         Route::get('{collection_id}/contents', 'ContentController@getCollectionContents');
         Route::get('{id}/reviews', 'CollectionController@getReviews');
     });
-        Route::get('{id}/reviews', 'ReviewController@listReviews')->name('list-review-reviews');
+
+    Route::group(['prefix' => 'reviews'], function () {
+        Route::post('/', 'ReviewController@create')->name('create-review');    
+        Route::get('{id}/reviews', 'ReviewController@listReviews');
     });
 
     Route::group(['prefix' => 'users'], function () {
@@ -204,10 +209,6 @@ Route::group(['middleware' => 'auth:api'], function () {
 
             Route::delete('{id}/archive', 'CollectionController@archive');
             Route::delete('{id}', 'CollectionController@delete');
-        });
-
-        Route::group(['prefix' => 'reviews'], function () {
-            Route::post('/', 'ReviewController@create')->name('create-review');
         });
 
         Route::group(['prefix' => 'payments'], function () {
