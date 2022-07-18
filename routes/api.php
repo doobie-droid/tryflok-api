@@ -37,9 +37,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
         Route::patch('{id}/live', 'ContentController@joinLive');
         
-        Route::post('{id}/views', 'ContentController@addViews');
+        Route::post('{id}/views', 'ContentController@addViews')->name('add-content-views');
         Route::get('{id}', 'ContentController@show')->name('show-content');
-        Route::get('{id}/reviews', 'ContentController@getReviews');
+        Route::get('{id}/reviews', 'ContentController@listReviews')->name('list-content-reviews');
         Route::get('{id}/assets', 'ContentController@listAssets')->name('list-content-assets');
 
         Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
@@ -50,17 +50,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}', 'CollectionController@showDigiverse')->name('show-digiverse');
         Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-digiverse-contents');
         Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections')->name('list-digiverse-collections');
-        Route::get('{id}/reviews', 'CollectionController@getReviews');
-    });
 
     Route::group(['prefix' => 'collections'], function () {
-        Route::get('{id}', 'CollectionController@listCollections')->name('list-collections');
+        Route::get('{id}', 'CollectionController@showCollection')->name('show-collection');
         Route::get('{collection_id}/contents', 'ContentController@getCollectionContents');
-        Route::get('{id}/reviews', 'CollectionController@getReviews');
+        Route::get('{id}/reviews', 'CollectionController@listReviews')->name('list-collection-reviews');
     });
-
-    Route::group(['prefix' => 'reviews'], function () {
-        Route::get('{id}/reviews', 'ReviewController@listReviews')->name('list-reviews');
+        Route::get('{id}/reviews', 'ReviewController@listReviews')->name('list-review-reviews');
     });
 
     Route::group(['prefix' => 'users'], function () {

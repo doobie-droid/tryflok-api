@@ -85,28 +85,22 @@ class Collection
         'is_available' => 1,
     ];
 
-    public static function generateGetAllResponse(): array
+    public static function generateGetResponse(): array
     {
-        $expected_response_structure = self::STANDARD_RESPONSE;
-        $content_types_available_key = array_search('content_types_available', $expected_response_structure['data']);
-        unset($expected_response_structure['collection'][$content_types_available_key]);
-        return $expected_response_structure;
-    }
-
-    const STANDARD_RESPONSE = [
-        'data' => [
-            'collection' => [
-                'id',
-                'title',
-                'description',
-                'user_id', // owner of collection
-                'type', // book, series, channel, digiverse
-                'is_available',
-                'approved_by_admin',
-                'show_only_in_collections',
-                'views',
+        return [
+            'data' => [
+                'collection' => [
+                    'id',
+                    'title',
+                    'description',
+                    'user_id', // owner of collection
+                    'type', // book, series, channel, digiverse
+                    'is_available',
+                    'approved_by_admin',
+                    'show_only_in_collections',
+                    'views',
+                ]
             ]
-        ]       
-    ];
-
+        ];
+    }
 }

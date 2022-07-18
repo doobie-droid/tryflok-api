@@ -7,7 +7,7 @@ use Tests\MockData;
 
 test('update fails when user is not signed in', function()
 {
-    $request = MockData\Digiverse::generateStandardUpdateRequest();
+        $request = MockData\Digiverse::generateStandardUpdateRequest();
         $tag = Models\Tag::factory()->create();
         $request['tags'][] = [
             'action' => 'remove',

@@ -203,7 +203,7 @@ class CollectionController extends Controller
         }
     }
 
-    public function listCollections(Request $request, $id)
+    public function showCollection(Request $request, $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [
@@ -751,7 +751,7 @@ class CollectionController extends Controller
         }
     }
 
-    public function getReviews(Request $request, $id)
+    public function listReviews(Request $request, $id)
     {
         try {
             $collection = Collection::where('id', $id)->first();

@@ -87,7 +87,9 @@ class ReviewController extends Controller
                 $limit = Constants::MAX_ITEMS_LIMIT;
             }
 
-            $reviews = $review->reviews()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
+            $reviews = $review->reviews()->with('user', 'user.profile_picture', 'user.roles')
+            ->orderBy('created_at', 'desc')
+            ->paginate($limit, ['*'], 'page', $page);
             return $this->respondWithSuccess('Reviews retrieved successfully', [
                 'reviews' => $reviews,
             ]);

@@ -1283,7 +1283,7 @@ class ContentController extends Controller
         }
     }
 
-    public function getReviews(Request $request, $id)
+    public function listReviews(Request $request, $id)
     {
         try {
             $content = Content::where('id', $id)->first();
