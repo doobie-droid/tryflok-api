@@ -6,13 +6,13 @@ use App\Traits\Uuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PollVote extends Model
-{   
+class ContentPollOption extends Model
+{
     use Uuid;
     use HasFactory;
 
-    public function poll()
+    public function contentPoll()
     {
-        return $this->belongsTo(Poll::class);
+        return $this->belongsTo(ContentPoll::class);
     }
 }

@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class PollFactory extends Factory
+class ContentPollFactory extends Factory
 {
     /**
      * Define the model's default state.

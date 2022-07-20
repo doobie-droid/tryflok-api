@@ -188,9 +188,9 @@ class Content extends Model
         return $this->hasMany(ContentLiveBroadcaster::class);
     }
 
-    public function polls()
+    public function contentPolls()
     {
-        return $this->belongsToMany(Poll::class);
+        return $this->belongsToMany(ContentPoll::class);
     }
 
     public function isFree()

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePollOptionsTable extends Migration
+class CreateContentContentPollTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreatePollOptionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('poll_options', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('poll_id');
-            $table->string('option');
+        Schema::create('content_content_poll', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('content_id');
+            $table->foreignUuid('content_poll_id');
         });
     }
 
@@ -27,6 +27,6 @@ class CreatePollOptionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('poll_options');
+        Schema::dropIfExists('content_poll');
     }
 }
