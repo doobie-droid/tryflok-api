@@ -39,7 +39,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         
         Route::post('{id}/views', 'ContentController@addViews');
         Route::get('{id}', 'ContentController@show')->name('show-content');
-        Route::get('{id}/reviews', 'ContentController@getReviews');
+        Route::get('{id}/reviews', 'ContentController@listReviews');
         Route::get('{id}/assets', 'ContentController@listAssets')->name('list-content-assets');
 
         Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
@@ -50,7 +50,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}', 'CollectionController@showDigiverse')->name('show-digiverse');
         Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-digiverse-contents');
         Route::get('{collection_id}/collections', 'CollectionController@listDigiverseCollections');
-        Route::get('{id}/reviews', 'CollectionController@getReviews');
+        Route::get('{id}/reviews', 'CollectionController@listReviews');
     });
 
     Route::group(['prefix' => 'collections'], function () {
@@ -60,7 +60,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'reviews'], function () {
-        Route::get('{id}/reviews', 'ReviewController@getReviews');
+        Route::post('/', 'ReviewController@create')->name('create-review');    
+        Route::get('{id}/reviews', 'ReviewController@listReviews');
     });
 
     Route::group(['prefix' => 'users'], function () {
@@ -208,10 +209,6 @@ Route::group(['middleware' => 'auth:api'], function () {
 
             Route::delete('{id}/archive', 'CollectionController@archive');
             Route::delete('{id}', 'CollectionController@delete');
-        });
-
-        Route::group(['prefix' => 'reviews'], function () {
-            Route::post('/', 'ReviewController@create')->name('create-review');
         });
 
         Route::group(['prefix' => 'payments'], function () {
