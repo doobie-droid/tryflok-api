@@ -686,6 +686,7 @@ class ContentController extends Controller
             $orderDirection = $request->query('order_direction', 'asc');
 
             $activeLiveContent = $request->query('active_live_content', 'false');
+            $challengeOnly = $request->query('challenge_only', 'false');
 
             $max_items_count = Constants::MAX_ITEMS_LIMIT;
             $validator = Validator::make([
@@ -700,6 +701,7 @@ class ContentController extends Controller
                 'order_direction' => $orderDirection,
                 'type' => $types,
                 'active_live_content' => $activeLiveContent,
+                'challenge_only' => $challengeOnly,
             ], [
                 'page' => ['required', 'integer', 'min:1'],
                 'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}"],
@@ -715,6 +717,7 @@ class ContentController extends Controller
                 'creators' => ['sometimes'],
                 'creators.*' => ['required', 'string', 'exists:users,id'],
                 'active_live_content' => ['sometimes', 'in:true,false'],
+                'challenge_only' => ['sometimes', 'in:true,false'],
             ]);
 
             if ($validator->fails()) {
@@ -771,6 +774,10 @@ class ContentController extends Controller
                 });
             }
 
+            if ($challengeOnly === 'true') {
+                $contents = $contents->where('is_challenge', 1);
+            }
+
             $contents = $contents
             ->eagerLoadBaseRelations($user_id)
             ->orderBy('contents.trending_points', 'desc')
@@ -818,6 +825,7 @@ class ContentController extends Controller
             $orderDirection = $request->query('order_direction', 'desc');
 
             $activeLiveContent = $request->query('active_live_content', 'false');
+            $challengeOnly = $request->query('challenge_only', 'false');
 
             $max_items_count = Constants::MAX_ITEMS_LIMIT;
             $validator = Validator::make([
@@ -833,6 +841,7 @@ class ContentController extends Controller
                 'order_direction' => $orderDirection,
                 'type' => $types,
                 'active_live_content' => $activeLiveContent,
+                'challenge_only' => $challengeOnly,
             ], [
                 'id' => ['required', 'string', 'exists:collections,id'],
                 'page' => ['required', 'integer', 'min:1'],
@@ -849,6 +858,7 @@ class ContentController extends Controller
                 'creators' => ['sometimes'],
                 'creators.*' => ['required', 'string', 'exists:users,id'],
                 'active_live_content' => ['sometimes', 'in:true,false'],
+                'challenge_only' => ['sometimes', 'in:true,false'],
             ]);
 
             if ($validator->fails()) {
@@ -902,6 +912,10 @@ class ContentController extends Controller
                     $query->where('live_status', 'active')
                     ->orWhere('live_status', 'inactive');
                 });
+            }
+
+            if ($challengeOnly === 'true') {
+                $contents = $contents->where('is_challenge', 1);
             }
 
             $contents = $contents
