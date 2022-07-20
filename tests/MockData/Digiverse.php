@@ -51,6 +51,29 @@ class Digiverse
         return $expected_response_structure;
     }
 
+    public static function generateGetReviewResponse(): array
+    {
+        return [
+        'status_code',
+        'message',
+        'data' => [
+            'reviews' => [
+                'data' => [
+                    '0'=>[
+                        'id',
+                        'user_id',
+                        'rating',
+                        'comment',
+                        'reviewable_id',
+                        'reviewable_type',
+                    ],
+                
+            ],
+        ],
+        ],
+    ];
+    }
+
     const STANDARD_REQUEST = [
         'title' => 'The first Digiverse',
         'description' => 'Testing digiverse creation',

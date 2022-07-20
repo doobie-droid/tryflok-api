@@ -755,7 +755,7 @@ class CollectionController extends Controller
         }
     }
 
-    public function getReviews(Request $request, $id)
+    public function listReviews(Request $request, $id)
     {
         try {
             $collection = Collection::where('id', $id)->first();
