@@ -14,10 +14,10 @@ class CreateContentPollVotesTable extends Migration
     public function up()
     {
         Schema::create('content_poll_votes', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->foreignUuid('content_poll_id');
             $table->foreignUuid('content_poll_option_id');
-            $table->char('voter_id', 36)->nullable();
+            $table->foreignUuid('voter_id')->nullable();
             $table->ipAddress('ip');
         });
     }
@@ -29,6 +29,6 @@ class CreateContentPollVotesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('poll_votes');
+        Schema::dropIfExists('content_poll_votes');
     }
 }

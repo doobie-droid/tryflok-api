@@ -17,7 +17,6 @@ class CreateContentPollsTable extends Migration
             $table->uuid('id')->primary();
             $table->string('question');
             $table->datetime('closes_at');
-            $table->tinyInteger('is_closed');
             $table->timestamps();
             $table->foreignUuid('user_id'); //creator of the poll  
         });
@@ -30,6 +29,6 @@ class CreateContentPollsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('polls');
+        Schema::dropIfExists('content_polls');
     }
 }

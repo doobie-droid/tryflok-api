@@ -14,7 +14,7 @@ class CreateContentContentPollTable extends Migration
     public function up()
     {
         Schema::create('content_content_poll', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->foreignUuid('content_id');
             $table->foreignUuid('content_poll_id');
         });
@@ -27,6 +27,6 @@ class CreateContentContentPollTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('content_poll');
+        Schema::dropIfExists('content_content_poll');
     }
 }

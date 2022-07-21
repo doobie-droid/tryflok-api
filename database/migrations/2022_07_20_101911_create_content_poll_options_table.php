@@ -27,6 +27,6 @@ class CreateContentPollOptionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('poll_options');
+        Schema::dropIfExists('content_poll_options');
     }
 }

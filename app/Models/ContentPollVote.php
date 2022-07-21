@@ -15,4 +15,9 @@ class ContentPollVote extends Model
     {
         return $this->belongsTo(ContentPoll::class);
     }
+
+    public function contentVote()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
