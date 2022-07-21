@@ -188,7 +188,7 @@ class Content extends Model
         return $this->hasMany(ContentLiveBroadcaster::class);
     }
 
-    public function contentPolls()
+    public function polls()
     {
         return $this->hasMany(ContentPoll::class);
     }

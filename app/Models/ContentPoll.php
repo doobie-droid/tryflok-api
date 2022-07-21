@@ -11,7 +11,7 @@ class ContentPoll extends Model
     use Uuid;
     use HasFactory;
 
-    public function contents()
+    public function content()
     {
         return $this->belongsTo(Content::class);
     }
