@@ -19,6 +19,7 @@ class CreateContentPollsTable extends Migration
             $table->datetime('closes_at');
             $table->timestamps();
             $table->foreignUuid('user_id'); //creator of the poll  
+            $table->foreignUuid('content_id'); // id of the content
         });
     }
 

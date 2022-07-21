@@ -13,15 +13,15 @@ class ContentPoll extends Model
 
     public function contents()
     {
-        return $this->belongsToMany(Content::class);
+        return $this->belongsTo(Content::class);
     }
 
-    public function contentPollOptions()
+    public function pollOptions()
     {
         return $this->hasMany(ContentPollOption::class);
     }
 
-    public function contentPollVotes()
+    public function votes()
     {
         return $this->hasMany(ContentPollVote::class);
     }

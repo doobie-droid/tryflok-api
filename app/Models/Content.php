@@ -190,7 +190,7 @@ class Content extends Model
 
     public function contentPolls()
     {
-        return $this->belongsToMany(ContentPoll::class);
+        return $this->hasMany(ContentPoll::class);
     }
 
     public function isFree()
