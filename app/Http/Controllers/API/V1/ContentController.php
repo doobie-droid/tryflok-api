@@ -1669,13 +1669,12 @@ class ContentController extends Controller
 
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)->first();
             if (is_null($content)) {
-                return $this->respondBadRequest('You do not have permission to create an issue for this content');
+                return $this->respondBadRequest('You do not have permission to create a poll for this content');
             }
 
             $poll = $content->polls()->create([
                 'question' => $request->question,
                 'closes_at' => $request->closes_at,
-                'content_id' => $content->id,
                 'user_id' => $content->user_id,
             ]);
 
@@ -1688,11 +1687,10 @@ class ContentController extends Controller
                 ];
             }
 
-            $content->polls->options()->createMany($options);
-
+            $poll = ContentPoll::with('content', 'options')->where('id', $poll->id)->first();
             return $this->respondWithSuccess('Poll has been created successfully', [
-                'poll' => $poll->with('content')->first(),
-            ]);
+            'poll' => $poll,
+            ]);           
 
         } catch (\Exception $exception) {
             Log::error($exception);

@@ -5,7 +5,7 @@ use Tests\MockData;
 
 beforeEach(function()
 {
-    $this->user = Models\User::factory()->create();
+        $this->user = Models\User::factory()->create();
         $this->be($this->user);
         $this->digiverse = Models\Collection::factory()
         ->for($this->user, 'owner')
