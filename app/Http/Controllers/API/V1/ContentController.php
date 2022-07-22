@@ -1653,4 +1653,51 @@ class ContentController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
+
+    public function createPoll(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string'],
+                'question' => ['required', 'string', 'max:200', 'min:1'],
+                'closes_at' => ['required'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $content = Content::where('id', $id)->where('user_id', $request->user()->id)->first();
+            if (is_null($content)) {
+                return $this->respondBadRequest('You do not have permission to create an issue for this content');
+            }
+
+            $poll = $content->polls()->create([
+                'question' => $request->question,
+                'closes_at' => $request->closes_at,
+                'content_id' => $content->id,
+                'user_id' => $content->user_id,
+            ]);
+
+            $input = $request->all();
+            for ($i = 0; $i <= count($input['option']); $i++)
+            {
+                $options = [
+                        'content_poll_id' => $poll->id,
+                        'option' => $input['option'][$i],
+                ];
+            }
+
+            $content->polls->options()->createMany($options);
+
+            return $this->respondWithSuccess('Poll has been created successfully', [
+                'poll' => $poll->with('content')->first(),
+            ]);
+
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
 }
