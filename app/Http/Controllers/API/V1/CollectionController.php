@@ -612,7 +612,7 @@ class CollectionController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-            $digiverse = Collection::where('id', $request->digiverse_id)->first();
+            $digiverse = Collection::where('id', $digiverse_id)->first();
             $collections = $digiverse->collections()->whereNull('archived_at');
 
             if ($request->user() == null || $request->user()->id == null) {
