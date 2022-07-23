@@ -106,7 +106,7 @@ test('unavailable contents do not get returned if user is not owner', function()
         $this->assertEquals($contents, []);
 });
 
-        test('unavailable contents does not get returned event if user is owner', function()
+        test('unavailable contents does not get returned even if user is owner', function()
         {
             Models\Content::factory()
                     ->unavailable()
