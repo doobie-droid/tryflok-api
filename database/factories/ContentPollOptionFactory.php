@@ -3,19 +3,18 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\ContentPollOption;
 use App\Models\ContentPoll;
-use App\Models\Content;
-use App\Models\User;
 
 
-class ContentPollFactory extends Factory
-{
+class ContentPollOptionFactory extends Factory
+{   
      /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = ContentPoll::class;
+    protected $model = ContentPollOption::class;
 
     /**
      * Define the model's default state.
@@ -24,12 +23,10 @@ class ContentPollFactory extends Factory
      */
     public function definition()
     {
-            return [
+        return [
                 'id' => $this->faker->unique()->uuid,
-                'question' => $this->faker->sentence(4),
-                'closes_at' => now()->addHours(5),
-                'content_id' => Content::factory(),
-                'user_id' => User::factory(),
-            ];
+                'content_poll_id' => ContentPoll::factory(),
+                'option' => $this->faker->word,
+        ];
     }
 }

@@ -189,11 +189,11 @@ Route::group(['middleware' => 'auth:api'], function () {
 
             Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
 
-            Route::post('{id}/create', 'ContentController@createPoll')->name('create-poll');
-            Route::patch('{id}/edit', 'ContentController@editPoll')->name('edit-poll');
-            Route::delete('{id}/delete', 'ContentController@deletePoll')->name('delete-poll');
-            Route::get('{id}/result', 'ContentController@getPollResult')->name('get-poll-result');
-            Route::post('{id}/vote', 'ContentController@votePoll')->name('vote-poll');
+            Route::post('{id}/poll', 'PollController@createPoll')->name('create-poll');
+            Route::patch('{id}/poll', 'PollController@updatePoll')->name('update-poll');
+            Route::delete('{id}/poll', 'PollController@deletePoll')->name('delete-poll');
+            Route::get('{id}/poll', 'PollController@getPollResults')->name('get-poll-results');
+            Route::post('{id}/poll-vote', 'PollController@votePoll')->name('vote-poll');
         });
 
         Route::group(['prefix' => 'issues'], function () {

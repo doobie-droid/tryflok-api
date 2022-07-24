@@ -116,7 +116,6 @@ test('video content gets created', function()
             'asset_id' => $this->coverAsset->id,
         ],
     ];
-
         $response = $this->json('POST', '/api/v1/contents', $request);
         $response->assertStatus(200)->assertJsonStructure(MockData\Content::generateStandardCreateResponse());
 
