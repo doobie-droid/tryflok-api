@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Builder;
 
 
-class PollController extends Controller
+class ContentPollController extends Controller
 
 {
-    public function createPoll(Request $request, $id)
+    public function createPoll(Request $request, $content_id)
     {
         try {
-            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+            $validator = Validator::make(array_merge($request->all(), ['id' => $content_id]), [
                 'id' => ['required', 'string'],
                 'question' => ['required', 'string', 'max:200', 'min:1'],
                 'closes_at' => ['required'],
@@ -27,7 +27,7 @@ class PollController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            $content = Content::where('id', $id)->where('user_id', $request->user()->id)->first();
+            $content = Content::where('id', $content_id)->where('user_id', $request->user()->id)->first();
             if (is_null($content)) {
                 return $this->respondBadRequest('You do not have permission to create a poll for this content');
             }

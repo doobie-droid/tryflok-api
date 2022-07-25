@@ -63,6 +63,7 @@ test('poll is created if signed in user is owner of the content', function()
             ],
         ];
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request); 
+        dd($response);
         $response->assertStatus(200);
         $this->assertDatabaseHas('content_polls', [
             'question' => $request['question'],
