@@ -53,9 +53,10 @@ test('poll is created if signed in user is owner of the content', function()
         ->for($user, 'owner')
         ->create();
 
+        $date = date('Y-m-d H:i:s', strtotime('+ 5 hours'));
         $request = [
             'question' => 'question',
-            'closes_at' => now()->addHours(5),
+            'closes_at' => $date,
             'user_id' => $content->user_id,
             'option' => [
                 0 => 'option 1',
@@ -63,7 +64,6 @@ test('poll is created if signed in user is owner of the content', function()
             ],
         ];
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request); 
-        dd($response);
         $response->assertStatus(200);
         $this->assertDatabaseHas('content_polls', [
             'question' => $request['question'],
@@ -72,7 +72,6 @@ test('poll is created if signed in user is owner of the content', function()
         ]);
 
         $this->assertDatabaseHas('content_poll_options', [
-            'content_poll_id' => $content->poll->id,
             'option' => $request['option'],
         ]);
         

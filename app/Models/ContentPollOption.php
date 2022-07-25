@@ -12,6 +12,8 @@ class ContentPollOption extends Model
     use Uuid;
     use HasFactory;
 
+    public $timestamps = false;
+
     /**
      * The attributes that are not mass assignable.
      *
