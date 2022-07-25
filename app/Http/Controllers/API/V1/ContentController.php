@@ -1652,5 +1652,6 @@ class ContentController extends Controller
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
-    }
+    }  
+
 }
