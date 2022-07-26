@@ -1,6 +1,8 @@
 <?php 
 
 use App\Models;
+use Tests\MockData;
+
 
 it('returns a 401 error when a user is not signed in', function()
 {
@@ -62,8 +64,9 @@ test('poll is created if signed in user is owner of the content', function()
                 1 =>'option 2',
             ],
         ];
-        $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request); 
-        $response->assertStatus(200);
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request);
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\ContentPoll::generateStandardCreateResponse());
 
         //check that content_polls table is populated with the right entries
         $this->assertDatabaseHas('content_polls', [

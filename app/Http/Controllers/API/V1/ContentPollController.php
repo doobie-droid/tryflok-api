@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Content;
+use App\Http\Resources\ContentPollResource;
 use App\Models\ContentPoll;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Builder;
@@ -47,13 +48,11 @@ class ContentPollController extends Controller
                         'option' => $input['option'][$i],
                 ];
                 $option = $poll->pollOptions()->create($options);
-            }
+            }          
             
-            
-
             $poll = ContentPoll::with('content', 'pollOptions')->where('id', $poll->id)->first();
             return $this->respondWithSuccess('Poll has been created successfully', [
-            'poll' => $poll,
+            'poll' => new ContentPollResource ($poll),
             ]);           
 
         } catch (\Exception $exception) {
