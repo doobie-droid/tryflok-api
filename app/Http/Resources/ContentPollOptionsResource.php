@@ -15,11 +15,7 @@ class ContentPollOptionsResource extends JsonResource
     public function toArray($request)
     {
         $parent = parent::toArray($request);
-        return array_merge($parent, [
-            'id',
-            'content_poll_id',
-            'option',
-        ]);
+        return array_merge($parent, []);
         
     }
 }

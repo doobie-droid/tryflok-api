@@ -16,9 +16,6 @@ class ContentPollResource extends JsonResource
     {
         $parent = parent::toArray($request);
         return array_merge($parent, [
-            'id',
-            'question',
-            'closes_at',
             'poll_options' => new ContentPollOptionsResource($this->whenLoaded('pollOptions')),   
             'content' =>new ContentResource($this->whenLoaded('content')),
         ]);
