@@ -23,6 +23,7 @@ class ContentPollController extends Controller
                 'id' => ['required', 'string'],
                 'question' => ['required', 'string', 'max:200', 'min:1'],
                 'closes_at' => ['required'],
+                'option' => ['required'],
             ]);
 
             if ($validator->fails()) {
@@ -55,6 +56,73 @@ class ContentPollController extends Controller
             'poll' => new ContentPollResource ($poll),
             ]);           
 
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function update(Request $request, $poll_id)
+    {
+        try {
+                $validator = Validator::make(array_merge($request->all(), ['id' => $poll_id]), [
+                    'id' => ['string', 'exists:content_poll,id'],
+                    'question' => ['string', 'max:200', 'min:1'],
+                ]);
+
+                if ($validator->fails()) {
+                    return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+                }
+
+            //make sure user owns poll
+            $poll = ContentPoll::where('id', $poll_id)->where('user_id', $request->user()->id)
+            ->eagerLoadBaseRelations()
+            ->first();
+            if (is_null($poll)) {
+                return $this->respondBadRequest('You do not have permission to update this poll');
+            }
+
+            $user = $request->user();
+            if (! is_null($request->question)) {
+                $poll->question = $request->question;
+            }
+
+            if (! is_null($request->closes_at)) {
+                $poll->closes_at = $request->closes_at;
+            }
+            $poll->save();
+            
+            if  (! is_null($request->option))   {
+            foreach ($poll->pollOptions as $i => $options) {
+                $options->option = $request->input('option')[$i];
+                $options->save();
+            }
+            }
+
+            return $this->respondWithSuccess('Poll has been updated successfully', [
+                 'poll' => new ContentPollResource ($poll), 
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function delete(Request $request, $poll_id)
+    {
+        try {
+            //make sure user owns poll
+            $poll = ContentPoll::where('id', $poll_id)->where('user_id', $request->user()->id)
+            ->eagerLoadBaseRelations()
+            ->first();
+            if (is_null($poll)) {
+                return $this->respondBadRequest('You do not have permission to update this poll');
+            }
+
+            $poll->delete();
+            return $this->respondWithSuccess('poll deleted successfully', [
+                'poll' => new ContentPollResource ($poll),
+            ]);
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
