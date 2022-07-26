@@ -21,7 +21,7 @@ it('returns a 401 error when a user is not signed in', function()
                     1 =>'option 2',
                 ],
             ];
-            $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request);     
+            $response = $this->json('POST', "/api/v1/polls/{$content->id}/poll", $request);     
             $response->assertStatus(401);
 });
 
@@ -42,7 +42,7 @@ test('poll is not created if signed in user is not the owner of the content', fu
                     1 =>'option 2',
                 ],
             ];
-            $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request);     
+            $response = $this->json('POST', "/api/v1/polls/{$content->id}/poll", $request);     
             $response->assertStatus(400);
 });
 
@@ -64,7 +64,7 @@ test('poll is created if signed in user is owner of the content', function()
                 1 =>'option 2',
             ],
         ];
-        $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request);
+        $response = $this->json('POST', "/api/v1/polls/{$content->id}/poll", $request);
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\ContentPoll::generateStandardCreateResponse());
 
