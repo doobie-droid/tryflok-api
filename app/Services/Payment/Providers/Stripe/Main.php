@@ -67,7 +67,7 @@ class Main extends API
         }
     }
 
-    private function setupStackHeaders($stack)
+    protected function setupStackHeaders($stack)
     {
         $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
             $request = $request->withHeader('Authorization', 'Bearer ' . $this->secret);
