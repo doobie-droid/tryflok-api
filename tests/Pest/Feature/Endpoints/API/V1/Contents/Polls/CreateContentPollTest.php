@@ -44,7 +44,6 @@ test('poll is not created if signed in user is not the owner of the content', fu
             $response->assertStatus(400);
 });
 
-//This checks should include asserting that the poll question and it's options can be found in the appropriate tables
 test('poll is created if signed in user is owner of the content', function()
 {
         $user = Models\User::factory()->create();
@@ -53,9 +52,10 @@ test('poll is created if signed in user is owner of the content', function()
         ->for($user, 'owner')
         ->create();
 
+        $date = date('Y-m-d H:i:s', strtotime('+ 5 hours'));
         $request = [
             'question' => 'question',
-            'closes_at' => now()->addHours(5),
+            'closes_at' => $date,
             'user_id' => $content->user_id,
             'option' => [
                 0 => 'option 1',
@@ -63,17 +63,33 @@ test('poll is created if signed in user is owner of the content', function()
             ],
         ];
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request); 
-        dd($response);
         $response->assertStatus(200);
+
+        //check that content_polls table is populated with the right entries
         $this->assertDatabaseHas('content_polls', [
             'question' => $request['question'],
             'closes_at' => $request['closes_at'],
             'user_id' => $content->user_id,
+            'content_id' =>$content->id,
+        ]);
+
+        //check that submitted options are in the content_poll_options table
+        $poll = $content->polls()->first();
+        $this->assertDatabaseHas('content_poll_options', [
+        'content_poll_id' => $poll->id,
+        'option' => $request['option'][0],
         ]);
 
         $this->assertDatabaseHas('content_poll_options', [
-            'content_poll_id' => $content->poll->id,
-            'option' => $request['option'],
+        'content_poll_id' => $poll->id,
+        'option' => $request['option'][1],
         ]);
+        
+        //check that there are no duplicate options
+        $option_1_count = Models\ContentPollOption::where('option',  $request['option'][0])->count();
+        $option_2_count = Models\ContentPollOption::where('option',  $request['option'][1])->count();
+
+        $this->assertEquals(1, $option_1_count);
+        $this->assertEquals(1, $option_2_count);
         
 });

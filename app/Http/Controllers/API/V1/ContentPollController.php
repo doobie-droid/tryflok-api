@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Content;
+use App\Models\ContentPoll;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -39,17 +40,18 @@ class ContentPollController extends Controller
             ]);
 
             $input = $request->all();
-            for ($i = 0; $i <= count($input['option']); $i++)
+            for ($i = 0; $i < count($input['option']); $i++)
             {
                 $options = [
                         'content_poll_id' => $poll->id,
                         'option' => $input['option'][$i],
                 ];
+                $option = $poll->pollOptions()->create($options);
             }
             
-            $option = $poll->pollOptions()->create($options);
+            
 
-            $poll = ContentPoll::with('content', 'options')->where('id', $poll->id)->first();
+            $poll = ContentPoll::with('content', 'pollOptions')->where('id', $poll->id)->first();
             return $this->respondWithSuccess('Poll has been created successfully', [
             'poll' => $poll,
             ]);           
