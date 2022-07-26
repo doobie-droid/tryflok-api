@@ -3,6 +3,9 @@ namespace App\Services\Payment\Providers\Stripe;
 
 use App\Models\PaymentAccount;
 use App\Services\API;
+use GuzzleHttp\ClientException;
+use GuzzleHttp\Middleware;
+use Psr\Http\Message\RequestInterface;
 
 class Main extends API
 {
