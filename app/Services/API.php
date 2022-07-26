@@ -106,7 +106,7 @@ abstract class API implements APIInterface
      *
      * @return Client
      */
-    private function getClient()
+    protected function getClient()
     {
         return new Client([
             'base_uri' => $this->baseUrl(),
@@ -119,7 +119,7 @@ abstract class API implements APIInterface
      *
      * @return HandlerStack
      */
-    private function createHandler()
+    protected function createHandler()
     {
         $stack  = HandlerStack::create();
         $stack = $this->setupStackHeaders($stack);
@@ -133,7 +133,7 @@ abstract class API implements APIInterface
         return $stack;
     }
 
-    private function setupStackHeaders($stack)
+    protected function setupStackHeaders($stack)
     {
         $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
             $request = $request->withHeader('Authorization', 'Bearer ' . $this->secret);

@@ -3,6 +3,9 @@ namespace App\Services\Payment\Providers\Stripe;
 
 use App\Models\PaymentAccount;
 use App\Services\API;
+use GuzzleHttp\ClientException;
+use GuzzleHttp\Middleware;
+use Psr\Http\Message\RequestInterface;
 
 class Main extends API
 {
@@ -52,7 +55,22 @@ class Main extends API
         return $this->_get("v1/transfers/{$id}");
     }
 
-    private function setupStackHeaders($stack)
+    public function execute($httpMethod, $url, array $parameters = [])
+    {
+        try {
+            $results = $this->getClient()->{$httpMethod}($url, ['form_params' => $parameters]);
+            $res  = json_decode((string) $results->getBody(), true);
+            return response()->json($res)->getData();
+        } catch (ClientException $exception) {
+            return response()->json([
+               'status' => false,
+               'status_code' => $exception->getCode(),
+               'message' => $exception->getMessage(),
+            ])->getData();
+        }
+    }
+
+    protected function setupStackHeaders($stack)
     {
         $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
             $request = $request->withHeader('Authorization', 'Bearer ' . $this->secret);
