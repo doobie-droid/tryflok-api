@@ -66,7 +66,7 @@ class Main extends API
         return $this->_get("v3/transfers/{$id}");
     }
 
-    private function setupStackHeaders($stack)
+    protected function setupStackHeaders($stack)
     {
         $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
             $request = $request->withHeader('Authorization', 'Bearer ' . $this->secret);
