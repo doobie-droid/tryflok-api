@@ -52,6 +52,21 @@ class Main extends API
         return $this->_get("v1/transfers/{$id}");
     }
 
+    public function execute($httpMethod, $url, array $parameters = [])
+    {
+        try {
+            $results = $this->getClient()->{$httpMethod}($url, ['form_params' => $parameters]);
+            $res  = json_decode((string) $results->getBody(), true);
+            return response()->json($res)->getData();
+        } catch (ClientException $exception) {
+            return response()->json([
+               'status' => false,
+               'status_code' => $exception->getCode(),
+               'message' => $exception->getMessage(),
+            ])->getData();
+        }
+    }
+
     private function setupStackHeaders($stack)
     {
         $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
