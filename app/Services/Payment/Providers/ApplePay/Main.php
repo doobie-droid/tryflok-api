@@ -3,6 +3,9 @@ namespace App\Services\Payment\Providers\ApplePay;
 
 use App\Constants\Constants;
 use App\Models\PaymentAccount;
+use GuzzleHttp\ClientException;
+use GuzzleHttp\Middleware;
+use Psr\Http\Message\RequestInterface;
 
 use App\Services\API;
 
@@ -30,7 +33,7 @@ class Main extends API
         ]);
     }
 
-    private function setupStackHeaders($stack)
+    protected function setupStackHeaders($stack)
     {
         $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
             $request = $request->withHeader('Content-Type', 'application/json');

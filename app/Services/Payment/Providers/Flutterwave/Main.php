@@ -3,6 +3,9 @@ namespace App\Services\Payment\Providers\Flutterwave;
 
 use App\Constants\Constants;
 use App\Models\PaymentAccount;
+use GuzzleHttp\ClientException;
+use GuzzleHttp\Middleware;
+use Psr\Http\Message\RequestInterface;
 
 use App\Services\API;
 
