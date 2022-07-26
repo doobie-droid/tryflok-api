@@ -76,6 +76,8 @@ class WalletController extends Controller
                     $amount_in_dollars = bcdiv($request->amount_in_cents, 100, 2);
                     $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
                     $req = $stripe->chargeViaToken($request->amount_in_cents, $request->provider_response['id']);
+                    Log::info($request->provider_response['id']);
+                    Log::info(json_encode($req));
                     if (($req->status === 'succeeded' && $req->paid === true)) {
                         $fee = bcdiv(bcadd(bcmul(0.029, $req->amount, 2), 30, 2), 100, 2); //2.9% + 30c convert to dollar
                         $amount_in_dollars = bcdiv($req->amount, 100, 2);
@@ -83,6 +85,7 @@ class WalletController extends Controller
                         $provider_id = $req->id;
                         $payment_verified = true;
                     }
+                    Log::info("Paymentverified: {$payment_verified}");
                     
                     break;
                 case 'apple':
