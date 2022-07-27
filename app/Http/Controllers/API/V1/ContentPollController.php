@@ -11,6 +11,8 @@ use App\Http\Resources\ContentPollResource;
 use App\Models\ContentPoll;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
+
 
 
 class ContentPollController extends Controller
@@ -23,7 +25,7 @@ class ContentPollController extends Controller
                 'id' => ['required', 'string'],
                 'question' => ['required', 'string', 'max:200', 'min:1'],
                 'closes_at' => ['required'],
-                'option' => ['required'],
+                //'option' => ['required'],
             ]);
 
             if ($validator->fails()) {
@@ -62,11 +64,11 @@ class ContentPollController extends Controller
         }
     }
 
-    public function update(Request $request, $poll_id)
+    public function updatePoll(Request $request, $poll_id)
     {
         try {
                 $validator = Validator::make(array_merge($request->all(), ['id' => $poll_id]), [
-                    'id' => ['string', 'exists:content_poll,id'],
+                    'id' => ['string', 'exists:content_polls,id'],
                     'question' => ['string', 'max:200', 'min:1'],
                 ]);
 
@@ -76,7 +78,6 @@ class ContentPollController extends Controller
 
             //make sure user owns poll
             $poll = ContentPoll::where('id', $poll_id)->where('user_id', $request->user()->id)
-            ->eagerLoadBaseRelations()
             ->first();
             if (is_null($poll)) {
                 return $this->respondBadRequest('You do not have permission to update this poll');
@@ -91,8 +92,8 @@ class ContentPollController extends Controller
                 $poll->closes_at = $request->closes_at;
             }
             $poll->save();
+            if  (! is_null($request->option))   {            
             
-            if  (! is_null($request->option))   {
             foreach ($poll->pollOptions as $i => $options) {
                 $options->option = $request->input('option')[$i];
                 $options->save();
@@ -108,7 +109,7 @@ class ContentPollController extends Controller
         }
     }
 
-    public function delete(Request $request, $poll_id)
+    public function deletePoll(Request $request, $poll_id)
     {
         try {
             //make sure user owns poll
