@@ -114,13 +114,13 @@ class ContentPollController extends Controller
         try {
             //make sure user owns poll
             $poll = ContentPoll::where('id', $poll_id)->where('user_id', $request->user()->id)
-            ->eagerLoadBaseRelations()
             ->first();
             if (is_null($poll)) {
                 return $this->respondBadRequest('You do not have permission to update this poll');
             }
 
             $poll->delete();
+            $poll->pollOptions()->delete();
             return $this->respondWithSuccess('poll deleted successfully', [
                 'poll' => new ContentPollResource ($poll),
             ]);
