@@ -22,7 +22,7 @@ class ContentPollController extends Controller
     {
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $content_id]), [
-                'id' => ['required', 'string'],
+                'content_id' => ['required', 'string'],
                 'question' => ['required', 'string', 'max:200', 'min:1'],
                 'closes_at' => ['required'],
                 //'option' => ['required'],

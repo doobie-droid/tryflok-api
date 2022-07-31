@@ -22,10 +22,13 @@ class ContentPoll extends Model
     ];
 
 
-
     public function content()
     {
         return $this->belongsTo(Content::class);
+    }
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function pollOptions()
@@ -37,4 +40,9 @@ class ContentPoll extends Model
     {
         return $this->hasMany(ContentPollVote::class);
     }
+    
+    // public function ContentPollOptions()
+    // {
+    //     return $this->hasMany(ContentPollOption::class);
+    // }
 }
