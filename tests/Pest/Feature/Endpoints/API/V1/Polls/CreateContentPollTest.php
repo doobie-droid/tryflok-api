@@ -16,7 +16,7 @@ it('returns a 401 error when a user is not signed in', function()
                 'closes_at' => now()->addHours(5),
                 'content_id' => $content->id,
                 'user_id' => $content->user_id,
-                'option' => [
+                'options' => [
                     0 => 'option 1',
                     1 =>'option 2',
                 ],
@@ -37,7 +37,7 @@ test('poll is not created if signed in user is not the owner of the content', fu
                 'closes_at' => now()->addHours(5),
                 'content_id' => $content->id,
                 'user_id' => $content->user_id,
-                'option' => [
+                'options' => [
                     0 => 'option 1',
                     1 =>'option 2',
                 ],
@@ -59,9 +59,9 @@ test('poll is created if signed in user is owner of the content', function()
             'question' => 'question',
             'closes_at' => $date,
             'user_id' => $content->user_id,
-            'option' => [
+            'options' => [
                 0 => 'option 1',
-                1 =>'option 2',
+                1 => 'option 2',
             ],
         ];
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request);
@@ -80,19 +80,41 @@ test('poll is created if signed in user is owner of the content', function()
         $poll = $content->polls()->first();
         $this->assertDatabaseHas('content_poll_options', [
         'content_poll_id' => $poll->id,
-        'option' => $request['option'][0],
+        'option' => $request['options'][0],
         ]);
 
         $this->assertDatabaseHas('content_poll_options', [
         'content_poll_id' => $poll->id,
-        'option' => $request['option'][1],
+        'option' => $request['options'][1],
         ]);
         
         //check that there are no duplicate options
-        $option_1_count = Models\ContentPollOption::where('option',  $request['option'][0])->count();
-        $option_2_count = Models\ContentPollOption::where('option',  $request['option'][1])->count();
+        $option_1_count = Models\ContentPollOption::where('option',  $request['options'][0])->count();
+        $option_2_count = Models\ContentPollOption::where('option',  $request['options'][1])->count();
 
         $this->assertEquals(1, $option_1_count);
         $this->assertEquals(1, $option_2_count);
         
+});
+
+test('poll is not created if options has duplicate values', function()
+{
+        $user = Models\User::factory()->create();
+        $this->be($user);
+        $content = Models\Content::factory()
+        ->for($user, 'owner')
+        ->create();
+
+        $date = date('Y-m-d H:i:s', strtotime('+ 5 hours'));
+        $request = [
+            'question' => 'question',
+            'closes_at' => $date,
+            'user_id' => $content->user_id,
+            'options' => [
+                0 => 'option 1',
+                1 => 'option 1',
+            ],
+        ];
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request);
+        $response->assertStatus(400);
 });

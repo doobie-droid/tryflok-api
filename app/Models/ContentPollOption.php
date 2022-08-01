@@ -26,6 +26,6 @@ class ContentPollOption extends Model
 
     public function poll()
     {
-        return $this->belongsTo(ContentPoll::class);
+        return $this->belongsTo(ContentPoll::class, 'content_poll_id');
     }
 }
