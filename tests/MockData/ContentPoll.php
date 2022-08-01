@@ -65,13 +65,6 @@ class ContentPoll
         'id',
         'question',
         'closes_at',
-        'poll_options' => [
-            [
-            'id',
-            'content_poll_id',
-            'option',
-            ]
-         ],   
     ];
 }
     

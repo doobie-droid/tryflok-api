@@ -16,7 +16,7 @@ it('returns 401 when user is not signed in', function()
             ->create();
 
             Models\ContentPollOption::factory()
-            ->for($poll, 'content_poll')
+            ->for($poll, 'poll')
             ->count(2)
             ->create();
 
@@ -36,7 +36,7 @@ test('delete poll does not work if user is not the owner', function()
             ->create();
 
             Models\ContentPollOption::factory()
-            ->for($poll, 'content_poll')
+            ->for($poll, 'poll')
             ->count(2)
             ->create();
 
@@ -58,7 +58,7 @@ test('delete poll does not work with invalid input', function()
             ->create();
 
             Models\ContentPollOption::factory()
-            ->for($poll, 'content_poll')
+            ->for($poll, 'poll')
             ->count(2)
             ->create();
 
@@ -80,11 +80,29 @@ test('delete poll works', function()
             ->for($content, 'content')
             ->create();
 
-            Models\ContentPollOption::factory()
-            ->for($poll, 'content_poll')
+            $options = Models\ContentPollOption::factory()
+            ->for($poll, 'poll')
             ->count(2)
             ->create();
 
+            $option = $poll->pollOptions()->first();
+
             $response = $this->json('DELETE', "/api/v1/polls/{$poll->id}");
             $response->assertStatus(200);
+            $this->assertDatabaseMissing('content_polls', [
+                'question' => $poll->question,
+                'closes_at' => $poll->closes_at,
+                'user_id' => $content->user_id,
+                'content_id' =>$content->id,
+            ]);
+       
+            $this->assertDatabaseMissing('content_poll_options', [
+            'content_poll_id' => $poll->id,
+            'option' => $option['option'][0],
+            ]);
+
+            $this->assertDatabaseMissing('content_poll_options', [
+            'content_poll_id' => $poll->id,
+            'option' => $option['option'][1],
+            ]);
 });

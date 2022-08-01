@@ -25,7 +25,8 @@ class ContentPollController extends Controller
                 'id' => ['required', 'string'],
                 'question' => ['required', 'string', 'max:200', 'min:1'],
                 'closes_at' => ['required'],
-                //'option' => ['required'],
+                'option' => ['required'],
+                'option.*' => ['required', 'string', 'max:50'],
             ]);
 
             if ($validator->fails()) {
@@ -37,20 +38,24 @@ class ContentPollController extends Controller
                 return $this->respondBadRequest('You do not have permission to create a poll for this content');
             }
 
+            if ($request->option != array_unique($request->option)) {
+                return $this->respondBadRequest('Your options contain duplicate values');
+            }
+
             $poll = $content->polls()->create([
                 'question' => $request->question,
                 'closes_at' => $request->closes_at,
                 'user_id' => $content->user_id,
             ]);
 
-            $input = $request->all();
-            for ($i = 0; $i < count($input['option']); $i++)
+            foreach($request->option as $options) 
             {
-                $options = [
+
+                $option = [
                         'content_poll_id' => $poll->id,
-                        'option' => $input['option'][$i],
+                        'option' => $options,
                 ];
-                $option = $poll->pollOptions()->create($options);
+                $PollOptions = $poll->pollOptions()->create($option);
             }          
             
             $poll = ContentPoll::with('content', 'pollOptions')->where('id', $poll->id)->first();
@@ -82,6 +87,9 @@ class ContentPollController extends Controller
             if (is_null($poll)) {
                 return $this->respondBadRequest('You do not have permission to update this poll');
             }
+            if  (! is_null($request->option))   {    
+                return $this->respondBadRequest('You cannot edit poll options');
+            }
 
             $user = $request->user();
             if (! is_null($request->question)) {
@@ -92,13 +100,6 @@ class ContentPollController extends Controller
                 $poll->closes_at = $request->closes_at;
             }
             $poll->save();
-            if  (! is_null($request->option))   {            
-            
-            foreach ($poll->pollOptions as $i => $options) {
-                $options->option = $request->input('option')[$i];
-                $options->save();
-            }
-            }
 
             return $this->respondWithSuccess('Poll has been updated successfully', [
                  'poll' => new ContentPollResource ($poll), 
@@ -119,8 +120,8 @@ class ContentPollController extends Controller
                 return $this->respondBadRequest('You do not have permission to update this poll');
             }
 
-            $poll->delete();
             $poll->pollOptions()->delete();
+            $poll->delete(); 
             return $this->respondWithSuccess('poll deleted successfully', [
                 'poll' => new ContentPollResource ($poll),
             ]);

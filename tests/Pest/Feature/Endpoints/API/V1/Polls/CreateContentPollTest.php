@@ -61,7 +61,7 @@ test('poll is created if signed in user is owner of the content', function()
             'user_id' => $content->user_id,
             'option' => [
                 0 => 'option 1',
-                1 =>'option 2',
+                1 => 'option 2',
             ],
         ];
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request);
@@ -95,4 +95,26 @@ test('poll is created if signed in user is owner of the content', function()
         $this->assertEquals(1, $option_1_count);
         $this->assertEquals(1, $option_2_count);
         
+});
+
+test('poll is not created if options has duplicate values', function()
+{
+        $user = Models\User::factory()->create();
+        $this->be($user);
+        $content = Models\Content::factory()
+        ->for($user, 'owner')
+        ->create();
+
+        $date = date('Y-m-d H:i:s', strtotime('+ 5 hours'));
+        $request = [
+            'question' => 'question',
+            'closes_at' => $date,
+            'user_id' => $content->user_id,
+            'option' => [
+                0 => 'option 1',
+                1 => 'option 1',
+            ],
+        ];
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $request);
+        $response->assertStatus(400);
 });
