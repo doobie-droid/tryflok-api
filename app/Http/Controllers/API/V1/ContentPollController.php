@@ -25,8 +25,8 @@ class ContentPollController extends Controller
                 'id' => ['required', 'string'],
                 'question' => ['required', 'string', 'max:200', 'min:1'],
                 'closes_at' => ['required'],
-                'option' => ['required'],
-                'option.*' => ['required', 'string', 'max:50'],
+                'options' => ['required'],
+                'options.*' => ['required', 'string', 'max:50'],
             ]);
 
             if ($validator->fails()) {
@@ -38,7 +38,7 @@ class ContentPollController extends Controller
                 return $this->respondBadRequest('You do not have permission to create a poll for this content');
             }
 
-            if ($request->option != array_unique($request->option)) {
+            if ($request->options != array_unique($request->options)) {
                 return $this->respondBadRequest('Your options contain duplicate values');
             }
 
@@ -48,14 +48,14 @@ class ContentPollController extends Controller
                 'user_id' => $content->user_id,
             ]);
 
-            foreach($request->option as $options) 
+            foreach($request->options as $option) 
             {
 
-                $option = [
+                $options = [
                         'content_poll_id' => $poll->id,
-                        'option' => $options,
+                        'option' => $option,
                 ];
-                $PollOptions = $poll->pollOptions()->create($option);
+                $PollOptions = $poll->pollOptions()->create($options);
             }          
             
             $poll = ContentPoll::with('content', 'pollOptions')->where('id', $poll->id)->first();
