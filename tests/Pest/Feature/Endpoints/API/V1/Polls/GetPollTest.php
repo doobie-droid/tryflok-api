@@ -43,4 +43,5 @@ test('get poll works', function()
                         'content_poll_option_id' => $option->id,
                         ]);
                 }
+
 });
