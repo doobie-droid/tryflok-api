@@ -40,9 +40,4 @@ class ContentPoll extends Model
     {
         return $this->hasMany(ContentPollVote::class);
     }
-    
-    // public function ContentPollOptions()
-    // {
-    //     return $this->hasMany(ContentPollOption::class);
-    // }
 }

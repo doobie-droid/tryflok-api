@@ -130,4 +130,32 @@ class ContentPollController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
+    public function get(Request $request, $poll_id)
+    {
+        try{
+            $validator = Validator::make(array_merge($request->all(), ['id' => $poll_id]),[
+                        'id' => ['string', 'exists:content_polls,id'],
+            ]);
+    
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+    
+            //check if poll exists
+            $poll = ContentPoll::where('id', $poll_id)->first();
+            if (is_null($poll)) {
+                return $this->respondBadRequest('This poll does not exist');
+            }
+
+            $polls = $poll::with('pollOptions', 'votes')
+            ->where('id', $poll->id)->first();
+            return $this->respondWithSuccess('Poll retrieved successfully', [
+                'poll' => $polls,
+            ]);
+            
+    } catch (\Exception $exception) {
+        Log::error($exception);
+        return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+    }
+    }
 }
