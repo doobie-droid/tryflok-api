@@ -26,22 +26,13 @@ test('get poll works', function()
                 foreach ($pollOptions as $option)
                 {
                     $votes = Models\ContentPollVote::factory()
-                    ->for($option, 'votes')
+                    ->for($option, 'pollOption')
                     ->for($poll, 'poll')
                     ->count(5)
                     ->create();
                 }
-              
-               
                 $response = $this->json('GET', "/api/v1/polls/{$poll->id}");
-                $response->assertStatus(200);
-
-                foreach ($votes as $vote)
-                {
-                        $this->assertDatabaseHas('content_poll_votes', [
-                        'content_poll_id' => $poll->id,
-                        'content_poll_option_id' => $option->id,
-                        ]);
-                }
+                $response->assertStatus(200)
+                ->assertJsonStructure(MockData\ContentPoll::generateStandardGetResponse());
 
 });

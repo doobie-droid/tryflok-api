@@ -15,6 +15,7 @@ use App\Models\ContentPollVote;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 
 
@@ -150,8 +151,11 @@ class ContentPollController extends Controller
                 return $this->respondBadRequest('This poll does not exist');
             }
 
-            $polls = $poll::with('pollOptions', 'votes')
-            ->where('id', $poll->id)->first();
+            $polls = $poll::with(['pollOptions' => function($pollOptions)
+            {
+                $pollOptions->withCount(['votes'])->get();
+            }])->get();
+
             return $this->respondWithSuccess('Poll retrieved successfully', [
                 'poll' => $polls,
             ]);
@@ -169,12 +173,18 @@ class ContentPollController extends Controller
             'content_poll_id' => ['required', 'string', 'exists:content_polls,id'],
             'content_poll_option_id' => ['required', 'string', 'exists:content_poll_options,id'],
             'voter_id' => ['sometimes'],
-            // 'ip' => ['required'],
         ]);
 
         if ($validator->fails()) {
             return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
         }
+
+        if ($request->user() == null || $request->user()->id == null) {
+            $user_id = '';
+        } else {
+            $user_id = $request->user()->id;
+        }
+
 
         //check if poll exists
         $poll = ContentPoll::where('id', $poll_id)->first();
@@ -187,19 +197,42 @@ class ContentPollController extends Controller
         // }
 
         //check that the voter's ip has not voted before
-        $voted = ContentPollVote::where('voter_id', $request->voter_id)->where('content_poll_id', $poll->id)->exists();
-        if ($voted) {
-            return back()->withErrors('This IP address already voted.');
-        }
-
-        //vote
-        $pollVote = $poll->votes()->create([
+        $hasVoted = ContentPollVote::where('content_poll_id', $poll->id)->where('ip', $request->ip())->first();
+        
+        if (is_null($hasVoted))
+        {
+            if ($user_id)
+            {
+            //vote
+            $pollVote = $poll->votes()->create([
             'content_poll_id' => $poll->id,
             'content_poll_option_id' => $request->content_poll_option_id,
-            'voter_id' => $request->user()->id,
+            'voter_id' => $user_id,
             'ip' => $request->ip(),
-        ]);
+            ]);
+            }
 
+            //vote
+            $pollVote = $poll->votes()->create([
+            'content_poll_id' => $poll->id,
+            'content_poll_option_id' => $request->content_poll_option_id,
+            'ip' => $request->ip(),
+            ]);
+        }
+        else{
+            if ($hasVoted->content_poll_option_id === $request->content_poll_option_id)
+            {
+                return back()->withErrors('This user has already voted.');
+            }
+    
+            if ($hasVoted->content_poll_option_id !== $request->content_poll_option_id)
+            {
+                $changeVote = ContentPollVote::find($poll->id)->first();
+                $changeVote->content_poll_option_id = $request->content_poll_option_id;
+                $changeVote->save();
+            } 
+        }               
+        
         $pollVote = ContentPollVote::where('id', $pollVote->id)->first();
         return $this->respondWithSuccess('Vote has been registered for poll successfully', [
         'pollVote' => new ContentPollOptionsVoteResource ($pollVote),

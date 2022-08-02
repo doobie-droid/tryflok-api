@@ -32,7 +32,7 @@ class ContentPollVote extends Model
         return $this->belongsTo(ContentPoll::class, 'content_poll_id');
     }
 
-    public function votes()
+    public function pollOption()
     {
         return $this->belongsTo(ContentPollOption::class, 'content_poll_option_id');
     }
