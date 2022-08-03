@@ -4,192 +4,90 @@ use App\Models;
 use Tests\MockData;
 use Illuminate\Http\Request;
 
-test('user who is not signed in can vote', function(){
-            $user = Models\User::factory()->create();
-            $content = Models\Content::factory()
+beforeEach(function()
+{
+            $this->user = Models\User::factory()->create();
+            $this->content = Models\Content::factory()
             ->create();
 
-            $poll = Models\ContentPoll::factory()
-            ->for($content, 'content')
+            $this->poll = Models\ContentPoll::factory()
+            ->for($this->content, 'content')
             ->create();
 
-            $pollOptions = Models\ContentPollOption::factory()
-            ->for($poll, 'poll')
+            $this->pollOptions = Models\ContentPollOption::factory()
+            ->for($this->poll, 'poll')
             ->count(2)
             ->create();
 
-            $option = Models\ContentPollOption::where('content_poll_id', $poll->id)->first();
-            $request = [
-                'content_poll_id' => $poll->id,
-                'content_poll_option_id' => $option->id,
-            ];
+            $this->option = Models\ContentPollOption::where('content_poll_id', $this->poll->id)->first();
 
-            $response = $this->json('POST', "/api/v1/polls/{$poll->id}/vote", $request);
+            $this->request = [
+                'content_poll_id' => $this->poll->id,
+                'content_poll_option_id' => $this->option->id,
+            ];
+});
+
+
+test('user who is not signed in can vote', function(){
+
+            $response = $this->json('POST', "/api/v1/polls/{$this->poll->id}/vote", $this->request);
             $response->assertStatus(200)
             ->assertJsonStructure(MockData\ContentPoll::generateStandardGetVoteResponse());
 
              //check that submitted votes are in the content_poll_votes table
             $this->assertDatabaseHas('content_poll_votes', [
-            'content_poll_id' => $poll->id,
-            'content_poll_option_id' => $option->id,
+            'content_poll_id' => $this->poll->id,
+            'content_poll_option_id' => $this->option->id,
             ]);
 });
 
 test('user who is signed in can vote', function()
 {       
-            $user = Models\User::factory()->create();
-            $this->be($user);
-            $content = Models\Content::factory()
-            ->create();
+            $this->be($this->user);
 
-            $poll = Models\ContentPoll::factory()
-            ->for($content, 'content')
-            ->create();
-
-            $pollOptions = Models\ContentPollOption::factory()
-            ->for($poll, 'poll')
-            ->count(2)
-            ->create();
-
-            $option = Models\ContentPollOption::where('content_poll_id', $poll->id)->first();
-            $request = [
-                'content_poll_id' => $poll->id,
-                'content_poll_option_id' => $option->id,
-                'voter_id' => $user->id,
-            ];
-
-            $response = $this->json('POST', "/api/v1/polls/{$poll->id}/vote", $request);
+            $response = $this->json('POST', "/api/v1/polls/{$this->poll->id}/vote", $this->request);
             $response->assertStatus(200)
             ->assertJsonStructure(MockData\ContentPoll::generateStandardGetVoteResponse());
 
             //check that submitted votes are in the content_poll_votes table
             $this->assertDatabaseHas('content_poll_votes', [
-            'content_poll_id' => $poll->id,
-            'content_poll_option_id' => $option->id,
-            'voter_id' => $user->id,
+            'content_poll_id' => $this->poll->id,
+            'content_poll_option_id' => $this->option->id,
+            'voter_id' => $this->user->id,
             ]);
 
 });
 
 it('returns a 404 when invalid inputs are used', function()
 {   
-        $user = Models\User::factory()->create();
-        $this->be($user);
-        $content = Models\Content::factory()
-        ->create();
-
-        $poll = Models\ContentPoll::factory()
-        ->for($content, 'content')
-        ->create();
-
-        $pollOptions = Models\ContentPollOption::factory()
-        ->for($poll, 'poll')
-        ->count(2)
-        ->create();
-
-        $option = Models\ContentPollOption::where('content_poll_id', $poll->id)->first();
-        $request = [
-            'content_poll_id' => $poll->id,
-            'content_poll_option_id' => $option->id,
-            'voter_id' => $user->id,
-        ];
-        $response = $this->json('POST', "/api/v1/polls/-1/vote", $request);
+        $this->be($this->user);
+        $response = $this->json('POST', "/api/v1/polls/-1/vote", $this->request);
         $response->assertStatus(400);
 });
 
-test('user cannot vote more than once', function()
+test('user who is signed cannot vote more than once', function()
 {
-            $user = Models\User::factory()->create();
-            $this->be($user);
-            $content = Models\Content::factory()
-            ->create();
-
-            $poll = Models\ContentPoll::factory()
-            ->for($content, 'content')
-            ->create();
-
-            $pollOptions = Models\ContentPollOption::factory()
-            ->for($poll, 'poll')
-            ->count(2)
-            ->create();
-
-            $option = Models\ContentPollOption::where('content_poll_id', $poll->id)->first();
+            $this->be($this->user);
 
             $createVote = Models\ContentPollVote::factory()
-            ->for($option, 'pollOption')
-            ->for($poll, 'poll')
-            ->for($user, 'voter')
+            ->for($this->option, 'pollOption')
+            ->for($this->poll, 'poll')
+            ->for($this->user, 'voter')
             ->create();
 
-            $votes = Models\ContentPollVote::where('content_poll_id', $poll->id)
-            ->where('content_poll_option_id', $option->id)->first();
+            $votes = Models\ContentPollVote::where('content_poll_id', $this->poll->id)
+            ->where('content_poll_option_id', $this->option->id)->first();
 
-            $request = [
-                'content_poll_id' => $poll->id,
-                'content_poll_option_id' => $option->id,
-                'voter_id' => $user->id,
-                'ip' => $votes->ip,
-            ];
-            $response = $this->json('POST', "/api/v1/polls/{$poll->id}/vote", $request);
+            $response = $this->json('POST', "/api/v1/polls/{$this->poll->id}/vote", $this->request);
             $response->assertStatus(302);
-});
-
-test('user can change vote', function()
-{
-            $user = Models\User::factory()->create();
-            $this->be($user);
-            $content = Models\Content::factory()
-            ->create();
-
-            $poll = Models\ContentPoll::factory()
-            ->for($content, 'content')
-            ->create();
-
-            $pollOptions = Models\ContentPollOption::factory()
-            ->for($poll, 'poll')
-            ->count(2)
-            ->create();
-
-            $option1 = Models\ContentPollOption::where('content_poll_id', $poll->id)->first();
-            $option2 = Models\ContentPollOption::where('content_poll_id', $poll->id)->skip(1)->first();
-
-            $createVote = Models\ContentPollVote::factory()
-            ->for($option1, 'pollOption')
-            ->for($poll, 'poll')
-            ->for($user, 'voter')
-            ->create();
-
-            $votes = Models\ContentPollVote::where('content_poll_id', $poll->id)
-            ->where('content_poll_option_id', $option1->id)->first();
-
-            $request = [
-                'content_poll_id' => $poll->id,
-                'content_poll_option_id' => $option2->id,
-                'voter_id' => $user->id,
-                'ip' => $votes->ip,
-            ];
-            $response = $this->json('POST', "/api/v1/polls/{$poll->id}/vote", $request);
-            $response->assertStatus(200)
-            ->assertJsonStructure(MockData\ContentPoll::generateStandardGetVoteResponse());
-
-            //check that submitted votes are in the content_poll_votes table
-            $this->assertDatabaseHas('content_poll_votes', [
-                'content_poll_id' => $poll->id,
-                'content_poll_option_id' => $option2->id,
-                'voter_id' => $user->id,
-                'ip' => $votes->ip,
-            ]);
 });
 
 test('voting ends after polls is closed', function()
 {
-            $user = Models\User::factory()->create();
-            $this->be($user);
-            $content = Models\Content::factory()
-            ->create();
+            $this->be($this->user);
 
             $poll = Models\ContentPoll::factory()
-            ->for($content, 'content')
+            ->for($this->content, 'content')
             ->create([
                 'closes_at' => now()->subHours(1),
             ]);
@@ -199,12 +97,6 @@ test('voting ends after polls is closed', function()
             ->count(2)
             ->create();
 
-            $option = Models\ContentPollOption::where('content_poll_id', $poll->id)->first();
-            $request = [
-                'content_poll_id' => $poll->id,
-                'content_poll_option_id' => $option->id,
-                'voter_id' => $user->id,
-            ];
-            $response = $this->json('POST', "/api/v1/polls/{$poll->id}/vote", $request);
+            $response = $this->json('POST', "/api/v1/polls/{$poll->id}/vote", $this->request);
             $response->assertStatus(302);
 });

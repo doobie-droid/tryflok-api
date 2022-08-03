@@ -5,33 +5,37 @@ use Tests\MockData;
 use Illuminate\Foundation\Testing\WithFaker;
 uses(WithFaker::class);
 
+beforeEach(function()
+{
+        $this->user = Models\User::factory()->create();
+        $this->content = Models\Content::factory()
+        ->for($this->user, 'owner')
+        ->create();
+
+        $this->poll = Models\ContentPoll::factory()
+        ->for($this->user, 'owner')
+        ->for($this->content, 'content')
+        ->create();
+
+        $this->pollOptions = Models\ContentPollOption::factory()
+        ->for($this->poll, 'poll')
+        ->count(2)
+        ->create();
+
+        foreach ($this->pollOptions as $this->option)
+            {
+                $this->votes = Models\ContentPollVote::factory()
+                ->for($this->option, 'pollOption')
+                ->for($this->poll, 'poll')
+                ->count(5)
+                ->create();
+            }
+});
+
 test('get poll works', function()
 {   
-                $user = Models\User::factory()->create();
-                $this->be($user);
-                $content = Models\Content::factory()
-                ->for($user, 'owner')
-                ->create();
-
-                $poll = Models\ContentPoll::factory()
-                ->for($user, 'owner')
-                ->for($content, 'content')
-                ->create();
-
-                $pollOptions = Models\ContentPollOption::factory()
-                ->for($poll, 'poll')
-                ->count(2)
-                ->create();
-
-                foreach ($pollOptions as $option)
-                {
-                    $votes = Models\ContentPollVote::factory()
-                    ->for($option, 'pollOption')
-                    ->for($poll, 'poll')
-                    ->count(5)
-                    ->create();
-                }
-                $response = $this->json('GET', "/api/v1/polls/{$poll->id}");
+                $this->be($this->user);
+                $response = $this->json('GET', "/api/v1/polls/{$this->poll->id}");
                 $response->assertStatus(200)
                 ->assertJsonStructure(MockData\ContentPoll::generateStandardGetResponse());
 
@@ -39,59 +43,13 @@ test('get poll works', function()
 
 it('returns a 404 with invalid poll ID', function()
 {
-                $user = Models\User::factory()->create();
-                $this->be($user);
-                $content = Models\Content::factory()
-                ->for($user, 'owner')
-                ->create();
-
-                $poll = Models\ContentPoll::factory()
-                ->for($user, 'owner')
-                ->for($content, 'content')
-                ->create();
-
-                $pollOptions = Models\ContentPollOption::factory()
-                ->for($poll, 'poll')
-                ->count(2)
-                ->create();
-
-                foreach ($pollOptions as $option)
-                {
-                    $votes = Models\ContentPollVote::factory()
-                    ->for($option, 'pollOption')
-                    ->for($poll, 'poll')
-                    ->count(5)
-                    ->create();
-                }
+                $this->be($this->user);
                 $response = $this->json('GET', "/api/v1/polls/-1");
                 $response->assertStatus(400);
 });
 
 it('returns 401 if user is not signed in', function()
 {
-            $user = Models\User::factory()->create();
-            $content = Models\Content::factory()
-            ->for($user, 'owner')
-            ->create();
-
-            $poll = Models\ContentPoll::factory()
-            ->for($user, 'owner')
-            ->for($content, 'content')
-            ->create();
-
-            $pollOptions = Models\ContentPollOption::factory()
-            ->for($poll, 'poll')
-            ->count(2)
-            ->create();
-
-            foreach ($pollOptions as $option)
-                {
-                    $votes = Models\ContentPollVote::factory()
-                    ->for($option, 'pollOption')
-                    ->for($poll, 'poll')
-                    ->count(5)
-                    ->create();
-                }
-            $response = $this->json('GET', "/api/v1/polls/{$poll->id}");
+            $response = $this->json('GET', "/api/v1/polls/{$this->poll->id}");
             $response->assertStatus(401);
 });

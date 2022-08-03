@@ -3,31 +3,34 @@
 use App\Models;
 use Tests\MockData;
 
+beforeEach(function()
+{
+        $this->user = Models\User::factory()->create();
+        $this->content = Models\Content::factory()
+        ->for($this->user, 'owner')
+        ->create();
+
+        $this->poll = Models\ContentPoll::factory()
+        ->for($this->user, 'owner')
+        ->for($this->content, 'content')
+        ->create();
+
+        $this->options = Models\ContentPollOption::factory()
+        ->for($this->poll, 'poll')
+        ->count(2)
+        ->create();
+});
+
 it('returns 401 when user is not signed in', function()
 {
-            $user = Models\User::factory()->create();
-            $content = Models\Content::factory()
-            ->for($user, 'owner')
-            ->create();
 
-            $poll = Models\ContentPoll::factory()
-            ->for($user, 'owner')
-            ->for($content, 'content')
-            ->create();
-
-            Models\ContentPollOption::factory()
-            ->for($poll, 'poll')
-            ->count(2)
-            ->create();
-
-            $response = $this->json('DELETE', "/api/v1/polls/{$poll->id}");
+            $response = $this->json('DELETE', "/api/v1/polls/{$this->poll->id}");
             $response->assertStatus(401);
 });
 
 test('delete poll does not work if user is not the owner', function()
 {
-            $user = Models\User::factory()->create();
-            $this->be($user);
+            $this->be($this->user);
             $content = Models\Content::factory()
             ->create();
 
@@ -46,21 +49,7 @@ test('delete poll does not work if user is not the owner', function()
 
 test('delete poll does not work with invalid input', function()
 {
-            $user = Models\User::factory()->create();
-            $this->be($user);
-            $content = Models\Content::factory()
-            ->for($user, 'owner')
-            ->create();
-
-            $poll = Models\ContentPoll::factory()
-            ->for($user, 'owner')
-            ->for($content, 'content')
-            ->create();
-
-            Models\ContentPollOption::factory()
-            ->for($poll, 'poll')
-            ->count(2)
-            ->create();
+            $this->be($this->user);
 
             $response = $this->json('DELETE', "/api/v1/polls/-1");
             $response->assertStatus(400);
@@ -68,41 +57,26 @@ test('delete poll does not work with invalid input', function()
 
 test('delete poll works', function()
 {       
+            $this->be($this->user);
 
-            $user = Models\User::factory()->create();
-            $this->be($user);
-            $content = Models\Content::factory()
-            ->for($user, 'owner')
-            ->create();
+            $option = $this->poll->pollOptions()->first();
 
-            $poll = Models\ContentPoll::factory()
-            ->for($user, 'owner')
-            ->for($content, 'content')
-            ->create();
-
-            $options = Models\ContentPollOption::factory()
-            ->for($poll, 'poll')
-            ->count(2)
-            ->create();
-
-            $option = $poll->pollOptions()->first();
-
-            $response = $this->json('DELETE', "/api/v1/polls/{$poll->id}");
+            $response = $this->json('DELETE', "/api/v1/polls/{$this->poll->id}");
             $response->assertStatus(200);
             $this->assertDatabaseMissing('content_polls', [
-                'question' => $poll->question,
-                'closes_at' => $poll->closes_at,
-                'user_id' => $content->user_id,
-                'content_id' =>$content->id,
+                'question' => $this->poll->question,
+                'closes_at' => $this->poll->closes_at,
+                'user_id' => $this->content->user_id,
+                'content_id' =>$this->content->id,
             ]);
        
             $this->assertDatabaseMissing('content_poll_options', [
-            'content_poll_id' => $poll->id,
+            'content_poll_id' => $this->poll->id,
             'option' => $option['option'][0],
             ]);
 
             $this->assertDatabaseMissing('content_poll_options', [
-            'content_poll_id' => $poll->id,
+            'content_poll_id' => $this->poll->id,
             'option' => $option['option'][1],
             ]);
 });
