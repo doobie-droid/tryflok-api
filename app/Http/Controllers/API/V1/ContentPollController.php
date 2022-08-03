@@ -8,10 +8,14 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Content;
 use App\Http\Resources\ContentPollResource;
+use App\Http\Resources\ContentPollOptionsVoteResource;
+use App\Http\Resources\ContentPollOptionsResource;
 use App\Models\ContentPoll;
+use App\Models\ContentPollVote;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 
 
@@ -130,4 +134,91 @@ class ContentPollController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
+    public function get(Request $request, $poll_id)
+    {
+        try{
+            $validator = Validator::make(array_merge($request->all(), ['id' => $poll_id]),[
+                        'id' => ['string', 'exists:content_polls,id'],
+            ]);
+    
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+    
+            //check if poll exists
+            $poll = ContentPoll::where('id', $poll_id)->first();
+            if (is_null($poll)) {
+                return $this->respondBadRequest('This poll does not exist');
+            }
+
+            $polls = $poll::with(['pollOptions' => function($pollOptions)
+            {
+                $pollOptions->withCount(['votes'])->get();
+            }])->get();
+
+            return $this->respondWithSuccess('Poll retrieved successfully', [
+                'poll' => $polls,
+            ]);
+            
+    } catch (\Exception $exception) {
+        Log::error($exception);
+        return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+    }
+    }
+
+    public function votePoll(Request $request, $poll_id)
+    {   
+        try{
+        $validator = Validator::make(array_merge($request->all(), ['id' => $poll_id]), [
+            'content_poll_id' => ['required', 'string', 'exists:content_polls,id'],
+            'content_poll_option_id' => ['required', 'string', 'exists:content_poll_options,id'],
+            'voter_id' => ['sometimes'],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+        }
+
+        //check if poll exists
+        $poll = ContentPoll::where('id', $poll_id)->first();
+        if (is_null($poll)) {
+            return $this->respondBadRequest('This poll does not exist');
+        }
+
+        if ( Carbon::now() >= $poll->closes_at) {
+            return back()->withErrors('The poll is closed.');
+        }
+
+        $user = $request->user();
+        $user_id = '';
+        if (!is_null($user)) {
+        $user_id = $user->id;
+        }
+
+        $hasVotedWhileSignedIn = ContentPollVote::where('content_poll_id', $poll->id)
+                ->where('voter_id', $user_id)->first();
+        if (!is_null($hasVotedWhileSignedIn)) 
+        {
+        // return error response
+        return back()->withErrors('This user has already voted for this option.');
+        }
+        $pollVote = $poll->votes()->create([
+        'content_poll_id' => $poll->id,
+        'content_poll_option_id' => $request->content_poll_option_id,
+        'voter_id' => $user_id,
+        'ip' => $request->ip(),
+        ]);  
+        
+        $pollVote = ContentPollVote::where('id', $pollVote->id)->first();
+        return $this->respondWithSuccess('Vote has been registered for poll successfully', [
+        'pollVote' => new ContentPollOptionsVoteResource ($pollVote),
+        ]);  
+
+
+    } catch (\Exception $exception) {
+        Log::error($exception);
+        return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+    }
+    }
+
 }

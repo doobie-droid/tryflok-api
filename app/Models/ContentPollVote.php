@@ -13,6 +13,9 @@ class ContentPollVote extends Model
     use Uuid;
     use HasFactory;
 
+    public $timestamps = false;
+
+
     /**
      * The attributes that are not mass assignable.
      *
@@ -26,7 +29,12 @@ class ContentPollVote extends Model
 
     public function poll()
     {
-        return $this->belongsTo(ContentPoll::class);
+        return $this->belongsTo(ContentPoll::class, 'content_poll_id');
+    }
+
+    public function pollOption()
+    {
+        return $this->belongsTo(ContentPollOption::class, 'content_poll_option_id');
     }
 
     public function voter()

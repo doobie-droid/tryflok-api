@@ -28,4 +28,8 @@ class ContentPollOption extends Model
     {
         return $this->belongsTo(ContentPoll::class, 'content_poll_id');
     }
+    public function votes()
+    {
+        return $this->hasMany(ContentPollVote::class);
+    }
 }

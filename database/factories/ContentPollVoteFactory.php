@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ContentPollVote;
 use App\Models\Content;
 use App\Models\ContentPollOption;
+use App\Models\ContentPoll;
 use App\Models\User;
 
 

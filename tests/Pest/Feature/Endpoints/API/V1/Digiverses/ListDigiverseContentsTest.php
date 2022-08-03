@@ -9,7 +9,7 @@ beforeEach(function()
     $this->digiverse = Models\Collection::factory()->digiverse()->create();
 
     $this->user = Models\User::factory()->create();
-        $this->be($this->user);
+    $this->be($this->user);
 });
 
 test('retrieve all digiverse contents fails with invalid parameters', function()
