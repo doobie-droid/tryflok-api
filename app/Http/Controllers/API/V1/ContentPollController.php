@@ -179,57 +179,69 @@ class ContentPollController extends Controller
             return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
         }
 
-        if ($request->user() == null || $request->user()->id == null) {
-            $user_id = '';
-        } else {
-            $user_id = $request->user()->id;
-        }
-
-
         //check if poll exists
         $poll = ContentPoll::where('id', $poll_id)->first();
         if (is_null($poll)) {
             return $this->respondBadRequest('This poll does not exist');
         }
 
-        // if ( Carbon::now() >= $poll->created_at) {
-        //     return back()->withErrors('The poll is closed.');
-        // }
+        if ( Carbon::now() >= $poll->closes_at) {
+            return back()->withErrors('The poll is closed.');
+        }
 
-        //check that the voter's ip has not voted before
-        $hasVoted = ContentPollVote::where('content_poll_id', $poll->id)->where('ip', $request->ip())->first();
-        
-        if (is_null($hasVoted))
+        if ($request->ip == null)
         {
-            if ($user_id)
-            {
-            //vote
-            $pollVote = $poll->votes()->create([
-            'content_poll_id' => $poll->id,
-            'content_poll_option_id' => $request->content_poll_option_id,
-            'voter_id' => $user_id,
-            'ip' => $request->ip(),
-            ]);
-            }
-
-            //vote
-            $pollVote = $poll->votes()->create([
-            'content_poll_id' => $poll->id,
-            'content_poll_option_id' => $request->content_poll_option_id,
-            'ip' => $request->ip(),
-            ]);
+            $ip = $request->ip();
         }
         else{
+            $ip = $request->ip;
+        }
+
+        //check for existing vote with ip
+        $hasVoted = ContentPollVote::where('content_poll_id', $poll->id)
+        ->where('ip', $ip)->first();
+        
+        if (is_null($hasVoted)) //user has not voted
+        {       
+                //assign null to user_id if user is not signed in
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+
+                //vote
+                $pollVote = $poll->votes()->create([
+                'content_poll_id' => $poll->id,
+                'content_poll_option_id' => $request->content_poll_option_id,
+                'ip' => $ip,
+                ]);
+
+            } else {
+                $user_id = $request->user()->id; //user is signed in
+                 //vote
+                $pollVote = $poll->votes()->create([
+                'content_poll_id' => $poll->id,
+                'content_poll_option_id' => $request->content_poll_option_id,
+                'voter_id' => $user_id,
+                'ip' => $ip,
+                ]);
+            }            
+        }
+        else{   //user has voted
+
+            //user wants to vote for the same option more than once
             if ($hasVoted->content_poll_option_id === $request->content_poll_option_id)
             {
                 return back()->withErrors('This user has already voted.');
             }
-    
+            //user wants to change vote option
             if ($hasVoted->content_poll_option_id !== $request->content_poll_option_id)
-            {
-                $changeVote = ContentPollVote::find($poll->id)->first();
-                $changeVote->content_poll_option_id = $request->content_poll_option_id;
-                $changeVote->save();
+            {   
+                ContentPollVote::where('content_poll_id', $poll->id)
+                ->where('ip', $ip)
+                ->update(['content_poll_option_id'=> $request->content_poll_option_id]);
+
+                $pollVote = ContentPollVote::where('content_poll_id', $poll->id)
+                ->where('ip', $ip)
+                ->first();
             } 
         }               
         

@@ -14,6 +14,17 @@ class ContentPoll
             ]
         ];
     }
+
+    public static function generateStandardGetVoteResponse(): array
+    {
+        return [
+            'status_code',
+            'message',
+            'data' => [
+                'pollVote' => self::STANDARD_GET_VOTE_STRUCTURE,
+            ]
+            ];
+    }
     public static function generateStandardCreateResponse(): array
     {
         return [
@@ -89,6 +100,14 @@ class ContentPoll
             ]
             ], 
         ]
+    ];
+
+    const STANDARD_GET_VOTE_STRUCTURE = [
+        'id',
+        'content_poll_id',
+        'content_poll_option_id',
+        'voter_id',
+        'ip',
     ];
 
     const STANDARD_UPDATE_STRUCTURE = [
