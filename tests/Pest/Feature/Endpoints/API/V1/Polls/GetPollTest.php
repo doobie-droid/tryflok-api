@@ -48,8 +48,9 @@ it('returns a 404 with invalid poll ID', function()
                 $response->assertStatus(400);
 });
 
-it('returns 401 if user is not signed in', function()
+test('users who are not signed in can see poll details', function()
 {
             $response = $this->json('GET', "/api/v1/polls/{$this->poll->id}");
-            $response->assertStatus(401);
+            $response->assertStatus(200)
+            ->assertJsonStructure(MockData\ContentPoll::generateStandardGetResponse());
 });

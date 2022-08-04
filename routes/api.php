@@ -71,6 +71,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::group(['prefix' => 'polls'], function () {
        Route::post('{id}/vote', 'ContentPollController@votePoll')->name('vote-poll');
+       Route::get('{id}', 'ContentPollController@get')->name('get-poll');
     });
 
     Route::group(['prefix' => 'payments'], function () {
@@ -196,7 +197,6 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'polls'], function () {
             Route::patch('{id}', 'ContentPollController@updatePoll')->name('update-poll');
             Route::delete('{id}', 'ContentPollController@deletePoll')->name('delete-poll');
-            Route::get('{id}', 'ContentPollController@get')->name('get-poll');
         });
 
         Route::group(['prefix' => 'issues'], function () {
