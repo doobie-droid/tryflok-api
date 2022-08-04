@@ -187,7 +187,7 @@ class ContentPollController extends Controller
         }
 
         if ( Carbon::now() >= $poll->closes_at) {
-            return back()->withErrors('The poll is closed.');
+            return $this->respondBadRequest('The poll is closed.');
         }
 
         $user = $request->user();
@@ -201,7 +201,7 @@ class ContentPollController extends Controller
         if (!is_null($hasVotedWhileSignedIn)) 
         {
         // return error response
-        return back()->withErrors('This user has already voted for this option.');
+        return $this->respondBadRequest('This user has already voted for this option.');
         }
         $pollVote = $poll->votes()->create([
         'content_poll_id' => $poll->id,

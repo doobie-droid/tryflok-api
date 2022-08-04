@@ -79,7 +79,7 @@ test('user who is signed cannot vote more than once', function()
             ->where('content_poll_option_id', $this->option->id)->first();
 
             $response = $this->json('POST', "/api/v1/polls/{$this->poll->id}/vote", $this->request);
-            $response->assertStatus(302);
+            $response->assertStatus(400);
 });
 
 test('voting ends after polls is closed', function()
@@ -98,5 +98,5 @@ test('voting ends after polls is closed', function()
             ->create();
 
             $response = $this->json('POST', "/api/v1/polls/{$poll->id}/vote", $this->request);
-            $response->assertStatus(302);
+            $response->assertStatus(400);
 });
