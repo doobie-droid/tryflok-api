@@ -36,6 +36,7 @@ test('get poll works', function()
 {   
                 $this->be($this->user);
                 $response = $this->json('GET', "/api/v1/polls/{$this->poll->id}");
+                dd($response->getData());
                 $response->assertStatus(200)
                 ->assertJsonStructure(MockData\ContentPoll::generateStandardGetResponse());
 

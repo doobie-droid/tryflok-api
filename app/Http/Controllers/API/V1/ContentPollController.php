@@ -151,9 +151,10 @@ class ContentPollController extends Controller
                 return $this->respondBadRequest('This poll does not exist');
             }
 
-            $polls = $poll::with(['pollOptions' => function($pollOptions)
+            $polls = $poll::with([
+                'pollOptions' => function($query)
             {
-                $pollOptions->withCount(['votes'])->get();
+                $query->withCount('votes');
             }])->get();
 
             return $this->respondWithSuccess('Poll retrieved successfully', [
