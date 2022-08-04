@@ -69,6 +69,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}', 'UserController@showUser')->name('show-user');
     });
 
+    Route::group(['prefix' => 'polls'], function () {
+       Route::post('{id}/vote', 'ContentPollController@votePoll')->name('vote-poll');
+       Route::get('{id}', 'ContentPollController@get')->name('get-poll');
+    });
+
     Route::group(['prefix' => 'payments'], function () {
         Route::patch('easy-fund-wallet', 'WalletController@fundWallet')->name('easy-fund-wallet');
 
@@ -186,8 +191,12 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge')->name('respond-to-challenge');
             Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge')->name('contribute-to-challenge');
             Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge')->name('vote-on-challenge');
-
             Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
+            Route::post('{id}/poll', 'ContentPollController@createPoll')->name('create-poll');
+        });
+        Route::group(['prefix' => 'polls'], function () {
+            Route::patch('{id}', 'ContentPollController@updatePoll')->name('update-poll');
+            Route::delete('{id}', 'ContentPollController@deletePoll')->name('delete-poll');
         });
 
         Route::group(['prefix' => 'issues'], function () {
