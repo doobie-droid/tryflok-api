@@ -1688,12 +1688,31 @@ class ContentController extends Controller
                     'key' => 'AIzaSyCiHRUsqgxDVPGyPswL_WLJUTXSsyoMGGs'
                 ]
                 );
-            dd($response->json());
 
-
+                $data = [
+                    'title' => $response->json('items.0.snippet.title'),
+                    'embed_html' => $response->json('items.0.player.embedHtml'),
+                    'thumbnail_url' => $this->thumbnailUrl($response),
+                    'description' => $response->json('items.0.snippet.description')
+                ];
+            dd($data);
         } catch(\Exception $exception){
 
         }
     }
+
+    private function thumbnailUrl($response)
+    {
+        if($response->json('items.0.snippet.thumbnails.standard.url'))
+        {
+            return $response->json('items.0.snippet.thumbnails.standard.url');
+        }
+
+        return optional(collect($response->json('items.0.snippet.thumbnails'))
+        ->sortByDesc('width')
+        ->first()
+        )['url'];
+    }
+
 
 }

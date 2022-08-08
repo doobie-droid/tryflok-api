@@ -5,6 +5,9 @@ use Tests\MockData;
 
 test('video details are returned', function()
 {   
+    $user = Models\User::factory()->create();
+    $this->be($user);
+
     $request = 
     [ 
         'url' => 'https://www.youtube.com/watch?v=BLmRXRBk5AQ'
