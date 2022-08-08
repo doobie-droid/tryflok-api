@@ -43,6 +43,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}/assets', 'ContentController@listAssets')->name('list-content-assets');
 
         Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
+
+        Route::post('/youtube-migrate', 'ContentController@youtubeMigrate')->name('youtube-migrate');
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
@@ -193,6 +195,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge')->name('vote-on-challenge');
             Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
             Route::post('{id}/poll', 'ContentPollController@createPoll')->name('create-poll');
+
         });
         Route::group(['prefix' => 'polls'], function () {
             Route::patch('{id}', 'ContentPollController@updatePoll')->name('update-poll');

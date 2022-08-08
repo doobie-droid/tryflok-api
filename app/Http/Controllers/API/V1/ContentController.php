@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 class ContentController extends Controller
 {
@@ -1667,5 +1668,32 @@ class ContentController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }  
+
+    public function youtubeMigrate(Request $request)
+    {
+        try{
+
+            $url = $request->url;
+
+            parse_str( parse_url( $url, PHP_URL_QUERY ), $my_array_of_vars );
+
+            $videoId = $my_array_of_vars['v']; 
+            
+            $response = Http::asJson()
+            ->get(
+                'https://youtube.googleapis.com/youtube/v3/videos',
+                [
+                    'part' => 'snippet,player,contentDetails',
+                    'id' => $videoId,
+                    'key' => 'AIzaSyCiHRUsqgxDVPGyPswL_WLJUTXSsyoMGGs'
+                ]
+                );
+            dd($response->json());
+
+
+        } catch(\Exception $exception){
+
+        }
+    }
 
 }
