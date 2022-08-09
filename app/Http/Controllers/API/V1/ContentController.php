@@ -6,6 +6,7 @@ use App\Constants\Constants;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ContentIssueResource;
 use App\Http\Resources\ContentResource;
+use App\Http\Resources\YoutubeVideoResource;
 use App\Jobs\Assets\UploadResource\Html as UploadHtmlJob;
 use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJob;
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
@@ -31,6 +32,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use App\Rules\YoutubeUrl;
+
 
 class ContentController extends Controller
 {
@@ -1673,15 +1676,21 @@ class ContentController extends Controller
     {
         try{
             $validator = Validator::make($request->all(), [
-                'url' => ['required', 'string'],
-                // 'digiverse_id' => ['required', 'string', 'exists:digiverse,id'],
-                // 'videoPrice' => ['required', 'numeric', 'min:0', 'max:9999']
+                'url' => ['required', 'string', new YouTubeUrl],
+                'digiverse_id' => ['required','exists:collections,id'],
+                'price_in_dollars' => ['required', 'numeric', 'min:0', 'max:10000']
             ]);
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
+            $user = $request->user();
+            $digiverse = Collection::where('id', $request->digiverse_id)->where('type', 'digiverse')->first();
+            
+            if ($digiverse->user_id !== $user->id) {
+                return $this->respondBadRequest('You cannot add to this digiverse because you do not own it');
+            }
 
             $url = $request->url;
 
@@ -1699,13 +1708,20 @@ class ContentController extends Controller
                 ]
                 );
 
-                $data = [
+                $youtubeVideoData = [
                     'title' => $response->json('items.0.snippet.title'),
                     'embed_html' => $response->json('items.0.player.embedHtml'),
+                    'embed_url' => 'https://youtube.com/embed/'.$videoId,
                     'thumbnail_url' => $this->thumbnailUrl($response),
                     'description' => preg_replace('/#.*/', '', $response->json('items.0.snippet.description')),
                 ];
-            dd($data);
+
+                $descriptionHashTags = $this->get_hashtags($response->json('items.0.snippet.description'));
+
+                return $this->respondWithSuccess('Video has been retrieved successfully', [
+                    'youtubeVideoData' => new YoutubeVideoResource ($youtubeVideoData),
+                    'descriptionHashTags' => $descriptionHashTags,
+                ]);  
         } catch(\Exception $exception){
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
@@ -1724,5 +1740,26 @@ class ContentController extends Controller
         ->first()
         )['url'];
     }
+
+    private function get_hashtags($description, $str = 1)
+    {
+        preg_match_all('/#(\w+)/',$description,$matches);
+        $i = 0;
+        $keywords = '';
+        if ($str) {
+        foreach ($matches[1] as $match) {
+            $count = count($matches[1]);
+            $keywords .= "$match";
+            $i++;
+            if ($count > $i) $keywords .= ", ";
+        }
+        } else {
+        foreach ($matches[1] as $match) {
+            $keyword[] = $match;
+        }
+        $keywords = $keyword;
+        }
+        return $keywords;
+        }
 
 }
