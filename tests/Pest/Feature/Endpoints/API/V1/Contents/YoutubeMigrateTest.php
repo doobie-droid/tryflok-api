@@ -20,9 +20,17 @@ test('video details are returned', function()
         'price_in_dollars' => 10,
     ];
     $response = $this->json('POST', "/api/v1/contents/youtube-migrate", $request);
-    $response->assertStatus(200)
-    ->assertJsonStructure(MockData\YoutubeVideo::generateStandardGetYoutubeVideoResponse());
+    $response->assertStatus(200);
     
+    $request = 
+    [ 
+        'url' => 'www.youtube.com/watch?v=BLmRXRBk5AQ',
+        'digiverse_id' => $digiverse->id,
+        'price_in_dollars' => 10,
+    ];
+    $response = $this->json('POST', "/api/v1/contents/youtube-migrate", $request);
+    $response->assertStatus(200);
+
 });
 
 it('fails if youtube URL is inavlid', function()
@@ -42,7 +50,68 @@ it('fails if youtube URL is inavlid', function()
             'price_in_dollars' => 10,
         ];
         $response = $this->json('POST', "/api/v1/contents/youtube-migrate", $request);
-        $response->assertStatus(400);
+        $response->assertStatus(400)
+        ->assertJson(MockData\YoutubeVideo::generateStandardUrlErrorResponse());
+
+        $request = 
+        [ 
+            'url' => 'https://www.youtube.com/3kmlkslfkoi',
+            'digiverse_id' => $digiverse->id,
+            'price_in_dollars' => 10,
+        ];
+        $response = $this->json('POST', "/api/v1/contents/youtube-migrate", $request);
+        $response->assertStatus(400)
+        ->assertJson(MockData\YoutubeVideo::generateStandardUrlErrorResponse());
+
+        $request = 
+        [ 
+            'url' => 'https://www.facebook.com',
+            'digiverse_id' => $digiverse->id,
+            'price_in_dollars' => 10,
+        ];
+        $response = $this->json('POST', "/api/v1/contents/youtube-migrate", $request);
+        $response->assertStatus(400)
+        ->assertJson(MockData\YoutubeVideo::generateStandardUrlErrorResponse());
+
+        $request = 
+        [ 
+            'url' => 'https:/www.youtube.com',
+            'digiverse_id' => $digiverse->id,
+            'price_in_dollars' => 10,
+        ];
+        $response = $this->json('POST', "/api/v1/contents/youtube-migrate", $request);
+        $response->assertStatus(400)
+        ->assertJson(MockData\YoutubeVideo::generateStandardUrlErrorResponse());
+
+        $request = 
+        [ 
+            'url' => 'https:/www.youtube.com/watch?v=BLmRXRBk5AQ',
+            'digiverse_id' => $digiverse->id,
+            'price_in_dollars' => 10,
+        ];
+        $response = $this->json('POST', "/api/v1/contents/youtube-migrate", $request);
+        $response->assertStatus(400)
+        ->assertJson(MockData\YoutubeVideo::generateStandardUrlErrorResponse());
+
+        $request = 
+        [ 
+            'url' => 'https://www.youtube.comm/watch?v=BLmRXRBk5AQ',
+            'digiverse_id' => $digiverse->id,
+            'price_in_dollars' => 10,
+        ];
+        $response = $this->json('POST', "/api/v1/contents/youtube-migrate", $request);
+        $response->assertStatus(400)
+        ->assertJson(MockData\YoutubeVideo::generateStandardUrlErrorResponse());
+
+        $request = 
+        [ 
+            'url' => 'https://www.youtube.com/watch?z=BLmRXRBk5AQ',
+            'digiverse_id' => $digiverse->id,
+            'price_in_dollars' => 10,
+        ];
+        $response = $this->json('POST', "/api/v1/contents/youtube-migrate", $request);
+        $response->assertStatus(400)
+        ->assertJson(MockData\YoutubeVideo::generateStandardUrlErrorResponse());
 });
 
 it('fails if digiverse is invalid', function()

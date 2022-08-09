@@ -11,6 +11,7 @@ use App\Jobs\Assets\UploadResource\Html as UploadHtmlJob;
 use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJob;
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
+use App\Jobs\Content\MigrateYoutubeVideo as MigrateYoutubeVideoJob;
 use App\Jobs\Users\NotifyAddedToChallenge as NotifyAddedToChallengeJob;
 use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
@@ -1692,74 +1693,14 @@ class ContentController extends Controller
                 return $this->respondBadRequest('You cannot add to this digiverse because you do not own it');
             }
 
-            $url = $request->url;
-
-            parse_str( parse_url( $url, PHP_URL_QUERY ), $my_array_of_vars );
-
-            $videoId = $my_array_of_vars['v']; 
-            
-            $response = Http::asJson()
-            ->get(
-                'https://youtube.googleapis.com/youtube/v3/videos',
-                [
-                    'part' => 'snippet,player,contentDetails',
-                    'id' => $videoId,
-                    'key' => config('services.google.youtube_api_key'),
-                ]
-                );
-
-                $youtubeVideoData = [
-                    'title' => $response->json('items.0.snippet.title'),
-                    'embed_html' => $response->json('items.0.player.embedHtml'),
-                    'embed_url' => 'https://youtube.com/embed/'.$videoId,
-                    'thumbnail_url' => $this->thumbnailUrl($response),
-                    'description' => preg_replace('/#.*/', '', $response->json('items.0.snippet.description')),
-                ];
-
-                $descriptionHashTags = $this->get_hashtags($response->json('items.0.snippet.description'));
-
-                return $this->respondWithSuccess('Video has been retrieved successfully', [
-                    'youtubeVideoData' => new YoutubeVideoResource ($youtubeVideoData),
-                    'descriptionHashTags' => $descriptionHashTags,
-                ]);  
+            MigrateYoutubeVideoJob::dispatch([
+                'url' => $request->url,
+            ]);
+          
+            return $this->respondWithSuccess('Video has been retrieved successfully');  
         } catch(\Exception $exception){
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
-
-    private function thumbnailUrl($response)
-    {
-        if($response->json('items.0.snippet.thumbnails.standard.url'))
-        {
-            return $response->json('items.0.snippet.thumbnails.standard.url');
-        }
-
-        return optional(collect($response->json('items.0.snippet.thumbnails'))
-        ->sortByDesc('width')
-        ->first()
-        )['url'];
-    }
-
-    private function get_hashtags($description, $str = 1)
-    {
-        preg_match_all('/#(\w+)/',$description,$matches);
-        $i = 0;
-        $keywords = '';
-        if ($str) {
-        foreach ($matches[1] as $match) {
-            $count = count($matches[1]);
-            $keywords .= "$match";
-            $i++;
-            if ($count > $i) $keywords .= ", ";
-        }
-        } else {
-        foreach ($matches[1] as $match) {
-            $keyword[] = $match;
-        }
-        $keywords = $keyword;
-        }
-        return $keywords;
-        }
-
 }
