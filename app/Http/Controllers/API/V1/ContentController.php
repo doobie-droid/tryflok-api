@@ -1672,6 +1672,16 @@ class ContentController extends Controller
     public function youtubeMigrate(Request $request)
     {
         try{
+            $validator = Validator::make($request->all(), [
+                'url' => ['required', 'string'],
+                // 'digiverse_id' => ['required', 'string', 'exists:digiverse,id'],
+                // 'videoPrice' => ['required', 'numeric', 'min:0', 'max:9999']
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
 
             $url = $request->url;
 
@@ -1685,7 +1695,7 @@ class ContentController extends Controller
                 [
                     'part' => 'snippet,player,contentDetails',
                     'id' => $videoId,
-                    'key' => 'AIzaSyCiHRUsqgxDVPGyPswL_WLJUTXSsyoMGGs'
+                    'key' => config('services.google.youtube_api_key'),
                 ]
                 );
 
@@ -1693,11 +1703,12 @@ class ContentController extends Controller
                     'title' => $response->json('items.0.snippet.title'),
                     'embed_html' => $response->json('items.0.player.embedHtml'),
                     'thumbnail_url' => $this->thumbnailUrl($response),
-                    'description' => $response->json('items.0.snippet.description')
+                    'description' => preg_replace('/#.*/', '', $response->json('items.0.snippet.description')),
                 ];
             dd($data);
         } catch(\Exception $exception){
-
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
@@ -1713,6 +1724,5 @@ class ContentController extends Controller
         ->first()
         )['url'];
     }
-
 
 }
