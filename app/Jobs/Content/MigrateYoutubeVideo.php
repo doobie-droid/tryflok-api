@@ -97,23 +97,20 @@ class MigrateYoutubeVideo implements ShouldQueue
                 'is_challenge' => $is_challenge,
             ]);
 
-                $filename = date('Ymd') . Str::random(16);
-                $folder = join_path('assets', Str::random(16) . date('Ymd'), 'text');
-                $fullFilename = join_path($folder, $filename . '.html');
                 $video_asset = Asset::create([
                     'url' => $youtubeVideoData['embed_url'],
                     'storage_provider' => 'youtube',
-                    'storage_provider_id' => $fullFilename,
+                    'storage_provider_id' => $videoId,
                     'asset_type' => 'video',
-                    'mime_type' => 'video/html',
+                    'mime_type' => 'video/mp4',
                 ]);
 
                 $cover_asset = Asset::create([
                     'url' => $youtubeVideoData['thumbnail_url'],
                     'storage_provider' => 'youtube',
-                    'storage_provider_id' => $fullFilename,
+                    'storage_provider_id' => $videoId,
                     'asset_type' => 'image',
-                    'mime_type' => 'image/html',
+                    'mime_type' => 'image/jpeg',
                 ]);
                 $content->assets()->attach($cover_asset->id, [
                     'id' => Str::uuid(),
@@ -127,18 +124,18 @@ class MigrateYoutubeVideo implements ShouldQueue
 
             if (! is_null($descriptionHashTags))
             {
-                foreach ($descriptionHashTags as $tags)
+                foreach ($descriptionHashTags as $tag)
                 {
-                $tag = Tag::where('name', 'LIKE', "%{$tags}%")->first();
-                if (is_null($tags))
+                    $tag = Tag::where('name', $tag)->first();
+                if (is_null($tag))
                 {   
                     $content->tags()->create([
                         'id' => Str::uuid(),
-                        'name' => $tags,
+                        'name' => $tag,
                     ]);
                 }
 
-                $content->tags()->attach($tags, [
+                $content->tags()->attach($tag, [
                     'id' => Str::uuid(),
                 ]);                
                 }
