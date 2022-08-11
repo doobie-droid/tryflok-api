@@ -372,7 +372,7 @@ test('tipping fan works via stripe when parameters are valid', function () {
         'notificable_type' => 'wallet_transaction',
         'message' => sprintf("You just got a gift of %d Flok Cowries from %s with the note '%s'", $expected_flok, FUNDER_NAME, FUND_NOTE),
     ]);
-})->only();
+});
 
 test('tipping fan works via apple pay when parameters are valid', function () {
     Mail::fake();
