@@ -1677,9 +1677,10 @@ class ContentController extends Controller
     {
         try{
             $validator = Validator::make($request->all(), [
-                'url' => ['required', 'string', new YouTubeUrl],
+                'urls' => ['required'],
+                'urls.*.url' => ['required', 'string', new YouTubeUrl],
+                'urls.*.price_in_dollars' => ['required', 'numeric', 'min:0', 'max:10000'],
                 'digiverse_id' => ['required','exists:collections,id'],
-                'price_in_dollars' => ['required', 'numeric', 'min:0', 'max:10000']
             ]);
 
             if ($validator->fails()) {
@@ -1693,11 +1694,18 @@ class ContentController extends Controller
                 return $this->respondBadRequest('You cannot add to this digiverse because you do not own it');
             }
 
-            MigrateYoutubeVideoJob::dispatch([
-                'url' => $request->url,
+            foreach($request->urls as $url)
+            {            
+                MigrateYoutubeVideoJob::dispatch([
+                'url' => $url['url'],
+                'price_in_dollars' => $url['price_in_dollars'],
+                'digiverse' => $digiverse,
+                'user' => $user,                
             ]);
-          
-            return $this->respondWithSuccess('Video has been retrieved successfully');  
+            }
+
+            return $this->respondWithSuccess('Content has been created successfully'); 
+
         } catch(\Exception $exception){
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
