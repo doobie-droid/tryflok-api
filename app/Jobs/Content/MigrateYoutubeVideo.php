@@ -166,19 +166,4 @@ class MigrateYoutubeVideo implements ShouldQueue
         ->first()
         )['url'];
     }
-
-    private function get_hashtags($description, $str = 1)
-    {
-        preg_match_all('/#(\w+)/',$description,$matches);
-        $i = 0;
-        $keywords = [];
-        if ($str) {
-        foreach ($matches[1] as $match) {
-            $count = count($matches[1]);
-            $keywords[] = strtolower($match);
-            $i++;
-        }
-        }
-        return array_unique($keywords);
-    }
 }
