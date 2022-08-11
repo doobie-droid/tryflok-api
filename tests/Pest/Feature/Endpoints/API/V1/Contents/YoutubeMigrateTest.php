@@ -101,13 +101,13 @@ test('content creation is successful with correct data', function()
             'purpose' => 'content-asset',
         ]);
 
-        //  //validate tags was attached
-        //  $this->assertDatabaseHas('taggables', [
-        //     'tag_id' => $tag_1->id,
-        //     'taggable_type' => 'content',
-        //     'taggable_id' => $content->id,
-        // ]);
-        // $this->assertTrue($content->tags()->where('tags.id', $tag_1->id)->count() === 1);
+         //validate tags was attached
+         $this->assertDatabaseHas('taggables', [
+            'tag_id' => $tag_1->id,
+            'taggable_type' => 'content',
+            'taggable_id' => $content->id,
+        ]);
+        $this->assertTrue($content->tags()->where('tags.id', $tag_1->id)->count() === 1);
 
         $this->assertDatabaseHas('taggables', [
             'tag_id' => $tag_2->id,
