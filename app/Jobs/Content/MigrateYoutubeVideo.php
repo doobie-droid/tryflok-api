@@ -62,14 +62,13 @@ class MigrateYoutubeVideo implements ShouldQueue
         $youtube = new Youtube;
         $response = $youtube->fetchVideo($videoId);
 
-
             $youtubeVideoData = [
                 'title' => $response->items[0]->snippet->title,
                 'embed_url' => 'https://youtube.com/embed/'.$videoId,
                 'thumbnail_url' => $this->thumbnailUrl($response),
-                'description' => preg_replace('/#.*/', '', $response->items[0]->snippet->description),
+                'description' => $response->items[0]->snippet->description,
+                'tags' => array_unique($response->items[0]->snippet->tags),
             ];
-            $descriptionHashTags = $this->get_hashtags($response->items[0]->snippet->description);
 
             $is_available = 0;
             $is_challenge = 0;
@@ -114,21 +113,31 @@ class MigrateYoutubeVideo implements ShouldQueue
                 $content->assets()->attach($video_asset->id, [
                     'id' => Str::uuid(),
                     'purpose' => 'content-asset',
-                ]);
+                ]);  
 
-            if (! is_null($descriptionHashTags))
-            {
-                foreach ($descriptionHashTags as $tag)
+                $content->prices()->create([
+                    'amount' => $price_in_dollars,
+                    'interval' => 'one-off',
+                    'interval_amount' => 1,
+                ]);  
+
+                $content->benefactors()->create([
+                    'user_id' => $user->id,
+                    'share' => 100,
+                ]);
+                
+            if (! is_null($youtubeVideoData['tags']))
+            {   
+                foreach ($youtubeVideoData['tags'] as $tag)
                 {
-                    $tag = Tag::where('name', $tag)->first();
-                if (is_null($tag))
+                $check_tag = Tag::where('name', $tag)->first();
+                if (is_null($check_tag))
                 {   
-                    $content->tags()->create([
+                    Tag::create([
                         'id' => Str::uuid(),
                         'name' => $tag,
                     ]);
                 }
-
                 $content->tags()->attach($tag, [
                     'id' => Str::uuid(),
                 ]);                
