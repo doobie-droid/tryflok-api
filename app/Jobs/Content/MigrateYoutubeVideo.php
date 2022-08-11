@@ -17,6 +17,7 @@ use App\Models\Tag;
 use Illuminate\Support\Str;
 use App\Models\Asset;
 use App\Http\Resources\ContentResource;
+use App\Services\Youtube\Youtube;
 
 
 
@@ -57,25 +58,18 @@ class MigrateYoutubeVideo implements ShouldQueue
         parse_str( parse_url( $url, PHP_URL_QUERY ), $my_array_of_vars );
 
         $videoId = $my_array_of_vars['v']; 
-        
-        $response = Http::asJson()
-        ->get(
-            'https://youtube.googleapis.com/youtube/v3/videos',
-            [
-                'part' => 'snippet,player,contentDetails',
-                'id' => $videoId,
-                'key' => config('services.google.youtube_api_key'),
-            ]
-            );
+
+        $youtube = new Youtube;
+        $response = $youtube->fetchVideo($videoId);
+
 
             $youtubeVideoData = [
-                'title' => $response->json('items.0.snippet.title'),
-                'embed_html' => $response->json('items.0.player.embedHtml'),
+                'title' => $response->items[0]->snippet->title,
                 'embed_url' => 'https://youtube.com/embed/'.$videoId,
                 'thumbnail_url' => $this->thumbnailUrl($response),
-                'description' => preg_replace('/#.*/', '', $response->json('items.0.snippet.description')),
+                'description' => preg_replace('/#.*/', '', $response->items[0]->snippet->description),
             ];
-            $descriptionHashTags = $this->get_hashtags($response->json('items.0.snippet.description'));
+            $descriptionHashTags = $this->get_hashtags($response->items[0]->snippet->description);
 
             $is_available = 0;
             $is_challenge = 0;
@@ -144,11 +138,6 @@ class MigrateYoutubeVideo implements ShouldQueue
             $digiverse->contents()->attach($content->id, [
                 'id' => Str::uuid(),
             ]);
-
-            $content = Content::where('id', $content->id)
-            ->eagerLoadBaseRelations()
-            ->eagerLoadSingleContentRelations()
-            ->first();
     }
 
     public function failed(\Throwable $exception)
@@ -158,12 +147,12 @@ class MigrateYoutubeVideo implements ShouldQueue
 
     private function thumbnailUrl($response)
     {
-        if($response->json('items.0.snippet.thumbnails.standard.url'))
+        if($response->items[0]->snippet->thumbnails->default->url)
         {
-            return $response->json('items.0.snippet.thumbnails.standard.url');
+            return $response->items[0]->snippet->thumbnails->default->url;
         }
 
-        return optional(collect($response->json('items.0.snippet.thumbnails'))
+        return optional(collect($response->items[0]->snippet->thumbnails)
         ->sortByDesc('width')
         ->first()
         )['url'];

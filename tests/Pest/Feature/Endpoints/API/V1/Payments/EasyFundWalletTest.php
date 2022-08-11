@@ -334,6 +334,7 @@ test('tipping fan works via stripe when parameters are valid', function () {
         'funder_name' => FUNDER_NAME,
         'fund_note' => FUND_NOTE,
     ]);
+    dd($response->getData());
 
     $response->assertStatus(200)->assertJson([
         'message' => 'Payment received successfully',
@@ -372,7 +373,7 @@ test('tipping fan works via stripe when parameters are valid', function () {
         'notificable_type' => 'wallet_transaction',
         'message' => sprintf("You just got a gift of %d Flok Cowries from %s with the note '%s'", $expected_flok, FUNDER_NAME, FUND_NOTE),
     ]);
-});
+})->only();
 
 test('tipping fan works via apple pay when parameters are valid', function () {
     Mail::fake();

@@ -1704,9 +1704,7 @@ class ContentController extends Controller
             ]);
             }
 
-            return $this->respondWithSuccess('Content has been created successfully', [
-                'content' => new ContentResource($content),
-            ]); 
+            return $this->respondWithSuccess('Content has been created successfully'); 
 
         } catch(\Exception $exception){
             Log::error($exception);
