@@ -59,6 +59,7 @@ class MigrateYoutubeVideo implements ShouldQueue
 
         $videoId = $my_array_of_vars['v']; 
 
+
         $youtube = new Youtube;
         $response = $youtube->fetchVideo($videoId);
 

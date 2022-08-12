@@ -45,7 +45,7 @@ test('content creation is successful with correct data', function()
     ]);
     $response = $this->json('POST', '/api/v1/contents/youtube-migrate', [
         'urls' => [
-            [
+            [   
                 'url' => 'https://www.youtube.com/watch?v=I7MDn4etRuM',
                 'price_in_dollars' => $price_in_dollars,
             ],
