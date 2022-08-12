@@ -1711,4 +1711,67 @@ class ContentController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
+
+    public function likeContent(Request $request)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'id' => ['required','exists:contents,id'],
+            ]);
+
+
+        if ($validator->fails()) {
+            return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+        }
+
+        $user = $request->user();
+
+        $content = Content::where('id', $request->id)->first();
+
+        $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
+        if ( ! is_null($hasLikedContent))
+        {
+            $content->likes()->delete();
+        }
+
+        $content->likes()->create([
+            'user_id' => $user->id,
+        ]);
+
+        }catch(\Exception $exception){
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+
+    }
+
+    public function unlikeContent(Request $request)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'id' => ['required','exists:contents,id'],
+            ]);
+
+
+        if ($validator->fails()) {
+            return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+        }
+
+        $user = $request->user();
+
+        $content = Content::where('id', $request->id)->first();
+
+        $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
+        if (is_null($hasLikedContent))
+        {
+            
+        }
+        $content->likes()->delete();
+
+        }catch(\Exception $exception){
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+
+    }
 }
