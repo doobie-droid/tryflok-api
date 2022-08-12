@@ -19,8 +19,6 @@ test('content creation is successful with correct data', function()
     $title = 'A Youtube video title';
     $description = 'A Youtube video description';
     $url = 'https://i.ytimg.com/vi/I7MDn4etRuM/default.jpg';
-    $tag_1 = Models\Tag::factory()->create();
-    $tag_2 = Models\Tag::factory()->create();
     $price_in_dollars = 10;
 
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$secret}&part=snippet,contentDetails", [
@@ -33,8 +31,8 @@ test('content creation is successful with correct data', function()
                     'title' => $title,
                     'description' => $description,
                     'tags' => [
-                        '0' => $tag_1->id,
-                        '1' => $tag_2->id,
+                        '0' => 'tag1',
+                        '1' => 'tag2'
                     ],
                     'thumbnails' => [
                         'default' => [
@@ -64,7 +62,7 @@ test('content creation is successful with correct data', function()
         'description' => $description,
         'user_id' => $user->id,
         'type' => 'video',
-        'is_available' => 0,
+        'is_available' => 1,
         'approved_by_admin' => 1,
         'show_only_in_digiverses' => 1,
     ]);
@@ -102,20 +100,19 @@ test('content creation is successful with correct data', function()
         ]);
 
          //validate tags was attached
+         $tag1 = Models\Tag::where('name', 'tag1')->first();
          $this->assertDatabaseHas('taggables', [
-            'tag_id' => $tag_1->id,
+            'tag_id' => $tag1->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $tag_1->id)->count() === 1);
 
+        $tag2 = Models\Tag::where('name', 'tag2')->first();
         $this->assertDatabaseHas('taggables', [
-            'tag_id' => $tag_2->id,
+            'tag_id' => $tag2->id,
             'taggable_type' => 'content',
             'taggable_id' => $content->id,
         ]);
-        $this->assertTrue($content->tags()->where('tags.id', $tag_2->id)->count() === 1);
-
 
         //validate price was created
         $this->assertDatabaseHas('prices', [

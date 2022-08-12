@@ -70,8 +70,6 @@ class MigrateYoutubeVideo implements ShouldQueue
                 'tags' => array_unique($response->items[0]->snippet->tags),
             ];
 
-            $is_available = 0;
-            $is_challenge = 0;
 
             if (is_null($youtubeVideoData))
             {
@@ -83,11 +81,11 @@ class MigrateYoutubeVideo implements ShouldQueue
                 'description' => $youtubeVideoData['description'],
                 'user_id' => $user->id,
                 'type' => 'video',
-                'is_available' => $is_available,
+                'is_available' => 1,
                 'approved_by_admin' => 1,
                 'show_only_in_digiverses' => 1,
                 'live_status' => 'inactive',
-                'is_challenge' => $is_challenge,
+                'is_challenge' => 0,
             ]);
 
                 $video_asset = Asset::create([
@@ -107,7 +105,7 @@ class MigrateYoutubeVideo implements ShouldQueue
                 ]);
                 $content->assets()->attach($cover_asset->id, [
                     'id' => Str::uuid(),
-                    'purpose' => 'content-asset',
+                    'purpose' => 'cover',
                 ]);
 
                 $content->assets()->attach($video_asset->id, [
@@ -130,19 +128,19 @@ class MigrateYoutubeVideo implements ShouldQueue
             {   
                 foreach ($youtubeVideoData['tags'] as $tag)
                 {
-                $check_tag = Tag::where('name', $tag)->first();
-                if (is_null($check_tag))
-                {   
-                    Tag::create([
+                    $check_tag = Tag::where('name', $tag)->first();
+                    if (is_null($check_tag))
+                    {   
+                       $check_tag = Tag::create([
+                            'id' => Str::uuid(),
+                            'name' => $tag,
+                        ]);
+                    }
+                    $content->tags()->attach($check_tag->id, [
                         'id' => Str::uuid(),
-                        'name' => $tag,
-                    ]);
-                }
-                $content->tags()->attach($tag, [
-                    'id' => Str::uuid(),
-                ]);                
-                }
+                    ]);                
             }             
+            }
 
             $digiverse->contents()->attach($content->id, [
                 'id' => Str::uuid(),
