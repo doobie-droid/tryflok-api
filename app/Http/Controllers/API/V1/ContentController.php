@@ -6,10 +6,12 @@ use App\Constants\Constants;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ContentIssueResource;
 use App\Http\Resources\ContentResource;
+use App\Http\Resources\YoutubeVideoResource;
 use App\Jobs\Assets\UploadResource\Html as UploadHtmlJob;
 use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJob;
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
+use App\Jobs\Content\MigrateYoutubeVideo as MigrateYoutubeVideoJob;
 use App\Jobs\Users\NotifyAddedToChallenge as NotifyAddedToChallengeJob;
 use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
@@ -30,6 +32,9 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+use App\Rules\YoutubeUrl;
+
 
 class ContentController extends Controller
 {
@@ -1668,4 +1673,42 @@ class ContentController extends Controller
         }
     }  
 
+    public function youtubeMigrate(Request $request)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'urls' => ['required'],
+                'urls.*.url' => ['required', 'string', new YouTubeUrl],
+                'urls.*.price_in_dollars' => ['required', 'numeric', 'min:0', 'max:10000'],
+                'digiverse_id' => ['required','exists:collections,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $user = $request->user();
+            $digiverse = Collection::where('id', $request->digiverse_id)->where('type', 'digiverse')->first();
+            
+            if ($digiverse->user_id !== $user->id) {
+                return $this->respondBadRequest('You cannot add to this digiverse because you do not own it');
+            }
+
+            foreach($request->urls as $url)
+            {            
+                MigrateYoutubeVideoJob::dispatch([
+                'url' => $url['url'],
+                'price_in_dollars' => $url['price_in_dollars'],
+                'digiverse' => $digiverse,
+                'user' => $user,                
+            ]);
+            }
+
+            return $this->respondWithSuccess('Content has been created successfully'); 
+
+        } catch(\Exception $exception){
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
 }
