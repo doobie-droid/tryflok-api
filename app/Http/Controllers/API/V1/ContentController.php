@@ -1715,28 +1715,24 @@ class ContentController extends Controller
     public function likeContent(Request $request)
     {
         try{
-            $validator = Validator::make($request->all(), [
-                'id' => ['required','exists:contents,id'],
-            ]);
-
-
-        if ($validator->fails()) {
-            return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
-        }
-
         $user = $request->user();
 
         $content = Content::where('id', $request->id)->first();
 
-        $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
-        if ( ! is_null($hasLikedContent))
+        if (! is_null($content))
         {
-            $content->likes()->delete();
-        }
+            $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
+            if ( is_null($hasLikedContent))
+            {
+            $content->likes()->create([
+                'user_id' => $user->id,
+            ]);
+            return $this->respondWithSuccess('You have liked this content');
+            }
 
-        $content->likes()->create([
-            'user_id' => $user->id,
-        ]);
+            return $this->respondBadRequest('You have already liked this content');
+        
+        } 
 
         }catch(\Exception $exception){
             Log::error($exception);
@@ -1748,25 +1744,16 @@ class ContentController extends Controller
     public function unlikeContent(Request $request)
     {
         try{
-            $validator = Validator::make($request->all(), [
-                'id' => ['required','exists:contents,id'],
-            ]);
-
-
-        if ($validator->fails()) {
-            return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
-        }
-
         $user = $request->user();
 
         $content = Content::where('id', $request->id)->first();
 
         $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
-        if (is_null($hasLikedContent))
+        if (! is_null($hasLikedContent))
         {
-            
+            $content->likes()->delete();   
         }
-        $content->likes()->delete();
+        return $this->respondWithSuccess('You have unliked this content'); 
 
         }catch(\Exception $exception){
             Log::error($exception);
