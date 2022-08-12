@@ -143,6 +143,11 @@ class Content extends Model
         return $this->morphToMany(Cart::class, 'cartable');
     }
 
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likeable');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
+    }
+
     public function collections()
     {
         return $this->belongsToMany(Collection::class);
@@ -234,6 +239,7 @@ class Content extends Model
             },
         ])
         ->withCount('views')
+        ->withCount('likes')
         ->with('metas')
         ->with('collections', 'collections.prices')
         ->withCount([

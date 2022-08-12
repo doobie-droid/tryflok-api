@@ -197,6 +197,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 
             Route::post('/youtube-migrate', 'ContentController@youtubeMigrate')->name('youtube-migrate');
 
+            Route::post('{id}/like', 'ContentController@likeContent')->name('like-content');
+
         });
         Route::group(['prefix' => 'polls'], function () {
             Route::patch('{id}', 'ContentPollController@updatePoll')->name('update-poll');
