@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
 use App\Models\Asset;
 use App\Http\Resources\ContentResource;
 use App\Services\Youtube\Youtube;
+use App\Utils\RestResponse;
 
 
 
@@ -25,6 +26,8 @@ use App\Services\Youtube\Youtube;
 class MigrateYoutubeVideo implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use RestResponse;
+    
     public $url;
     public $digiverse;
     public $user;
@@ -55,14 +58,31 @@ class MigrateYoutubeVideo implements ShouldQueue
         $user = $this->user;
         $price_in_dollars = $this->price_in_dollars;
 
-        parse_str( parse_url( $url, PHP_URL_QUERY ), $my_array_of_vars );
+       if(preg_match("/https?:\/\/(w{3}\.)?youtube\.com\/embed.+?(\s|$)/", $url, $matches))
+       {
+            $parts = explode('/', $url);  
+            $videoId = end($parts);
+       }
+       else{
+            parse_str( parse_url( $url, PHP_URL_QUERY ), $array );
 
-        $videoId = $my_array_of_vars['v']; 
+            $index = array_key_first($array);
+            
+            $value = $array[$index];
 
-
+            if (($value) != '')
+            {
+                $videoId = $value;
+            }
+            else{
+                $videoId = $index;
+            }
+       }
+       
         $youtube = new Youtube;
         $response = $youtube->fetchVideo($videoId);
-
+        if (count($response->items) > 0)
+        {
             $youtubeVideoData = [
                 'title' => $response->items[0]->snippet->title,
                 'embed_url' => 'https://youtube.com/embed/'.$videoId,
@@ -70,12 +90,6 @@ class MigrateYoutubeVideo implements ShouldQueue
                 'description' => preg_replace('/#.*/', '', $response->items[0]->snippet->description),
                 'tags' => array_unique($response->items[0]->snippet->tags),
             ];
-
-
-            if (is_null($youtubeVideoData))
-            {
-                return $this->respondBadRequest('This video is no longer available');
-            }
 
             $content = Content::create([
                 'title' => $youtubeVideoData['title'],
@@ -147,6 +161,10 @@ class MigrateYoutubeVideo implements ShouldQueue
                 'id' => Str::uuid(),
             ]);
     }
+    else{
+        return $this->respondBadRequest('this video is no longer available');
+    }
+}
 
     public function failed(\Throwable $exception)
     {

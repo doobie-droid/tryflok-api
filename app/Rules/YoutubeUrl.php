@@ -25,10 +25,9 @@ class YoutubeUrl implements Rule
      */
     public function passes($attribute, $value)
     {   
-        if (preg_match("/https?:\/\/(w{3}\.)?youtube\.com\/watch\?.+?(\s|$)/", $value, $matches)) {
+        if (preg_match("/https?:\/\/(w{3}\.)?youtube\.com.+?(\s|$)/", $value, $matches)) {
             return true;
         }
-
         return false;
     }
 
