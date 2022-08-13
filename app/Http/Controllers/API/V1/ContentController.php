@@ -1712,16 +1712,24 @@ class ContentController extends Controller
         }
     }
 
-    public function likeContent(Request $request)
+    public function likeContent(Request $request, $id)
     {
         try{
-        $user = $request->user();
 
-        $content = Content::where('id', $request->id)->first();
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
 
-        if (! is_null($content))
-        {
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $user = $request->user();
+
+            $content = Content::where('id', $request->id)->first();
+
             $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
+
             if ( is_null($hasLikedContent))
             {
             $content->likes()->create([
@@ -1731,8 +1739,7 @@ class ContentController extends Controller
             }
 
             return $this->respondBadRequest('You have already liked this content');
-        
-        } 
+
 
         }catch(\Exception $exception){
             Log::error($exception);
@@ -1741,9 +1748,17 @@ class ContentController extends Controller
 
     }
 
-    public function unlikeContent(Request $request)
+    public function unlikeContent(Request $request, $id)
     {
         try{
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
         $user = $request->user();
 
         $content = Content::where('id', $request->id)->first();
@@ -1751,7 +1766,7 @@ class ContentController extends Controller
         $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
         if (! is_null($hasLikedContent))
         {
-            $content->likes()->delete();   
+            $hasLikedContent->where('user_id', $user->id)->delete();   
         }
         return $this->respondWithSuccess('You have unliked this content'); 
 
@@ -1761,4 +1776,6 @@ class ContentController extends Controller
         }
 
     }
-}
+
+}   
+

@@ -85,7 +85,7 @@ test('poll is created if signed in user is owner of the content', function()
         $this->assertEquals(1, $option_1_count);
         $this->assertEquals(1, $option_2_count);
         
-});
+})->only();
 
 test('poll is not created if options has duplicate values', function()
 {
