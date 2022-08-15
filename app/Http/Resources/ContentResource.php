@@ -31,6 +31,7 @@ class ContentResource extends JsonResource
             'metas' => $this->refactorMetas(),
             'total_challenge_contributions' => $this->challenge_contributions_sum_amount,
             'voting_result' => $this->getVoteStructure(),
+            'likes_count' => $this->likes_count,
         ]);
     }
 

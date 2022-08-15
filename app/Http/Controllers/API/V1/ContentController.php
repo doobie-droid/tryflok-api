@@ -1735,7 +1735,14 @@ class ContentController extends Controller
             $content->likes()->create([
                 'user_id' => $user->id,
             ]);
-            return $this->respondWithSuccess('You have liked this content');
+            $content = Content::where('id', $content->id)
+            ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+            return $this->respondWithSuccess('You have liked this content', [
+                'content' => new ContentResource($content),
+            ]);
             }
 
             return $this->respondBadRequest('You have already liked this content');

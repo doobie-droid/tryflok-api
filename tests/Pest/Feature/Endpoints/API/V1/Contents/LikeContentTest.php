@@ -10,7 +10,7 @@ test('user who is signed in can like content', function()
         $content = Models\Content::factory()
         ->create();
 
-        $response = $this->json('POST', "/api/v1/contents/{$content->id}/like");     
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/like"); 
         $response->assertStatus(200);
 
         $this->assertDatabaseHas('likes', [
