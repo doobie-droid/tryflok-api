@@ -24,7 +24,7 @@ beforeEach(function()
 
 test('content creation is successful with https://www.youtube.com/watch?v=sUUGPYrh2ME', function()
 {
-    $videoId = 'sUUGPYrh2ME';
+    $videoId = 'n0FHAOVpqGc';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
@@ -50,12 +50,13 @@ test('content creation is successful with https://www.youtube.com/watch?v=sUUGPY
     $response = $this->json('POST', '/api/v1/contents/youtube-migrate', [
         'urls' => [
             [   
-                'url' => 'https://www.youtube.com/watch?v=sUUGPYrh2ME',
+                'url' => 'https://www.youtube.com/watch?v=n0FHAOVpqGc&list=RDZCfrpi0tKHY&index=3',
                 'price_in_dollars' => $this->price_in_dollars,
             ],
         ],      
         'digiverse_id' => $this->digiverse->id,
     ]);
+    dd($response);
     $response->assertStatus(200)->assertJson([
         'message' => 'Content has been created successfully',
     ]);
@@ -136,7 +137,7 @@ test('content creation is successful with https://www.youtube.com/watch?v=sUUGPY
             'share' => 100,
         ]);
         $this->assertTrue($content->benefactors()->count() === 1);
-});
+})->only();
 
 test('content creation is successful with https://youtube.com/?v=WEWE', function()
 {
