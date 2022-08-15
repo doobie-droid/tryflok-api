@@ -56,7 +56,6 @@ test('content creation is successful with https://www.youtube.com/watch?v=sUUGPY
         ],      
         'digiverse_id' => $this->digiverse->id,
     ]);
-    dd($response);
     $response->assertStatus(200)->assertJson([
         'message' => 'Content has been created successfully',
     ]);
@@ -137,7 +136,7 @@ test('content creation is successful with https://www.youtube.com/watch?v=sUUGPY
             'share' => 100,
         ]);
         $this->assertTrue($content->benefactors()->count() === 1);
-})->only();
+});
 
 test('content creation is successful with https://youtube.com/?v=WEWE', function()
 {

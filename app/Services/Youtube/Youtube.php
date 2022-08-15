@@ -12,9 +12,9 @@ class Youtube
     public function __construct()
     {
         if (config('app.env') == 'testing') {
-            $this->driver = new Main;
-        } else {
             $this->driver = new Test;
+        } else {
+            $this->driver = new Main;
         }
     }
 
