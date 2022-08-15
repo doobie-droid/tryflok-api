@@ -13,7 +13,7 @@ test('user who is signed in can like content', function()
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/like"); 
         $response->assertStatus(200);
 
-        $this->assertDatabaseHas('likes', [
+        $this->assertDatabaseHas('content_likes', [
             'user_id' => $user->id,
             'likeable_id' => $content->id,
         ]);
@@ -28,7 +28,7 @@ test('user who is not signed in cannot like a content', function()
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/like");     
         $response->assertStatus(401);
 
-        $this->assertDatabaseMissing('likes', [
+        $this->assertDatabaseMissing('content_likes', [
             'user_id' => $user->id,
             'likeable_id' => $content->id,
         ]);

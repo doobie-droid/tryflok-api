@@ -22,11 +22,11 @@ test('unlike content works', function()
         $response = $this->json('DELETE', "/api/v1/contents/{$content->id}/like");     
         $response->assertStatus(200);
 
-        $this->assertDatabaseMissing('likes', [
+        $this->assertDatabaseMissing('content_likes', [
             'user_id' => $user->id,
             'likeable_id' => $content->id,
         ]);
-        $this->assertDatabaseHas('likes', [
+        $this->assertDatabaseHas('content_likes', [
             'user_id' => $user2->id,
             'likeable_id' => $content->id,
         ]);
@@ -46,7 +46,7 @@ it('does not work when content id is invalid', function()
         $response = $this->json('DELETE', "/api/v1/contents/-1/like");     
         $response->assertStatus(400);
 
-        $this->assertDatabaseHas('likes', [
+        $this->assertDatabaseHas('content_likes', [
             'user_id' => $user->id,
             'likeable_id' => $content->id,
         ]);

@@ -145,7 +145,7 @@ class Content extends Model
 
     public function likes()
     {
-        return $this->morphMany(Like::class, 'likeable');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
+        return $this->morphMany(ContentLike::class, 'likeable');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
     }
 
     public function collections()

@@ -17,6 +17,7 @@ use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
+use App\Models\ContentLike;
 use App\Models\ContentIssue;
 use App\Models\User;
 use App\Models\WalletTransaction;
@@ -1726,16 +1727,19 @@ class ContentController extends Controller
 
             $user = $request->user();
 
-            $content = Content::where('id', $request->id)->first();
+            //check if the content has been liked before
+            $contentLike = ContentLike::where('likeable_id', $id)
+            ->where('user_id', $user->id)
+            ->first();
 
-            $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
-
-            if ( is_null($hasLikedContent))
+            if ( is_null($contentLike)) //user has not liked the content before; create
             {
-            $content->likes()->create([
+            ContentLike::create([
                 'user_id' => $user->id,
+                'likeable_id' => $id,
+                'likeable_type' => 'content',
             ]);
-            $content = Content::where('id', $content->id)
+            $content = Content::where('id', $id)
             ->eagerLoadBaseRelations()
             ->eagerLoadSingleContentRelations()
             ->first();
@@ -1768,12 +1772,10 @@ class ContentController extends Controller
 
         $user = $request->user();
 
-        $content = Content::where('id', $request->id)->first();
-
-        $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
-        if (! is_null($hasLikedContent))
+        $contentLike = ContentLike::where('user_id', $user->id)->first();
+        if (! is_null($contentLike))
         {
-            $hasLikedContent->where('user_id', $user->id)->delete();   
+            $contentLike->where('user_id', $user->id)->delete();   
         }
         return $this->respondWithSuccess('You have unliked this content'); 
 
