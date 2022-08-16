@@ -94,8 +94,12 @@ class MigrateYoutubeVideo implements ShouldQueue
             'embed_url' => 'https://youtube.com/embed/'.$videoId,
             'thumbnail_url' => $this->thumbnailUrl($response),
             'description' => preg_replace('/#.*/', '', $response->items[0]->snippet->description),
-            'tags' => array_unique($response->items[0]->snippet->tags),
         ];
+
+        $tags = [];
+        if (isset($response->items[0]->snippet->tags)){
+                $tags = $response->items[0]->snippet->tags;
+            }  
 
         $content = Content::create([
             'title' => $youtubeVideoData['title'],
