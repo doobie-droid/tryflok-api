@@ -43,6 +43,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}/assets', 'ContentController@listAssets')->name('list-content-assets');
 
         Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
+
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
@@ -67,6 +68,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', 'UserController@listUsers')->name('list-users');
         Route::get('{id}', 'UserController@showUser')->name('show-user');
+    });
+
+    Route::group(['prefix' => 'polls'], function () {
+       Route::post('{id}/vote', 'ContentPollController@votePoll')->name('vote-poll');
+       Route::get('{id}', 'ContentPollController@get')->name('get-poll');
     });
 
     Route::group(['prefix' => 'payments'], function () {
@@ -186,8 +192,15 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge')->name('respond-to-challenge');
             Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge')->name('contribute-to-challenge');
             Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge')->name('vote-on-challenge');
-
             Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
+            Route::post('{id}/poll', 'ContentPollController@createPoll')->name('create-poll');
+
+            Route::post('/youtube-migrate', 'ContentController@youtubeMigrate')->name('youtube-migrate');
+
+        });
+        Route::group(['prefix' => 'polls'], function () {
+            Route::patch('{id}', 'ContentPollController@updatePoll')->name('update-poll');
+            Route::delete('{id}', 'ContentPollController@deletePoll')->name('delete-poll');
         });
 
         Route::group(['prefix' => 'issues'], function () {

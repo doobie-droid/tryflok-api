@@ -97,7 +97,7 @@ test('create digiverse fails with invalid request', function()
      
 test('create digiverse works with valid request', function()
 {
-    $user = Models\User::factory()->create();
+        $user = Models\User::factory()->create();
         $user->assignRole(Roles::USER);
         $this->be($user);
 

@@ -188,6 +188,15 @@ class Content extends Model
         return $this->hasMany(ContentLiveBroadcaster::class);
     }
 
+    public function polls()
+    {
+        return $this->hasMany(ContentPoll::class);
+    }
+
+    public function ContentPolls()
+    {
+        return $this->hasMany(ContentPoll::class);
+    }
     public function isFree()
     {
         $freePriceCount = $this->prices()->where('amount', 0)->count();
