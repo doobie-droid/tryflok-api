@@ -53,6 +53,7 @@ class MigrateYoutubeVideo implements ShouldQueue
      */
     public function handle()
     {   
+        Log::info("Begin Youtube Migration");
         $url = $this->url;
         $digiverse = $this->digiverse;
         $user = $this->user;
@@ -83,88 +84,90 @@ class MigrateYoutubeVideo implements ShouldQueue
         $response = $youtube->fetchVideo($videoId);
         if (count($response->items) > 0)
         {
-            $youtubeVideoData = [
-                'title' => $response->items[0]->snippet->title,
-                'embed_url' => 'https://youtube.com/embed/'.$videoId,
-                'thumbnail_url' => $this->thumbnailUrl($response),
-                'description' => preg_replace('/#.*/', '', $response->items[0]->snippet->description),
-                'tags' => array_unique($response->items[0]->snippet->tags),
-            ];
+            Log::info("Video is no longer available");
+            Log::info(json_encode($response));
+            return;
+        }
 
-            $content = Content::create([
-                'title' => $youtubeVideoData['title'],
-                'description' => $youtubeVideoData['description'],
-                'user_id' => $user->id,
-                'type' => 'video',
-                'is_available' => 1,
-                'approved_by_admin' => 1,
-                'show_only_in_digiverses' => 1,
-                'live_status' => 'inactive',
-                'is_challenge' => 0,
-            ]);
+        $youtubeVideoData = [
+            'title' => $response->items[0]->snippet->title,
+            'embed_url' => 'https://youtube.com/embed/'.$videoId,
+            'thumbnail_url' => $this->thumbnailUrl($response),
+            'description' => preg_replace('/#.*/', '', $response->items[0]->snippet->description),
+            'tags' => array_unique($response->items[0]->snippet->tags),
+        ];
 
-                $video_asset = Asset::create([
-                    'url' => $youtubeVideoData['embed_url'],
-                    'storage_provider' => 'youtube',
-                    'storage_provider_id' => $videoId,
-                    'asset_type' => 'video',
-                    'mime_type' => 'video/mp4',
-                ]);
+        $content = Content::create([
+            'title' => $youtubeVideoData['title'],
+            'description' => $youtubeVideoData['description'],
+            'user_id' => $user->id,
+            'type' => 'video',
+            'is_available' => 1,
+            'approved_by_admin' => 1,
+            'show_only_in_digiverses' => 1,
+            'live_status' => 'inactive',
+            'is_challenge' => 0,
+        ]);
 
-                $cover_asset = Asset::create([
-                    'url' => $youtubeVideoData['thumbnail_url'],
-                    'storage_provider' => 'youtube',
-                    'storage_provider_id' => $videoId,
-                    'asset_type' => 'image',
-                    'mime_type' => 'image/jpeg',
-                ]);
-                $content->assets()->attach($cover_asset->id, [
-                    'id' => Str::uuid(),
-                    'purpose' => 'cover',
-                ]);
+        $video_asset = Asset::create([
+            'url' => $youtubeVideoData['embed_url'],
+            'storage_provider' => 'youtube',
+            'storage_provider_id' => $videoId,
+            'asset_type' => 'video',
+            'mime_type' => 'video/mp4',
+        ]);
 
-                $content->assets()->attach($video_asset->id, [
-                    'id' => Str::uuid(),
-                    'purpose' => 'content-asset',
-                ]);  
+        $cover_asset = Asset::create([
+            'url' => $youtubeVideoData['thumbnail_url'],
+            'storage_provider' => 'youtube',
+            'storage_provider_id' => $videoId,
+            'asset_type' => 'image',
+            'mime_type' => 'image/jpeg',
+        ]);
+        $content->assets()->attach($cover_asset->id, [
+            'id' => Str::uuid(),
+            'purpose' => 'cover',
+        ]);
 
-                $content->prices()->create([
-                    'amount' => $price_in_dollars,
-                    'interval' => 'one-off',
-                    'interval_amount' => 1,
-                ]);  
+        $content->assets()->attach($video_asset->id, [
+            'id' => Str::uuid(),
+            'purpose' => 'content-asset',
+        ]);  
 
-                $content->benefactors()->create([
-                    'user_id' => $user->id,
-                    'share' => 100,
-                ]);
-                
-            if (! is_null($youtubeVideoData['tags']))
-            {   
-                foreach ($youtubeVideoData['tags'] as $tag)
-                {
-                    $check_tag = Tag::where('name', $tag)->first();
-                    if (is_null($check_tag))
-                    {   
-                       $check_tag = Tag::create([
-                            'id' => Str::uuid(),
-                            'name' => $tag,
-                        ]);
-                    }
-                    $content->tags()->attach($check_tag->id, [
+        $content->prices()->create([
+            'amount' => $price_in_dollars,
+            'interval' => 'one-off',
+            'interval_amount' => 1,
+        ]);  
+
+        $content->benefactors()->create([
+            'user_id' => $user->id,
+            'share' => 100,
+        ]);
+            
+        if (! is_null($youtubeVideoData['tags']))
+        {   
+            foreach ($youtubeVideoData['tags'] as $tag)
+            {
+                $check_tag = Tag::where('name', $tag)->first();
+                if (is_null($check_tag))
+                {   
+                    $check_tag = Tag::create([
                         'id' => Str::uuid(),
-                    ]);                
+                        'name' => $tag,
+                    ]);
+                }
+                $content->tags()->attach($check_tag->id, [
+                    'id' => Str::uuid(),
+                ]);                
             }             
-            }
+        }
 
-            $digiverse->contents()->attach($content->id, [
-                'id' => Str::uuid(),
-            ]);
+        $digiverse->contents()->attach($content->id, [
+            'id' => Str::uuid(),
+        ]);
+        Log::info("End Youtube Migration");
     }
-    else{
-        return $this->respondBadRequest('this video is no longer available');
-    }
-}
 
     public function failed(\Throwable $exception)
     {
