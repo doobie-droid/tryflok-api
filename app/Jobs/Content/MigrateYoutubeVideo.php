@@ -82,7 +82,7 @@ class MigrateYoutubeVideo implements ShouldQueue
        
         $youtube = new Youtube;
         $response = $youtube->fetchVideo($videoId);
-        if (count($response->items) > 0)
+        if (count($response->items) == 0)
         {
             Log::info("Video is no longer available");
             Log::info(json_encode($response));
