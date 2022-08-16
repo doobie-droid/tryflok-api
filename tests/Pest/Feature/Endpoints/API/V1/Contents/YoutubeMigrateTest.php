@@ -2,6 +2,8 @@
 
 use App\Models;
 use Tests\MockData;
+use App\Mail\User\YoutubeMigrateMail;
+use Illuminate\Support\Facades\Mail;
 
 beforeEach(function()
 {
@@ -820,4 +822,26 @@ test('content is created with www.youtube.com/embed/sUUGPYrh2ME', function()
         'approved_by_admin' => 1,
         'show_only_in_digiverses' => 1,
     ]);
+});
+
+test('mail is sent for failed migrate', function()
+{
+    Mail::fake();
+
+    $videoId = 'WEWE';
+    stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
+        'items' =>
+        [
+        ]        
+    ]);
+    $response = $this->json('POST', '/api/v1/contents/youtube-migrate', [
+        'urls' => [
+            [   
+                'url' => 'https://youtube.com/watch?WEWE',
+                'price_in_dollars' => $this->price_in_dollars,
+            ],
+        ],      
+        'digiverse_id' => $this->digiverse->id,
+    ]);
+    Mail::assertSent(YoutubeMigrateMail::class);
 });

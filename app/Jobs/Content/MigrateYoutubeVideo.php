@@ -19,6 +19,8 @@ use App\Models\Asset;
 use App\Http\Resources\ContentResource;
 use App\Services\Youtube\Youtube;
 use App\Utils\RestResponse;
+use App\Mail\User\YoutubeMigrateMail;
+use Illuminate\Support\Facades\Mail;
 
 
 
@@ -87,6 +89,7 @@ class MigrateYoutubeVideo implements ShouldQueue
         {
             Log::info("Video is no longer available");
             Log::info(json_encode($response));
+            $this->sendMail();
             return;
         }
 
@@ -176,6 +179,7 @@ class MigrateYoutubeVideo implements ShouldQueue
 
     public function failed(\Throwable $exception)
     {
+        $this->sendMail();
         Log::error($exception);
     }
 
@@ -189,5 +193,14 @@ class MigrateYoutubeVideo implements ShouldQueue
         ->sortByDesc('width')
         ->first()
         )['url'];
+    }
+
+    public function sendMail()
+    {
+            $message = "Sorry, we could not get your video from Youtube, please try again";
+            Mail::to($this->user)->send(new YoutubeMigrateMail([
+            'user' => $this->user,
+            'message' => $message,
+        ]));
     }
 }
