@@ -19,6 +19,8 @@ use App\Models\Asset;
 use App\Http\Resources\ContentResource;
 use App\Services\Youtube\Youtube;
 use App\Utils\RestResponse;
+use App\Mail\User\YoutubeMigrateMail;
+use Illuminate\Support\Facades\Mail;
 
 
 
@@ -59,33 +61,35 @@ class MigrateYoutubeVideo implements ShouldQueue
         $user = $this->user;
         $price_in_dollars = $this->price_in_dollars;
 
-       if(preg_match("/https?:\/\/(w{3}\.)?youtube\.com\/embed.+?(\s|$)/", $url, $matches))
-       {
-            $parts = explode('/', $url);  
-            $videoId = end($parts);
-       }
-       else{
+        preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $url, $match);
+        if (! empty($match))
+        {
+            $videoId = $match[2];
+        }
+        if (empty($match))
+        {
             parse_str( parse_url( $url, PHP_URL_QUERY ), $array );
-
-            $index = array_key_first($array);
-            
-            $value = $array[$index];
-
-            if (($value) != '')
-            {
-                $videoId = $value;
-            }
-            else{
-                $videoId = $index;
-            }
-       }
-       
+ 
+             $index = array_key_first($array);
+             
+             $value = $array[$index];
+ 
+             if (($value) != '')
+             {
+                 $videoId = $value;
+             }
+             else{
+                 $videoId = $index;
+             }
+        }
         $youtube = new Youtube;
         $response = $youtube->fetchVideo($videoId);
+
         if (count($response->items) == 0)
         {
             Log::info("Video is no longer available");
             Log::info(json_encode($response));
+            $this->sendMail();
             return;
         }
 
@@ -94,8 +98,12 @@ class MigrateYoutubeVideo implements ShouldQueue
             'embed_url' => 'https://youtube.com/embed/'.$videoId,
             'thumbnail_url' => $this->thumbnailUrl($response),
             'description' => preg_replace('/#.*/', '', $response->items[0]->snippet->description),
-            'tags' => array_unique($response->items[0]->snippet->tags),
         ];
+
+        $tags = [];
+        if (isset($response->items[0]->snippet->tags)){
+                $tags = $response->items[0]->snippet->tags;
+            }  
 
         $content = Content::create([
             'title' => $youtubeVideoData['title'],
@@ -145,23 +153,23 @@ class MigrateYoutubeVideo implements ShouldQueue
             'share' => 100,
         ]);
             
-        if (! is_null($youtubeVideoData['tags']))
-        {   
-            foreach ($youtubeVideoData['tags'] as $tag)
-            {
-                $check_tag = Tag::where('name', $tag)->first();
-                if (is_null($check_tag))
-                {   
-                    $check_tag = Tag::create([
+        if (! empty($tags))
+            {   
+                foreach ($tags as $tag)
+                {
+                    $check_tag = Tag::where('name', $tag)->first();
+                    if (is_null($check_tag))
+                    {   
+                       $check_tag = Tag::create([
+                            'id' => Str::uuid(),
+                            'name' => $tag,
+                        ]);
+                    }
+                    $content->tags()->attach($check_tag->id, [
                         'id' => Str::uuid(),
-                        'name' => $tag,
-                    ]);
-                }
-                $content->tags()->attach($check_tag->id, [
-                    'id' => Str::uuid(),
-                ]);                
+                    ]);                
             }             
-        }
+            }
 
         $digiverse->contents()->attach($content->id, [
             'id' => Str::uuid(),
@@ -171,6 +179,7 @@ class MigrateYoutubeVideo implements ShouldQueue
 
     public function failed(\Throwable $exception)
     {
+        $this->sendMail();
         Log::error($exception);
     }
 
@@ -184,5 +193,14 @@ class MigrateYoutubeVideo implements ShouldQueue
         ->sortByDesc('width')
         ->first()
         )['url'];
+    }
+
+    public function sendMail()
+    {
+            $message = "Youtube video migration failed for {$this->url} because the video does not exist";
+            Mail::to($this->user)->send(new YoutubeMigrateMail([
+            'user' => $this->user,
+            'message' => $message,
+        ]));
     }
 }

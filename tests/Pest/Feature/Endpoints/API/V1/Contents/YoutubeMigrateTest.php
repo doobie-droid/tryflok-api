@@ -2,6 +2,8 @@
 
 use App\Models;
 use Tests\MockData;
+use App\Mail\User\YoutubeMigrateMail;
+use Illuminate\Support\Facades\Mail;
 
 beforeEach(function()
 {
@@ -22,9 +24,9 @@ beforeEach(function()
         $this->price_in_dollars = 10;
 });
 
-test('content creation is successful with https://www.youtube.com/watch?v=sUUGPYrh2ME', function()
+test('content creation is successful with http://youtu.be/dQw4w9WgXcQ?feature=youtube_gdata_player', function()
 {
-    $videoId = 'n0FHAOVpqGc';
+    $videoId = 'dQw4w9WgXcQ';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
@@ -50,7 +52,17 @@ test('content creation is successful with https://www.youtube.com/watch?v=sUUGPY
     $response = $this->json('POST', '/api/v1/contents/youtube-migrate', [
         'urls' => [
             [   
-                'url' => 'https://www.youtube.com/watch?v=n0FHAOVpqGc&list=RDZCfrpi0tKHY&index=3',
+                // 'url' => 'https://youtube.com?v=WEWE',
+                // 'url' => 'https://www.youtube.com?v=WEWE',
+                // 'url' => 'https://youtube.com/watch?WEWE',
+                'url' => 'http://youtu.be/dQw4w9WgXcQ?feature=youtube_gdata_player',
+                // 'url' => 'https://youtu.be/Sn2MIzIOHfo',
+                // 'url' => 'http://youtube.com/?feature=channel&v=oTJRivZTMLs',
+                // 'url' => 'http://www.youtube.com/user/dreamtheater#p/u/1/oTJRivZTMLs',
+                // 'url' => 'http://youtube.com/watch?vi=dQw4w9WgXcQ&feature=youtube_gdata_player',
+                // 'url' => 'https://www.youtube.com/v/0zM3nApSvMg?fs=1&amp;hl=en_US&amp;rel=0',
+                // 'url' => 'http://youtu.be/-wtIMTCHWuI',
+                // 'url' => 'https://www.youtube.com/watch?v=n0FHAOVpqGc&list=RDZCfrpi0tKHY&index=3',
                 'price_in_dollars' => $this->price_in_dollars,
             ],
         ],      
@@ -138,9 +150,10 @@ test('content creation is successful with https://www.youtube.com/watch?v=sUUGPY
         $this->assertTrue($content->benefactors()->count() === 1);
 });
 
-test('content creation is successful with https://youtube.com/?v=WEWE', function()
+test('content creation is successful with http://www.youtube.com/oembed?url=http%3A//www.youtube.com/watch?v%3D-wtIMTCHWuI&format=json
+', function()
 {
-    $videoId = 'WEWE';
+    $videoId = '-wtIMTCHWuI';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
@@ -166,7 +179,8 @@ test('content creation is successful with https://youtube.com/?v=WEWE', function
     $response = $this->json('POST', '/api/v1/contents/youtube-migrate', [
         'urls' => [
             [   
-                'url' => 'https://youtube.com/?v=WEWE',
+                'url' => 'http://www.youtube.com/oembed?url=http%3A//www.youtube.com/watch?v%3D-wtIMTCHWuI&format=json
+                ',
                 'price_in_dollars' => $this->price_in_dollars,
             ],
         ],      
@@ -254,9 +268,9 @@ test('content creation is successful with https://youtube.com/?v=WEWE', function
         $this->assertTrue($content->benefactors()->count() === 1);
 });
 
-test('content creation is successful with https://www.youtube.com/?v=WEWE', function()
+test('content creation is successful with http://youtube.com/?feature=channel&v=oTJRivZTMLs', function()
 {
-    $videoId = 'WEWE';
+    $videoId = 'oTJRivZTMLs';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
@@ -282,7 +296,7 @@ test('content creation is successful with https://www.youtube.com/?v=WEWE', func
     $response = $this->json('POST', '/api/v1/contents/youtube-migrate', [
         'urls' => [
             [   
-                'url' => 'https://www.youtube.com/?v=WEWE',
+                'url' => 'http://youtube.com/?feature=channel&v=oTJRivZTMLs',
                 'price_in_dollars' => $this->price_in_dollars,
             ],
         ],      
@@ -369,10 +383,9 @@ test('content creation is successful with https://www.youtube.com/?v=WEWE', func
         ]);
         $this->assertTrue($content->benefactors()->count() === 1);
 });
-
-test('content creation is successful with https://youtube.com/watch?WEWE', function()
+test('content creation is successful with http://www.youtube.com/user/dreamtheater#p/u/1/oTJRivZTMLs', function()
 {
-    $videoId = 'WEWE';
+    $videoId = 'oTJRivZTMLs';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
@@ -398,7 +411,7 @@ test('content creation is successful with https://youtube.com/watch?WEWE', funct
     $response = $this->json('POST', '/api/v1/contents/youtube-migrate', [
         'urls' => [
             [   
-                'url' => 'https://youtube.com/watch?WEWE',
+                'url' => 'http://www.youtube.com/user/dreamtheater#p/u/1/oTJRivZTMLs',
                 'price_in_dollars' => $this->price_in_dollars,
             ],
         ],      
@@ -485,10 +498,10 @@ test('content creation is successful with https://youtube.com/watch?WEWE', funct
         ]);
         $this->assertTrue($content->benefactors()->count() === 1);
 });
-
-test('content creation is successful with https://youtube.com/?r=sasasv=WEWE', function()
+                
+test('content creation is successful with http://youtube.com/watch?vi=dQw4w9WgXcQ&feature=youtube_gdata_player', function()
 {
-    $videoId = 'sasasv=WEWE';
+    $videoId = 'dQw4w9WgXcQ';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
@@ -514,7 +527,7 @@ test('content creation is successful with https://youtube.com/?r=sasasv=WEWE', f
     $response = $this->json('POST', '/api/v1/contents/youtube-migrate', [
         'urls' => [
             [   
-                'url' => 'https://youtube.com/?r=sasasv=WEWE',
+                'url' => 'http://youtube.com/watch?vi=dQw4w9WgXcQ&feature=youtube_gdata_player',
                 'price_in_dollars' => $this->price_in_dollars,
             ],
         ],      
@@ -717,10 +730,9 @@ test('content creation is successful with https://youtube.com/embed/sUUGPYrh2ME'
         ]);
         $this->assertTrue($content->benefactors()->count() === 1);
 });
-
-test('content is not created with https://facebook.com/embed/sUUGPYrh2ME', function()
+test('content is created with https://www.youtube.com/v/0zM3nApSvMg?fs=1&amp;hl=en_US&amp;rel=0', function()
 {
-    $videoId = 'sUUGPYrh2ME';
+    $videoId = '0zM3nApSvMg';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
@@ -746,15 +758,15 @@ test('content is not created with https://facebook.com/embed/sUUGPYrh2ME', funct
     $response = $this->json('POST', '/api/v1/contents/youtube-migrate', [
         'urls' => [
             [   
-                'url' => 'https://facebook.com/embed/sUUGPYrh2ME',
+                'url' => 'https://www.youtube.com/v/0zM3nApSvMg?fs=1&amp;hl=en_US&amp;rel=0',
                 'price_in_dollars' => $this->price_in_dollars,
             ],
         ],      
         'digiverse_id' => $this->digiverse->id,
     ]);
-    $response->assertStatus(400);
+    $response->assertStatus(200);
 
-    $this->assertDatabaseMissing('contents', [
+    $this->assertDatabaseHas('contents', [
         'title' => $this->title,
         'description' => $this->description,
         'user_id' => $this->user->id,
@@ -765,7 +777,7 @@ test('content is not created with https://facebook.com/embed/sUUGPYrh2ME', funct
     ]);
 });
 
-test('content is not created with www.youtube.com/embed/sUUGPYrh2ME', function()
+test('content is created with www.youtube.com/embed/sUUGPYrh2ME', function()
 {
     $videoId = 'sUUGPYrh2ME';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
@@ -799,9 +811,9 @@ test('content is not created with www.youtube.com/embed/sUUGPYrh2ME', function()
         ],      
         'digiverse_id' => $this->digiverse->id,
     ]);
-    $response->assertStatus(400);
+    $response->assertStatus(200);
 
-    $this->assertDatabaseMissing('contents', [
+    $this->assertDatabaseHas('contents', [
         'title' => $this->title,
         'description' => $this->description,
         'user_id' => $this->user->id,
@@ -810,4 +822,26 @@ test('content is not created with www.youtube.com/embed/sUUGPYrh2ME', function()
         'approved_by_admin' => 1,
         'show_only_in_digiverses' => 1,
     ]);
+});
+
+test('mail is sent for failed migrate', function()
+{
+    Mail::fake();
+
+    $videoId = 'WEWE';
+    stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
+        'items' =>
+        [
+        ]        
+    ]);
+    $response = $this->json('POST', '/api/v1/contents/youtube-migrate', [
+        'urls' => [
+            [   
+                'url' => 'https://youtube.com/watch?WEWE',
+                'price_in_dollars' => $this->price_in_dollars,
+            ],
+        ],      
+        'digiverse_id' => $this->digiverse->id,
+    ]);
+    Mail::assertSent(YoutubeMigrateMail::class);
 });
