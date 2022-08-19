@@ -1703,7 +1703,6 @@ class ContentController extends Controller
                 'user' => $user,                
             ]);
             }
-
             return $this->respondWithSuccess('Content has been created successfully'); 
 
         } catch(\Exception $exception){
