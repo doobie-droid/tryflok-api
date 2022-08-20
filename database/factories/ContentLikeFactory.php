@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models;
+use App\Models\ContentLike;
 
 class ContentLikeFactory extends Factory
 {
@@ -18,9 +19,8 @@ class ContentLikeFactory extends Factory
     {
         return [
             'id' => $this->faker->unique()->uuid,
-            'likeable_type' => 'content',
-            'likeable_id' => Models\Content::factory(),
-            'user_id' => User::factory(),
+            'content_id' => Models\Content::factory(),
+            'user_id' => Models\User::factory(),
         ];
     }
 }

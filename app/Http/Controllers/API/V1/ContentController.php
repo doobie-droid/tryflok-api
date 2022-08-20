@@ -1727,8 +1727,8 @@ class ContentController extends Controller
 
             $user = $request->user();
 
-            //check if the content has been liked before
-            $contentLike = ContentLike::where('likeable_id', $id)
+            //check if the user has liked the content already
+            $contentLike = ContentLike::where('content_id', $id)
             ->where('user_id', $user->id)
             ->first();
 
@@ -1736,8 +1736,7 @@ class ContentController extends Controller
             {
             ContentLike::create([
                 'user_id' => $user->id,
-                'likeable_id' => $id,
-                'likeable_type' => 'content',
+                'content_id' => $id,
             ]);
             $content = Content::where('id', $id)
             ->eagerLoadBaseRelations()

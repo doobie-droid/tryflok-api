@@ -185,6 +185,7 @@ class Content
         'ratings_average',
         'subscribers_count',
         'views_count',
+        'likes_count',
         'revenues_count',
         'cover' => [
             'url',

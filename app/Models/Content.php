@@ -145,7 +145,7 @@ class Content extends Model
 
     public function likes()
     {
-        return $this->morphMany(ContentLike::class, 'likeable');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
+        return $this->hasMany(ContentLike::class, 'content_id');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
     }
 
     public function collections()
@@ -238,8 +238,8 @@ class Content extends Model
                 $query->where('revenue_from', 'sale');
             },
         ])
-        ->withCount('views')
         ->withCount('likes')
+        ->withCount('views')
         ->with('metas')
         ->with('collections', 'collections.prices')
         ->withCount([

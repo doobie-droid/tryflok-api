@@ -184,8 +184,8 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(ContentPollVote::class);
     }
 
-    public function likes()
+    public function contentLikes()
     {
-        return $this->hasOne(ContentLike::class, 'likeable');
+        return $this->hasMany(ContentLike::class, 'content_id');
     }
 }

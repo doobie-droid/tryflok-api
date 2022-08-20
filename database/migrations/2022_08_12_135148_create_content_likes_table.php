@@ -15,7 +15,7 @@ class CreateContentLikesTable extends Migration
     {
         Schema::create('content_likes', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuidMorphs('likeable');
+            $table->foreignUuid('content_id'); // id of the content
             $table->foreignUuid('user_id');
             $table->timestamps();
         });

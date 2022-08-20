@@ -24,11 +24,11 @@ test('unlike content works', function()
 
         $this->assertDatabaseMissing('content_likes', [
             'user_id' => $user->id,
-            'likeable_id' => $content->id,
+            'content_id' => $content->id,
         ]);
         $this->assertDatabaseHas('content_likes', [
             'user_id' => $user2->id,
-            'likeable_id' => $content->id,
+            'content_id' => $content->id,
         ]);
 });
 
@@ -48,6 +48,6 @@ it('does not work when content id is invalid', function()
 
         $this->assertDatabaseHas('content_likes', [
             'user_id' => $user->id,
-            'likeable_id' => $content->id,
+            'content_id' => $content->id,
         ]);
 });

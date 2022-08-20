@@ -15,9 +15,9 @@ class ContentLike extends Model
         'id',
     ];
 
-    public function contents()
+    public function content()
     {
-        return $this->morphTo(Content::class, 'likeable');
+        return $this->belongsTo(Content::class, 'content_id');
     }
 
     public function owner()
