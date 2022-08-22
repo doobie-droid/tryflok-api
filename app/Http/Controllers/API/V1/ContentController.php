@@ -1772,11 +1772,20 @@ class ContentController extends Controller
         $user = $request->user();
 
         $contentLike = ContentLike::where('user_id', $user->id)->first();
-        if (! is_null($contentLike))
+        if (is_null($contentLike))
         {
-            $contentLike->where('user_id', $user->id)->delete();   
+            return $this->respondBadRequest('You have not already liked this content');          
         }
-        return $this->respondWithSuccess('You have unliked this content'); 
+        $contentLike->where('user_id', $user->id)->delete();  
+        
+        $content = Content::where('id', $id)
+            ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+        return $this->respondWithSuccess('You have unliked this content', [
+                'content' => new ContentResource($content),
+            ]);
 
         }catch(\Exception $exception){
             Log::error($exception);
