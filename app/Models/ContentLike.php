@@ -6,7 +6,7 @@ use App\Traits\Uuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Like extends Model
+class ContentLike extends Model
 {
     use Uuid;
     use HasFactory;
@@ -15,9 +15,9 @@ class Like extends Model
         'id',
     ];
 
-    public function contents()
+    public function content()
     {
-        return $this->morphTo(Content::class, 'likeable');
+        return $this->belongsTo(Content::class, 'content_id');
     }
 
     public function owner()

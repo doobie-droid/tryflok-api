@@ -17,6 +17,7 @@ use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
+use App\Models\ContentLike;
 use App\Models\ContentIssue;
 use App\Models\User;
 use App\Models\WalletTransaction;
@@ -1712,27 +1713,43 @@ class ContentController extends Controller
         }
     }
 
-    public function likeContent(Request $request)
+    public function likeContent(Request $request, $id)
     {
         try{
-        $user = $request->user();
 
-        $content = Content::where('id', $request->id)->first();
-
-        if (! is_null($content))
-        {
-            $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
-            if ( is_null($hasLikedContent))
-            {
-            $content->likes()->create([
-                'user_id' => $user->id,
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
             ]);
-            return $this->respondWithSuccess('You have liked this content');
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $user = $request->user();
+
+            //check if the user has liked the content already
+            $contentLike = ContentLike::where('content_id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+
+            if ( is_null($contentLike)) //user has not liked the content before; create
+            {
+            ContentLike::create([
+                'user_id' => $user->id,
+                'content_id' => $id,
+            ]);
+            $content = Content::where('id', $id)
+            ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+            return $this->respondWithSuccess('You have liked this content', [
+                'content' => new ContentResource($content),
+            ]);
             }
 
             return $this->respondBadRequest('You have already liked this content');
-        
-        } 
+
 
         }catch(\Exception $exception){
             Log::error($exception);
@@ -1741,19 +1758,34 @@ class ContentController extends Controller
 
     }
 
-    public function unlikeContent(Request $request)
+    public function unlikeContent(Request $request, $id)
     {
         try{
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
         $user = $request->user();
 
-        $content = Content::where('id', $request->id)->first();
-
-        $hasLikedContent = $content->likes()->where('user_id', $user->id)->first();
-        if (! is_null($hasLikedContent))
+        $contentLike = ContentLike::where('user_id', $user->id)->first();
+        if (is_null($contentLike))
         {
-            $content->likes()->delete();   
+            return $this->respondBadRequest('You have not already liked this content');          
         }
-        return $this->respondWithSuccess('You have unliked this content'); 
+        $contentLike->where('user_id', $user->id)->delete();  
+        
+        $content = Content::where('id', $id)
+            ->eagerLoadBaseRelations()
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+        return $this->respondWithSuccess('You have unliked this content', [
+                'content' => new ContentResource($content),
+            ]);
 
         }catch(\Exception $exception){
             Log::error($exception);
@@ -1761,4 +1793,6 @@ class ContentController extends Controller
         }
 
     }
-}
+
+}   
+

@@ -193,7 +193,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('{id}/contribute-to-challenge', 'ContentController@contributeToChallenge')->name('contribute-to-challenge');
             Route::patch('{id}/vote-on-challenge', 'ContentController@voteOnChallenge')->name('vote-on-challenge');
             Route::post('{id}/attach-media', 'ContentController@attachMediaToContent');
-            Route::post('{id}/poll', 'ContentPollController@createPoll')->name('create-poll');
+            Route::post('{id}/poll', 'ContentPollController@createPoll')->name('create-poll');                                                                                                                                                                                                                                                                                                                                                                  
 
             Route::post('/youtube-migrate', 'ContentController@youtubeMigrate')->name('youtube-migrate');
 
@@ -206,7 +206,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::delete('{id}', 'ContentPollController@deletePoll')->name('delete-poll');
         });
 
-        Route::group(['prefix' => 'issues'], function () {
+                                                                                                                                                                                                                                                    Route::group(['prefix' => 'issues'], function () {
             Route::get('{id}', 'ContentController@getSingleIssue');
         });
 
