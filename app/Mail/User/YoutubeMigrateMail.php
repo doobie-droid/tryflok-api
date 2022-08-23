@@ -33,7 +33,7 @@ class YoutubeMigrateMail extends Mailable
     {
         return $this->view('emails.user.content.youtube-migrate-unsuccessful')->with([
             'user' => $this->user,
-            'message' => $this->message,
+            'failure_message' => $this->message,
         ])->subject('Youtube migrate failed!');
     }
 }
