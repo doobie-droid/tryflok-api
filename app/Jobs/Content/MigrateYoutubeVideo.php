@@ -197,7 +197,7 @@ class MigrateYoutubeVideo implements ShouldQueue
 
     public function sendMail()
     {
-            $message = "Youtube video migration failed for {$this->url} because the video does not exist";
+            $message = "Youtube video migration failed because the video does not exist";
             Mail::to($this->user)->send(new YoutubeMigrateMail([
             'user' => $this->user,
             'message' => $message,
