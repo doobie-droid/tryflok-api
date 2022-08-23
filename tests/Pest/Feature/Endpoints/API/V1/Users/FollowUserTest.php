@@ -33,6 +33,7 @@ test('follow user works', function()
         $user_to_be_followed = Models\User::factory()->create();
 
         $response = $this->json('PATCH', "/api/v1/users/{$user_to_be_followed->id}/follow");
+        dd($response);
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\User::generateGetUserResponse());
         $user_responded = $response->getData()->data->user;
@@ -51,4 +52,4 @@ test('follow user works', function()
             'notificable_id' => $user_making_request->id,
             'message' => "@{$user_making_request->username} followed you",
         ]);
-});
+})->only();

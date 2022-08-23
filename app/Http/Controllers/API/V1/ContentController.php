@@ -1725,19 +1725,24 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            $user = $request->user();
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
 
             //check if the user has liked the content already
             $contentLike = ContentLike::where('content_id', $id)
-            ->where('user_id', $user->id)
+            ->where('user_id', $user_id)
             ->first();
 
             if ( is_null($contentLike)) //user has not liked the content before; create
             {
             ContentLike::create([
-                'user_id' => $user->id,
+                'user_id' => $user_id,
                 'content_id' => $id,
             ]);
+            }
             $content = Content::where('id', $id)
             ->eagerLoadBaseRelations()
             ->eagerLoadSingleContentRelations()
@@ -1746,9 +1751,6 @@ class ContentController extends Controller
             return $this->respondWithSuccess('You have liked this content', [
                 'content' => new ContentResource($content),
             ]);
-            }
-
-            return $this->respondBadRequest('You have already liked this content');
             
         }catch(\Exception $exception){
             Log::error($exception);
@@ -1770,20 +1772,18 @@ class ContentController extends Controller
         $user = $request->user();
 
         $contentLike = ContentLike::where('user_id', $user->id)->first();
-        if (is_null($contentLike))
+        if ( ! is_null($contentLike))
         {
-            return $this->respondBadRequest('You have not already liked this content');          
+            $contentLike->where('user_id', $user->id)->delete();  
         }
-        $contentLike->where('user_id', $user->id)->delete();  
-        
-        $content = Content::where('id', $id)
-            ->eagerLoadBaseRelations()
-            ->eagerLoadSingleContentRelations()
-            ->first();
+            $content = Content::where('id', $id)
+                ->eagerLoadBaseRelations()
+                ->eagerLoadSingleContentRelations()
+                ->first();    
 
         return $this->respondWithSuccess('You have unliked this content', [
-                'content' => new ContentResource($content),
-            ]);
+            'content' => new ContentResource($content),
+        ]); 
 
         }catch(\Exception $exception){
             Log::error($exception);

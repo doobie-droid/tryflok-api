@@ -266,6 +266,11 @@ class Content extends Model
             },
         ])
         ->with([
+            'likes' => function ($query) use ($user_id) {
+                $query->where('user_id', $user_id); 
+            },
+        ])
+        ->with([
             'access_through_ancestors' => function ($query) use ($user_id) {
                 $query->whereHas('userables', function (Builder $query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('status', 'available');

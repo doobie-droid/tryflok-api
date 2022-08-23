@@ -12,17 +12,18 @@ test('user who is signed in can like content', function()
 
         $contentLikes = Models\ContentLike::factory()
         ->for($content, 'content')
-        ->count(10)
+        ->count(3)
         ->create();
 
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/like");
+        dd($response);
         $response->assertStatus(200);
 
         $this->assertDatabaseHas('content_likes', [
             'user_id' => $user->id,
             'content_id' => $content->id,
         ]);
-});
+})->only();
 
 test('user who is not signed in cannot like a content', function()
 {
