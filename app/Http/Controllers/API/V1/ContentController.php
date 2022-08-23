@@ -1749,13 +1749,11 @@ class ContentController extends Controller
             }
 
             return $this->respondBadRequest('You have already liked this content');
-
-
+            
         }catch(\Exception $exception){
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
-
     }
 
     public function unlikeContent(Request $request, $id)
@@ -1791,6 +1789,5 @@ class ContentController extends Controller
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
-
     }
 }
