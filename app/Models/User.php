@@ -188,4 +188,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(ContentLike::class, 'content_id');
     }
+
+    public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')
+    {
+        return $mainQuery
+        ->with('roles', 'profile_picture')
+            ->withCount('digiversesCreated')
+            ->with([
+                'followers' => function ($query) use ($user_id) {
+                    $query->where('users.id', $user_id);
+                },
+                'following' => function ($query) use ($user_id) {
+                    $query->where('users.id', $user_id);
+                },
+            ])
+            ->withCount('followers', 'following');     
+    }
 }

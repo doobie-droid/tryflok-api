@@ -24,7 +24,6 @@ test('subscribe to content works', function()
 
         //asset user gets attached
         $response = $this->json('POST', "/api/v1/contents/{$newsletter->id}/subscription");
-        dd($response); 
         $response->assertStatus(200);
         $this->assertDatabaseHas('content_subscriber', [
             'content_id' => $newsletter->id,
@@ -40,7 +39,7 @@ test('subscribe to content works', function()
             'user_id' => $user->id,
         ]);
         $this->assertTrue($newsletter->subscribers()->count() === 1);
-})->only();
+});
 
 test('unsubscribe from content works', function()
 {

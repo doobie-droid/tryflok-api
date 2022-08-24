@@ -10,20 +10,20 @@ test('user who is signed in can like content', function()
         $content = Models\Content::factory()
         ->create();
 
-        $contentLikes = Models\ContentLike::factory()
-        ->for($content, 'content')
-        ->count(3)
-        ->create();
-
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/like");
-        dd($response);
         $response->assertStatus(200);
 
         $this->assertDatabaseHas('content_likes', [
             'user_id' => $user->id,
             'content_id' => $content->id,
         ]);
-})->only();
+
+        $contentLike = Models\ContentLike::where('content_id', $content->id)
+        ->where('user_id', $user->id)
+        ->first();
+
+        $this->assertTrue($contentLike->count() === 1);
+});
 
 test('user who is not signed in cannot like a content', function()
 {
@@ -52,5 +52,16 @@ test('user cannot like a content more than once', function()
         ]);
 
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/like");     
-        $response->assertStatus(400);
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('content_likes', [
+            'user_id' => $user->id,
+            'content_id' => $content->id,
+        ]);
+
+        $contentLike = Models\ContentLike::where('content_id', $content->id)
+        ->where('user_id', $user->id)
+        ->first();
+
+        $this->assertTrue($contentLike->count() === 1);
 });
