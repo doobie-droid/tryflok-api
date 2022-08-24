@@ -35,9 +35,6 @@ test('follow user works', function()
         $response = $this->json('PATCH', "/api/v1/users/{$user_to_be_followed->id}/follow");
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\User::generateGetUserResponse());
-        $user_responded = $response->getData()->data->user;
-        $this->assertEquals(count($user_responded->followers), 1);
-        $this->assertEquals($user_responded->followers[0]->id, $user_making_request->id);
 
         $this->assertDatabaseHas('followers', [
             'user_id' => $user_to_be_followed->id,
