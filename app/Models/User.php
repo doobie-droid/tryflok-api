@@ -66,13 +66,6 @@ class User extends Authenticatable implements JWTSubject
      * @return array
      */
 
-     /**
-     * Scope a query to only include users of a given type.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $mainQuery
-     * @param  mixed  $user_id
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function getJWTCustomClaims()
     {
         return [];
