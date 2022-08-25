@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -63,6 +64,14 @@ class User extends Authenticatable implements JWTSubject
      * Return a key value array, containing any custom claims to be added to the JWT.
      *
      * @return array
+     */
+
+     /**
+     * Scope a query to only include users of a given type.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $mainQuery
+     * @param  mixed  $user_id
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function getJWTCustomClaims()
     {

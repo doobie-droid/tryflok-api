@@ -1744,7 +1744,7 @@ class ContentController extends Controller
             ]);
             }
             $content = Content::where('id', $id)
-            ->eagerLoadBaseRelations()
+            ->eagerLoadBaseRelations($user_id)
             ->eagerLoadSingleContentRelations()
             ->first();
 
@@ -1769,21 +1769,26 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-        $user = $request->user();
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
 
-        $contentLike = ContentLike::where('user_id', $user->id)->first();
-        if ( ! is_null($contentLike))
-        {
-            $contentLike->where('user_id', $user->id)->delete();  
-        }
-            $content = Content::where('id', $id)
-                ->eagerLoadBaseRelations()
-                ->eagerLoadSingleContentRelations()
-                ->first();    
 
-        return $this->respondWithSuccess('You have unliked this content', [
-            'content' => new ContentResource($content),
-        ]); 
+            $contentLike = ContentLike::where('user_id', $user_id)->first();
+            if ( ! is_null($contentLike))
+            {
+                $contentLike->where('user_id', $user_id)->delete();  
+            }
+                $content = Content::where('id', $id)
+                    ->eagerLoadBaseRelations($user_id)
+                    ->eagerLoadSingleContentRelations()
+                    ->first();    
+
+            return $this->respondWithSuccess('You have unliked this content', [
+                'content' => new ContentResource($content),
+            ]); 
 
         }catch(\Exception $exception){
             Log::error($exception);

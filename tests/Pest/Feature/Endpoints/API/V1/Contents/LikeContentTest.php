@@ -12,6 +12,10 @@ test('user who is signed in can like content', function()
 
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/like");
         $response->assertStatus(200);
+        $content_like = $response->getData()->data->content;
+        $this->assertEquals(count($content_like->likes), 1);
+        $this->assertEquals($content_like->likes[0]->content_id, $content->id);
+        $this->assertEquals($content_like->likes[0]->user_id, $user->id);
 
         $this->assertDatabaseHas('content_likes', [
             'user_id' => $user->id,
@@ -53,6 +57,10 @@ test('user cannot like a content more than once', function()
 
         $response = $this->json('POST', "/api/v1/contents/{$content->id}/like");     
         $response->assertStatus(200);
+        $content_like = $response->getData()->data->content;
+        $this->assertEquals(count($content_like->likes), 1);
+        $this->assertEquals($content_like->likes[0]->content_id, $content->id);
+        $this->assertEquals($content_like->likes[0]->user_id, $user->id);
 
         $this->assertDatabaseHas('content_likes', [
             'user_id' => $user->id,

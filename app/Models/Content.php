@@ -43,6 +43,14 @@ class Content extends Model
 
     protected $guard_name = 'api';
 
+    /**
+     * Scope a query to only include users of a given type.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $mainQuery
+     * @param  mixed  $user_id
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id');

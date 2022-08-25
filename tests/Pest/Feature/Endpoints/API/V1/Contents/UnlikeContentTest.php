@@ -21,6 +21,8 @@ test('unlike content works', function()
 
         $response = $this->json('DELETE', "/api/v1/contents/{$content->id}/like");     
         $response->assertStatus(200);
+        $content_like = $response->getData()->data->content;
+        $this->assertEquals(count($content_like->likes), 0);
 
         $this->assertDatabaseMissing('content_likes', [
             'user_id' => $user->id,

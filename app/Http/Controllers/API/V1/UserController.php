@@ -204,7 +204,7 @@ class UserController extends Controller
             }
 
             $user = User::where('id', $user->id)
-            ->eagerLoadBaseRelations()
+            ->eagerLoadBaseRelations($user_id)
             ->first();
 
             NotifyFollowJob::dispatch([
