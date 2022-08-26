@@ -291,6 +291,12 @@ class Content extends Model
                 $query->where('users.id', $user_id);
             },
         ])
+        ->with([
+            'polls', 
+            'polls.pollOptions' => function($query){
+                $query->withCount('votes');
+            },
+            ])
         ->withSum('challengeContributions', 'amount')
         ->with([
             'challengeContestants' => function ($query) {
