@@ -143,6 +143,11 @@ class Content extends Model
         return $this->morphToMany(Cart::class, 'cartable');
     }
 
+    public function likes()
+    {
+        return $this->hasMany(ContentLike::class, 'content_id');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
+    }
+
     public function collections()
     {
         return $this->belongsToMany(Collection::class);
@@ -233,6 +238,7 @@ class Content extends Model
                 $query->where('revenue_from', 'sale');
             },
         ])
+        ->withCount('likes')
         ->withCount('views')
         ->with('metas')
         ->with('collections', 'collections.prices')
@@ -257,6 +263,11 @@ class Content extends Model
         ->with([
             'userables' => function ($query) use ($user_id) {
                 $query->with('subscription')->where('user_id', $user_id)->where('status', 'available');
+            },
+        ])
+        ->with([
+            'likes' => function ($query) use ($user_id) {
+                $query->where('user_id', $user_id); 
             },
         ])
         ->with([

@@ -203,18 +203,8 @@ class UserController extends Controller
                 $user_id = $request->user()->id;
             }
 
-            $user = User::with('roles', 'profile_picture')
-            ->withCount('digiversesCreated')
-            ->with([
-                'followers' => function ($query) use ($user_id) {
-                    $query->where('users.id', $user_id);
-                },
-                'following' => function ($query) use ($user_id) {
-                    $query->where('users.id', $user_id);
-                },
-            ])
-            ->withCount('followers', 'following')
-            ->where('id', $user->id)
+            $user = User::where('id', $user->id)
+            ->eagerLoadBaseRelations($user_id)
             ->first();
 
             NotifyFollowJob::dispatch([
@@ -254,18 +244,8 @@ class UserController extends Controller
                 $user_id = $request->user()->id;
             }
 
-            $user = User::with('roles', 'profile_picture')
-            ->withCount('digiversesCreated')
-            ->with([
-                'followers' => function ($query) use ($user_id) {
-                    $query->where('users.id', $user_id);
-                },
-                'following' => function ($query) use ($user_id) {
-                    $query->where('users.id', $user_id);
-                },
-            ])
-            ->withCount('followers', 'following')
-            ->where('id', $user->id)
+            $user = User::where('id', $user->id)
+            ->eagerLoadBaseRelations()
             ->first();
             return $this->respondWithSuccess('You have successfully followed this user', [
                 'user' => new UserResource($user),
