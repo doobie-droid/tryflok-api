@@ -30,7 +30,7 @@ class ContentPollVoteFactory extends Factory
                 'id' => $this->faker->unique()->uuid,
                 'content_poll_id' => ContentPoll::factory(),
                 'content_poll_option_id' => ContentPollOption::factory(),
-                'voter_id' => User::class,
+                'voter_id' => User::factory(),
                 'ip' => $this->faker->unique()->localIpv4(),
         ];
     }
