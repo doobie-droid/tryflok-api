@@ -198,7 +198,7 @@ class ContentPollController extends Controller
 
         $hasVotedWhileSignedIn = ContentPollVote::where('content_poll_id', $poll->id)
                 ->where('voter_id', $user_id)->first();
-        if (!is_null($hasVotedWhileSignedIn)) 
+        if ( ! is_null($hasVotedWhileSignedIn)) 
         {
         // return error response
         return $this->respondBadRequest('This user has already voted for this option.');
