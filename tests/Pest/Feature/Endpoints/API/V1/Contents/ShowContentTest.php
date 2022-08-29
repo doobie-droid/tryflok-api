@@ -109,3 +109,28 @@ test('poll is returned with content', function(){
         $this->assertFalse(empty($polls));
         
 });
+
+test('vote is returned with content if user has voted before', function()
+{       
+        $user2 = Models\User::factory()->create();
+        $poll = Models\ContentPoll::factory()
+        ->for($user2, 'owner')
+        ->for($this->content, 'content')
+        ->create();
+
+        $pollOption = Models\ContentPollOption::factory()
+        ->for($poll, 'poll')
+        ->create();
+
+        $votes = Models\ContentPollVote::factory()
+        ->for($pollOption, 'pollOption')
+        ->for($poll, 'poll')
+        ->create([
+            'voter_id' => $this->user->id,
+        ]);
+
+        $response = $this->json('GET', "/api/v1/contents/{$this->content->id}");
+        $response->assertStatus(200);
+        $voted_user = $response->getData()->data->content->polls[0]->poll_options[0]->votes[0]->voter_id;
+        $this->assertEquals($voted_user, $this->user->id);
+});

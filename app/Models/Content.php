@@ -293,10 +293,13 @@ class Content extends Model
         ])
         ->with([
             'polls', 
-            'polls.pollOptions' => function($query){
-                $query->withCount('votes');
+            'polls.pollOptions' => function($query) use ($user_id){
+                $query->withCount('votes')
+                           ->with(['votes' => function ($sub_query) use ($user_id) {
+                                  $sub_query->where('voter_id', $user_id);
+                 }]);
             },
-            ])
+        ])
         ->withSum('challengeContributions', 'amount')
         ->with([
             'challengeContestants' => function ($query) {
