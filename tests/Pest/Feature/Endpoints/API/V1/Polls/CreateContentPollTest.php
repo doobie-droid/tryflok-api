@@ -104,3 +104,25 @@ test('poll is not created if options has duplicate values', function()
         $response = $this->json('POST', "/api/v1/contents/{$this->content->id}/poll", $request);
         $response->assertStatus(400);
 });
+
+test('content can only have one poll', function()
+{
+        $user = Models\User::factory()->create();
+        $this->be($user);
+        $content = Models\Content::factory()
+        ->for($user, 'owner')
+        ->create();
+
+        $poll = Models\ContentPoll::factory()
+        ->for($user, 'owner')
+        ->for($content, 'content')
+        ->create();
+
+        Models\ContentPollOption::factory()
+        ->for($poll, 'poll')
+        ->count(2)
+        ->create();
+
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/poll", $this->request);
+        $response->assertStatus(400);
+});

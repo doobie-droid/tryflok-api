@@ -37,11 +37,17 @@ class ContentPollController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            $content = Content::where('id', $content_id)->where('user_id', $request->user()->id)->first();
+            $content = Content::where('id', $content_id)->where('user_id', $request->user()->id)
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
             if (is_null($content)) {
                 return $this->respondBadRequest('You do not have permission to create a poll for this content');
             }
 
+            if ( $content->polls()->count() === 1 ) {
+                return $this->respondBadRequest('Content can only have one poll');
+            }
             if ($request->options != array_unique($request->options)) {
                 return $this->respondBadRequest('Your options contain duplicate values');
             }
