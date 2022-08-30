@@ -926,6 +926,7 @@ class ContentController extends Controller
 
             $contents = $contents
             ->eagerLoadBaseRelations($user_id)
+            ->eagerLoadSingleContentRelations($user_id)
             ->orderBy("contents.{$orderBy}", $orderDirection)
             ->paginate($limit, ['*'], 'page', $page);
 
