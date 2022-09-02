@@ -143,6 +143,11 @@ class Content extends Model
         return $this->morphToMany(Cart::class, 'cartable');
     }
 
+    public function likes()
+    {
+        return $this->hasMany(ContentLike::class, 'content_id');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
+    }
+
     public function collections()
     {
         return $this->belongsToMany(Collection::class);
@@ -233,6 +238,7 @@ class Content extends Model
                 $query->where('revenue_from', 'sale');
             },
         ])
+        ->withCount('likes')
         ->withCount('views')
         ->with('metas')
         ->with('collections', 'collections.prices')
@@ -260,6 +266,20 @@ class Content extends Model
             },
         ])
         ->with([
+            'likes' => function ($query) use ($user_id) {
+                $query->where('user_id', $user_id); 
+            },
+        ])
+        ->with([
+            'polls', 
+            'polls.pollOptions' => function($query) use ($user_id){
+                $query->withCount('votes')
+                           ->with(['votes' => function ($sub_query) use ($user_id) {
+                                  $sub_query->where('voter_id', $user_id);
+                 }]);
+            },
+        ])
+        ->with([
             'access_through_ancestors' => function ($query) use ($user_id) {
                 $query->whereHas('userables', function (Builder $query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('status', 'available');
@@ -278,6 +298,15 @@ class Content extends Model
         return $mainQuery->with([
             'subscribers' => function ($query) use ($user_id) {
                 $query->where('users.id', $user_id);
+            },
+        ])
+        ->with([
+            'polls', 
+            'polls.pollOptions' => function($query) use ($user_id){
+                $query->withCount('votes')
+                           ->with(['votes' => function ($sub_query) use ($user_id) {
+                                  $sub_query->where('voter_id', $user_id);
+                 }]);
             },
         ])
         ->withSum('challengeContributions', 'amount')

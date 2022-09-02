@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -64,6 +65,7 @@ class User extends Authenticatable implements JWTSubject
      *
      * @return array
      */
+
     public function getJWTCustomClaims()
     {
         return [];
@@ -181,6 +183,27 @@ class User extends Authenticatable implements JWTSubject
 
     public function contentPollVote()
     {
-        return $this->hasOne(ContentPollVote::class);
+        return $this->hasOne(ContentPollVote::class, 'voter_id');
+    }
+
+    public function contentLikes()
+    {
+        return $this->hasMany(ContentLike::class, 'content_id');
+    }
+
+    public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')
+    {
+        return $mainQuery
+        ->with('roles', 'profile_picture')
+            ->withCount('digiversesCreated')
+            ->with([
+                'followers' => function ($query) use ($user_id) {
+                    $query->where('users.id', $user_id);
+                },
+                'following' => function ($query) use ($user_id) {
+                    $query->where('users.id', $user_id);
+                },
+            ])
+            ->withCount('followers', 'following');     
     }
 }

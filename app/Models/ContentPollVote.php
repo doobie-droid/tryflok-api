@@ -39,6 +39,6 @@ class ContentPollVote extends Model
 
     public function voter()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

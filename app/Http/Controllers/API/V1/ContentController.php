@@ -17,6 +17,7 @@ use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
+use App\Models\ContentLike;
 use App\Models\ContentIssue;
 use App\Models\User;
 use App\Models\WalletTransaction;
@@ -1706,6 +1707,89 @@ class ContentController extends Controller
             return $this->respondWithSuccess('Content has been created successfully'); 
 
         } catch(\Exception $exception){
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function likeContent(Request $request, $id)
+    {
+        try{
+
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            //check if the user has liked the content already
+            $contentLike = ContentLike::where('content_id', $id)
+            ->where('user_id', $user_id)
+            ->first();
+
+            if ( is_null($contentLike)) //user has not liked the content before; create
+            {
+            ContentLike::create([
+                'user_id' => $user_id,
+                'content_id' => $id,
+            ]);
+            }
+            $content = Content::where('id', $id)
+            ->eagerLoadBaseRelations($user_id)
+            ->eagerLoadSingleContentRelations()
+            ->first();
+
+            return $this->respondWithSuccess('You have liked this content', [
+                'content' => new ContentResource($content),
+            ]);
+            
+        }catch(\Exception $exception){
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function unlikeContent(Request $request, $id)
+    {
+        try{
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+
+            $contentLike = ContentLike::where('user_id', $user_id)->first();
+            if ( ! is_null($contentLike))
+            {
+                $contentLike->where('user_id', $user_id)->delete();  
+            }
+                $content = Content::where('id', $id)
+                    ->eagerLoadBaseRelations($user_id)
+                    ->eagerLoadSingleContentRelations()
+                    ->first();    
+
+            return $this->respondWithSuccess('You have unliked this content', [
+                'content' => new ContentResource($content),
+            ]); 
+
+        }catch(\Exception $exception){
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }

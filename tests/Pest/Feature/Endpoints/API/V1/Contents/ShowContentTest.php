@@ -83,3 +83,54 @@ test('retrieve single content works when user is signed in and has paid for cont
     $access_through_ancestors = $response->getData()->data->content->access_through_ancestors;
     $this->assertFalse(empty($access_through_ancestors));
 });
+
+test('poll is returned with content', function(){
+        $poll = Models\ContentPoll::factory()
+        ->for($this->user, 'owner')
+        ->for($this->content, 'content')
+        ->create();
+
+        $pollOptions = Models\ContentPollOption::factory()
+        ->for($poll, 'poll')
+        ->count(2)
+        ->create();
+
+        foreach ($pollOptions as $option)
+            {
+                $votes = Models\ContentPollVote::factory()
+                ->for($option, 'pollOption')
+                ->for($poll, 'poll')
+                ->count(5)
+                ->create();
+            }
+        $response = $this->json('GET', "/api/v1/contents/{$this->content->id}");
+        $response->assertStatus(200)->assertJsonStructure(MockData\Content::generateGetSingleContentResponse());
+        $polls = $response->getData()->data->content->polls;
+        $this->assertFalse(empty($polls));
+        
+});
+
+test('vote is returned with content if user has voted before', function()
+{       
+        $user2 = Models\User::factory()->create();
+        $poll = Models\ContentPoll::factory()
+        ->for($user2, 'owner')
+        ->for($this->content, 'content')
+        ->create();
+
+        $pollOption = Models\ContentPollOption::factory()
+        ->for($poll, 'poll')
+        ->create();
+
+        $votes = Models\ContentPollVote::factory()
+        ->for($pollOption, 'pollOption')
+        ->for($poll, 'poll')
+        ->create([
+            'voter_id' => $this->user->id,
+        ]);
+
+        $response = $this->json('GET', "/api/v1/contents/{$this->content->id}");
+        $response->assertStatus(200);
+        $voted_user = $response->getData()->data->content->polls[0]->poll_options[0]->votes[0]->voter_id;
+        $this->assertEquals($voted_user, $this->user->id);
+});

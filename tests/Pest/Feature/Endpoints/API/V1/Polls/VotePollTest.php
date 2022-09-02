@@ -72,8 +72,9 @@ test('user who is signed cannot vote more than once', function()
             $createVote = Models\ContentPollVote::factory()
             ->for($this->option, 'pollOption')
             ->for($this->poll, 'poll')
-            ->for($this->user, 'voter')
-            ->create();
+            ->create([
+                'voter_id' => $this->user->id,
+            ]);
 
             $votes = Models\ContentPollVote::where('content_poll_id', $this->poll->id)
             ->where('content_poll_option_id', $this->option->id)->first();
