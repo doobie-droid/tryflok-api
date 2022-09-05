@@ -123,6 +123,7 @@ class MigrateYoutubeVideo implements ShouldQueue
             'storage_provider_id' => $videoId,
             'asset_type' => 'video',
             'mime_type' => 'video/mp4',
+            'processing_complete' => 1,
         ]);
 
         $cover_asset = Asset::create([
@@ -131,6 +132,7 @@ class MigrateYoutubeVideo implements ShouldQueue
             'storage_provider_id' => $videoId,
             'asset_type' => 'image',
             'mime_type' => 'image/jpeg',
+            'processing_complete' => 1,
         ]);
         $content->assets()->attach($cover_asset->id, [
             'id' => Str::uuid(),
