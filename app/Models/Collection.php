@@ -146,6 +146,10 @@ class Collection extends Model
                 $content_types_available[] = $content_type;
             }
         }
+        $child_collections = $this->childCollections();
+        if ( $child_collections->count() > 0) {
+            $content_types_available[] = 'collection';
+        }
         return $content_types_available;
     }
 
