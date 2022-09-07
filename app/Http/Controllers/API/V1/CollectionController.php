@@ -334,6 +334,7 @@ class CollectionController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
+            $user_id = $request->user()->id;
             $collection = Collection::where('id', $id)
             ->eagerLoadBaseRelations($user_id)
             ->first();
