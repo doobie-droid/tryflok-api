@@ -11,7 +11,6 @@ test('list collections works', function()
     $this->be($user);  
         
     $response = $this->json('GET', "/api/v1/collections/{$collection->id}");
-    dd($response->getData());
     $response->assertStatus(200)
     ->assertJsonStructure([
         'data' => [
