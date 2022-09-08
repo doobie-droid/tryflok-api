@@ -188,6 +188,7 @@ class Collection extends Model
                 $query->where('revenue_from', 'sale');
             },
         ])
+        ->with('parentCollections')
         ->withCount('collections');
     }
 }
