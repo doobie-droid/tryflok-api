@@ -30,14 +30,3 @@ test('list collections works', function()
     ]
     );
 });
-
-test('collection is returned with digiverse', function()
-{
-    $user = Models\User::factory()->create(); 
-    $collection = Models\Collection::factory()
-    ->create();
-    $this->be($user);  
-        
-    $response = $this->json('GET', "/api/v1/collections/{$collection->id}");
-    dd($response->getData());
-});
