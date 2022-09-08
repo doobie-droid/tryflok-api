@@ -160,7 +160,7 @@ class CollectionController extends Controller
                 'purpose' => 'cover',
             ]);
 
-            $collection = Collection::where('id', $digiverse->id)
+            $collection = Collection::where('id', $collection->id)
             ->eagerLoadBaseRelations()
             ->first();
 
