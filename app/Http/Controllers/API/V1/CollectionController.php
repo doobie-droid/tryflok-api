@@ -160,7 +160,7 @@ class CollectionController extends Controller
                 'purpose' => 'cover',
             ]);
 
-            $collection = Collection::where('id', $digiverse->id)
+            $collection = Collection::where('id', $collection->id)
             ->eagerLoadBaseRelations()
             ->first();
 
@@ -334,6 +334,7 @@ class CollectionController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
+            $user_id = $request->user()->id;
             $collection = Collection::where('id', $id)
             ->eagerLoadBaseRelations($user_id)
             ->first();
