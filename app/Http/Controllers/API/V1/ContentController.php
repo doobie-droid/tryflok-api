@@ -740,7 +740,9 @@ class ContentController extends Controller
                 ->where('approved_by_admin', 1);
             })->where(function ($query) {
                 $query->whereNull('live_ended_at')->orWhereDate('live_ended_at', '>=', now()->subHours(12));
-            })->whereDate('scheduled_date', '>=', now()->subHours(24));
+            })->where(function ($query) {
+                $query->whereNull('scheduled_date')->orWhereDate('scheduled_date', '>=', now()->subHours(24));
+            });
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
