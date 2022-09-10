@@ -689,7 +689,7 @@ class ContentController extends Controller
             $minPrice = $request->query('min_price', 0);
 
             $orderBy = $request->query('order_by', 'created_at');
-            $orderDirection = $request->query('order_direction', 'asc');
+            $orderDirection = $request->query('order_direction', 'desc');
 
             $activeLiveContent = $request->query('active_live_content', 'false');
             $challengeOnly = $request->query('challenge_only', 'false');
@@ -740,7 +740,7 @@ class ContentController extends Controller
                 ->where('approved_by_admin', 1);
             })->where(function ($query) {
                 $query->whereNull('live_ended_at')->orWhereDate('live_ended_at', '>=', now()->subHours(12));
-            });
+            })->whereDate('scheduled_date', '>=', now()->subHours(24));
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
@@ -786,8 +786,8 @@ class ContentController extends Controller
 
             $contents = $contents
             ->eagerLoadBaseRelations($user_id)
-            ->orderBy('contents.trending_points', 'desc')
             ->orderBy("contents.{$orderBy}", $orderDirection)
+            ->orderBy('contents.trending_points', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Contents retrieved successfully', [
