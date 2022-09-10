@@ -187,10 +187,6 @@ class MigrateYoutubeVideo implements ShouldQueue
 
     private function thumbnailUrl($response)
     {
-        if (isset($response->items[0]->snippet->thumbnails->default->url)){
-            return $response->items[0]->snippet->thumbnails->default->url;
-        }
-
         return optional(collect($response->items[0]->snippet->thumbnails)
         ->sortByDesc('width')
         ->first()
