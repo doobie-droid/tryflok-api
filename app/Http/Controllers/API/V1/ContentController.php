@@ -408,7 +408,7 @@ class ContentController extends Controller
             }
 
             $content->archived_at = now();
-            $content->saved();
+            $content->save();
             return $this->respondWithSuccess('Content has been archived successfully', [
                 'content' => new ContentResource($content),
             ]);

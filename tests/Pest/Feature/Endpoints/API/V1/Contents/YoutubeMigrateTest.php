@@ -27,11 +27,13 @@ beforeEach(function()
 test('content creation is successful with http://youtu.be/dQw4w9WgXcQ?feature=youtube_gdata_player', function()
 {
     $videoId = 'dQw4w9WgXcQ';
+    $cover_url = 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
             '0' => 
-            [
+            [   
+                'id' => $videoId,
                 'snippet' =>
                 [
                     'title' => $this->title,
@@ -41,8 +43,8 @@ test('content creation is successful with http://youtu.be/dQw4w9WgXcQ?feature=yo
                         '1' => 'tag2'
                     ],
                     'thumbnails' => [
-                        'default' => [
-                            'url' => $this->cover_url,
+                        'maxres' => [
+                            'url' => $cover_url,
                         ]
                     ]
                 ]
@@ -100,7 +102,7 @@ test('content creation is successful with http://youtu.be/dQw4w9WgXcQ?feature=yo
             'mime_type' => 'video/mp4',
         ]);
         $this->assertDatabaseHas('assets', [
-            'url' => $this->cover_url,
+            'url' => $cover_url,
             'storage_provider' => 'youtube',
             'storage_provider_id' => $videoId,
             'asset_type' => 'image',
@@ -154,11 +156,12 @@ test('content creation is successful with http://www.youtube.com/oembed?url=http
 ', function()
 {
     $videoId = '-wtIMTCHWuI';
+    $cover_url = 'https://i.ytimg.com/vi/-wtIMTCHWuI/0.jpg';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
             '0' => 
-            [
+            [   'id' => $videoId,
                 'snippet' =>
                 [
                     'title' => $this->title,
@@ -169,7 +172,7 @@ test('content creation is successful with http://www.youtube.com/oembed?url=http
                     ],
                     'thumbnails' => [
                         'default' => [
-                            'url' => $this->cover_url,
+                            'url' => $cover_url,
                         ]
                     ]
                 ]
@@ -218,7 +221,7 @@ test('content creation is successful with http://www.youtube.com/oembed?url=http
             'mime_type' => 'video/mp4',
         ]);
         $this->assertDatabaseHas('assets', [
-            'url' => $this->cover_url,
+            'url' => $cover_url,
             'storage_provider' => 'youtube',
             'storage_provider_id' => $videoId,
             'asset_type' => 'image',
@@ -271,11 +274,13 @@ test('content creation is successful with http://www.youtube.com/oembed?url=http
 test('content creation is successful with http://youtube.com/?feature=channel&v=oTJRivZTMLs', function()
 {
     $videoId = 'oTJRivZTMLs';
+    $cover_url = 'https://i.ytimg.com/vi/oTJRivZTMLs/0.jpg';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
             '0' => 
             [
+                'id' => $videoId,
                 'snippet' =>
                 [
                     'title' => $this->title,
@@ -286,7 +291,7 @@ test('content creation is successful with http://youtube.com/?feature=channel&v=
                     ],
                     'thumbnails' => [
                         'default' => [
-                            'url' => $this->cover_url,
+                            'url' => $cover_url,
                         ]
                     ]
                 ]
@@ -334,7 +339,7 @@ test('content creation is successful with http://youtube.com/?feature=channel&v=
             'mime_type' => 'video/mp4',
         ]);
         $this->assertDatabaseHas('assets', [
-            'url' => $this->cover_url,
+            'url' => $cover_url,
             'storage_provider' => 'youtube',
             'storage_provider_id' => $videoId,
             'asset_type' => 'image',
@@ -386,11 +391,13 @@ test('content creation is successful with http://youtube.com/?feature=channel&v=
 test('content creation is successful with http://www.youtube.com/user/dreamtheater#p/u/1/oTJRivZTMLs', function()
 {
     $videoId = 'oTJRivZTMLs';
+    $cover_url = 'https://i.ytimg.com/vi/oTJRivZTMLs/0.jpg';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
             '0' => 
             [
+                'id' => $videoId,
                 'snippet' =>
                 [
                     'title' => $this->title,
@@ -401,7 +408,7 @@ test('content creation is successful with http://www.youtube.com/user/dreamtheat
                     ],
                     'thumbnails' => [
                         'default' => [
-                            'url' => $this->cover_url,
+                            'url' => $cover_url,
                         ]
                     ]
                 ]
@@ -449,7 +456,7 @@ test('content creation is successful with http://www.youtube.com/user/dreamtheat
             'mime_type' => 'video/mp4',
         ]);
         $this->assertDatabaseHas('assets', [
-            'url' => $this->cover_url,
+            'url' => $cover_url,
             'storage_provider' => 'youtube',
             'storage_provider_id' => $videoId,
             'asset_type' => 'image',
@@ -502,11 +509,13 @@ test('content creation is successful with http://www.youtube.com/user/dreamtheat
 test('content creation is successful with http://youtube.com/watch?vi=dQw4w9WgXcQ&feature=youtube_gdata_player', function()
 {
     $videoId = 'dQw4w9WgXcQ';
+    $cover_url = 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
             '0' => 
             [
+                'id' => $videoId,
                 'snippet' =>
                 [
                     'title' => $this->title,
@@ -516,8 +525,8 @@ test('content creation is successful with http://youtube.com/watch?vi=dQw4w9WgXc
                         '1' => 'tag2'
                     ],
                     'thumbnails' => [
-                        'default' => [
-                            'url' => $this->cover_url,
+                        'maxres' => [
+                            'url' => $cover_url,
                         ]
                     ]
                 ]
@@ -565,7 +574,7 @@ test('content creation is successful with http://youtube.com/watch?vi=dQw4w9WgXc
             'mime_type' => 'video/mp4',
         ]);
         $this->assertDatabaseHas('assets', [
-            'url' => $this->cover_url,
+            'url' => $cover_url,
             'storage_provider' => 'youtube',
             'storage_provider_id' => $videoId,
             'asset_type' => 'image',
@@ -618,11 +627,13 @@ test('content creation is successful with http://youtube.com/watch?vi=dQw4w9WgXc
 test('content creation is successful with https://youtube.com/embed/sUUGPYrh2ME', function()
 {
     $videoId = 'sUUGPYrh2ME';
+    $cover_url = 'https://i.ytimg.com/vi/sUUGPYrh2ME/maxresdefault.jpg';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
             '0' => 
             [
+                'id' => $videoId,
                 'snippet' =>
                 [
                     'title' => $this->title,
@@ -632,8 +643,8 @@ test('content creation is successful with https://youtube.com/embed/sUUGPYrh2ME'
                         '1' => 'tag2'
                     ],
                     'thumbnails' => [
-                        'default' => [
-                            'url' => $this->cover_url,
+                        'maxres' => [
+                            'url' => $cover_url,
                         ]
                     ]
                 ]
@@ -681,7 +692,7 @@ test('content creation is successful with https://youtube.com/embed/sUUGPYrh2ME'
             'mime_type' => 'video/mp4',
         ]);
         $this->assertDatabaseHas('assets', [
-            'url' => $this->cover_url,
+            'url' => $cover_url,
             'storage_provider' => 'youtube',
             'storage_provider_id' => $videoId,
             'asset_type' => 'image',
@@ -733,11 +744,13 @@ test('content creation is successful with https://youtube.com/embed/sUUGPYrh2ME'
 test('content is created with https://www.youtube.com/v/0zM3nApSvMg?fs=1&amp;hl=en_US&amp;rel=0', function()
 {
     $videoId = '0zM3nApSvMg';
+    $cover_url = 'https://i.ytimg.com/vi/0zM3nApSvMg/0.jpg';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
             '0' => 
             [
+                'id' => $videoId,
                 'snippet' =>
                 [
                     'title' => $this->title,
@@ -748,7 +761,7 @@ test('content is created with https://www.youtube.com/v/0zM3nApSvMg?fs=1&amp;hl=
                     ],
                     'thumbnails' => [
                         'default' => [
-                            'url' => $this->cover_url,
+                            'url' => $cover_url,
                         ]
                     ]
                 ]
@@ -780,11 +793,13 @@ test('content is created with https://www.youtube.com/v/0zM3nApSvMg?fs=1&amp;hl=
 test('content is created with www.youtube.com/embed/sUUGPYrh2ME', function()
 {
     $videoId = 'sUUGPYrh2ME';
+    $cover_url = 'https://i.ytimg.com/vi/sUUGPYrh2ME/maxresdefault.jpg';
     stub_request("https://youtube.googleapis.com/youtube/v3/videos?id={$videoId}&key={$this->secret}&part=snippet,contentDetails", [
         'items' =>
         [
             '0' => 
             [
+                'id' => $videoId,
                 'snippet' =>
                 [
                     'title' => $this->title,
@@ -794,8 +809,8 @@ test('content is created with www.youtube.com/embed/sUUGPYrh2ME', function()
                         '1' => 'tag2'
                     ],
                     'thumbnails' => [
-                        'default' => [
-                            'url' => $this->cover_url,
+                        'maxres' => [
+                            'url' => $cover_url,
                         ]
                     ]
                 ]
