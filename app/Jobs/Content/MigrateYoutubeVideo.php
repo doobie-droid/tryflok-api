@@ -99,7 +99,6 @@ class MigrateYoutubeVideo implements ShouldQueue
             'thumbnail_url' => $this->thumbnailUrl($response),
             'description' => preg_replace('/#.*/', '', $response->items[0]->snippet->description),
         ];
-
         $tags = [];
         if (isset($response->items[0]->snippet->tags)){
                 $tags = $response->items[0]->snippet->tags;
@@ -187,10 +186,14 @@ class MigrateYoutubeVideo implements ShouldQueue
 
     private function thumbnailUrl($response)
     {
-        return optional(collect($response->items[0]->snippet->thumbnails)
-        ->sortByDesc('width')
-        ->first()
-        )['url'];
+        if (! empty( $response->items[0]->snippet->thumbnails->maxres)) {
+            $thumbnail_url = $response->items[0]->snippet->thumbnails->maxres->url;
+        }
+        else{
+            $videoID = $response->items[0]->id;
+            $thumbnail_url = 'https://i.ytimg.com/vi/'.$videoID.'/0.jpg';
+        }
+        return $thumbnail_url;
     }
 
     public function sendMail()
