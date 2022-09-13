@@ -14,6 +14,9 @@ class ChangeSalesTableToRevenuesTable extends Migration
             $table->renameColumn('saleable_type', 'revenueable_type');
             $table->renameColumn('saleable_id', 'revenueable_id');
             $table->string('revenue_from')->default('sale'); // sale, referall, tip
+            $table->foreignUuid('originating_content_id')->nullable();
+            $table->string('originating_currency')->nullable();
+            $table->string('originating_client_source')->nullable();
         });
     }
 

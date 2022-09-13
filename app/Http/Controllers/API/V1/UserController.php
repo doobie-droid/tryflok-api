@@ -915,6 +915,9 @@ class UserController extends Controller
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'amount_in_flk' => ['required', 'numeric', 'min:1', 'max:1000000'],
                 'id' => ['required', 'string', 'exists:users,id'],
+                'originating_content_id' => ['sometimes', 'nullable', 'string', 'exists:contents,id'],
+                'originating_client_source' => ['sometimes', 'nullable', 'string'],
+                'originating_currency' => ['sometimes', 'nullable', 'string']
             ]);
 
             if ($validator->fails()) {
@@ -967,6 +970,20 @@ class UserController extends Controller
                 'revenue_from' => 'tip',
                 'added_to_payout' => 1,
             ]);
+
+            if ( ! is_null($request->originating_currency)) {
+                $revenue->originating_currency = $request->originating_currency;
+            }
+
+            if ( ! is_null($request->originating_content_id)) {
+                $revenue->originating_content_id = $request->originating_content_id;
+            }
+
+            if ( ! is_null($request->originating_client_source)) {
+                $revenue->originating_client_source = $request->originating_client_source;
+            }
+
+            $revenue->save();
 
             $creator_share_in_flk = $creator_share * 100;
             $newWalletBalance = bcadd($userToTip->wallet->balance, $creator_share_in_flk, 2);

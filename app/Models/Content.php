@@ -113,6 +113,11 @@ class Content extends Model
         return $this->morphMany(Revenue::class, 'revenueable');
     }
 
+    public function generatedTips()
+    {
+        return $this->hasMany(Revenue::class, 'originating_content_id');
+    }
+
     public function reviews()
     {
         return $this->morphMany(Review::class, 'reviewable');
@@ -145,7 +150,7 @@ class Content extends Model
 
     public function likes()
     {
-        return $this->hasMany(ContentLike::class, 'content_id');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
+        return $this->hasMany(ContentLike::class, 'content_id');
     }
 
     public function collections()
