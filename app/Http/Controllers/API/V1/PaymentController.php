@@ -10,6 +10,7 @@ use App\Jobs\Payment\Paystack\Purchase as PaystackPurchaseHandler;
 use App\Jobs\Payment\Purchase as PurchaseJob;
 use App\Jobs\Payment\Stripe\Purchase as StripePurchaseHandler;
 use App\Models\Collection;
+use App\Models\Configuration;
 use App\Models\Content;
 use App\Models\User;
 use App\Services\Payment\Providers\ApplePay\ApplePay;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Http\Resources\ExchangeRatesResource;   
 
 class PaymentController extends Controller
 {
@@ -276,6 +278,20 @@ class PaymentController extends Controller
             ]);
 
             return $this->respondAccepted("Item queued to be added to user's library.");
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function listExchangeRates()
+    {
+        try{
+            $exchangeRates = Configuration::get();
+
+            return $this->respondWithSuccess('Exchange rates retrieved successfully', [
+                'exchangeRates' => ExchangeRatesResource::collection($exchangeRates),
+            ]);
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

@@ -93,6 +93,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::group(['prefix' => 'apple-pay'], function () {
             Route::post('webhook', 'PaymentController@applePayWebhook');
         });
+
+        Route::get('exchange-rates', 'PaymentController@listExchangeRates')->name('list-exchange-rates');
     });
 });
 
