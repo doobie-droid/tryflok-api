@@ -123,7 +123,7 @@ class Purchase implements ShouldQueue
             $platform_share = bcmul($net_amount, $platform_charge, 6);
             $creator_share = bcmul($net_amount, 1 - $platform_charge, 6);
             foreach ($itemModel->benefactors as $benefactor) {
-                $benefactor->user->revenues()->create([
+                $benefactorUser = $benefactor->user->revenues()->create([
                     'revenueable_type' => $item['type'],
                     'revenueable_id' => $itemModel->id,
                     'amount' => $amount,
@@ -133,10 +133,14 @@ class Purchase implements ShouldQueue
                     'referral_bonus' => 0,
                     'revenue_from' => 'sale',
                 ]);
+                if ( ! empty($item['originating_client_source'])) {
+                     $benefactorUser->originating_client_source = $item['originating_client_source'];
+                }
+                $benefactorUser->save();
             }
             //record revenue from referral of the item
             if ($itemModel->owner->referrer()->exists()) {
-                $itemModel->owner->referrer->revenues()->create([
+                $itemModelOwner = $itemModel->owner->referrer->revenues()->create([
                     'revenueable_type' => $item['type'],
                     'revenueable_id' => $itemModel->id,
                     'amount' => $amount,
@@ -146,6 +150,10 @@ class Purchase implements ShouldQueue
                     'referral_bonus' => bcmul(bcsub($net_amount, $fee, 6), Constants::REFERRAL_BONUS, 6),
                     'revenue_from' => 'referral',
                 ]);
+                if ( ! empty($item['originating_client_source'])) {
+                    $itemModelOwner->originating_client_source = $item['originating_client_source'];
+               }
+               $itemModelOwner->save();
             }
 
             //check if item exists in userables as a parent item (cos it's always going to trickle to children)
