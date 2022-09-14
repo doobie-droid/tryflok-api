@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 test('purchase works', function()
 {
-    $creator = Models\User::factory()->create();
+        $creator = Models\User::factory()->create();
         $buyer = Models\User::factory()->create();
         $free_digiverse = Models\Collection::factory()
         ->for($creator, 'owner')

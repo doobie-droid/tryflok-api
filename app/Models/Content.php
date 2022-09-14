@@ -315,6 +315,7 @@ class Content extends Model
             },
         ])
         ->withSum('challengeContributions', 'amount')
+        ->withSum('generatedTips', 'amount')
         ->with([
             'challengeContestants' => function ($query) {
                 $query->with('contestant', 'contestant.profile_picture');

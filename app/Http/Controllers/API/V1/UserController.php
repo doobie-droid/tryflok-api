@@ -916,7 +916,7 @@ class UserController extends Controller
                 'amount_in_flk' => ['required', 'numeric', 'min:1', 'max:1000000'],
                 'id' => ['required', 'string', 'exists:users,id'],
                 'originating_content_id' => ['sometimes', 'nullable', 'string', 'exists:contents,id'],
-                'originating_client_source' => ['sometimes', 'nullable', 'string'],
+                'originating_client_source' => ['sometimes', 'nullable', 'string', 'in:web,ios,android'],
                 'originating_currency' => ['sometimes', 'nullable', 'string']
             ]);
 

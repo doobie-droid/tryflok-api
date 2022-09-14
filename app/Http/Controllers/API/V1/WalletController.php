@@ -195,7 +195,7 @@ class WalletController extends Controller
                 'items.*.price.id' => ['required', 'string','exists:prices,id'],
                 'items.*.price.interval' => ['required', 'string', 'in:monthly,one-off'],
                 'items.*.price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
-                'items.*.originating_client_source' => ['sometimes', 'nullable', 'string'],
+                'items.*.originating_client_source' => ['sometimes', 'nullable', 'string', 'in:web,ios,android'],
             ]);
 
             if ($validator->fails()) {

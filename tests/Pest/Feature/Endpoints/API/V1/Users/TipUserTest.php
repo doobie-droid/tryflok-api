@@ -70,7 +70,7 @@ test('tipping works', function()
     $request = [
         'amount_in_flk' => "{$amount}",
         'originating_client_source' => 'ios',
-        'originating_currency' => 'naira',
+        'originating_currency' => 'NGN',
         'originating_content_id' => $content->id,
     ];
 
@@ -227,4 +227,36 @@ test('tipping works without optional  parameters', function()
         'notificable_type' => 'wallet_transaction',
         'message' => "@{$user1->username} just gifted you {$creator_share_in_flk} Flok Cowries",
     ]);
+});
+
+it('does not work with invalid client originating source', function()
+{
+        Mail::fake();
+        $user1 = Models\User::factory()->create();
+        $wallet = Models\Wallet::factory()
+        ->for($user1, 'walletable')
+        ->create();
+        $wallet_initial_balance = $wallet->balance;
+        $user2 = Models\User::factory()->create();
+        $wallet2 = Models\Wallet::factory()
+        ->for($user2, 'walletable')
+        ->create();
+        $wallet2_initial_balance = $wallet2->balance;
+        $content = Models\Content::factory()
+        ->for($user2, 'owner')
+        ->create();
+        
+        $this->be($user1);
+        $amount = 1000;
+        $amount_in_dollars = bcdiv($amount, 100, 6);
+
+        $request = [
+            'amount_in_flk' => "{$amount}",
+            'originating_client_source' => 'java',
+            'originating_currency' => 'NGN',
+            'originating_content_id' => $content->id,
+        ];
+
+        $response = $this->json('POST', "/api/v1/users/{$user2->id}/tip", $request);
+        $response->assertStatus(400);
 });

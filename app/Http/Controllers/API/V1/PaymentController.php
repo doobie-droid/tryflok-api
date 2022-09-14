@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use App\Http\Resources\ExchangeRatesResource;   
+use App\Http\Resources\ConfigurationResource;   
 
 class PaymentController extends Controller
 {
@@ -287,10 +287,10 @@ class PaymentController extends Controller
     public function listExchangeRates()
     {
         try{
-            $exchangeRates = Configuration::get();
+            $exchangeRates = Configuration::where('type', 'exchange_rate')->get();
 
             return $this->respondWithSuccess('Exchange rates retrieved successfully', [
-                'exchangeRates' => ExchangeRatesResource::collection($exchangeRates),
+                'exchangeRates' => new ConfigurationResource($exchangeRates),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
