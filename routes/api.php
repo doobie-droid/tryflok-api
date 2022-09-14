@@ -202,10 +202,12 @@ Route::group(['middleware' => 'auth:api'], function () {
 
             Route::post('{id}/comments', 'ContentController@createComment')->name('create-comment');    
             Route::get('{id}/comments', 'ContentController@listComments')->name('list-comments');
-            Route::patch('{id}/comments/{comment_id}', 'ContentController@updateComment')->name('update-comment');
-            Route::delete('{comment_id}/comments', 'ContentController@deleteComment')->name('delete-comment');
-
         });
+        Route::group(['prefix' => 'comments'], function () {
+            Route::patch('{id}', 'ContentController@updateComment')->name('update-comment');
+            Route::delete('{id}', 'ContentController@deleteComment')->name('delete-comment');
+        });
+
         Route::group(['prefix' => 'polls'], function () {
             Route::patch('{id}', 'ContentPollController@updatePoll')->name('update-poll');
             Route::delete('{id}', 'ContentPollController@deletePoll')->name('delete-poll');
