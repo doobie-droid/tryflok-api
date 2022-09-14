@@ -18,6 +18,7 @@ use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
 use App\Models\ContentComment;
+use App\Models\ContentCommentComment;
 use App\Models\ContentLike;
 use App\Models\ContentIssue;
 use App\Models\User;
@@ -1802,23 +1803,43 @@ class ContentController extends Controller
     {
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
-                'id' => ['required', 'string', 'exists:contents,id'],
+                'id' => ['required', 'string'],
+                'type' => ['required', 'string', 'in:content,comment'],
                 'comment' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-            $content = Content::where('id', $id)->first();
 
-            $comment = $content->comments()->create([
-                'comment' => $request->comment,
-                'user_id' => $request->user()->id,
-                'content_id' => $request->id,
-            ]);
+            $itemModel = null;
 
+            switch ($request->type) {
+                case 'content':
+                    $itemModel = Content::where('id', $id)->first();
+                    if (is_null($itemModel)) {
+                        return $this->respondBadRequest('Invalid ID supplied for ' . ucfirst($request->type));
+                    }
+                    $comment = $itemModel->comments()->create([
+                        'comment' => $request->comment,
+                        'user_id' => $request->user()->id,
+                        'content_id' => $request->id,
+                    ]);
+                    break;
+                case 'comment':
+                    $itemModel = ContentComment::where('id', $id)->first();
+                    if (is_null($itemModel)) {
+                        return $this->respondBadRequest('Invalid ID supplied for ' . ucfirst($request->type));
+                    }
+                    $comment = $itemModel->comments()->create([
+                        'comment' => $request->comment,
+                        'user_id' => $request->user()->id,
+                        'content_comment_id' => $request->id,
+                    ]);
+                    break;
+            }          
             return $this->respondWithSuccess('comment has been created successfully', [
-                'comment' => $comment->with('content')->first(),
+                'comment' => $comment,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -1839,7 +1860,8 @@ class ContentController extends Controller
                 $limit = Constants::MAX_ITEMS_LIMIT;
             }
 
-            $comments = $content->comments()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
+            $comments = $content->comments()->with('user', 'user.profile_picture', 'user.roles', 'comments')
+            ->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
             return $this->respondWithSuccess('comments retrieved successfully', [
                 'comments' => $comments,
             ]);
@@ -1853,24 +1875,37 @@ class ContentController extends Controller
     {
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $comment_id]), [
-                'id' => ['required', 'string', 'exists:content_comments,id'],
+                'id' => ['required', 'string'],
+                'type' => ['required', 'string', 'in:content,comment'],
             ]);
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            //make sure user owns comment
-            $comment = ContentComment::where('id', $comment_id)
-            ->where('user_id', $request->user()->id)
-            ->first();
-            if (is_null($comment)) {
-                return $this->respondBadRequest('You do not have permission to delete this comment');
-            }
+            $itemModel = null;
 
-            $comment->delete();
+            switch ($request->type) {
+                case 'content':
+                    $itemModel = ContentComment::where('id', $comment_id)->first();
+                    if (is_null($itemModel)) {
+                        return $this->respondBadRequest('Invalid ID supplied for ' . ucfirst($request->type));
+                    }
+                    break;
+                case 'comment':
+                    $itemModel = ContentCommentComment::where('id', $comment_id)->first();
+                    if (is_null($itemModel)) {
+                        return $this->respondBadRequest('Invalid ID supplied for ' . ucfirst($request->type));
+                    }
+                    break;
+            }    
+            //make sure user owns comment
+            if ( $itemModel->user_id != $request->user()->id) {
+                return $this->respondBadRequest('You do not have permission to delete this comment');
+            }    
+            $itemModel->delete();
             return $this->respondWithSuccess('Comment deleted successfully', [
-                'comment' => $comment,
+                'comment' => $itemModel,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -1882,30 +1917,45 @@ class ContentController extends Controller
     {
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $comment_id]), [
-                'id' => ['required', 'string', 'exists:content_comments,id'],
+                'id' => ['required', 'string'],
+                'type' => ['required', 'string', 'in:content,comment'],
+                'comment' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
+            $itemModel = null;
+
+            switch ($request->type) {
+                case 'content':
+                    $itemModel = ContentComment::where('id', $comment_id)
+                    ->with('user', 'user.profile_picture', 'user.roles', 'comments')
+                    ->first();
+                    if (is_null($itemModel)) {
+                        return $this->respondBadRequest('Invalid ID supplied for ' . ucfirst($request->type));
+                    }
+                    break;
+                case 'comment':
+                    $itemModel = ContentCommentComment::where('id', $comment_id)
+                    ->with('user', 'user.profile_picture', 'user.roles')
+                    ->first();
+                    if (is_null($itemModel)) {
+                        return $this->respondBadRequest('Invalid ID supplied for ' . ucfirst($request->type));
+                    }
+                    break;
+            }    
             //make sure user owns comment
-            $comment = ContentComment::where('id', $comment_id)
-            ->with('user', 'user.profile_picture', 'user.roles')
-            ->where('user_id', $request->user()->id)
-            ->first();
-            if (is_null($comment)) {
+            if ( $itemModel->user_id != $request->user()->id) {
                 return $this->respondBadRequest('You do not have permission to update this comment');
-            }
+            }    
 
-            if (! is_null($request->comment)) {
-                $comment->comment = $request->comment;
-            }
-
-            $comment->save();
+            $itemModel->comment = $request->comment;
+            $itemModel->save();
 
             return $this->respondWithSuccess('Comment has been updated successfully', [
-                'comment' => $comment,
+                'comment' => $itemModel,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);

@@ -39,4 +39,9 @@ class ContentComment extends Model
         return $this->belongsTo(Content::class);
     }
 
+    public function comments()
+    {
+        return $this->hasMany(ContentCommentComment::class, 'content_comment_id');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
+    }
+
 }

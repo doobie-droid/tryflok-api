@@ -179,6 +179,22 @@ class Content
         ];
     }
 
+    public static function generateCreateCommentCommentResponse(): array
+    {
+        return [
+            'status_code',
+        'message',
+        'data' => [
+            'comment' => [
+                'id',
+                'comment',
+                'content_comment_id',
+                'user_id',
+            ],
+        ],
+        ];
+    }
+
     public static function generateListCommentResponse(): array
     {
         return [

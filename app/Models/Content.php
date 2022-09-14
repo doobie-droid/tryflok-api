@@ -284,6 +284,7 @@ class Content extends Model
                  }]);
             },
         ])
+        ->with(['comments', 'comments.comments'])
         ->with([
             'access_through_ancestors' => function ($query) use ($user_id) {
                 $query->whereHas('userables', function (Builder $query) use ($user_id) {
@@ -314,6 +315,7 @@ class Content extends Model
                  }]);
             },
         ])
+        ->with(['comments', 'comments.comments'])
         ->withSum('challengeContributions', 'amount')
         ->with([
             'challengeContestants' => function ($query) {

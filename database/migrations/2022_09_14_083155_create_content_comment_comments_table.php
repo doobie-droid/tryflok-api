@@ -14,7 +14,10 @@ class CreateContentCommentCommentsTable extends Migration
     public function up()
     {
         Schema::create('content_comment_comments', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('user_id');//person writing comment
+            $table->mediumText('comment')->nullable();
+            $table->foreignUuid('content_comment_id');
             $table->timestamps();
         });
     }

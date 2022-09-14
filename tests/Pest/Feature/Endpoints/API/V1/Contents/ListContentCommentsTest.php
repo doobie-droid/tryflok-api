@@ -10,11 +10,16 @@ test('list content comments works', function()
             $content = Models\Content::factory()
             ->create();
 
-            Models\ContentComment::create([
+            $contentComment = Models\ContentComment::create([
             'user_id' => $user->id,
             'comment' => 'A content comment',
             'content_id' => $content->id,
+            ]);
 
+            Models\ContentCommentComment::create([
+                'user_id' => $user->id,
+                'comment' => 'A content comment',
+                'content_comment_id' => $contentComment->id,
             ]);
 
             $response = $this->json('GET', "/api/v1/contents/{$content->id}/comments");
