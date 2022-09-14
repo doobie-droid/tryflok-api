@@ -203,7 +203,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('{id}/comments', 'ContentController@createComment')->name('create-comment');    
             Route::get('{id}/comments', 'ContentController@listComments')->name('list-comments');
             Route::patch('{id}/comments/{comment_id}', 'ContentController@updateComment')->name('update-comment');
-            Route::delete('{id}/comments/{comment_id}', 'ContentController@deleteComment')->name('delete-comment');
+            Route::delete('{comment_id}/comments', 'ContentController@deleteComment')->name('delete-comment');
 
         });
         Route::group(['prefix' => 'polls'], function () {

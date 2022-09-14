@@ -1847,4 +1847,34 @@ class ContentController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
+
+    public function deleteComment(Request $request, $comment_id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'comment_id' => ['required', 'string', 'exists:content_comments,id'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            //make sure user owns content
+            $comment = ContentComment::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->eagerLoadBaseRelations()
+            ->first();
+            if (is_null($content)) {
+                return $this->respondBadRequest('You do not have permission to delete this content');
+            }
+
+            $comment->delete();
+            return $this->respondWithSuccess('Comment deleted successfully', [
+                'comment' => $comment,
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
 }
