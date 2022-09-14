@@ -1796,4 +1796,55 @@ class ContentController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
+
+    public function createComment(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:contents,id'],
+                'comment' => ['required', 'string'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+            $content = Content::where('id', $id)->first();
+
+            $comment = $content->comments()->create([
+                'comment' => $request->comment,
+                'user_id' => $request->user()->id,
+                'content_id' => $request->id,
+            ]);
+
+            return $this->respondWithSuccess('comment has been created successfully', [
+                'comment' => $comment->with('content')->first(),
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function listComments(Request $request, $id)
+    {
+        try {
+            $content = Content::where('id', $id)->first();
+            if (is_null($content)) {
+                return $this->respondBadRequest('Invalid content ID supplied');
+            }
+            $page = ctype_digit(strval($request->query('page', 1))) ? $request->query('page', 1) : 1;
+            $limit = ctype_digit(strval($request->query('limit', 10))) ? $request->query('limit', 10) : 1;
+            if ($limit > Constants::MAX_ITEMS_LIMIT) {
+                $limit = Constants::MAX_ITEMS_LIMIT;
+            }
+
+            $comments = $content->comments()->with('user', 'user.profile_picture', 'user.roles')->orderBy('created_at', 'desc')->paginate($limit, ['*'], 'page', $page);
+            return $this->respondWithSuccess('comments retrieved successfully', [
+                'comments' => $comments,
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
 }

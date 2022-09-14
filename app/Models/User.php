@@ -191,6 +191,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(ContentLike::class, 'content_id');
     }
 
+    public function contentComments()
+    {
+        return $this->hasMany(ContentComment::class, 'user_id');
+    }
+
     public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')
     {
         return $mainQuery
