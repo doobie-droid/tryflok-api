@@ -38,4 +38,9 @@ class Revenue extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function generatedFromContent()
+    {
+        return $this->belongsTo(Content::class, 'originating_content_id');
+    }
 }
