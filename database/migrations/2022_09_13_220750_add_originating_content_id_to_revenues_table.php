@@ -15,6 +15,8 @@ class AddOriginatingContentIdToRevenuesTable extends Migration
     {
         Schema::table('revenues', function (Blueprint $table) {
             $table->foreignUuid('originating_content_id')->nullable();
+            $table->string('originating_currency')->default('NGN');
+            $table->string('originating_client_source')->default('ios');
         });
     }
 
