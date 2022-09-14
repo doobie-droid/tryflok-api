@@ -11,6 +11,7 @@ use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceWithSensitive;
 use App\Jobs\Users\NotifyFollow as NotifyFollowJob;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
+use App\Jobs\Users\SendReferralEmails as SendReferralEmailsJob;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\Content;
@@ -169,6 +170,33 @@ class UserController extends Controller
             return $this->respondWithSuccess('Login successful', [
                 'user' => new UserResourceWithSensitive($user),
             ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function referUsers(Request $request)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'emails' => ['required'],
+                'emails.*.email' => ['required', 'email'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $user = $request->user();
+
+            foreach( $request->emails as $email) {
+                SendReferralEmailsJob::dispatch([
+                    'email' => $email,
+                    'referrer' => $user,
+                ]);
+            }
+            return $this->respondWithSuccess('referral emails have been successfully sent');
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
