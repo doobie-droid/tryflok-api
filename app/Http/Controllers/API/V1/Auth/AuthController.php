@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Jobs\Users\SendEmailToReferrer as SendEmailToReferrerJob;
 
 class AuthController extends Controller
 {
@@ -55,6 +56,10 @@ class AuthController extends Controller
                 if (! is_null($referrer)) {
                     $user->referrer_id = $referrer->id;
                     $user->save();
+                    SendEmailToReferrerJob::dispatch([
+                        'referrer' => $referrer,
+                        'user' => $user,
+                    ]);
                 }
             }
 
