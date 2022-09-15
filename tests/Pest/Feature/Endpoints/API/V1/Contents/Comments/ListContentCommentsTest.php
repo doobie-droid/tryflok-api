@@ -26,7 +26,6 @@ test('list content comments works', function()
             $response->assertStatus(200)
             ->assertJsonStructure(MockData\Content::generateListCommentResponse());
             $this->assertEquals($response->getData()->data->comments->data[0]->user_id, $user->id);
-            
 });
 
 it('returns a 400 when invalid content ID is supplied', function()

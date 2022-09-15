@@ -34,7 +34,7 @@ class ContentCommentComment extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function contentComments()
+    public function contentComment()
     {
         return $this->belongsTo(ContentComment::class);
     }
