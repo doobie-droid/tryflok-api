@@ -60,7 +60,7 @@ class MigrateYoutubeVideo implements ShouldQueue
         $digiverse = $this->digiverse;
         $user = $this->user;
         $price_in_dollars = $this->price_in_dollars;
-
+        Log::info("Video url: ".$url);
         preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $url, $match);
         if (! empty($match))
         {
