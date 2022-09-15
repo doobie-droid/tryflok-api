@@ -18,6 +18,7 @@ class CreateContentCommentCommentsTable extends Migration
             $table->foreignUuid('user_id');//person writing comment
             $table->mediumText('comment')->nullable();
             $table->foreignUuid('content_comment_id');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

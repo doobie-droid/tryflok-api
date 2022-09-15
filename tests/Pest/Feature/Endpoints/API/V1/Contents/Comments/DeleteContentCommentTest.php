@@ -25,12 +25,8 @@ test('only selected comment is deleted', function()
         $response = $this->json('DELETE', "/api/v1/content-comments/{$comment1->id}");
         $response->assertStatus(200);
 
-        $this->assertDatabaseMissing('content_comments', [
-                'id' => $comment1->id,
-                'comment' => $comment1->comment,
-                'user_id' => $user->id,
-                'content_id' => $content->id,
-        ]);
+        $comment_returned = $response->getData()->data->comment;
+        $this->assertTrue($comment_returned->deleted_at != null);
         
         $this->assertDatabaseHas('content_comments', [
                 'id' => $comment2->id,
@@ -105,10 +101,6 @@ test('delete comment works for content comment', function()
         $response = $this->json('DELETE', "/api/v1/content-comments/{$comment->id}");
         $response->assertStatus(200);
 
-        $this->assertDatabaseMissing('content_comments', [
-                'id' => $comment->id,
-                'comment' => $comment->comment,
-                'user_id' => $user->id,
-                'content_id' => $comment->id,
-        ]);
+        $comment_returned = $response->getData()->data->comment;
+        $this->assertTrue($comment_returned->deleted_at != null);
 });
