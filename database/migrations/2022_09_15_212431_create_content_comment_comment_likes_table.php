@@ -14,7 +14,9 @@ class CreateContentCommentCommentLikesTable extends Migration
     public function up()
     {
         Schema::create('content_comment_comment_likes', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('content_comment_comment_id'); // id of the content comment comment
+            $table->foreignUuid('user_id');
             $table->timestamps();
         });
     }
