@@ -24,6 +24,6 @@ test('list content comment comments works', function()
 
             $response = $this->json('GET', "/api/v1/content-comments/{$contentComment->id}/comments");
             $response->assertStatus(200)
-            ->assertJsonStructure(MockData\Content::generateListCommentResponse());
-            $this->assertEquals($response->getData()->data->comments->data[0]->user_id, $user->id);
+            ->assertJsonStructure(MockData\Content::generateListCommentCommentsResponse());
+            $this->assertEquals($response->getData()->data->commentComments->data[0]->user_id, $user->id);
 });

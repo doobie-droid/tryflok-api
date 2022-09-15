@@ -214,6 +214,26 @@ class Content
         ],
         ];
     }
+
+    public static function generateListCommentCommentsResponse(): array
+    {
+        return [
+            'status_code',
+        'message',
+        'data' => [
+                'commentComments' => [
+                    'data' => [
+                        '0' => [
+                            'id',
+                            'comment',
+                            'content_comment_id',
+                            'user_id',
+                    ],
+                    ]
+            ]
+        ],
+        ];
+    }
     
 
     const STANDARD_STRUCTURE = [
