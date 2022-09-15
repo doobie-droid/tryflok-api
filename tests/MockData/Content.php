@@ -162,6 +162,78 @@ class Content
             ],
         ];
     }
+
+    public static function generateCreateCommentResponse(): array
+    {
+        return [
+            'status_code',
+        'message',
+        'data' => [
+            'comment' => [
+                'id',
+                'comment',
+                'content_id',
+                'user_id',
+            ],
+        ],
+        ];
+    }
+
+    public static function generateCreateCommentCommentResponse(): array
+    {
+        return [
+            'status_code',
+        'message',
+        'data' => [
+            'comment' => [
+                'id',
+                'comment',
+                'content_comment_id',
+                'user_id',
+            ],
+        ],
+        ];
+    }
+
+    public static function generateListCommentResponse(): array
+    {
+        return [
+            'status_code',
+        'message',
+        'data' => [
+                'comments' => [
+                    'data' => [
+                        '0' => [
+                            'id',
+                            'comment',
+                            'content_id',
+                            'user_id',
+                    ],
+                    ]
+            ]
+        ],
+        ];
+    }
+
+    public static function generateListCommentCommentsResponse(): array
+    {
+        return [
+            'status_code',
+        'message',
+        'data' => [
+                'commentComments' => [
+                    'data' => [
+                        '0' => [
+                            'id',
+                            'comment',
+                            'content_comment_id',
+                            'user_id',
+                    ],
+                    ]
+            ]
+        ],
+        ];
+    }
     
 
     const STANDARD_STRUCTURE = [

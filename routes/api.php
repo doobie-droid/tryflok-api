@@ -93,6 +93,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::group(['prefix' => 'apple-pay'], function () {
             Route::post('webhook', 'PaymentController@applePayWebhook');
         });
+
+        Route::get('exchange-rates', 'PaymentController@listExchangeRates')->name('list-exchange-rates');
     });
 });
 
@@ -162,6 +164,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::delete('payment-account', 'UserController@removePaymentAccount');
             Route::get('revenues', 'UserController@listRevenues')->name('list-revenues');
             Route::post('referrer', 'UserController@addReferrer');
+            Route::post('refer', 'UserController@referUsers')->name('refer-users');
         });
 
         Route::group(['prefix' => 'subscriptions'], function () {
@@ -200,7 +203,20 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::post('{id}/like', 'ContentController@likeContent')->name('like-content');
             Route::delete('{id}/like', 'ContentController@unlikeContent')->name('unlike-content');
 
+            Route::post('{id}/comments', 'ContentCommentController@createContentComment')->name('create-content-comment');    
+            Route::get('{id}/comments', 'ContentCommentController@listContentComments')->name('list-content-comments');
         });
+        Route::group(['prefix' => 'content-comments'], function () {
+            Route::patch('{id}', 'ContentCommentController@updateContentComment')->name('update-content-comment');
+            Route::delete('{id}', 'ContentCommentController@deleteContentComment')->name('delete-content-comment');
+            Route::post('{id}/comments', 'ContentCommentController@createContentCommentComment')->name('create-content-comment-comment');
+            Route::get('{id}/comments', 'ContentCommentController@listContentCommentComments')->name('list-content-comment-comments');
+        });
+        Route::group(['prefix' => 'content-comment-comments'], function () {
+            Route::patch('{id}', 'ContentCommentController@updateContentCommentComment')->name('update-content-comment-comment');
+            Route::delete('{id}', 'ContentCommentController@deleteContentCommentComment')->name('delete-content-comment-comment');
+        });
+
         Route::group(['prefix' => 'polls'], function () {
             Route::patch('{id}', 'ContentPollController@updatePoll')->name('update-poll');
             Route::delete('{id}', 'ContentPollController@deletePoll')->name('delete-poll');

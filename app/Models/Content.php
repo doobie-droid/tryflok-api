@@ -113,6 +113,11 @@ class Content extends Model
         return $this->morphMany(Revenue::class, 'revenueable');
     }
 
+    public function generatedTips()
+    {
+        return $this->hasMany(Revenue::class, 'originating_content_id');
+    }
+
     public function reviews()
     {
         return $this->morphMany(Review::class, 'reviewable');
@@ -145,7 +150,12 @@ class Content extends Model
 
     public function likes()
     {
-        return $this->hasMany(ContentLike::class, 'content_id');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
+        return $this->hasMany(ContentLike::class, 'content_id');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(ContentComment::class, 'content_id');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
     }
 
     public function collections()
@@ -279,6 +289,7 @@ class Content extends Model
                  }]);
             },
         ])
+        ->with(['comments', 'comments.comments'])
         ->with([
             'access_through_ancestors' => function ($query) use ($user_id) {
                 $query->whereHas('userables', function (Builder $query) use ($user_id) {
@@ -309,7 +320,9 @@ class Content extends Model
                  }]);
             },
         ])
+        ->with(['comments', 'comments.comments'])
         ->withSum('challengeContributions', 'amount')
+        ->withSum('generatedTips', 'amount')
         ->with([
             'challengeContestants' => function ($query) {
                 $query->with('contestant', 'contestant.profile_picture');

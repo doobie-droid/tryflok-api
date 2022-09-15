@@ -106,8 +106,20 @@ test('poll is returned with content', function(){
         $response = $this->json('GET', "/api/v1/contents/{$this->content->id}");
         $response->assertStatus(200)->assertJsonStructure(MockData\Content::generateGetSingleContentResponse());
         $polls = $response->getData()->data->content->polls;
-        $this->assertFalse(empty($polls));
-        
+        $this->assertFalse(empty($polls));      
+});
+
+test('generated tips is returned with single content', function()
+{
+        $contentTips = Models\Revenue::factory()
+        ->for($this->content, 'generatedFromContent')
+        ->create([
+            'revenue_from' => 'tips',
+        ]);
+        $response = $this->json('GET', "/api/v1/contents/{$this->content->id}");
+        $response->assertStatus(200)->assertJsonStructure(MockData\Content::generateGetSingleContentResponse());
+        $contentTips = $response->getData()->data->content->generated_tips_sum_amount;
+        $this->assertFalse(empty($contentTips));      
 });
 
 test('vote is returned with content if user has voted before', function()

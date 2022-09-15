@@ -2,20 +2,22 @@
 
 namespace App\Models;
 
-use App\Traits\Uuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Uuid;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Revenue extends Model
+class ContentCommentComment extends Model
 {
     use HasFactory;
     use Uuid;
+    use SoftDeletes;
 
     /**
-     * The attributes that are not mass assignable.
-     *
-     * @var array
-     */
+    * The attributes that are not mass assignable.
+    *
+    * @var array
+    */
     protected $guarded = [
         'id',
     ];
@@ -29,18 +31,13 @@ class Revenue extends Model
 
     protected $guard_name = 'api';
 
-    public function revenueable()
-    {
-        return $this->morphTo();
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function generatedFromContent()
+    public function contentComment()
     {
-        return $this->belongsTo(Content::class, 'originating_content_id');
+        return $this->belongsTo(ContentComment::class);
     }
 }
