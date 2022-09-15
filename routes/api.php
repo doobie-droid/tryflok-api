@@ -217,8 +217,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'content-comment-comments'], function () {
             Route::patch('{id}', 'ContentCommentController@updateContentCommentComment')->name('update-content-comment-comment');
             Route::delete('{id}', 'ContentCommentController@deleteContentCommentComment')->name('delete-content-comment-comment');
-            Route::post('{id}', 'ContentCommentController@likeContentCommentComment')->name('like-content-comment-comment');
-            Route::delete('{id}', 'ContentCommentController@unlikeContentCommentComment')->name('unlike-content-comment-comment');
+            Route::post('{id}/like', 'ContentCommentController@likeContentCommentComment')->name('like-content-comment-comment');
+            Route::delete('{id}/like', 'ContentCommentController@unlikeContentCommentComment')->name('unlike-content-comment-comment');
         });
 
         Route::group(['prefix' => 'polls'], function () {

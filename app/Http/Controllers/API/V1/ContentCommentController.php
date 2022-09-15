@@ -270,7 +270,8 @@ class ContentCommentController extends Controller
                 'content_comment_id' => $id,
             ]);
             }
-            $contentComment = ContentComment::where('id', $id)
+            $contentComment = ContentComment::with('likes')
+            ->where('id', $id)
             ->where('user_id', $user_id)
             ->first();
 
@@ -304,11 +305,11 @@ class ContentCommentController extends Controller
             $contentCommentLike = ContentCommentLike::where('user_id', $user_id)->first();
             if ( ! is_null($contentCommentLike))
             {
-                $contentCommentLike->where('user_id', $user_id)->delete();  
+                $contentCommentLike->delete();  
             }
-                $contentComment = ContentComment::where('id', $id)
-                   ->where('user_id', $user_id)
-                    ->first();    
+            $contentComment = ContentComment::where('id', $id)
+            ->where('user_id', $user_id)
+            ->first();   
 
             return $this->respondWithSuccess('You have unliked this content comment', [
                 'contentComment' => $contentComment,
@@ -350,7 +351,8 @@ class ContentCommentController extends Controller
                 'content_comment_comment_id' => $id,
             ]);
             }
-            $contentCommentComment = ContentCommentComment::where('id', $id)
+            $contentCommentComment = ContentCommentComment::with('likes')
+            ->where('id', $id)
             ->where('user_id', $user_id)
             ->first();
 
@@ -387,8 +389,8 @@ class ContentCommentController extends Controller
                 $contentCommentCommentLike->where('user_id', $user_id)->delete();  
             }
                 $contentCommentComment = ContentCommentComment::where('id', $id)
-                   ->where('user_id', $user_id)
-                    ->first();    
+                ->where('user_id', $user_id)
+                ->first();    
 
             return $this->respondWithSuccess('You have unliked this content comment', [
                 'contentCommentComment' => $contentCommentComment,
