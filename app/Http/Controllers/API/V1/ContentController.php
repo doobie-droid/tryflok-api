@@ -17,6 +17,8 @@ use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
+use App\Models\ContentComment;
+use App\Models\ContentCommentComment;
 use App\Models\ContentLike;
 use App\Models\ContentIssue;
 use App\Models\User;
@@ -1795,5 +1797,5 @@ class ContentController extends Controller
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
-    }
+    }   
 }
