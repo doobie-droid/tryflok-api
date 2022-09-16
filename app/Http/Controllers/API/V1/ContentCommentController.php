@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Content;
 use App\Models\ContentComment;
 use App\Models\ContentCommentComment;
+use App\Models\ContentCommentLike;
+use App\Models\ContentCommentCommentLike;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -236,5 +238,163 @@ class ContentCommentController extends Controller
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
+    }
+
+    public function likeContentComment(Request $request, $id)
+    {
+        try{
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:content_comments,id,deleted_at,NULL'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            //check if the user has liked the content comment already
+            $contentCommentLike = ContentCommentLike::where('content_comment_id', $id)
+            ->where('user_id', $user_id)
+            ->first();
+
+            if ( is_null($contentCommentLike)) //user has not liked the content comment before; create
+            {
+            ContentCommentLike::create([
+                'user_id' => $user_id,
+                'content_comment_id' => $id,
+            ]);
+            }
+            $contentComment = ContentComment::with('likes')
+            ->where('id', $id)
+            ->first();
+
+            return $this->respondWithSuccess('You have liked this content comment', [
+                'contentComment' => $contentComment,
+            ]);
+            
+        }catch(\Exception $exception){
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function unlikeContentComment(Request $request, $id)
+    {
+        try{
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:content_comments,id,deleted_at,NULL'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            $contentCommentLike = ContentCommentLike::where('user_id', $user_id)->first();
+            if ( ! is_null($contentCommentLike))
+            {
+                $contentCommentLike->delete();  
+            }
+            $contentComment = ContentComment::where('id', $id)
+            ->where('user_id', $user_id)
+            ->first();   
+
+            return $this->respondWithSuccess('You have unliked this content comment', [
+                'contentComment' => $contentComment,
+            ]); 
+
+        }catch(\Exception $exception){
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        } 
+    }
+
+    public function likeContentCommentComment(Request $request, $id)
+    {
+        try{
+
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:content_comment_comments,id,deleted_at,NULL'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            //check if the user has liked the content comment comment already
+            $contentCommentCommentLike = ContentCommentCommentLike::where('content_comment_comment_id', $id)
+            ->where('user_id', $user_id)
+            ->first();
+
+            if ( is_null($contentCommentCommentLike)) //user has not liked the content comment comment before; create
+            {
+            ContentCommentCommentLike::create([
+                'user_id' => $user_id,
+                'content_comment_comment_id' => $id,
+            ]);
+            }
+            $contentCommentComment = ContentCommentComment::with('likes')
+            ->where('id', $id)
+            ->first();
+
+            return $this->respondWithSuccess('You have liked this content comment comment', [
+                'contentCommentComment' => $contentCommentComment,
+            ]);
+            
+        }catch(\Exception $exception){
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function unlikeContentCommentComment(Request $request, $id)
+    {
+        try{
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:content_comment_comments,id,deleted_at,NULL'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+
+            $contentCommentCommentLike = ContentCommentCommentLike::where('user_id', $user_id)->first();
+            if ( ! is_null($contentCommentCommentLike))
+            {
+                $contentCommentCommentLike->delete();  
+            }
+            $contentCommentComment = ContentCommentComment::where('id', $id)
+            ->first();    
+
+            return $this->respondWithSuccess('You have unliked this content comment', [
+                'contentCommentComment' => $contentCommentComment,
+            ]); 
+
+        }catch(\Exception $exception){
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        } 
     }
 }

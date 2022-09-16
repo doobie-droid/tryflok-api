@@ -211,10 +211,14 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::delete('{id}', 'ContentCommentController@deleteContentComment')->name('delete-content-comment');
             Route::post('{id}/comments', 'ContentCommentController@createContentCommentComment')->name('create-content-comment-comment');
             Route::get('{id}/comments', 'ContentCommentController@listContentCommentComments')->name('list-content-comment-comments');
+            Route::post('{id}/like', 'ContentCommentController@likeContentComment')->name('like-content-comment');
+            Route::delete('{id}/like', 'ContentCommentController@unlikeContentComment')->name('unlike-content-comment');
         });
         Route::group(['prefix' => 'content-comment-comments'], function () {
             Route::patch('{id}', 'ContentCommentController@updateContentCommentComment')->name('update-content-comment-comment');
             Route::delete('{id}', 'ContentCommentController@deleteContentCommentComment')->name('delete-content-comment-comment');
+            Route::post('{id}/like', 'ContentCommentController@likeContentCommentComment')->name('like-content-comment-comment');
+            Route::delete('{id}/like', 'ContentCommentController@unlikeContentCommentComment')->name('unlike-content-comment-comment');
         });
 
         Route::group(['prefix' => 'polls'], function () {
