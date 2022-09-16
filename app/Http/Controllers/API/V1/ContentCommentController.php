@@ -243,7 +243,6 @@ class ContentCommentController extends Controller
     public function likeContentComment(Request $request, $id)
     {
         try{
-
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:content_comments,id'],
             ]);
@@ -272,7 +271,6 @@ class ContentCommentController extends Controller
             }
             $contentComment = ContentComment::with('likes')
             ->where('id', $id)
-            ->where('user_id', $user_id)
             ->first();
 
             return $this->respondWithSuccess('You have liked this content comment', [
@@ -353,7 +351,6 @@ class ContentCommentController extends Controller
             }
             $contentCommentComment = ContentCommentComment::with('likes')
             ->where('id', $id)
-            ->where('user_id', $user_id)
             ->first();
 
             return $this->respondWithSuccess('You have liked this content comment comment', [
@@ -389,7 +386,6 @@ class ContentCommentController extends Controller
                 $contentCommentCommentLike->where('user_id', $user_id)->delete();  
             }
                 $contentCommentComment = ContentCommentComment::where('id', $id)
-                ->where('user_id', $user_id)
                 ->first();    
 
             return $this->respondWithSuccess('You have unliked this content comment', [
