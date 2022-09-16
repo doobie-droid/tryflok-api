@@ -30,8 +30,7 @@ test('user who is signed in can like content comment', function()
         $contentCommentLike = Models\ContentCommentLike::where('content_comment_id', $contentComment->id)
         ->where('user_id', $user->id)
         ->first();
-
-        $this->assertTrue($contentCommentLike->count() === 1);
+        $this->assertEquals($contentCommentLike->count(), 1);
 });
 
 test('user who is not signed in cannot like a content comment', function()

@@ -244,7 +244,7 @@ class ContentCommentController extends Controller
     {
         try{
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
-                'id' => ['required', 'string', 'exists:content_comments,id'],
+                'id' => ['required', 'string', 'exists:content_comments,id,deleted_at,NULL'],
             ]);
 
             if ($validator->fails()) {
@@ -287,7 +287,7 @@ class ContentCommentController extends Controller
     {
         try{
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
-                'id' => ['required', 'string', 'exists:content_comments,id'],
+                'id' => ['required', 'string', 'exists:content_comments,id,deleted_at,NULL'],
             ]);
 
             if ($validator->fails()) {
@@ -324,7 +324,7 @@ class ContentCommentController extends Controller
         try{
 
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
-                'id' => ['required', 'string', 'exists:content_comment_comments,id'],
+                'id' => ['required', 'string', 'exists:content_comment_comments,id,deleted_at,NULL'],
             ]);
 
             if ($validator->fails()) {
@@ -367,7 +367,7 @@ class ContentCommentController extends Controller
     {
         try{
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
-                'id' => ['required', 'string', 'exists:content_comment_comments,id'],
+                'id' => ['required', 'string', 'exists:content_comment_comments,id,deleted_at,NULL'],
             ]);
 
             if ($validator->fails()) {
@@ -383,10 +383,10 @@ class ContentCommentController extends Controller
             $contentCommentCommentLike = ContentCommentCommentLike::where('user_id', $user_id)->first();
             if ( ! is_null($contentCommentCommentLike))
             {
-                $contentCommentCommentLike->where('user_id', $user_id)->delete();  
+                $contentCommentCommentLike->delete();  
             }
-                $contentCommentComment = ContentCommentComment::where('id', $id)
-                ->first();    
+            $contentCommentComment = ContentCommentComment::where('id', $id)
+            ->first();    
 
             return $this->respondWithSuccess('You have unliked this content comment', [
                 'contentCommentComment' => $contentCommentComment,
