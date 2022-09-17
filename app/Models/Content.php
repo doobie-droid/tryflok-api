@@ -322,7 +322,7 @@ class Content extends Model
         ])
         ->with(['comments', 'comments.comments'])
         ->withSum('challengeContributions', 'amount')
-        ->withSum('generatedTips', 'amount')
+        ->withCount('generatedTips')
         ->with([
             'challengeContestants' => function ($query) {
                 $query->with('contestant', 'contestant.profile_picture');

@@ -118,7 +118,7 @@ test('generated tips is returned with single content', function()
         ]);
         $response = $this->json('GET', "/api/v1/contents/{$this->content->id}");
         $response->assertStatus(200)->assertJsonStructure(MockData\Content::generateGetSingleContentResponse());
-        $contentTips = $response->getData()->data->content->generated_tips_sum_amount;
+        $contentTips = $response->getData()->data->content->generated_tips_count;
         $this->assertFalse(empty($contentTips));      
 });
 
