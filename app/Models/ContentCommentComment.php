@@ -40,4 +40,9 @@ class ContentCommentComment extends Model
     {
         return $this->belongsTo(ContentComment::class);
     }
+
+    public function likes()
+    {
+        return $this->hasMany(ContentCommentCommentLike::class, 'content_comment_comment_id');
+    }
 }

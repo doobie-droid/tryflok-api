@@ -196,6 +196,16 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(ContentComment::class, 'user_id');
     }
 
+    public function contentCommentLikes()
+    {
+        return $this->hasMany(ContentCommentLike::class, 'user_id');
+    }
+
+    public function contentCommentCommentLikes()
+    {
+        return $this->hasMany(ContentCommentCommentLike::class, 'user_id');
+    }
+
     public function contentCommentComments()
     {
         return $this->hasMany(ContentCommentComment::class, 'user_id');
