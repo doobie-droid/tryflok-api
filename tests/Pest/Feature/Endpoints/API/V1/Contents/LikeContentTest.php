@@ -73,3 +73,30 @@ test('user cannot like a content more than once', function()
 
         $this->assertTrue($contentLike->count() === 1);
 });
+test('notification is sent to owner of content', function()
+{
+        $user = Models\User::factory()->create();
+        $user2 = Models\User::factory()->create();
+        $this->be($user);
+        $content = Models\Content::factory()
+        ->create([
+            'user_id' => $user2,
+        ]);
+        $like = $content->likes()->create([
+            'user_id' => $user->id,
+        ]);
+        $response = $this->json('POST', "/api/v1/contents/{$content->id}/like");  
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('content_likes', [
+            'user_id' => $user->id,
+            'content_id' => $content->id,
+        ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'recipient_id' => $user2->id,
+            'notifier_id' => $user->id,
+            'notificable_type' => 'content',
+            'message' => "@{$user->username} just liked your content: {$content->title}",
+        ]);
+});
