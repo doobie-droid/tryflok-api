@@ -54,7 +54,7 @@ class AssetController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'files.*' => ['required', 'image', 'max:5120'], //5MB
+                'files.*' => ['required', 'image', 'max:5120', 'mimetypes:image/gif,image/jpeg,image/png,image/tiff,image/webp,image/avif,image/bmp'], //5MB
             ]);
 
             if ($validator->fails()) {
@@ -109,7 +109,7 @@ class AssetController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'files.*' => ['required', 'max:4096000'], // 4GB
+                'files.*' => ['required', 'max:4096000', 'mimetypes:video/mp4,video/mpeg,video/ogg,video/x-msvideo,video/webm'], // 4GB
             ]);
 
             if ($validator->fails()) {
@@ -163,7 +163,7 @@ class AssetController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'files.*' => ['required', 'max:204800'], // 200MB
+                'files.*' => ['required', 'max:204800', 'mimetypes:audio/ogg,audio/mpeg,audio/aac,audio/wav,audio/webm'], // 200MB
             ]);
 
             if ($validator->fails()) {
