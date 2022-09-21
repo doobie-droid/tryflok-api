@@ -29,6 +29,5 @@ test('toggle auto renew works', function()
         $this->be($this->user);
 
         $response = $this->json('GET', "/api/v1/account/subscriptions");
-        dd($response->getData());
         $response->assertStatus(200);
 });
