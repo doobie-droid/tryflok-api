@@ -211,6 +211,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(ContentCommentComment::class, 'user_id');
     }
 
+    public function tags()
+    {
+        return $this->hasMany(Tag::class, 'user_id');
+    }
+
     public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')
     {
         return $mainQuery

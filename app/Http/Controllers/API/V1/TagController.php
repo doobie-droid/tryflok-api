@@ -34,4 +34,57 @@ class TagController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
+
+    public function create(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'tags' => ['required'],
+                'tags.*.tag' => ['required', 'string'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+            foreach ($request->tags as $tag) {
+                $tag = Tag::where('name', $tag)->first();
+                if ( is_null($tag)) {
+                    Tag::create([
+                        'name' => $tag,
+                        'tag_priority' => 1,
+                        'user_id' => $request->user()->id,
+                    ]);
+                }
+            }
+            return $this->respondWithSuccess('Tags created successfully');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function delete(Request $request, $id)
+    {
+        $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+            'id' => ['required', 'string', 'exists:tags,id'],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+        }
+        if ($request->user() == null || $request->user()->id == null) {
+            $user_id = '';
+        } else {
+            $user_id = $request->user()->id;
+        }
+        //make sure user owns tag
+        $tag = Tag::where('id', $id)->where('user_id', $user_id)->first();
+        if ( ! is_null($tag))
+        {
+            $tag->delete();
+        }
+        return $this->respondWithSuccess('Tags created successfully', [
+            'tag' => $tag,
+        ]);
+    }
 }

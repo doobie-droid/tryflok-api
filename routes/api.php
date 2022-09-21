@@ -171,6 +171,11 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::patch('{id}', 'SubscriptionController@toggleAutorenew')->name('toggle-auto-renew');
         });
 
+        Route::group(['prefix' => 'tags'], function () {
+            Route::post('/', 'TagsController@create')->name('create-tag');
+            Route::delete('{id}', 'TagsController@delete')->name('delete-tag');
+        });
+
         Route::group(['prefix' => 'contents'], function () {
             Route::post('/', 'ContentController@create')->name('create-content');
             Route::patch('{id}', 'ContentController@update')->name('update-content');

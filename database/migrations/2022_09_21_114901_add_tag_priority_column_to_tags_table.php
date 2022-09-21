@@ -15,6 +15,7 @@ class AddTagPriorityColumnToTagsTable extends Migration
     {
         Schema::table('tags', function (Blueprint $table) {
             $table->boolean('tag_priority')->default(0);
+            $table->foreignUuid('user_id')->nullable();
         });
     }
 

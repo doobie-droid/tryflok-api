@@ -36,4 +36,9 @@ class Tag extends Model
     {
         return $this->morphedByMany(Collection::class, 'taggable');
     }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
