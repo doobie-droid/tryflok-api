@@ -21,7 +21,7 @@ class TagController extends Controller
             }
             $search = urldecode($request->query('search', ''));
 
-            $tags = Models\Tag::where('name', 'LIKE', "%{$search}%")->orderBy('name')->paginate($limit, ['*'], 'page', $page);
+            $tags = Models\Tag::where('name', 'LIKE', "%{$search}%")->where('tag_priority', 1)->orderBy('name')->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Tags retrieved successfully', [
                 'tags' => TagResource::collection($tags),
