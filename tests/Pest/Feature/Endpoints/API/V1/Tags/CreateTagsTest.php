@@ -24,4 +24,4 @@ test('create tags works', function()
         $response->assertStatus(200);
         $tags = Models\Tag::where('user_id', $user->id)->get();
         $this->assertEquals($tags->count(), 3);
-})->skip();
+});

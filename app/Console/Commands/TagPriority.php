@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Tag;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class TagPriority extends Command
 {
@@ -42,17 +43,20 @@ class TagPriority extends Command
         $tags = file(public_path("Tags.csv"));
         foreach ($tags as $tag) {
             $tag = strToLower($tag);
-            $dbTag = Tag::where('name', $tag)->first();
-            if ( ! is_null($dbTag)) {
-                $dbTag->tag_priority = 1;
-                $dbTag->save();
-            }
-            if ( is_null($dbTag)) {
-                Tag::create([
-                    'name' => $tag,
-                    'tag_priority' => 1,
-                ]);
-            }            
+            $tags = explode("&",$tag);
+            foreach ($tags as $tag) {
+                $dbTag = Tag::where('name', $tag)->first();
+                if ( ! is_null($dbTag)) {
+                    $dbTag->tag_priority = 1;
+                    $dbTag->save();
+                }
+                if ( is_null($dbTag)) {
+                    Tag::create([
+                        'name' => $tag,
+                        'tag_priority' => 1,
+                    ]);
+                }    
+            }        
         };
         return Command::SUCCESS;
     }

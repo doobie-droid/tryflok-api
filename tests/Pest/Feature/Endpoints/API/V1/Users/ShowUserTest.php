@@ -14,9 +14,10 @@ it('works when user is not signed in', function()
         ]);
 
         $response = $this->json('GET', "/api/v1/users/{$user_to_get->id}");
+        dd($response->getData());
         $response->assertStatus(200)
         ->assertJsonStructure(MockData\User::generateGetUserResponse());
-});
+})->only();
 
 it('works when username is passed', function ()
 {

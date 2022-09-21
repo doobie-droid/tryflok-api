@@ -213,7 +213,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function tags()
     {
-        return $this->hasMany(Tag::class, 'user_id');
+        return $this->morphToMany(Tag::class, 'taggable');
     }
 
     public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')

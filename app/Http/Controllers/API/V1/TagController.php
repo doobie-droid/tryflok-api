@@ -9,6 +9,9 @@ use App\Models;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use App\Constants\Roles;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class TagController extends Controller
 {
@@ -47,15 +50,23 @@ class TagController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
+            if ($request->user() == null || $request->user()->id == null) {
+                $user_id = '';
+            } else {
+                $user_id = $request->user()->id;
+            }
+            if (! $request->user()->hasRole(Roles::ADMIN) && ! $request->user()->hasRole(Roles::SUPER_ADMIN)) {
+                return $this->respondBadRequest('You do not have permission to add tags');   
+            }
+
             foreach ($request->tags as $tag) {
                 $dbTag = Models\Tag::where('name', $tag)->first();
                 if ( is_null($dbTag)) {
-                    Models\Tag::create([
+                    $tag = Models\Tag::create([
                         'name' => strToLower($tag['name']),
                         'tag_priority' => 1,
-                        'user_id' => $request->user()->id,
                     ]);
-                }
+            }
             }
             return $this->respondWithSuccess('Tags created successfully');
         } catch (\Exception $exception) {
@@ -73,17 +84,11 @@ class TagController extends Controller
         if ($validator->fails()) {
             return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
         }
-        if ($request->user() == null || $request->user()->id == null) {
-            $user_id = '';
-        } else {
-            $user_id = $request->user()->id;
+        if (! $request->user()->hasRole(Roles::ADMIN) && ! $request->user()->hasRole(Roles::SUPER_ADMIN)) {
+            return $this->respondBadRequest('You do not have permission to add tags');   
         }
         //make sure user owns tag
-        $tag = Models\Tag::where('id', $id)->where('user_id', $user_id)->first();
-        if ( is_null($tag))
-        {
-            return $this->respondBadRequest('You cannot delete this tag because you do not own it');  
-        }
+        $tag = Models\Tag::where('id', $id)->first();
         if ( ! is_null($tag))
         {
             $tag->delete();
