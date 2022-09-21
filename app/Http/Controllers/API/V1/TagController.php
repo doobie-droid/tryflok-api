@@ -66,6 +66,9 @@ class TagController extends Controller
                         'name' => strToLower($tag['name']),
                         'tag_priority' => 1,
                     ]);
+                    $request->user()->tags()->attach($tag->id, [
+                        'id' => Str::uuid(),
+                    ]);
             }
             }
             return $this->respondWithSuccess('Tags created successfully');
@@ -87,7 +90,6 @@ class TagController extends Controller
         if (! $request->user()->hasRole(Roles::ADMIN) && ! $request->user()->hasRole(Roles::SUPER_ADMIN)) {
             return $this->respondBadRequest('You do not have permission to add tags');   
         }
-        //make sure user owns tag
         $tag = Models\Tag::where('id', $id)->first();
         if ( ! is_null($tag))
         {

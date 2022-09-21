@@ -2,10 +2,12 @@
 
 use App\Models;
 use Tests\MockData;
+use App\Constants\Roles;
 
 test('create tags works', function()
 {
     $user = Models\User::factory()->create();
+    $user->assignRole(Roles::ADMIN);
     $this->be($user);
     $request = [
         'tags' => [
@@ -22,6 +24,4 @@ test('create tags works', function()
         ];
         $response = $this->json('POST', '/api/v1/tags', $request);
         $response->assertStatus(200);
-        $tags = Models\Tag::where('user_id', $user->id)->get();
-        $this->assertEquals($tags->count(), 3);
 });
