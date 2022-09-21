@@ -172,8 +172,8 @@ Route::group(['middleware' => 'auth:api'], function () {
         });
 
         Route::group(['prefix' => 'tags'], function () {
-            Route::post('/', 'TagsController@create')->name('create-tag');
-            Route::delete('{id}', 'TagsController@delete')->name('delete-tag');
+            Route::post('/', 'TagController@create')->name('create-tag');
+            Route::delete('{id}', 'TagController@delete')->name('delete-tag');
         });
 
         Route::group(['prefix' => 'contents'], function () {

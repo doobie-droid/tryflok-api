@@ -8,6 +8,10 @@ use Illuminate\Support\Str;
 it('works when user is not signed in', function()
 {
         $user_to_get = Models\User::factory()->create();
+        $user_to_get->tags()->create([
+            'name' => 'Football',
+            'tag_priority' => 1,
+        ]);
 
         $response = $this->json('GET', "/api/v1/users/{$user_to_get->id}");
         $response->assertStatus(200)

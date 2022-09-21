@@ -5,9 +5,10 @@ namespace App\Http\Controllers\API\V1;
 use App\Constants\Constants;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TagResource;
-use App\Models;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class TagController extends Controller
 {
@@ -40,17 +41,17 @@ class TagController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'tags' => ['required'],
-                'tags.*.tag' => ['required', 'string'],
+                'tags.*.name' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             foreach ($request->tags as $tag) {
-                $tag = Tag::where('name', $tag)->first();
-                if ( is_null($tag)) {
+                $dbTag = Tag::where('name', $tag)->first();
+                if ( is_null($dbTag)) {
                     Tag::create([
-                        'name' => $tag,
+                        'name' => strToLower($tag['name']),
                         'tag_priority' => 1,
                         'user_id' => $request->user()->id,
                     ]);
@@ -79,11 +80,15 @@ class TagController extends Controller
         }
         //make sure user owns tag
         $tag = Tag::where('id', $id)->where('user_id', $user_id)->first();
+        if ( is_null($tag))
+        {
+            return $this->respondBadRequest('You cannot delete this tag because you do not own it');  
+        }
         if ( ! is_null($tag))
         {
             $tag->delete();
         }
-        return $this->respondWithSuccess('Tags created successfully', [
+        return $this->respondWithSuccess('Tags Deleted successfully', [
             'tag' => $tag,
         ]);
     }

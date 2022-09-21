@@ -133,6 +133,7 @@ class UserController extends Controller
                     $query->where('users.id', $user_id);
                 },
             ])
+            ->with('tags')
             ->withCount('followers', 'following')->where('id', $user->id)->first();
             return $this->respondWithSuccess('User retrieved successfully', [
                 'user' => new UserResource($user),
