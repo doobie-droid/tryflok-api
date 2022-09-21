@@ -21,7 +21,7 @@ class SubscriptionController extends Controller
                 $limit = Constants::MAX_ITEMS_LIMIT;
             }
             $user_id = $request->user()->id;
-            $subscriptions = Subscription::with('subscriptionable', 'subscriptionable.cover', 'subscriptionable.prices', 'subscriptionable.prices.continent', 'subscriptionable.prices.country', 'subscriptionable.tags')->where('status', 'active')->whereHas('userable', function (Builder $query) use ($user_id) {
+            $subscriptions = Subscription::with('subscriptionable', 'subscriptionable.cover', 'subscriptionable.prices', 'subscriptionable.prices.continent', 'subscriptionable.prices.country', 'subscriptionable.tags', 'subscriptionable.owner')->where('status', 'active')->whereHas('userable', function (Builder $query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })->get();
 
