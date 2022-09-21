@@ -43,7 +43,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}/assets', 'ContentController@listAssets')->name('list-content-assets');
 
         Route::get('proxy-asset/{path}', 'ContentController@proxyAsset')->where('path', '.*');
-
+        Route::get('{id}/comments', 'ContentCommentController@listContentComments')->name('list-content-comments');
     });
 
     Route::group(['prefix' => 'digiverses'], function () {
@@ -58,6 +58,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}', 'CollectionController@getCollection');
         Route::get('{collection_id}/contents', 'ContentController@listContents')->name('list-collection-contents');
         Route::get('{id}/reviews', 'CollectionController@getReviews');
+    });
+    Route::group(['prefix' => 'content-comments'], function () {
+        Route::get('{id}/comments', 'ContentCommentController@listContentCommentComments')->name('list-content-comment-comments');
     });
 
     Route::group(['prefix' => 'reviews'], function () {
@@ -204,13 +207,11 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::delete('{id}/like', 'ContentController@unlikeContent')->name('unlike-content');
 
             Route::post('{id}/comments', 'ContentCommentController@createContentComment')->name('create-content-comment');    
-            Route::get('{id}/comments', 'ContentCommentController@listContentComments')->name('list-content-comments');
         });
         Route::group(['prefix' => 'content-comments'], function () {
             Route::patch('{id}', 'ContentCommentController@updateContentComment')->name('update-content-comment');
             Route::delete('{id}', 'ContentCommentController@deleteContentComment')->name('delete-content-comment');
             Route::post('{id}/comments', 'ContentCommentController@createContentCommentComment')->name('create-content-comment-comment');
-            Route::get('{id}/comments', 'ContentCommentController@listContentCommentComments')->name('list-content-comment-comments');
             Route::post('{id}/like', 'ContentCommentController@likeContentComment')->name('like-content-comment');
             Route::delete('{id}/like', 'ContentCommentController@unlikeContentComment')->name('unlike-content-comment');
         });

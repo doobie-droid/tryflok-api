@@ -36,7 +36,7 @@ it('returns a 400 when invalid content ID is supplied', function()
             $response->assertStatus(400);
 });
 
-it('returns a 401 when user is not signed in', function()
+it('works when user is not signed in', function()
 {
             $user = Models\User::factory()->create();
             $content = Models\Content::factory()
@@ -49,5 +49,5 @@ it('returns a 401 when user is not signed in', function()
             ]);
 
             $response = $this->json('GET', "/api/v1/contents/{$content->id}/comments");
-            $response->assertStatus(401);
+            $response->assertStatus(200);
 });
