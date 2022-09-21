@@ -24,7 +24,7 @@ test('delete tags does not work if user is not owner', function()
         $this->be($user);
         $tag = Models\Tag::factory()->create();
         $response = $this->json('DELETE', "/api/v1/tags/{$tag->id}");
-        $response->assertStatus(200);
+        $response->assertStatus(400);
         $this->assertDatabaseHas('tags', [
             'name' => $tag->name,
         ]);

@@ -10,10 +10,10 @@ test('create tags works', function()
     $request = [
         'tags' => [
             [
-                'name' => 'Lion king',
+                'name' => 'Lifestyle',
             ],
             [
-                'name' => 'Simba',
+                'name' => 'Money',
             ],
             [
                 'name' => 'Yolo',
