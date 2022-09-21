@@ -11,7 +11,7 @@ beforeEach(function()
         $this->price = $this->collection->prices()->first();
 });
 
-test('toggle auto renew works', function()
+test('get user subscriptions works', function()
 {
         $userable = Models\Userable::factory()
         ->for($this->user)
