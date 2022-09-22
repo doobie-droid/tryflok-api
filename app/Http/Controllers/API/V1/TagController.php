@@ -8,6 +8,10 @@ use App\Http\Resources\TagResource;
 use App\Models;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use App\Constants\Roles;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class TagController extends Controller
 {
@@ -21,7 +25,7 @@ class TagController extends Controller
             }
             $search = urldecode($request->query('search', ''));
 
-            $tags = Models\Tag::where('name', 'LIKE', "%{$search}%")->orderBy('name')->paginate($limit, ['*'], 'page', $page);
+            $tags = Models\Tag::where('name', 'LIKE', "%{$search}%")->where('tag_priority', 1)->orderBy('name')->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Tags retrieved successfully', [
                 'tags' => TagResource::collection($tags),
@@ -33,5 +37,61 @@ class TagController extends Controller
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
+    }
+
+    public function create(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'tags' => ['required'],
+                'tags.*.name' => ['required', 'string'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+            if (! $request->user()->hasRole(Roles::ADMIN) && ! $request->user()->hasRole(Roles::SUPER_ADMIN)) {
+                return $this->respondBadRequest('You do not have permission to add tags');   
+            }
+
+            foreach ($request->tags as $tag) {
+                $dbTag = Models\Tag::where('name', $tag)->first();
+                if ( is_null($dbTag)) {
+                    $tag = Models\Tag::create([
+                        'name' => strToLower($tag['name']),
+                        'tag_priority' => 1,
+                    ]);
+                    $request->user()->tags()->attach($tag->id, [
+                        'id' => Str::uuid(),
+                    ]);
+            }
+            }
+            return $this->respondWithSuccess('Tags created successfully');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function delete(Request $request, $id)
+    {
+        $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+            'id' => ['required', 'string', 'exists:tags,id'],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+        }
+        if (! $request->user()->hasRole(Roles::ADMIN) && ! $request->user()->hasRole(Roles::SUPER_ADMIN)) {
+            return $this->respondBadRequest('You do not have permission to add tags');   
+        }
+        $tag = Models\Tag::where('id', $id)->first();
+        if ( ! is_null($tag))
+        {
+            $tag->delete();
+        }
+        return $this->respondWithSuccess('Tags Deleted successfully', [
+            'tag' => $tag,
+        ]);
     }
 }

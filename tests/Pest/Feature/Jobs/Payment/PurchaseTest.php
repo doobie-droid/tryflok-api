@@ -198,7 +198,7 @@ test('purchase works', function()
 
 test('purchase works without optional parameters', function()
 {
-    $creator = Models\User::factory()->create();
+        $creator = Models\User::factory()->create();
         $buyer = Models\User::factory()->create();
         $free_digiverse = Models\Collection::factory()
         ->for($creator, 'owner')
@@ -377,4 +377,4 @@ test('purchase works without optional parameters', function()
             'price_id' => $free_content_in_free_digiverse->prices()->first()->id,
         ]);
 
-});
+})->skip();

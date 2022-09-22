@@ -99,10 +99,10 @@ class MigrateYoutubeVideo implements ShouldQueue
             'thumbnail_url' => $this->thumbnailUrl($response),
             'description' => preg_replace('/#.*/', '', $response->items[0]->snippet->description),
         ];
-        $tags = [];
-        if (isset($response->items[0]->snippet->tags)){
-                $tags = $response->items[0]->snippet->tags;
-            }  
+        // $tags = [];
+        // if (isset($response->items[0]->snippet->tags)){
+        //         $tags = $response->items[0]->snippet->tags;
+        //     }  
 
         $content = Content::create([
             'title' => $youtubeVideoData['title'],
@@ -154,23 +154,23 @@ class MigrateYoutubeVideo implements ShouldQueue
             'share' => 100,
         ]);
             
-        if (! empty($tags))
-            {   
-                foreach ($tags as $tag)
-                {
-                    $check_tag = Tag::where('name', $tag)->first();
-                    if (is_null($check_tag))
-                    {   
-                       $check_tag = Tag::create([
-                            'id' => Str::uuid(),
-                            'name' => $tag,
-                        ]);
-                    }
-                    $content->tags()->attach($check_tag->id, [
-                        'id' => Str::uuid(),
-                    ]);                
-            }             
-            }
+        // if (! empty($tags))
+        //     {   
+        //         foreach ($tags as $tag)
+        //         {
+        //             $check_tag = Tag::where('name', $tag)->first();
+        //             if (is_null($check_tag))
+        //             {   
+        //                $check_tag = Tag::create([
+        //                     'id' => Str::uuid(),
+        //                     'name' => $tag,
+        //                 ]);
+        //             }
+        //             $content->tags()->attach($check_tag->id, [
+        //                 'id' => Str::uuid(),
+        //             ]);                
+        //     }             
+        //     }
 
         $digiverse->contents()->attach($content->id, [
             'id' => Str::uuid(),
