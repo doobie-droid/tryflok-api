@@ -2,23 +2,22 @@
 
 use App\Models;
 use Tests\MockData;
+use App\Constants\Roles;
 
-test('create tags works', function()
+test('delete tags works', function()
 {
         $user = Models\User::factory()->create();
+        $user->assignRole(Roles::ADMIN);
         $this->be($user);
-        $tag = $user->tags()->create([
+        $tag = Models\Tag::create([
             'name' => 'xena',
             'tag_priority' => 1,
         ]);
         $response = $this->json('DELETE', "/api/v1/tags/{$tag->id}");
         $response->assertStatus(200);
-        $this->assertDatabaseMissing('tags', [
-            'name' => $tag->name,
-        ]);
 });
 
-test('delete tags does not work if user is not owner', function()
+test('delete tags does not work if user is not admin', function()
 {
     $user = Models\User::factory()->create();
         $this->be($user);
