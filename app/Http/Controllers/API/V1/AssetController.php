@@ -54,7 +54,7 @@ class AssetController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'files.*' => ['required', 'image', 'max:5120', 'mimetypes:image/gif,image/jpeg,image/png,image/tiff,image/webp,image/avif,image/bmp'], //5MB
+                'files.*' => ['required', 'image', 'max:5120', 'mimetypes:image/gif,image/jpeg,image/png'], //5MB
             ]);
 
             if ($validator->fails()) {
