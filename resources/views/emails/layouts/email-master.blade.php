@@ -329,6 +329,12 @@
             box-shadow: 0px 4px 20px -5px rgba(0, 0, 0, 0.05);
             border-radius: 10px;
         }
+        .box-main {
+            background: #FFFFFF;
+        }
+        .box-inner {
+            background: #FFFFFF;
+        }
         .analytics-box2 {
             display: flex;
             flex-direction: column;

@@ -22,7 +22,34 @@
                     <div class="analytics-title" style="font-size: 14px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">Engagement and Revenue for 
                     15/06/22 (M) to 21/06/22 (S)
                     </div>
-                    <div class="box-wrapper">
+                    <div class="col-9 box-main">
+                        <div class="row box-row">
+                            <div class="col-6 box-inner">
+
+                            </div>
+                            <div class="col-6 box-inner">
+                                
+                            </div>
+                        </div>
+                        <div class="row box-row">
+                            <div class="col-6 box-inner">
+
+                            </div>
+                            <div class="col-6 box-inner">
+                                
+                            </div>
+                        </div>
+                        <div class="row box-row">
+                            <div class="col-6 box-inner">
+
+                            </div>
+                            <div class="col-6 box-inner">
+                                
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- <div class="box-wrapper">
                             <div class="analytics-box1">
                                 <span class="box-title">Total Revenue <span class="percentage">10%</span></span>
                                 <span class="this-week">$2020<span class="previous-week">$2020</span></span>
@@ -33,7 +60,7 @@
                                 <span class="this-week">202<span class="previous-week">20</span></span>
                                 <span class="this-week-label">This Week <span class="previous-week-label">Last Week</span></span>
                             </div>
-                    </div>
+                    </div> -->
                     </div>
                     <div class="box-wrapper">
                        
