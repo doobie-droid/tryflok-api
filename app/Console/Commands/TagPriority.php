@@ -45,6 +45,7 @@ class TagPriority extends Command
             $tag = strToLower($tag);
             $tags = explode("&",$tag);
             foreach ($tags as $tag) {
+                $tag = trim($tag);
                 $dbTag = Tag::where('name', $tag)->first();
                 if ( ! is_null($dbTag)) {
                     $dbTag->tag_priority = 1;
