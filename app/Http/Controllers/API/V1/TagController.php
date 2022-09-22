@@ -50,11 +50,6 @@ class TagController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-            if ($request->user() == null || $request->user()->id == null) {
-                $user_id = '';
-            } else {
-                $user_id = $request->user()->id;
-            }
             if (! $request->user()->hasRole(Roles::ADMIN) && ! $request->user()->hasRole(Roles::SUPER_ADMIN)) {
                 return $this->respondBadRequest('You do not have permission to add tags');   
             }
