@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 
-class CreatorWeeklyValidationEmails extends Command
+class CreatorsWeeklyValidation extends Command
 {
     /**
      * The name and signature of the console command.
