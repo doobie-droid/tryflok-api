@@ -39,7 +39,6 @@ class CompileWeeklyAnalytics implements ShouldQueue
     public function handle()
     {
         try{
-            Log::info("here".$this->user);
             $digiverses = Models\Collection::where('user_id', $this->user->id)
             ->where('is_available', 1)
             ->where('approved_by_admin', 1)
@@ -53,7 +52,7 @@ class CompileWeeklyAnalytics implements ShouldQueue
                 ])
             ->get();
             foreach ($digiverses as $digiverse)
-            {   Log::info("here");
+            {  
                 $user_analytics = array();
                 $previous_week = array();
                 $current_week = array(); 
@@ -66,6 +65,10 @@ class CompileWeeklyAnalytics implements ShouldQueue
                             "digiverse_id" => $digiverse->id,
                             "week_revenue" => $this->getDigiverseCurrentWeekRevenues($digiverse),
                             "week_subscribers" => $this->getDigiverseCurrentWeekSubscribers($digiverse),
+                            "week_sales" => $this->getDigiverseCurrentWeekSales($digiverse),
+                            "week_tips" => $this->getDigiverseCurrentWeekTips($digiverse),
+                            "week_likes" => $this->getDigiverseCurrentWeekLikes($digiverse),
+                            "week_comments" => $this->getDigiverseCurrentWeekComments($digiverse),
                             "content_with_highest_engagements" => [                
                                 "content_id" => $current_week_content_with_highest_engagements->id,
                                 "content_type" => $current_week_content_with_highest_engagements->type,
@@ -75,6 +78,7 @@ class CompileWeeklyAnalytics implements ShouldQueue
                                 "purchases" => $this->getContentCurrentWeekPurchases($current_week_content_with_highest_engagements),
                                 "revenue" => $this->getContentCurrentWeekRevenues($current_week_content_with_highest_engagements),
                                 "likes" => $this->getContentCurrentWeekLikes($current_week_content_with_highest_engagements),
+                                "comments" => $this->getContentCurrentWeekComments($current_week_content_with_highest_engagements),
                                 ]
                             ]
                         ];
@@ -87,6 +91,10 @@ class CompileWeeklyAnalytics implements ShouldQueue
                             "digiverse_id" => $digiverse->id,
                             "week_revenue" => $this->getDigiversePreviousWeekRevenues($digiverse),
                             "week_subscribers" => $this->getDigiversePreviousWeekSubscribers($digiverse),
+                            "week_sales" => $this->getDigiversePreviousWeekSales($digiverse),
+                            "week_tips" => $this->getDigiversePreviousWeekTips($digiverse),
+                            "week_likes" => $this->getDigiversePreviousWeekLikes($digiverse),
+                            "week_comments" => $this->getDigiversePreviousWeekComments($digiverse),
                             "content_with_highest_engagements" => [                
                                 "content_id" => $previous_week_content_with_highest_engagements->id,
                                 "content_type" => $previous_week_content_with_highest_engagements->type,
@@ -96,13 +104,47 @@ class CompileWeeklyAnalytics implements ShouldQueue
                                 "purchases" => $this->getContentPreviousWeekPurchases($previous_week_content_with_highest_engagements),
                                 "revenue" => $this->getContentPreviousWeekRevenues($previous_week_content_with_highest_engagements),
                                 "likes" => $this->getContentPreviousWeekLikes($previous_week_content_with_highest_engagements),
+                                "comments" => $this->getContentPreviousWeekComments($previous_week_content_with_highest_engagements),
                                 ]   
                         ]
                         ];
                 array_push($user_analytics, $previous_week);
                 }    
             Cache::put("analytics:{$digiverse->id}", $user_analytics);
-            $this->sendWeeklyValidationMail($digiverse->id); 
+            
+            $analytics_percentages = array();
+
+            $current_week_revenue = $current_week['current_week']['week_revenue'];
+            $previous_week_revenue =  $previous_week['previous_week']['week_revenue'];
+            $revenue_percentage = $this->calculatePercentage($current_week_revenue, $previous_week_revenue);
+            array_push($analytics_percentages, ['revenue_percentage' => $revenue_percentage]);
+
+            $current_week_subscribers = $current_week['current_week']['week_subscribers'];
+            $previous_week_subscribers =  $previous_week['previous_week']['week_subscribers'];
+            $subscribers_percentage = $this->calculatePercentage($current_week_subscribers, $previous_week_subscribers);
+            array_push($analytics_percentages, ['subscribers_percentage' => $subscribers_percentage]);
+
+            $current_week_sales = $current_week['current_week']['week_sales'];
+            $previous_week_sales =  $previous_week['previous_week']['week_sales'];
+            $sales_percentage = $this->calculatePercentage($current_week_sales, $previous_week_sales);
+            array_push($analytics_percentages, ['sales_percentage' => $sales_percentage]);
+
+            $current_week_tips = $current_week['current_week']['week_tips'];
+            $previous_week_tips =  $previous_week['previous_week']['week_tips'];
+            $tips_percentage = $this->calculatePercentage($current_week_tips, $previous_week_tips);
+            array_push($analytics_percentages, ['tips_percentage' => $tips_percentage]);
+
+            $current_week_likes = $current_week['current_week']['week_likes'];
+            $previous_week_likes =  $previous_week['previous_week']['week_likes'];
+            $likes_percentage = $this->calculatePercentage($current_week_likes, $previous_week_likes);
+            array_push($analytics_percentages, ['likes_percentage' => $likes_percentage]);
+
+            $current_week_comments = $current_week['current_week']['week_comments'];
+            $previous_week_comments =  $previous_week['previous_week']['week_comments'];
+            $comments_percentage = $this->calculatePercentage($current_week_comments, $previous_week_comments);
+            array_push($analytics_percentages, ['comments_percentage' => $comments_percentage]);
+
+            $this->sendWeeklyValidationMail($digiverse->id, $analytics_percentages); 
             }
         } catch (\Exception $exception) {
             throw $exception;
@@ -118,6 +160,34 @@ class CompileWeeklyAnalytics implements ShouldQueue
 
     public function getContentPreviousWeekRevenues($content) {
         return $content->revenues()
+        ->whereBetween('created_at', [Carbon::now()->startOfWeek()->subDays(7), Carbon::now()->endOfWeek()->subDays(7)])
+        ->sum('amount');
+    }
+
+    public function getContentCurrentWeekTips($content) {
+        return $content->generatedTips()
+        ->where('revenue_from', 'tip')
+        ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+        ->sum('amount');
+    }
+
+    public function getContentPreviousWeekTips($content) {
+        return $content->generatedTips()
+        ->where('revenue_from', 'tip')
+        ->whereBetween('created_at', [Carbon::now()->startOfWeek()->subDays(7), Carbon::now()->endOfWeek()->subDays(7)])
+        ->sum('amount');
+    }
+
+    public function getContentCurrentWeekSales($content) {
+        return $content->revenues()
+        ->where('revenue_from', 'sale')
+        ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+        ->sum('amount');
+    }
+
+    public function getContentPreviousWeekSales($content) {
+        return $content->revenues()
+        ->where('revenue_from', 'sale')
         ->whereBetween('created_at', [Carbon::now()->startOfWeek()->subDays(7), Carbon::now()->endOfWeek()->subDays(7)])
         ->sum('amount');
     }
@@ -158,6 +228,18 @@ class CompileWeeklyAnalytics implements ShouldQueue
         ->count();
     }
 
+    public function getContentCurrentWeekComments($content) {
+        return $content->comments()
+        ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+        ->count();
+    }
+
+    public function getContentPreviousWeekComments($content) {
+        return $content->comments()
+        ->whereBetween('created_at', [Carbon::now()->startOfWeek()->subDays(7), Carbon::now()->endOfWeek()->subDays(7)])
+        ->count();
+    }
+
     public function getContentCover($content) {
         return $content->cover()->first();
     }
@@ -174,6 +256,56 @@ class CompileWeeklyAnalytics implements ShouldQueue
         return array_sum($digiverse_revenues);
     }
 
+    public function getDigiverseCurrentWeekSales($digiverse) {
+        $contents = $digiverse->contents;
+        $digiverse_sales = array();
+        foreach ($contents as $content) {
+            $sales = $content->revenues()
+            ->where('revenue_from', 'sale')
+            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->sum('amount');
+            array_push($digiverse_sales, $sales);
+        }
+        return array_sum($digiverse_sales);
+    }
+
+    public function getDigiverseCurrentWeekTips($digiverse) {
+        $contents = $digiverse->contents;
+        $digiverse_tips = array();
+        foreach ($contents as $content) {
+            $tips = $content->generatedTips()
+            ->where('revenue_from', 'tip')
+            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->sum('amount');
+            array_push($digiverse_tips, $tips);
+        }
+        return array_sum($digiverse_tips);
+    }
+
+    public function getDigiverseCurrentWeekLikes($digiverse) {
+        $contents = $digiverse->contents;
+        $digiverse_likes = array();
+        foreach ($contents as $content) {
+            $likes = $content->likes()
+            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->count();
+            array_push($digiverse_likes, $likes);
+        }
+        return array_sum($digiverse_likes);
+    }
+
+    public function getDigiverseCurrentWeekComments($digiverse) {
+        $contents = $digiverse->contents;
+        $digiverse_comments = array();
+        foreach ($contents as $content) {
+            $comments = $content->comments()
+            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->count();
+            array_push($digiverse_comments, $comments);
+        }
+        return array_sum($digiverse_comments);
+    }
+
     public function getDigiversePreviousWeekRevenues($digiverse) {
         $contents = $digiverse->contents;
         $digiverse_revenues = array();
@@ -184,6 +316,56 @@ class CompileWeeklyAnalytics implements ShouldQueue
             array_push($digiverse_revenues, $revenues);
         }
         return array_sum($digiverse_revenues);
+    }
+
+    public function getDigiversePreviousWeekLikes($digiverse) {
+        $contents = $digiverse->contents;
+        $digiverse_likes = array();
+        foreach ($contents as $content) {
+            $likes = $content->likes()
+            ->whereBetween('created_at', [Carbon::now()->startOfWeek()->subDays(7), Carbon::now()->endOfWeek()->subDays(7)])
+            ->count();
+            array_push($digiverse_likes, $likes);
+        }
+        return array_sum($digiverse_likes);
+    }
+
+    public function getDigiversePreviousWeekComments($digiverse) {
+        $contents = $digiverse->contents;
+        $digiverse_comments = array();
+        foreach ($contents as $content) {
+            $comments = $content->comments()
+            ->whereBetween('created_at', [Carbon::now()->startOfWeek()->subDays(7), Carbon::now()->endOfWeek()->subDays(7)])
+            ->count();
+            array_push($digiverse_comments, $comments);
+        }
+        return array_sum($digiverse_comments);
+    }
+
+    public function getDigiversePreviousWeekTips($digiverse) {
+        $contents = $digiverse->contents;
+        $digiverse_tips = array();
+        foreach ($contents as $content) {
+            $tips = $content->generatedTips()
+            ->where('revenue_from', 'tip')
+            ->whereBetween('created_at', [Carbon::now()->startOfWeek()->subDays(7), Carbon::now()->endOfWeek()->subDays(7)])
+            ->sum('amount');
+            array_push($digiverse_tips, $tips);
+        }
+        return array_sum($digiverse_tips);
+    }
+
+    public function getDigiversePreviousWeekSales($digiverse) {
+        $contents = $digiverse->contents;
+        $digiverse_sales = array();
+        foreach ($contents as $content) {
+            $sales = $content->revenues()
+            ->where('revenue_from', 'sale')
+            ->whereBetween('created_at', [Carbon::now()->startOfWeek()->subDays(7), Carbon::now()->endOfWeek()->subDays(7)])
+            ->sum('amount');
+            array_push($digiverse_sales, $sales);
+        }
+        return array_sum($digiverse_sales);
     }
 
     public function getDigiverseCurrentWeekSubscribers($digiverse) {
@@ -252,12 +434,38 @@ class CompileWeeklyAnalytics implements ShouldQueue
         return $content_with_highest_engagement;
     }
 
-    public function sendWeeklyValidationMail($digiverse_id) {
-        $analytics = Cache::get("analytics:digiverse:{$digiverse_id}");
-        Log::info($analytics);
+    public function calculatePercentage($current_week, $previous_week) {
+        if ($previous_week == 0) {
+            $percentage = +100;
+            return $percentage;
+        }
+        elseif ($current_week == 0) {
+            $percentage = -100;
+            return $percentage;
+        }
+        if ($current_week > $previous_week) {
+            $increase = $current_week - $previous_week;
+            $percentage = +($increase / $previous_week) * 100;
+        }
+        elseif ($current_week < $previous_week) {
+            $decrease = $previous_week - $current_week;
+            $percentage = -($decrease / $current_week) * 100;
+        }
+        else {
+            $percentage = 0;
+        }
+        return $percentage;
+    }
+
+    public function sendWeeklyValidationMail($digiverse_id, $analytics_percentages) {
+        $analytics = Cache::get("analytics:{$digiverse_id}");
+        Log::info($analytics_percentages);
         Mail::to($this->user)->send(new WeeklyValidationMail([
         'user' => $this->user,
         'message' => $analytics,
+        'analytics_percentages' => $analytics_percentages,
+        'start_of_week' => Carbon::now()->startOfWeek()->format('d-m-y'),
+        'end_of_week' => Carbon::now()->endOfWeek()->format('d-m-y'),
         ]));
     }
 }

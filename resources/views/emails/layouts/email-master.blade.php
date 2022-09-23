@@ -4,6 +4,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/fontawesome.min.css" />  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css" /> 
 	<title></title>
 	<style type="text/css" rel="stylesheet" media="all">
 		/* Base ------------------------------ */
@@ -51,22 +53,6 @@
 			margin-top: 0;
 			color: #333333;
 			font-size: 22px;
-			font-weight: bold;
-			text-align: left;
-		}
-
-		h2 {
-			margin-top: 0;
-			color: #333333;
-			font-size: 16px;
-			font-weight: bold;
-			text-align: left;
-		}
-
-		h3 {
-			margin-top: 0;
-			color: #333333;
-			font-size: 14px;
 			font-weight: bold;
 			text-align: left;
 		}
@@ -123,10 +109,6 @@
 			color: #51545E;
 		}
 
-		p {
-			color: #51545E;
-		}
-
 		.email-wrapper {
 			width: 100%;
 			margin: 0;
@@ -145,74 +127,8 @@
 			-premailer-cellpadding: 0;
 			-premailer-cellspacing: 0;
 		}
-		/* Masthead ----------------------- */
-
-		.email-masthead {
-			padding: 25px 0;
-			text-align: center;
-		}
-
-		.email-masthead_logo {
-			width: 94px;
-		}
-
-		.email-masthead_name {
-			font-size: 16px;
-			font-weight: bold;
-			color: #A8AAAF;
-			text-decoration: none;
-			text-shadow: 0 1px 0 white;
-		}
-		/* Body ------------------------------ */
-
-		.email-body {
-			width: 100%;
-			margin: 0;
-			padding: 0;
-			-premailer-width: 100%;
-			-premailer-cellpadding: 0;
-			-premailer-cellspacing: 0;
-		}
-
-		.email-body_inner {
-			width: 570px;
-			margin: 0 auto;
-			padding: 0;
-			-premailer-width: 570px;
-			-premailer-cellpadding: 0;
-			-premailer-cellspacing: 0;
-			background-color: #FFFFFF;
-		}
-
-		.email-footer {
-			width: 570px;
-			margin: 0 auto;
-			padding: 0;
-			-premailer-width: 570px;
-			-premailer-cellpadding: 0;
-			-premailer-cellspacing: 0;
-			text-align: center;
-		}
-
-		.email-footer p {
-			color: #A8AAAF;
-		}
-
-		.body-action {
-			width: 100%;
-			margin: 30px auto;
-			padding: 0;
-			-premailer-width: 100%;
-			-premailer-cellpadding: 0;
-			-premailer-cellspacing: 0;
-			text-align: center;
-		}
-
-		.body-sub {
-			margin-top: 25px;
-			padding-top: 25px;
-			border-top: 1px solid #EAEAEC;
-		}
+	
+		
 
 		.content-cell {
 			padding: 45px;
@@ -226,23 +142,6 @@
 			}
 		}
 
-			p,
-			ul,
-			ol,
-			blockquote,
-			h1,
-			h2,
-			h3 {
-				color: #FFF !important;
-			}
-			.attributes_content,
-			.discount {
-				background-color: #222 !important;
-			}
-			.email-masthead_name {
-				text-shadow: none !important;
-			}
-
             .analytics-wrapper {
             display: flex;
             flex-direction: column;
@@ -255,6 +154,18 @@
             left: 0px;
             top: 0px;;
             background: rgba(103, 48, 208, 0.05);
+        }
+        .box-main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 11px 50px;
+            position: relative;
+            width: auto;
+            height: 250;
+            left: 0px;
+            top: 0px;;
+            background: #FFFFFF;
         }
         .pro-tips {
             position: relative;
@@ -289,7 +200,7 @@
             left: 0px;
             top: 55px;
             background: #6730D0;
-            margin-bottom: 60px;
+            margin-bottom: 65px;
         }
         .banner-background {
             position: relative;
@@ -317,59 +228,25 @@
             text-align: center;
             color: #000000;
         }
-        .analytics-box1 {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 7px;
-            gap: 6px;
-            width: 100px;
-            height: 54px;
-            background: #FFFFFF;
-            box-shadow: 0px 4px 20px -5px rgba(0, 0, 0, 0.05);
-            border-radius: 10px;
-        }
-        .box-main {
-            background: #FFFFFF;
-        }
-        .box-inner {
-            background: #FFFFFF;
-        }
-        .analytics-box2 {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 7px;
-            gap: 6px;
-            width: auto;
-            height: 54px;
-            background: #FFFFFF;
-            box-shadow: 0px 4px 20px -5px rgba(0, 0, 0, 0.05);
-            border-radius: 10px;
-            flex: none;
-            order: 1;
-            flex-grow: 0;
-        }
-        .box-wrapper {
-            display: flex;
-            flex-direction: row;
-            width: auto;
-            align-items: stretch;
-            padding: 7px;
-            gap: 6px;
-        }
+        
         .content-text {
-            width: 149px;
-            height: 30px;
+            width: auto;
+            height: 50px;
             font-family: 'Circular Std';
             font-style: normal;
             font-weight: 500;
-            font-size: 12px;
+            font-size: 16px;
             line-height: 15px;
             color: #1E1E1E;
-            flex: none;
-            order: 2;
-            flex-grow: 0;
+            margin-top: 10px;
+            text-align: center;
+        }
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+        .content-card {
+            max-width: 33%;
         }
         .box-title {
             width: auto;
@@ -385,83 +262,41 @@
             flex-grow: 0;
             padding-right: 25px;
         }
-        .percentage {
-            width: 3px;
-            height: 6px;
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 450;
-            font-size: 5px;
-            line-height: 6px;
-            align-self: flex-end;
-            color: #000000;
-            flex: none;
-            order: 0;
-            flex-grow: 0;
-            margin-right: 10px;
-            text-align: right;
-            position: relative;
-            width: 197.06px;
-            left: 23px;
-            top: 0px;
-            text-align: right;
-        }
-        .percentage2 {
-            width: 3px;
-            height: 6px;
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 450;
-            font-size: 5px;
-            line-height: 6px;
-            align-self: flex-end;
-            color: #000000;
-            flex: none;
-            order: 0;
-            flex-grow: 0;
-            margin-right: 10px;
-            position: relative;
-            width: 197.06px;
-            left: 35px;
-            top: 0px;
-            text-align: right;
-        }
-        .percentage3 {
-            width: 3px;
-            height: 6px;
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 450;
-            font-size: 5px;
-            line-height: 6px;
-            align-self: flex-end;
-            color: #000000;
-            flex: none;
-            order: 0;
-            flex-grow: 0;
-            margin-right: 10px;
-            position: relative;
-            width: 197.06px;
-            left: 45px;
-            top: 0px;
-            text-align: right;
-        }
+        
         .content-wrapper {
-            position: absolute;
-            width: 197.06px;
+            position: relative;
+            width: auto;
             left: 50px;
-            top: 340px;
+            top: 10px;
         }
         .content-image {
             height: 140.24px;    
             border-radius: 10px;
         }
-        .content-details-wrapper {
-            width: 197.06px;
+        .content-title {
+            position: absolute;
+            width: 100%;
             height: 48.62px;
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(25px);
             position: absolute;
+            bottom: 0px;
+            right: 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .image-container {
+            position: relative;
+        }
+        .content-details-wrapper {
+            width: auto;
+            height: 48.62px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(25px);
+            position: relative;
             left: 0px;
             top: 91.62px;
             border-bottom-left-radius: 10px;
@@ -474,190 +309,104 @@
             padding: 7px;
             gap: 6px;
         }
-        .content-box1 {
-            display: flex;
-            align-items: flex-start;
-            padding: 7px;
-            gap: 6px;
-            width: 62px;
-            height: 54px;
-            background: #FFFFFF;
-            box-shadow: 0px 4px 20px -5px rgba(0, 0, 0, 0.05);
-            border-radius: 10px;
-            position: absolute;
-            left: 0px;
-            top: 5;
-            flex: none;
-            order: 0;
-            flex-grow: 0;
-        }
-        .content-box2 {
-            display: flex;
-            align-items: flex-start;
-            padding: 7px;
-            gap: 6px;
-            width: 62px;
-            height: 54px;
-            background: #FFFFFF;
-            box-shadow: 0px 4px 20px -5px rgba(0, 0, 0, 0.05);
-            border-radius: 10px;
-            position: absolute;
-            left: 67px;
-            top: 5;
-            flex: none;
-            order: 0;
-            flex-grow: 0;
-        }
-        .content-box3 {
-            display: flex;
-            align-items: flex-start;
-            padding: 7px;
-            gap: 6px;
-            width: 62px;
-            height: 54px;
-            background: #FFFFFF;
-            box-shadow: 0px 4px 20px -5px rgba(0, 0, 0, 0.05);
-            border-radius: 10px;
-            position: absolute;
-            right: 0px;
-            top: 5;
-            flex: none;
-            order: 0;
-            flex-grow: 0;
-        }
-        .content-box-value {
-            width: 21px;
-            height: 15px;
 
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 500;
+            * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .email_template {
+            /* height: 100vh; */
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 30px 10px;
+        }
+
+        .email_template .container {
+            padding: 30px 50px;
+            background: rgba(103, 48, 208, 0.05);
+
+        }
+
+        .email_template .description p {
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .email_template .container .overview_engagements {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: space-between;
+        }
+
+
+
+        .email_template .container .overview_engagements P {
             font-size: 12px;
-            line-height: 15px;
+        }
+
+        .email_template .overview_engagements .card {
+            background-color: #fff;
+            display: flex;
+            width: 130px;
+            padding: 15px;
+            border-radius: 20px;
+            flex-direction: column;
+            box-shadow: 0px 4px 20px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .email_template .container .content_engaged {
+            display: flex;
+            margin-top: 20px;
+            justify-content: space-between;
+        }
+
+        .email_template .container .content_engaged .card {
             text-align: center;
-            margin-top: 8px;
+            background-color: #fff;
+            display: flex;
+            width: 30%;
+            padding: 15px 0;
+            border-radius: 12px;
+            flex-direction: column;
+
+        }
+
+        .email_template .container .content_engaged .card p {
+            font-size: 12px;
+        }
+
+
+
+        .email_template .card h2 {
+            /* width: 50%; */
+            font-size: 20px;
+            padding: 10px 0;
+        }
+
+        .email_template .card h2:first-child {
             color: #6730D0;
-            flex: none;
-            order: 0;
-            flex-grow: 0;
         }
-        .content-box-label {
-            color:#000000;
-            text-align: center;    
+
+        .email_template .card div {
+            display: flex;
+            justify-content: space-between;
         }
-        .content-details-title {
-            width: 200px;
-            height: 20px;
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 500;
-            font-size: 10px;
-            line-height: 20px;
-            text-align: center;
-            color: #FFFFFF;
-            padding-top: 5px;
+
+        @media screen and (max-width: 609px) {
+            .email_template .container {
+                padding: 30px 10px;
+            }
         }
-        .content-details-desc {
-            width: 177px;
-            height: 10px;
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 450;
-            font-size: 9px;
-            line-height: 10px;
-            color: rgba(255, 255, 255, 0.6);
-            flex: none;
-            flex-grow: 0;
-            text-align: center;
-            margin-left: 10px;
-        }
-        .content-type-icon {
-            width: 16.48px;
-            height: 16.48px;
-            left: 0px;
-            top: 1.76px;
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .this-week {
-            width: auto;
-            height: 10px;
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 500;
-            font-size: 12px;
-            line-height: 15px;
-            text-align: left;
-            color: #6730D0;
-            flex: none;
-            order: 0;
-            flex-grow: 0;
-            margin-top: 0px;
-            padding-top: 0px;
-            position: relative;
-            left: 0px;
-            top: 0px;
-        }
-        .previous-week {
-            width: auto;
-            height: 10px;
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 500;
-            font-size: 12px;
-            line-height: 15px;
-            text-align: right;
-            color: #000000;
-            position: relative;
-            left: 23px;
-            top: 0px;
-        }
-        .previous-week2 {
-            width: auto;
-            height: 10px;
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 500;
-            font-size: 12px;
-            line-height: 15px;
-            text-align: right;
-            color: #000000;
-            position: relative;
-            left: 32px;
-            top: 0px;
-        }
-        .this-week-label{
-            width: auto;
-            height: 10px;
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 100;
-            font-size: 8px;
-            line-height: 10px;
-            text-align: left;
-            color: #000000;
-            flex: none;
-            order: 0;
-            flex-grow: 0;
-            margin-top: 0px;
-            padding-top: 0px;    
-        }
-        .previous-week-label {
-            width: auto;
-            height: 10px;
-            font-family: 'Circular Std';
-            font-style: normal;
-            font-weight: 100;
-            font-size: 8px;
-            line-height: 10px;
-            text-align: center;
-            color: #000000;
-            margin-top: 0px;
-            padding-top: 0px; 
-            padding-right: 0px; 
-            position: relative;
-            left: 15px;
-            top: 0px;  
-        }
+
+        @media screen and (max-width: 395px) {
+            .email_template .container .overview_engagements .card {
+                width: 130px;
+            }
+        } 
+       
 	</style>
 	<!--[if mso]>
 	<style type="text/css">
