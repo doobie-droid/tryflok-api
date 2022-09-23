@@ -43,7 +43,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('flok:compute-content-trending')->daily();
         $schedule->command('flok:compute-collection-trending')->daily();
         $schedule->command('flok:compute-challenge-winner')->everyFiveMinutes();
-        $schedule->command('flok:send-weekly-validation-emails')->weeklyOn(6, '00:00');
+        $schedule->command('flok:send-creator-weekly-validation-emails')->weeklyOn(6, '00:00');
         // $schedule->command('flok:send-monthly-validation-emails')->lastDayOfMonth('15:00');
         // $schedule->command('flok:send-yearly-validation-emails')->yearlyOn(12, 31, '15:00');
         // $schedule->command('flok:send-quarterly-validation-emails')->cron('0 0 30 3,6,9,12 *');

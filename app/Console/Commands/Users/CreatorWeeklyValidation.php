@@ -17,7 +17,7 @@ class CreatorWeeklyValidationEmails extends Command
      *
      * @var string
      */
-    protected $signature = 'flok:send-weekly-validation-emails';
+    protected $signature = 'flok:send-creator-weekly-validation-emails';
 
     /**
      * The console command description.
