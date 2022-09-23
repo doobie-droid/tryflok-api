@@ -22,7 +22,7 @@ class Kernel extends ConsoleKernel
         Commands\Contents\ComputeChallengeWinner::class,
         Commands\Assets\MigratePrivateAssets::class,
         Commands\Assets\MigratePublicAssets::class,
-        Commands\Users\SendCreatorsValidationEmails::class,
+        Commands\Users\CreatorWeeklyValidationEmails::class,
         // Commands\Users\CreatorsMonthlyValidation::class,
         // Commands\Users\CreatorsYearlyValidation::class,
         // Commands\Users\CreatorsQuarterlyValidation::class,
