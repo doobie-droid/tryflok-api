@@ -459,7 +459,6 @@ class CompileWeeklyAnalytics implements ShouldQueue
 
     public function sendWeeklyValidationMail($digiverse_id, $analytics_percentages) {
         $analytics = Cache::get("analytics:{$digiverse_id}");
-        Log::info($analytics_percentages);
         Mail::to($this->user)->send(new WeeklyValidationMail([
         'user' => $this->user,
         'message' => $analytics,

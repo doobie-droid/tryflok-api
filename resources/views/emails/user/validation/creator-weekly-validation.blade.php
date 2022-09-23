@@ -10,7 +10,7 @@
                 <td class="content-cell" style="word-break: break-word; font-family: &quot;Nunito Sans&quot;, Helvetica, Arial, sans-serif; font-size: 16px; padding: 45px;">
                     <div class="f-fallback">
                         <div class="banner">
-                            <div class="banner-background" style = "background: url({{asset('images/weekly-flokdate.png')}});">
+                            <div class="banner-background">
         
                             </div>
                         </div>
