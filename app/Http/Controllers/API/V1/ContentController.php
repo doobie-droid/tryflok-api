@@ -66,6 +66,7 @@ class ContentController extends Controller
                 'winner_share' => ['required_if:is_challenge,1', 'integer', 'max:100', 'min:45', 'gte:loser_share', new SumCheckRule(['moderator_share', 'loser_share'], 100)],
                 'contestants' => ['required_if:is_challenge,1', 'size:2'],
                 'contestants.*' => ['required_if:is_challenge,1', 'string', 'distinct', 'exists:users,id', "not_in:{$request->user()->id}"],
+                'newsletter_position_elements' => ['sometimes', 'nullable', 'json'],
 
             ], [
                 'contestants.*.not_in' => 'You cannot make yourself a contestant',
@@ -116,6 +117,12 @@ class ContentController extends Controller
                 $content->scheduled_date = $request->scheduled_date;
                 $content->save();
             }
+
+            if (! is_null($request->newsletter_position_elements)) {
+                $content->newsletter_position_elements = $request->newsletter_position_elements;
+                $content->save();
+            }
+
 
             if ($content->type === 'live-audio' || $content->type === 'live-video') {
                 $content->metas()->createMany([
@@ -273,6 +280,7 @@ class ContentController extends Controller
                 'is_available' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['sometimes', 'nullable', 'string'],
+                'newsletter_position_elements' => ['sometimes', 'nullable', 'json'],
             ]);
 
             if ($validator1->fails()) {
@@ -313,6 +321,10 @@ class ContentController extends Controller
 
             if (! is_null($request->scheduled_date)) {
                 $content->scheduled_date = $request->scheduled_date;
+            }
+
+            if (! is_null($request->newsletter_position_elements)) {
+                $content->newsletter_position_elements = $request->newsletter_position_elements;
             }
 
             $content->save();
