@@ -191,6 +191,17 @@ test('content is updated with valid inputs', function()
 {
     $this->be($this->user);
 
+        $newsletter_pe = '[
+            [
+            {
+                "name": "a",
+                "range": {
+                "start": 0,
+                "end": 5
+                }
+            }
+            ]
+        ]';
         $old_tag1 = Models\Tag::factory()->create();
         $old_tag2 = Models\Tag::factory()->create();
         $content = Models\Content::factory()
@@ -226,6 +237,7 @@ test('content is updated with valid inputs', function()
                 'asset_id' => $cover_asset->id,
             ],
             'is_available' => 0,
+            'newsletter_position_elements' => $newsletter_pe,
         ];
 
         $response = $this->json('PATCH', "/api/v1/contents/{$content->id}", $complete_request);
@@ -239,6 +251,10 @@ test('content is updated with valid inputs', function()
             'user_id' => $this->user->id,
             'is_available' => 0,
         ]);
+
+        $decoded_content_newsletter_pe = json_decode($content->refresh()->newsletter_position_elements);
+        $decoded_newsletter_pe = json_decode($newsletter_pe);
+        $this->assertTrue($decoded_newsletter_pe[0][0]->name == $decoded_content_newsletter_pe[0][0]->name);
 
         // validate tags were updated
         $this->assertDatabaseHas('taggables', [

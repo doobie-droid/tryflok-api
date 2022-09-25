@@ -379,6 +379,17 @@ test('pdf content gets created', function()
 
 test('newsletter content gets created', function()
 {
+    $newsletter_pe = '[
+        [
+          {
+            "name": "a",
+            "range": {
+              "start": 0,
+              "end": 5
+            }
+          }
+        ]
+    ]';
     $request = [
         'title' => 'A content ' . date('YmdHis'),
         'description' => 'a escription',
@@ -396,6 +407,8 @@ test('newsletter content gets created', function()
         'cover' => [
             'asset_id' => $this->coverAsset->id,
         ],
+        'newsletter_position_elements' => $newsletter_pe,
+
     ];
 
     $response = $this->json('POST', '/api/v1/contents', $request);
@@ -412,6 +425,9 @@ test('newsletter content gets created', function()
             'show_only_in_digiverses' => 1,
         ]);
         $content = Models\Content::where('title', $request['title'])->first();
+        $decoded_content_newsletter_pe = json_decode($content->newsletter_position_elements);
+        $decoded_newsletter_pe = json_decode($newsletter_pe);
+        $this->assertTrue($decoded_newsletter_pe[0][0]->name == $decoded_content_newsletter_pe[0][0]->name);
 
          // content is attached to collection
          $this->assertDatabaseHas('collection_content', [
