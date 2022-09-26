@@ -34,7 +34,7 @@ class WalletController extends Controller
                 'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
                 'expected_flk_amount' => ['required', 'integer', 'min:1'],
                 'fund_type' => ['sometimes', 'string', 'in:tip,self'],
-                'funder_name' => ['required_if:fund_type,tip', 'string'],
+                'funder_name' => ['sometimes', 'string'],
                 'fund_note' => ['sometimes', 'string', 'max: 300'],
             ]);
 
