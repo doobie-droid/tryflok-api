@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Payment;
 
+use App\Constants\Constants;
 use App\Models\Payment;
 use App\Models\WalletTransaction;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
@@ -30,6 +31,9 @@ class FundWallet implements ShouldQueue
     private $fund_type;
     private $funder_name;
     private $fund_note;
+    private $originating_currency;
+    private $originating_content_id;
+    private $originating_client_source;
 
     /**
      * Create a new job instance.
@@ -48,6 +52,9 @@ class FundWallet implements ShouldQueue
         $this->fund_type = array_key_exists('fund_type', $data) ? $data['fund_type'] : '';
         $this->funder_name = array_key_exists('funder_name', $data) ? $data['funder_name'] : '';
         $this->fund_note = array_key_exists('fund_note', $data) ? $data['fund_note'] : '';
+        $this->originating_currency = array_key_exists('originating_currency', $data) ? $data['originating_currency'] : '';
+        $this->originating_content_id = array_key_exists('originating_content_id', $data) ? $data['originating_content_id'] : null;
+        $this->originating_client_source = array_key_exists('originating_client_source', $data) ? $data['originating_client_source'] : '';
     }
 
     /**
@@ -94,6 +101,41 @@ class FundWallet implements ShouldQueue
                 'provider' => $this->provider,
                 'provider_id' => $this->provider_id,
             ]);
+
+            $amount_in_dollars = bcdiv($this->flk, 100, 6);
+
+            $platform_charge = Constants::TIPPING_CHARGE;
+            if ($this->user->user_charge_type === 'non-profit') {
+                $platform_charge = Constants::TIPPING_CHARGE;
+            }
+            $platform_share = bcmul($amount_in_dollars, $platform_charge, 6);
+            $creator_share = bcmul($amount_in_dollars, 1 - $platform_charge, 6);
+            $revenue = $this->user->revenues()->create([
+                'revenueable_type' => 'user',
+                'revenueable_id' => $this->user->id,
+                'amount' => $amount_in_dollars,
+                'payment_processor_fee' => 0,
+                'platform_share' => $platform_share,
+                'benefactor_share' => $creator_share,
+                'referral_bonus' => 0,
+                'revenue_from' => 'tip',
+                'added_to_payout' => 1,
+            ]);
+
+            if ( ! is_null($this->originating_currency)) {
+                $revenue->originating_currency = $this->originating_currency;
+            }
+
+            if ( ! is_null($this->originating_content_id)) {
+                $revenue->originating_content_id = $this->originating_content_id;
+            }
+
+            if ( ! is_null($this->originating_client_source)) {
+                $revenue->originating_client_source = $this->originating_client_source;
+            }
+
+            $revenue->save();
+            
             DB::commit();
             if ($this->fund_type == 'tip') {
                 $custom_message = "You just got a gift of {$this->flk} Flok Cowries from an anonymous person";

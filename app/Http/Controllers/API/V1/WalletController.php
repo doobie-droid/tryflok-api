@@ -36,6 +36,9 @@ class WalletController extends Controller
                 'fund_type' => ['sometimes', 'string', 'in:tip,self'],
                 'funder_name' => ['sometimes', 'nullable', 'string'],
                 'fund_note' => ['sometimes', 'nullable', 'string', 'max: 300'],
+                'originating_content_id' => ['sometimes', 'nullable', 'string', 'exists:contents,id'],
+                'originating_client_source' => ['sometimes', 'nullable', 'string', 'in:web,ios,android'],
+                'originating_currency' => ['sometimes', 'nullable', 'string']
             ]);
 
             if ($validator->fails()) {
@@ -126,6 +129,9 @@ class WalletController extends Controller
                 'fund_type' => $request->fund_type,
                 'funder_name' => $request->funder_name,
                 'fund_note' => $request->fund_note,
+                'originating_currency' => $request->originating_currency,
+                'originating_content_id' => $request->originating_content_id,
+                'originating_client_source' => $request->originating_client_source,
             ]);
             
             Log::info("User attempted purchase was successful");
