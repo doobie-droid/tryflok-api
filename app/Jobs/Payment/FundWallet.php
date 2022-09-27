@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Payment;
 
+use App\Constants\Constants;
 use App\Models\Payment;
 use App\Models\WalletTransaction;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
