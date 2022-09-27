@@ -31,6 +31,9 @@ class FundWallet implements ShouldQueue
     private $fund_type;
     private $funder_name;
     private $fund_note;
+    private $originating_currency;
+    private $originating_content_id;
+    private $originating_client_source;
 
     /**
      * Create a new job instance.
