@@ -9,11 +9,7 @@
             <tr>
                 <td class="content-cell" style="word-break: break-word; font-family: &quot;Nunito Sans&quot;, Helvetica, Arial, sans-serif; font-size: 16px; padding: 45px;">
                     <div class="f-fallback">
-                        <div class="banner">
-                            <div class="banner-background">
-        
-                            </div>
-                        </div>
+                        <h1 style="text-align: center;">Weekly Flokdate</h1>
                         <div class="email_template">
                         <div class="description">
                             <p>Hi {{ $user['name'] }}! </p>
@@ -45,11 +41,16 @@
                     <div>
                     @isset($contents[0]['current_week'])
                         <h2>${{$contents[0]['current_week']['week_revenue']}}</h2>
+                    @elseif (!isset($contents[0]['current_week']))
+                        <h2>$ 0</h2>
                     @endisset
                     @isset($contents[1]['previous_week'])
                         <h2>${{$contents[1]['previous_week']['week_revenue']}}</h2>
                     @elseif(isset($contents[0]['previous_week']))
+                        <h2>$ 0</h2>
                         <h2>${{$contents[0]['previous_week']['week_revenue']}}</h2>
+                    @else
+                        <h2>$ 0</h2>
                     @endisset
                     </div>
                     <div>
@@ -73,11 +74,16 @@
                     <div>
                     @isset($contents[0]['current_week'])
                         <h2>{{$contents[0]['current_week']['week_subscribers']}}</h2>
+                    @elseif (!isset($contents[0]['current_week']))
+                        <h2>$ 0</h2>
                     @endisset
                     @isset($contents[1]['previous_week'])
                         <h2>{{$contents[1]['previous_week']['week_subscribers']}}</h2>
                     @elseif(isset($contents[0]['previous_week']))
+                        <h2>$ 0</h2>
                         <h2>${{$contents[0]['previous_week']['week_subscribers']}}</h2>
+                        @else
+                        <h2>$ 0</h2>
                     @endisset
                     </div>
                     <div>
@@ -103,11 +109,16 @@
                     <div>
                     @isset($contents[0]['current_week'])
                         <h2>${{$contents[0]['current_week']['week_sales']}}</h2>
+                    @elseif (!isset($contents[0]['current_week']))
+                        <h2>$ 0</h2>
                     @endisset
                     @isset($contents[1]['previous_week'])
                         <h2>${{$contents[1]['previous_week']['week_sales']}}</h2>
                     @elseif(isset($contents[0]['previous_week']))
+                        <h2>$ 0</h2>
                         <h2>${{$contents[0]['previous_week']['week_sales']}}</h2>
+                        @else
+                        <h2>$ 0</h2>
                     @endisset
                     </div>
                     <div>
@@ -131,11 +142,16 @@
                     <div>
                     @isset($contents[0]['current_week'])
                         <h2>${{$contents[0]['current_week']['week_tips']}}</h2>
+                    @elseif (!isset($contents[0]['current_week']))
+                        <h2>$ 0</h2>
                     @endisset
                     @isset($contents[1]['previous_week'])
                         <h2>${{$contents[1]['previous_week']['week_tips']}}</h2>
                     @elseif(isset($contents[0]['previous_week']))
+                        <h2>$ 0</h2>
                         <h2>${{$contents[0]['previous_week']['week_tips']}}</h2>
+                        @else
+                        <h2>$ 0</h2>
                     @endisset
                     </div>
                     <div>
@@ -159,11 +175,16 @@
                     <div>
                     @isset($contents[0]['current_week'])
                         <h2>{{$contents[0]['current_week']['week_likes']}}</h2>
+                    @elseif (!isset($contents[0]['current_week']))
+                        <h2>$ 0</h2>
                     @endisset
                     @isset($contents[1]['previous_week'])
                         <h2>{{$contents[1]['previous_week']['week_likes']}}</h2>
                     @elseif(isset($contents[0]['previous_week']))
-                        <h2>${{$contents[0]['previous_week']['week_likes']}}</h2>
+                        <h2>$ 0</h2>
+                        <h2>{{$contents[0]['previous_week']['week_likes']}}</h2>
+                        @else
+                        <h2>$ 0</h2>
                     @endisset
                     </div>
                     <div>
@@ -187,11 +208,16 @@
                     <div>
                     @isset($contents[0]['current_week'])
                         <h2>{{$contents[0]['current_week']['week_comments']}}</h2>
+                    @elseif (!isset($contents[0]['current_week']))
+                        <h2>$ 0</h2>
                     @endisset
                     @isset($contents[1]['previous_week'])
                         <h2>{{$contents[1]['previous_week']['week_comments']}}</h2>
                     @elseif(isset($contents[0]['previous_week']))
-                        <h2>${{$contents[0]['previous_week']['week_comments']}}</h2>
+                        <h2>$ 0</h2>
+                        <h2>{{$contents[0]['previous_week']['week_comments']}}</h2>
+                        @else
+                        <h2>$ 0</h2>
                     @endisset
                     </div>
                     <div>
@@ -208,10 +234,8 @@
                     <img src="{{$contents[0]['current_week']['content_with_highest_engagements']['cover']}}" alt="no image">
                         <div class="content-title">
                             <h3>{{$contents[0]['current_week']['content_with_highest_engagements']['title']}}</h3>
-                            <span>Every body loves to dance</span>
                         </div>
                 </div>
-                @endisset
             </div>
 
             <div class="content_engaged">
@@ -234,13 +258,18 @@
                     <p>Comments</p>
                 </div>
             </div>
+            @endisset
         </section>
 
         <section>
             <div>
                 <h2>Pro Tips for next week:</h2>
                 <ol>
+                @if(isset($contents[0]['current_week']))
                 <li>Focus on @isset($contents[0]['current_week']) {{$contents[0]['current_week']['content_with_highest_engagements']['content_type']}}@endisset, as it has had the highest engagement in the past week.</li>
+                @elseif(isset($contents[0]['previous_week']))
+                <li>Focus on @isset($contents[0]['previous_week']) {{$contents[0]['previous_week']['content_with_highest_engagements']['content_type']}}@endisset, as it has had the highest engagement in the past week.</li>
+                @endisset
                 <li>Remember to share your link to contacts outside Flok!</li>
             </ol>
             <!-- Click this <a href="">link </a> to see detailed breakdown of your numbers this week. <br /> -->

@@ -39,6 +39,7 @@ class CompileWeeklyAnalytics implements ShouldQueue
     public function handle()
     {
         try{
+            Log::info("Begin Creator Weekly Validation");
             $digiverses = Models\Collection::where('user_id', $this->user->id)
             ->where('is_available', 1)
             ->where('approved_by_admin', 1)
@@ -113,38 +114,132 @@ class CompileWeeklyAnalytics implements ShouldQueue
             Cache::put("analytics:{$digiverse->id}", $user_analytics);
             
             $analytics_percentages = array();
+            if ( ! isset($current_week['current_week']) && isset($previous_week['previous_week'])) {
+                $current_week_revenue = 0;
+                $previous_week_revenue =  $previous_week['previous_week']['week_revenue'];
+                $revenue_percentage = $this->calculatePercentage($current_week_revenue, $previous_week_revenue);
+                array_push($analytics_percentages, ['revenue_percentage' => $revenue_percentage]);
+    
+                $current_week_subscribers = 0;
+                $previous_week_subscribers =  $previous_week['previous_week']['week_subscribers'];
+                $subscribers_percentage = $this->calculatePercentage($current_week_subscribers, $previous_week_subscribers);
+                array_push($analytics_percentages, ['subscribers_percentage' => $subscribers_percentage]);
+    
+                $current_week_sales = 0;
+                $previous_week_sales =  $previous_week['previous_week']['week_sales'];
+                $sales_percentage = $this->calculatePercentage($current_week_sales, $previous_week_sales);
+                array_push($analytics_percentages, ['sales_percentage' => $sales_percentage]);
+    
+                $current_week_tips = 0;
+                $previous_week_tips =  $previous_week['previous_week']['week_tips'];
+                $tips_percentage = $this->calculatePercentage($current_week_tips, $previous_week_tips);
+                array_push($analytics_percentages, ['tips_percentage' => $tips_percentage]);
+    
+                $current_week_likes = 0;
+                $previous_week_likes =  $previous_week['previous_week']['week_likes'];
+                $likes_percentage = $this->calculatePercentage($current_week_likes, $previous_week_likes);
+                array_push($analytics_percentages, ['likes_percentage' => $likes_percentage]);
+    
+                $current_week_comments = 0;
+                $previous_week_comments =  $previous_week['previous_week']['week_comments'];
+                $comments_percentage = $this->calculatePercentage($current_week_comments, $previous_week_comments);
+                array_push($analytics_percentages, ['comments_percentage' => $comments_percentage]);   
+            }
+            elseif ( ! isset($previous_week['previous_week']) && isset($current_week['current_week'])) {
+                $current_week_revenue = $current_week['current_week']['week_revenue'];
+                $previous_week_revenue =  0;
+                $revenue_percentage = $this->calculatePercentage($current_week_revenue, $previous_week_revenue);
+                array_push($analytics_percentages, ['revenue_percentage' => $revenue_percentage]);
 
-            $current_week_revenue = $current_week['current_week']['week_revenue'];
-            $previous_week_revenue =  $previous_week['previous_week']['week_revenue'];
-            $revenue_percentage = $this->calculatePercentage($current_week_revenue, $previous_week_revenue);
-            array_push($analytics_percentages, ['revenue_percentage' => $revenue_percentage]);
+                $current_week_subscribers = $current_week['current_week']['week_subscribers'];
+                $previous_week_subscribers =  0;
+                $subscribers_percentage = $this->calculatePercentage($current_week_subscribers, $previous_week_subscribers);
+                array_push($analytics_percentages, ['subscribers_percentage' => $subscribers_percentage]);
 
-            $current_week_subscribers = $current_week['current_week']['week_subscribers'];
-            $previous_week_subscribers =  $previous_week['previous_week']['week_subscribers'];
-            $subscribers_percentage = $this->calculatePercentage($current_week_subscribers, $previous_week_subscribers);
-            array_push($analytics_percentages, ['subscribers_percentage' => $subscribers_percentage]);
+                $current_week_sales = $current_week['current_week']['week_sales'];
+                $previous_week_sales =  0;
+                $sales_percentage = $this->calculatePercentage($current_week_sales, $previous_week_sales);
+                array_push($analytics_percentages, ['sales_percentage' => $sales_percentage]);
 
-            $current_week_sales = $current_week['current_week']['week_sales'];
-            $previous_week_sales =  $previous_week['previous_week']['week_sales'];
-            $sales_percentage = $this->calculatePercentage($current_week_sales, $previous_week_sales);
-            array_push($analytics_percentages, ['sales_percentage' => $sales_percentage]);
+                $current_week_tips = $current_week['current_week']['week_tips'];
+                $previous_week_tips =  0;
+                $tips_percentage = $this->calculatePercentage($current_week_tips, $previous_week_tips);
+                array_push($analytics_percentages, ['tips_percentage' => $tips_percentage]);
 
-            $current_week_tips = $current_week['current_week']['week_tips'];
-            $previous_week_tips =  $previous_week['previous_week']['week_tips'];
-            $tips_percentage = $this->calculatePercentage($current_week_tips, $previous_week_tips);
-            array_push($analytics_percentages, ['tips_percentage' => $tips_percentage]);
+                $current_week_likes = $current_week['current_week']['week_likes'];
+                $previous_week_likes =  0;
+                $likes_percentage = $this->calculatePercentage($current_week_likes, $previous_week_likes);
+                array_push($analytics_percentages, ['likes_percentage' => $likes_percentage]);
 
-            $current_week_likes = $current_week['current_week']['week_likes'];
-            $previous_week_likes =  $previous_week['previous_week']['week_likes'];
-            $likes_percentage = $this->calculatePercentage($current_week_likes, $previous_week_likes);
-            array_push($analytics_percentages, ['likes_percentage' => $likes_percentage]);
+                $current_week_comments = $current_week['current_week']['week_comments'];
+                $previous_week_comments =  0;
+                $comments_percentage = $this->calculatePercentage($current_week_comments, $previous_week_comments);
+                array_push($analytics_percentages, ['comments_percentage' => $comments_percentage]);
+            }
+            elseif ( isset($current_week['current_week']) && isset($previous_week['previous_week'])) {
+                $current_week_revenue = $current_week['current_week']['week_revenue'];
+                $previous_week_revenue =  $previous_week['previous_week']['week_revenue'];
+                $revenue_percentage = $this->calculatePercentage($current_week_revenue, $previous_week_revenue);
+                array_push($analytics_percentages, ['revenue_percentage' => $revenue_percentage]);
 
-            $current_week_comments = $current_week['current_week']['week_comments'];
-            $previous_week_comments =  $previous_week['previous_week']['week_comments'];
-            $comments_percentage = $this->calculatePercentage($current_week_comments, $previous_week_comments);
-            array_push($analytics_percentages, ['comments_percentage' => $comments_percentage]);
+                $current_week_subscribers = $current_week['current_week']['week_subscribers'];
+                $previous_week_subscribers =  $previous_week['previous_week']['week_subscribers'];
+                $subscribers_percentage = $this->calculatePercentage($current_week_subscribers, $previous_week_subscribers);
+                array_push($analytics_percentages, ['subscribers_percentage' => $subscribers_percentage]);
 
+                $current_week_sales = $current_week['current_week']['week_sales'];
+                $previous_week_sales =  $previous_week['previous_week']['week_sales'];
+                $sales_percentage = $this->calculatePercentage($current_week_sales, $previous_week_sales);
+                array_push($analytics_percentages, ['sales_percentage' => $sales_percentage]);
+
+                $current_week_tips = $current_week['current_week']['week_tips'];
+                $previous_week_tips =  $previous_week['previous_week']['week_tips'];
+                $tips_percentage = $this->calculatePercentage($current_week_tips, $previous_week_tips);
+                array_push($analytics_percentages, ['tips_percentage' => $tips_percentage]);
+
+                $current_week_likes = $current_week['current_week']['week_likes'];
+                $previous_week_likes =  $previous_week['previous_week']['week_likes'];
+                $likes_percentage = $this->calculatePercentage($current_week_likes, $previous_week_likes);
+                array_push($analytics_percentages, ['likes_percentage' => $likes_percentage]);
+
+                $current_week_comments = $current_week['current_week']['week_comments'];
+                $previous_week_comments =  $previous_week['previous_week']['week_comments'];
+                $comments_percentage = $this->calculatePercentage($current_week_comments, $previous_week_comments);
+                array_push($analytics_percentages, ['comments_percentage' => $comments_percentage]);
+            }
+            elseif ( ! isset($current_week['current_week']) && ! isset($previous_week['previous_week'])) {
+                $current_week_revenue = 0;
+                $previous_week_revenue =  0;
+                $revenue_percentage = $this->calculatePercentage($current_week_revenue, $previous_week_revenue);
+                array_push($analytics_percentages, ['revenue_percentage' => $revenue_percentage]);
+
+                $current_week_subscribers = 0;
+                $previous_week_subscribers =  0;
+                $subscribers_percentage = $this->calculatePercentage($current_week_subscribers, $previous_week_subscribers);
+                array_push($analytics_percentages, ['subscribers_percentage' => $subscribers_percentage]);
+
+                $current_week_sales = 0;
+                $previous_week_sales =  0;
+                $sales_percentage = $this->calculatePercentage($current_week_sales, $previous_week_sales);
+                array_push($analytics_percentages, ['sales_percentage' => $sales_percentage]);
+
+                $current_week_tips = 0;
+                $previous_week_tips =  0;
+                $tips_percentage = $this->calculatePercentage($current_week_tips, $previous_week_tips);
+                array_push($analytics_percentages, ['tips_percentage' => $tips_percentage]);
+
+                $current_week_likes = 0;
+                $previous_week_likes =  0;
+                $likes_percentage = $this->calculatePercentage($current_week_likes, $previous_week_likes);
+                array_push($analytics_percentages, ['likes_percentage' => $likes_percentage]);
+
+                $current_week_comments = 0;
+                $previous_week_comments =  0;
+                $comments_percentage = $this->calculatePercentage($current_week_comments, $previous_week_comments);
+                array_push($analytics_percentages, ['comments_percentage' => $comments_percentage]);
+            }
             $this->sendWeeklyValidationMail($digiverse->id, $analytics_percentages); 
+            Log::info("End Creator Weekly Validation");
             }
         } catch (\Exception $exception) {
             throw $exception;
@@ -244,16 +339,22 @@ class CompileWeeklyAnalytics implements ShouldQueue
         return $content->cover()->first();
     }
 
+    // public function getDigiverseCurrentWeekRevenues($digiverse) {
+    //     $contents = $digiverse->contents;
+    //     $digiverse_revenues = array();
+    //     foreach ($contents as $content) {
+    //         $revenues = $content->revenues()
+    //         ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+    //         ->sum('amount');
+    //         array_push($digiverse_revenues, $revenues);
+    //     }
+    //     return array_sum($digiverse_revenues);
+    // }
     public function getDigiverseCurrentWeekRevenues($digiverse) {
-        $contents = $digiverse->contents;
-        $digiverse_revenues = array();
-        foreach ($contents as $content) {
-            $revenues = $content->revenues()
-            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-            ->sum('amount');
-            array_push($digiverse_revenues, $revenues);
-        }
-        return array_sum($digiverse_revenues);
+        $digiverse_sales = $this->getDigiverseCurrentWeekSales($digiverse);
+        $digiverse_tips = $this->getDigiverseCurrentWeekTips($digiverse);
+        $digiverse_revenues = $digiverse_sales + $digiverse_tips;
+        return $digiverse_revenues;
     }
 
     public function getDigiverseCurrentWeekSales($digiverse) {
@@ -306,16 +407,23 @@ class CompileWeeklyAnalytics implements ShouldQueue
         return array_sum($digiverse_comments);
     }
 
+    // public function getDigiversePreviousWeekRevenues($digiverse) {
+    //     $contents = $digiverse->contents;
+    //     $digiverse_revenues = array();
+    //     foreach ($contents as $content) {
+    //         $revenues = $content->revenues()
+    //         ->whereBetween('created_at', [Carbon::now()->startOfWeek()->subDays(7), Carbon::now()->endOfWeek()->subDays(7)])
+    //         ->sum('amount');
+    //         array_push($digiverse_revenues, $revenues);
+    //     }
+    //     return array_sum($digiverse_revenues);
+    // }
+
     public function getDigiversePreviousWeekRevenues($digiverse) {
-        $contents = $digiverse->contents;
-        $digiverse_revenues = array();
-        foreach ($contents as $content) {
-            $revenues = $content->revenues()
-            ->whereBetween('created_at', [Carbon::now()->startOfWeek()->subDays(7), Carbon::now()->endOfWeek()->subDays(7)])
-            ->sum('amount');
-            array_push($digiverse_revenues, $revenues);
-        }
-        return array_sum($digiverse_revenues);
+        $digiverse_sales = $this->getDigiversePreviousWeekSales($digiverse);
+        $digiverse_tips = $this->getDigiversePreviousWeekTips($digiverse);
+        $digiverse_revenues = $digiverse_sales + $digiverse_tips;
+        return $digiverse_revenues;
     }
 
     public function getDigiversePreviousWeekLikes($digiverse) {
@@ -435,11 +543,15 @@ class CompileWeeklyAnalytics implements ShouldQueue
     }
 
     public function calculatePercentage($current_week, $previous_week) {
-        if ($previous_week == 0) {
+        if ($previous_week == 0 && $current_week == 0) {
+            $percentage = 0;
+            return $percentage;
+        }
+        elseif ($previous_week == 0 && $current_week != 0) {
             $percentage = +100;
             return $percentage;
         }
-        elseif ($current_week == 0) {
+        elseif ($previous_week != 0 && $current_week == 0) {
             $percentage = -100;
             return $percentage;
         }
