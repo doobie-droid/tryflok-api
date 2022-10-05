@@ -163,7 +163,7 @@ class AssetController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'files.*' => ['required', 'max:204800', 'mimetypes:audio/ogg,audio/mpeg,audio/aac,audio/wav,audio/webm'], // 200MB
+                'files.*' => ['required', 'max:1048576', 'mimetypes:audio/ogg,audio/mpeg,audio/aac,audio/wav,audio/webm'], // 200MB
             ]);
 
             if ($validator->fails()) {

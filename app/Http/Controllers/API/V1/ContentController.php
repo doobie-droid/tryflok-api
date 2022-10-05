@@ -86,7 +86,7 @@ class ContentController extends Controller
             }
 
             if ($digiverse->user_id !== $request->user()->id) {
-                return $this->respondBadRequest('You cannot to this digiverse because you do not own it');
+                return $this->respondBadRequest('You cannot add to this digiverse because you do not own it');
             }
 
             $user = $request->user();
@@ -888,7 +888,6 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $collection = Collection::where('id', $request->collection_id)->first();
-            // TO DO: add test to show lives ended more than 2 hours ago do not get returned
             $contents = $collection->contents()
                             ->whereNull('archived_at')
                             ->where(function ($query) {
