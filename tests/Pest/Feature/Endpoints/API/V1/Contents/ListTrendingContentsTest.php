@@ -106,18 +106,18 @@ test('unavailable contents do not get returned if user is not owner', function()
         $this->assertEquals($contents, []);
 });
 
-        test('unavailable contents does not get returned even if user is owner', function()
-        {
-            Models\Content::factory()
-                    ->unavailable()
-                    ->for($this->user, 'owner')
-                    ->setTags([Models\Tag::factory()->create()])
-                    ->count(4)
-                    ->create();
-                $response = $this->json('GET', "/api/v1/contents/trending?page=1&limit=10");
-                $response->assertStatus(200);
-                $contents = $response->getData()->data->contents;
-                $this->assertEquals($contents, []);
+test('unavailable contents does not get returned even if user is owner', function()
+{
+    Models\Content::factory()
+            ->unavailable()
+            ->for($this->user, 'owner')
+            ->setTags([Models\Tag::factory()->create()])
+            ->count(4)
+            ->create();
+        $response = $this->json('GET', "/api/v1/contents/trending?page=1&limit=10");
+        $response->assertStatus(200);
+        $contents = $response->getData()->data->contents;
+        $this->assertEquals($contents, []);
 });
 
 test('pagination works', function()
@@ -284,4 +284,18 @@ test('order by trending works', function()
         $this->assertEquals($contents[1]->id, $content1->id);
         $this->assertEquals($contents[2]->id, $content4->id);
         $this->assertEquals($contents[3]->id, $content3->id);
+});
+test('contents whose lives ended more than two hours ago do not get returned', function()
+{
+        Models\Content::factory()
+        ->for($this->user, 'owner')
+        ->setTags([Models\Tag::factory()->create()])
+        ->count(4)
+        ->create([
+            'live_ended_at' => now()->subHours(3),
+        ]);
+    $response = $this->json('GET', "/api/v1/contents/trending?page=1&limit=10");
+    $response->assertStatus(200);
+    $contents = $response->getData()->data->contents;
+    $this->assertEquals($contents, []); 
 });
