@@ -44,6 +44,6 @@ class WeeklyValidationMail extends Mailable
             'start_of_week' => $this->start_of_week,
             'end_of_week' => $this->end_of_week,
             'analytics_percentages' => $this->analytics_percentages,
-        ])->subject('Creator weekly analytics!');
+        ])->subject('Weekly Flokdate!');
     }
 }
