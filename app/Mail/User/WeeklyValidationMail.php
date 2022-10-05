@@ -38,7 +38,7 @@ class WeeklyValidationMail extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.user.validation.creator-weekly-validation')->with([
+        return $this->view('emails.user.validation.creator-weekly-validation2')->with([
             'user' => $this->user,
             'contents' => $this->message,
             'start_of_week' => $this->start_of_week,

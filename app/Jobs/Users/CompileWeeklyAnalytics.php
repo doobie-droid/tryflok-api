@@ -54,6 +54,7 @@ class CompileWeeklyAnalytics implements ShouldQueue
             ->get();
             foreach ($digiverses as $digiverse)
             {  
+                Log::info($digiverse);
                 $user_analytics = array();
                 $previous_week = array();
                 $current_week = array(); 

@@ -39,19 +39,19 @@
                         </div>
                     </div>
                     <div>
-                    @isset($contents[0]['current_week'])
-                        <h2>${{$contents[0]['current_week']['week_revenue']}}</h2>
-                    @elseif (!isset($contents[0]['current_week']))
-                        <h2>$ 0</h2>
-                    @endisset
-                    @isset($contents[1]['previous_week'])
-                        <h2>${{$contents[1]['previous_week']['week_revenue']}}</h2>
-                    @elseif(isset($contents[0]['previous_week']))
-                        <h2>$ 0</h2>
-                        <h2>${{$contents[0]['previous_week']['week_revenue']}}</h2>
-                    @else
-                        <h2>$ 0</h2>
-                    @endisset
+                        @isset($contents[0]['current_week'])
+                            <h2>${{$contents[0]['current_week']['week_revenue']}}</h2>
+                        @elseif (!isset($contents[0]['current_week']))
+                            <h2>$ 0</h2>
+                        @endisset
+                        @isset($contents[1]['previous_week'])
+                            <h2>${{$contents[1]['previous_week']['week_revenue']}}</h2>
+                        @elseif(isset($contents[0]['previous_week']))
+                            <h2>$ 0</h2>
+                            <h2>${{$contents[0]['previous_week']['week_revenue']}}</h2>
+                        @else
+                            <h2>$ 0</h2>
+                        @endisset
                     </div>
                     <div>
                         <p>This week</p>
