@@ -754,9 +754,9 @@ class ContentController extends Controller
                 ->where('is_adult', 0)
                 ->where('approved_by_admin', 1);
             })->where(function ($query) {
-                $query->whereNull('live_ended_at')->orWhereDate('live_ended_at', '>=', now()->subHours(12));
+                $query->whereNull('live_ended_at')->orWhere('live_ended_at', '>=', now()->subHours(2));
             })->where(function ($query) {
-                $query->whereNull('scheduled_date')->orWhereDate('scheduled_date', '>=', now()->subHours(24));
+                $query->whereNull('scheduled_date')->orWhere('scheduled_date', '>=', now()->subHours(24));
             });
 
             if ($request->user() == null || $request->user()->id == null) {
@@ -888,11 +888,11 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             $collection = Collection::where('id', $request->collection_id)->first();
-            // TO DO: add test to show lives ended more than 12 hours ago do not get returned
+            // TO DO: add test to show lives ended more than 2 hours ago do not get returned
             $contents = $collection->contents()
                             ->whereNull('archived_at')
                             ->where(function ($query) {
-                                $query->whereNull('live_ended_at')->orWhereDate('live_ended_at', '>=', now()->subHours(12));
+                                $query->whereNull('live_ended_at')->orWhere('live_ended_at', '>=', now()->subHours(2));
                             });
 
             if ($request->user() == null || $request->user()->id == null) {

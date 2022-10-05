@@ -117,7 +117,7 @@ class CollectionController extends Controller
             }
 
             if ($digiverse->user_id !== $user->id) {
-                return $this->respondBadRequest('You cannot to this digiverse because you do not own it');
+                return $this->respondBadRequest('You cannot add to this digiverse because you do not own it');
             }
 
             $collection = Collection::create([
