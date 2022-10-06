@@ -866,7 +866,7 @@ class ContentController extends Controller
                 'active_live_content' => $activeLiveContent,
                 'challenge_only' => $challengeOnly,
             ], [
-                'id' => ['required', 'string', 'exists:collections,id'],
+                'id' => ['required', 'string', 'exists:collections,id,deleted_at,NULL'],
                 'page' => ['required', 'integer', 'min:1'],
                 'limit' => ['required', 'integer', 'min:1', "max:{$max_items_count}"],
                 'keyword' => ['sometimes', 'string', 'max:200'],
