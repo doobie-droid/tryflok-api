@@ -177,7 +177,7 @@ class CollectionController extends Controller
     {
         try {
             $validator = Validator::make(['id' => $id], [
-                'id' => ['required', 'string', 'exists:collections,id'],
+                'id' => ['required', 'string', 'exists:collections,id,deleted_at,NULL'],
             ]);
 
             if ($validator->fails()) {
