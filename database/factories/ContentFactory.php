@@ -197,7 +197,7 @@ class ContentFactory extends Factory
         });
     }
 
-    public function setCollection(Collection $digiverse): self
+    public function setCollection(Collection $collection): self
     {
         $this->collection = $collection;
         return $this->afterCreating(function (Content $content) {
