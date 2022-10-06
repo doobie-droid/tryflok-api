@@ -160,22 +160,26 @@ class WalletController extends Controller
                 $query->where('is_available', 1)
                 ->where('approved_by_admin', 1)
                 ->whereNull('archived_at')
+                ->whereNull('deleted_at')
                 ->where('user_id', $user_id)
                 ->whereHas('contents', function (Builder $query) use ($user_id){
                     $query->where('is_available', 1)
                     ->where('approved_by_admin', 1)
                     ->whereNull('archived_at')
+                    ->whereNull('deleted_at')
                     ->where('user_id', $user_id);
                 })
                 ->orWhereHas('collections', function (Builder $query) use ($user_id) {
                     $query->where('is_available', 1)
                     ->where('approved_by_admin', 1)
                     ->whereNull('archived_at')
+                    ->whereNull('deleted_at')
                     ->where('user_id', $user_id)
                         ->whereHas('contents', function (Builder $query) use ($user_id){
                             $query->where('is_available', 1)
                             ->where('approved_by_admin', 1)
                             ->whereNull('archived_at')
+                            ->whereNull('deleted_at')
                             ->where('user_id', $user_id);
                         });  
                 });                   
