@@ -17,6 +17,7 @@ use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\Builder;
 
 class WalletController extends Controller
 {
@@ -151,6 +152,58 @@ class WalletController extends Controller
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $user_id = $request->user()->id;
+            $user = User::
+            whereHas('digiversesCreated', function (Builder $query) use ($user_id) {
+                $query->where('is_available', 1)
+                ->where('approved_by_admin', 1)
+                ->whereNull('archived_at')
+                ->where('user_id', $user_id)
+                ->whereHas('contents', function (Builder $query) use ($user_id){
+                    $query->where('is_available', 1)
+                    ->where('approved_by_admin', 1)
+                    ->whereNull('archived_at')
+                    ->where('user_id', $user_id);
+                });
+            })
+            ->orWhereHas('digiversesCreated', function (Builder $query) use ($user_id) {
+                $query->where('is_available', 1)
+                ->where('approved_by_admin', 1)
+                ->whereNull('archived_at')
+                ->where('user_id', $user_id)
+                ->whereHas('collections', function (Builder $query) use ($user_id) {
+                    $query->where('is_available', 1)
+                    ->where('approved_by_admin', 1)
+                    ->whereNull('archived_at')
+                    ->where('user_id', $user_id)
+                        ->whereHas('contents', function (Builder $query) use ($user_id){
+                            $query->where('is_available', 1)
+                            ->where('approved_by_admin', 1)
+                            ->whereNull('archived_at')
+                            ->where('user_id', $user_id);
+                        });
+                });                        
+            })
+            ->first();
+
+            // ->with([
+            //     'access_through_ancestors' => function ($query) use ($user_id) {
+            //         $query->whereHas('userables', function (Builder $query) use ($user_id) {
+            //             $query->where('user_id', $user_id)->where('status', 'available');
+            //         })
+            //         ->orWhereHas('parentCollections', function (Builder $query) use ($user_id) {
+            //             $query->whereHas('userables', function (Builder $query) use ($user_id) {
+            //                 $query->where('user_id', $user_id)->where('status', 'available');
+            //             });
+            //         });
+            //     },
+            // ]);
+
+            dd($user);
+            if ( is_null($user)) {
+                return $this->respondBadRequest('You need to have a published content before you can withdraw from your wallet');
             }
 
             $payment_account = $request->user()->paymentAccounts()->first();
