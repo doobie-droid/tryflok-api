@@ -30,6 +30,7 @@ class CollectionController extends Controller
                 'tags' => ['sometimes'],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
                 'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
+                'max_subscribers' => ['sometimes', 'nullable', 'integer', 'min:0'],
             ]);
 
             if ($validator->fails()) {
@@ -54,6 +55,11 @@ class CollectionController extends Controller
                 'views' => 0,
                 'is_challenge' => $is_challenge,
             ]);
+
+            if ( ! is_null($request->max_subscribers)) {
+                $digiverse->max_subscribers = $request->max_subscribers;
+                $digiverse->save();
+            }
 
             $digiverse->benefactors()->create([
                 'user_id' => $user->id,
@@ -250,6 +256,7 @@ class CollectionController extends Controller
                 'tags' => ['sometimes'],
                 'tags.*.id' => ['required', 'string', 'exists:tags,id'],
                 'tags.*.action' => ['required', 'string', 'in:add,remove'],
+                'max_subscribers' => ['sometimes', 'nullable', 'integer', 'min:0'],
             ]);
 
             if ($validator->fails()) {
@@ -260,7 +267,7 @@ class CollectionController extends Controller
             $digiverse = Collection::where('id', $id)
             ->eagerLoadBaseRelations()
             ->first();
-            $digiverse->fill($request->only('title', 'description', 'is_available'));
+            $digiverse->fill($request->only('title', 'description', 'is_available', 'max_subscribers'));
             $digiverse->save();
 
             if (isset($request->price) && array_key_exists('id', $request->price)) {
