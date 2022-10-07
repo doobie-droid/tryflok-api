@@ -241,7 +241,7 @@ class AuthController extends Controller
                 
                 $key = $request->user()->id;
                 $cookies = '';
-                $cookies = 'bearer' . ' ' . $token . ';';
+                $cookies = "Authorization=Bearer {$token };";
                 $secure = true;
                 $path = '/';
                 $domain = '.tryflok.com';
@@ -250,7 +250,6 @@ class AuthController extends Controller
                 return $this->respondWithSuccess('Login successful', [
                     'user' => new UserResourceWithSensitive($user),
                     'token' => $token,
-                    'authorization' => $cookies,
                 ]);
             } else {
                 return $this->respondBadRequest('User credentials do not match our record');
