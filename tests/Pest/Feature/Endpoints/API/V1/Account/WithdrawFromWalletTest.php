@@ -318,22 +318,26 @@ test('user with at least a content under an unpublished digiverse cannot withdra
 
 test('user with at least a content in a collection in an unpublished digiverse cannot withdraw', function()
 {
-        $digiverse = Models\Collection::factory()->digiverse()->create([
+        $digiverse = Models\Collection::factory()->create([
             'user_id' => $this->user->id,
             'is_available' => 0,
             'approved_by_admin' => 0,
+            'type' => 'digiverse'
         ]);
         $collection = Models\Collection::factory()
         ->collection()
         ->create([
             'user_id' => $this->user->id,
+            'type' => 'collection'
         ]);
         $digiverse->childCollections()->attach($collection->id, [
             'id' => Str::uuid(),
         ]);
+
+        
         $content = Models\Content::factory()
+        ->noDigiverse()
         ->setCollection($collection)
-        ->setTags([Models\Tag::factory()->create()])
         ->create([
             'user_id' => $this->user->id,
         ]);  
@@ -342,9 +346,8 @@ test('user with at least a content in a collection in an unpublished digiverse c
             'amount_in_flk' => 100,
         ];        
         $response = $this->json('PATCH', "/api/v1/account/withdraw-from-wallet", $request);
-        dd($response);
         $response->assertStatus(400);
-})->skip();
+});
 
 test('user with no content in a collection or a digiverse cannot withdraw', function()
 {

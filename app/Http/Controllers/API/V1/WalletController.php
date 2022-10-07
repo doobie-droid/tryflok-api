@@ -168,8 +168,7 @@ class WalletController extends Controller
                     ->where('approved_by_admin', 1)
                     ->whereNull('archived_at')
                     ->whereNull('deleted_at')
-                    ->where('user_id', $user_id);
-                })
+                    ->where('user_id', $user_id)
                 ->orWhereHas('collections', function (Builder $query) use ($user_id) {
                     $query->where('is_available', 1)
                     ->where('approved_by_admin', 1)
@@ -183,10 +182,10 @@ class WalletController extends Controller
                             ->whereNull('deleted_at')
                             ->where('user_id', $user_id);
                         });  
-                });                   
+                });   
+            });                
             })
             ->first();
-
             if ( is_null($user)) {
                 return $this->respondBadRequest('You need to have a published content before you can withdraw from your wallet');
             }
