@@ -22,6 +22,7 @@ class ContentFactory extends Factory
  * @var Collection
 */
     private $digiverse;
+    private $collection;
 
     /**
  * @var Tag[]
@@ -196,6 +197,15 @@ class ContentFactory extends Factory
         });
     }
 
+    public function setCollection(Collection $collection): self
+    {
+        $this->collection = $collection;
+        return $this->afterCreating(function (Content $content) {
+            $this->content = $content;
+            $this->generateCollection();
+        });
+    }
+
     /**
  * @param User[] $contestants
 */
@@ -356,6 +366,22 @@ class ContentFactory extends Factory
                                                         ->state(['user_id' => $this->content->user_id])
                                                         ->create();
         $this->digiverse->contents()->attach($this->content->id, [
+            'id' => Str::uuid(),
+        ]);
+    }
+
+    private function generateCollection(): void
+    {
+        $previousCollection = $this->content->basicCollections()->first();
+        if (! is_null($previousCollection)) {
+            $this->content->basicCollections()->detach($previousCollection->id);
+            $previousCollection->forceDelete();
+        }
+        $this->collection = $this->collection ?? Collection::factory()
+                                                        ->collection()
+                                                        ->state(['user_id' => $this->content->user_id])
+                                                        ->create();
+        $this->collection->contents()->attach($this->content->id, [
             'id' => Str::uuid(),
         ]);
     }

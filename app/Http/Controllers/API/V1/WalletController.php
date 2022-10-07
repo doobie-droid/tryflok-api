@@ -17,6 +17,7 @@ use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\Builder;
 
 class WalletController extends Controller
 {
@@ -153,6 +154,42 @@ class WalletController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
+            $user_id = $request->user()->id;
+            $user = User::
+            whereHas('digiversesCreated', function (Builder $query) use ($user_id) {
+                $query->where('is_available', 1)
+                ->where('approved_by_admin', 1)
+                ->whereNull('archived_at')
+                ->whereNull('deleted_at')
+                ->where('type', 'digiverse')
+                ->where('user_id', $user_id)
+                ->whereHas('contents', function (Builder $query) use ($user_id){
+                    $query->where('is_available', 1)
+                    ->where('approved_by_admin', 1)
+                    ->whereNull('archived_at')
+                    ->whereNull('deleted_at')
+                    ->where('user_id', $user_id)
+                ->orWhereHas('collections', function (Builder $query) use ($user_id) {
+                    $query->where('is_available', 1)
+                    ->where('approved_by_admin', 1)
+                    ->whereNull('archived_at')
+                    ->whereNull('deleted_at')
+                    ->where('user_id', $user_id)
+                        ->whereHas('contents', function (Builder $query) use ($user_id){
+                            $query->where('is_available', 1)
+                            ->where('approved_by_admin', 1)
+                            ->whereNull('archived_at')
+                            ->whereNull('deleted_at')
+                            ->where('user_id', $user_id);
+                        });  
+                });   
+            });                
+            })
+            ->first();
+            if ( is_null($user)) {
+                return $this->respondBadRequest('You need to have a published content before you can withdraw from your wallet');
+            }
+
             $payment_account = $request->user()->paymentAccounts()->first();
             if (is_null($payment_account)) {
                 return $this->respondBadRequest('You need to add a payment account before you can withdraw from your wallet');
@@ -165,6 +202,15 @@ class WalletController extends Controller
                 return $this->respondBadRequest('Your wallet balance is too low to make this withdrawal');
             }
             
+            $user_payout = $request->user()->payouts()->where('generated_from', 'wallet')->orderBy('created_at', 'DESC')
+            ->first();
+            if ( ! is_null($user_payout)) {
+                $last_payout = $user_payout->created_at;
+                if ( $last_payout >= now()->subHours(24)) {
+                    $next_payout = $last_payout->addHours(24);
+                    return $this->respondBadRequest('You are only allowed to withdraw once within 24 hrs, your next withdrawal window will begin on '.$next_payout->toDayDateTimeString());
+                }
+            }
             
             $newWalletBalance = bcsub($request->user()->wallet->balance, $total_amount_in_flk, 2);
             $transaction = WalletTransaction::create([
@@ -180,6 +226,7 @@ class WalletController extends Controller
             $amount_to_withdraw_in_dollars = bcdiv($total_amount_in_flk, 100, 6);
             $request->user()->payouts()->create([
                 'amount' => bcmul($amount_to_withdraw_in_dollars, 1 - Constants::WALLET_WITHDRAWAL_CHARGE),
+                'generated_from' => 'wallet'
             ]);
 
             return $this->respondAccepted('Withdrawal successful. You should receive your money soon.');
