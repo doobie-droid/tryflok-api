@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Jobs\Users\SendEmailToReferrer as SendEmailToReferrerJob;
+use Illuminate\Support\Facades\Cookie;
+use Aws\CloudFront\CloudFrontClient;
 
 class AuthController extends Controller
 {
@@ -236,9 +238,19 @@ class AuthController extends Controller
                         ]);
                     }
                 }
+                
+                $key = $request->user()->id;
+                $cookies = '';
+                $cookies = 'bearer' . ' ' . $token . ';';
+                $secure = true;
+                $path = '/';
+                $domain = '.tryflok.com';
+                $time_in_minutes = 2 * 60;
+                Cookie::queue($key, $token, $time_in_minutes, $path, $domain, $secure);
                 return $this->respondWithSuccess('Login successful', [
                     'user' => new UserResourceWithSensitive($user),
                     'token' => $token,
+                    'authorization' => $cookies,
                 ]);
             } else {
                 return $this->respondBadRequest('User credentials do not match our record');
