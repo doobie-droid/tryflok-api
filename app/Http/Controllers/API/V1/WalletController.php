@@ -209,7 +209,7 @@ class WalletController extends Controller
                 $last_payout = $user_payout->created_at;
                 if ( $last_payout >= now()->subHours(24)) {
                     $next_payout = $last_payout->addHours(24);
-                    return $this->respondBadRequest('You have withdrawn today, your next withdrawal is '.$next_payout->toDayDateTimeString());
+                    return $this->respondBadRequest('You are only allowed to withdraw once within 24 hrs, your next withdrawal window will begin on '.$next_payout->toDayDateTimeString());
                 }
             }
             
