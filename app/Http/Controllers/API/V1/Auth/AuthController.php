@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Jobs\Users\SendEmailToReferrer as SendEmailToReferrerJob;
+use Illuminate\Support\Facades\Cookie;
 
 class AuthController extends Controller
 {
@@ -236,6 +237,14 @@ class AuthController extends Controller
                         ]);
                     }
                 }
+                
+                $key = $request->user()->id;
+                $cookies = "Authorization=Bearer {$token};";
+                $secure = true;
+                $path = '/';
+                $domain = '.tryflok.com';
+                $time_in_minutes = 2 * 60;
+                Cookie::queue($key, $token, $time_in_minutes, $path, $domain, $secure);
                 return $this->respondWithSuccess('Login successful', [
                     'user' => new UserResourceWithSensitive($user),
                     'token' => $token,
