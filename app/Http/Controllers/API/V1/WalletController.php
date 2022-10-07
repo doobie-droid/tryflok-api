@@ -202,13 +202,13 @@ class WalletController extends Controller
                 return $this->respondBadRequest('Your wallet balance is too low to make this withdrawal');
             }
             
-            $user_payout = $request->user()->payouts()
+            $user_payout = $request->user()->payouts()->where('generated_from', 'wallet')->orderBy('created_at', 'DESC')
             ->first();
             if ( ! is_null($user_payout)) {
-                $last_payout = $user_payout->last_payment_request;
+                $last_payout = $user_payout->created_at;
                 if ( $last_payout >= now()->subHours(24)) {
                     $next_payout = $last_payout->addHours(24);
-                    return $this->respondBadRequest('You have withdrawn today, your next withdrawal is '.$next_payout);
+                    return $this->respondBadRequest('You have withdrawn today, your next withdrawal is '.$next_payout->toDayDateTimeString());
                 }
             }
             
@@ -226,6 +226,7 @@ class WalletController extends Controller
             $amount_to_withdraw_in_dollars = bcdiv($total_amount_in_flk, 100, 6);
             $request->user()->payouts()->create([
                 'amount' => bcmul($amount_to_withdraw_in_dollars, 1 - Constants::WALLET_WITHDRAWAL_CHARGE),
+                'generated_from' => 'wallet'
             ]);
 
             return $this->respondAccepted('Withdrawal successful. You should receive your money soon.');

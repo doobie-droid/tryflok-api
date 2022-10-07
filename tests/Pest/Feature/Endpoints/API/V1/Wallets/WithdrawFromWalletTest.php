@@ -41,9 +41,15 @@ test('user with at least one published content in a collection under a published
         $request = [
             'amount_in_flk' => 100,
         ];        
-        
+        $amount_in_dollars = bcdiv($request['amount_in_flk'], 100, 6);
+        $amount_to_withdraw_in_dollars = bcmul($amount_in_dollars, 1 - 0.05);
         $response = $this->json('PATCH', "/api/v1/account/withdraw-from-wallet", $request);
         $response->assertStatus(202);
+        $this->assertDatabaseHas('payouts', [
+            'user_id' => $this->user->id,
+            'generated_from' => 'wallet',
+            'amount' => $amount_to_withdraw_in_dollars,
+        ]);
 });
 
 test('user with at least one published content in a digiverse can withdraw', function()
@@ -63,16 +69,28 @@ test('user with at least one published content in a digiverse can withdraw', fun
         $request = [
             'amount_in_flk' => 100,
         ];        
-        
+        $amount_in_dollars = bcdiv($request['amount_in_flk'], 100, 6);
+        $amount_to_withdraw_in_dollars = bcmul($amount_in_dollars, 1 - 0.05);
         $response = $this->json('PATCH', "/api/v1/account/withdraw-from-wallet", $request);
         $response->assertStatus(202);
+        $this->assertDatabaseHas('payouts', [
+            'user_id' => $this->user->id,
+            'generated_from' => 'wallet',
+            'amount' => $amount_to_withdraw_in_dollars,
+        ]);
 });
 
 test('user with a payout within the last 24 hours cannot withdraw', function()
 {
         $payout = Models\Payout::factory()->create([
             'user_id' => $this->user->id,
-            'last_payment_request' => now()->subHours(20),
+            'created_at' => now()->subHours(25),
+            'generated_from' => 'wallet'
+        ]);
+        $payout = Models\Payout::factory()->create([
+            'user_id' => $this->user->id,
+            'created_at' => now()->subHours(20),
+            'generated_from' => 'wallet'
         ]);
         $digiverse = Models\Collection::factory()->digiverse()->create([
             'user_id' => $this->user->id,
@@ -97,7 +115,8 @@ test('user with a payout more than 24 hours ago can withdraw', function()
 {
         $payout = Models\Payout::factory()->create([
             'user_id' => $this->user->id,
-            'last_payment_request' => now()->subHours(25),
+            'generated_from' => 'wallet',
+            'created_at' => now()->subHours(25)
         ]);
         $digiverse = Models\Collection::factory()->digiverse()->create([
             'user_id' => $this->user->id,
@@ -113,9 +132,15 @@ test('user with a payout more than 24 hours ago can withdraw', function()
         $request = [
             'amount_in_flk' => 100,
         ];        
-        
+        $amount_in_dollars = bcdiv($request['amount_in_flk'], 100, 6);
+        $amount_to_withdraw_in_dollars = bcmul($amount_in_dollars, 1 - 0.05);
         $response = $this->json('PATCH', "/api/v1/account/withdraw-from-wallet", $request);
         $response->assertStatus(202);
+        $this->assertDatabaseHas('payouts', [
+            'user_id' => $this->user->id,
+            'generated_from' => 'wallet',
+            'amount' => $amount_to_withdraw_in_dollars,
+        ]);
 });
 
 test('user with at least a content under an unpublished digiverse cannot withdraw', function()
