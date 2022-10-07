@@ -90,6 +90,14 @@ class CollectionFactory extends Factory
             ];
         });
     }
+    public function collection()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'collection',
+            ];
+        });
+    }
 
     public function not_approved()
     {

@@ -50,6 +50,7 @@ class Payout implements ShouldQueue
         if ($total_payout > 0) {
             $this->user->payouts()->create([
                 'amount' => $total_payout,
+                'generated_from' => 'content'
             ]);
         }
     }
