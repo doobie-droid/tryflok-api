@@ -21,7 +21,6 @@ use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Jobs\Users\SendEmailToReferrer as SendEmailToReferrerJob;
 use Illuminate\Support\Facades\Cookie;
-use Aws\CloudFront\CloudFrontClient;
 
 class AuthController extends Controller
 {
@@ -240,8 +239,7 @@ class AuthController extends Controller
                 }
                 
                 $key = $request->user()->id;
-                $cookies = '';
-                $cookies = "Authorization=Bearer {$token };";
+                $cookies = "Authorization=Bearer {$token};";
                 $secure = true;
                 $path = '/';
                 $domain = '.tryflok.com';
