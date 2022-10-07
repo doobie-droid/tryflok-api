@@ -202,6 +202,15 @@ class WalletController extends Controller
                 return $this->respondBadRequest('Your wallet balance is too low to make this withdrawal');
             }
             
+            $user_payout = $request->user()->payouts()
+            ->first();
+            if ( ! is_null($user_payout)) {
+                $last_payout = $user_payout->last_payment_request;
+                if ( $last_payout >= now()->subHours(24)) {
+                    $next_payout = $last_payout->addHours(24);
+                    return $this->respondBadRequest('You have withdrawn today, your next withdrawal is '.$next_payout);
+                }
+            }
             
             $newWalletBalance = bcsub($request->user()->wallet->balance, $total_amount_in_flk, 2);
             $transaction = WalletTransaction::create([

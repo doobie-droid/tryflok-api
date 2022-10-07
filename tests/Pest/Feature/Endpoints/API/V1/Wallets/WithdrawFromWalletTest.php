@@ -68,6 +68,56 @@ test('user with at least one published content in a digiverse can withdraw', fun
         $response->assertStatus(202);
 });
 
+test('user with a payout within the last 24 hours cannot withdraw', function()
+{
+        $payout = Models\Payout::factory()->create([
+            'user_id' => $this->user->id,
+            'last_payment_request' => now()->subHours(20),
+        ]);
+        $digiverse = Models\Collection::factory()->digiverse()->create([
+            'user_id' => $this->user->id,
+        ]);
+       
+        $content = Models\Content::factory()
+        ->setDigiverse($digiverse)
+        ->setTags([Models\Tag::factory()->create()])
+        ->create([
+            'user_id' => $this->user->id,
+        ]);  
+        
+        $request = [
+            'amount_in_flk' => 100,
+        ];        
+        
+        $response = $this->json('PATCH', "/api/v1/account/withdraw-from-wallet", $request);
+        $response->assertStatus(400);
+});
+
+test('user with a payout more than 24 hours ago can withdraw', function()
+{
+        $payout = Models\Payout::factory()->create([
+            'user_id' => $this->user->id,
+            'last_payment_request' => now()->subHours(25),
+        ]);
+        $digiverse = Models\Collection::factory()->digiverse()->create([
+            'user_id' => $this->user->id,
+        ]);
+       
+        $content = Models\Content::factory()
+        ->setDigiverse($digiverse)
+        ->setTags([Models\Tag::factory()->create()])
+        ->create([
+            'user_id' => $this->user->id,
+        ]);  
+        
+        $request = [
+            'amount_in_flk' => 100,
+        ];        
+        
+        $response = $this->json('PATCH', "/api/v1/account/withdraw-from-wallet", $request);
+        $response->assertStatus(202);
+});
+
 test('user with at least a content under an unpublished digiverse cannot withdraw', function()
 {
         $digiverse = Models\Collection::factory()->digiverse()->create([
