@@ -23,6 +23,7 @@ class CollectionController extends Controller
                 'title' => ['required', 'string'],
                 'description' => ['required', 'string'],
                 'cover.asset_id' => ['required', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'trailer.asset_id' => ['sometimes', 'string', 'exists:assets,id', new AssetTypeRule('video')],
                 'price' => ['required'],
                 'price.amount' => ['required', 'min:0', 'numeric', 'max:10000'],
                 'price.interval' => ['required', 'string', 'in:one-off,monthly'],
@@ -84,6 +85,13 @@ class CollectionController extends Controller
                 'id' => Str::uuid(),
                 'purpose' => 'cover',
             ]);
+
+            if (isset($request->trailer)) {
+                $digiverse->cover()->attach($request->trailer['asset_id'], [
+                    'id' => Str::uuid(),
+                    'purpose' => 'trailer',
+                ]);
+            }
 
             $digiverse = Collection::where('id', $digiverse->id)
             ->eagerLoadBaseRelations()
@@ -247,6 +255,7 @@ class CollectionController extends Controller
                 'title' => ['sometimes', 'nullable', 'string'],
                 'description' => ['sometimes', 'nullable', 'string'],
                 'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'trailer.asset_id' => ['sometimes', 'string', 'exists:assets,id', new AssetTypeRule('video')],
                 'is_available' => ['sometimes', 'integer', 'min:0', 'max:1'],
                 'price' => ['sometimes', 'nullable'],
                 'price.id' => ['sometimes', 'exists:prices,id'],
@@ -298,6 +307,19 @@ class CollectionController extends Controller
                 $digiverse->cover()->attach($request->cover['asset_id'], [
                     'id' => Str::uuid(),
                     'purpose' => 'cover',
+                ]);
+            }
+
+            if (! is_null($request->trailer) && array_key_exists('asset_id', $request->trailer) && ! is_null($request->trailer['asset_id']) && $request->trailer['asset_id'] != '') {
+                $oldTrailer = $digiverse->trailerVideo()->first();
+                if (! is_null($oldTrailer)) {
+                    $digiverse->trailerVideo()->detach($oldTrailer->id);
+                    $oldTrailer->delete();
+                }
+                
+                $digiverse->trailerVideo()->attach($request->trailer['asset_id'], [
+                    'id' => Str::uuid(),
+                    'purpose' => 'trailer',
                 ]);
             }
 

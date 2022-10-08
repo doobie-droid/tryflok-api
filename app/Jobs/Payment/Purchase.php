@@ -174,20 +174,24 @@ class Purchase implements ShouldQueue
 
             //if subscription create subscription record
             if ($item['type'] === 'collection' && $price->interval === 'monthly') {
-                $start = now();
-                $cloneOfStart = clone $start;
-                $end = $cloneOfStart->add($price->interval_amount, 'month');
-                $auto_renew = 0;
-                if ($price->amount == 0) {
-                    $auto_renew = 1;
+                $subscribers = $itemModel->subscriptions()->count();
+                $max_subscribers = $itemModel->max_subscribers;
+                if ( ! is_null($max_subscribers) && $subscribers < $max_subscribers ) {
+                    $start = now();
+                    $cloneOfStart = clone $start;
+                    $end = $cloneOfStart->add($price->interval_amount, 'month');
+                    $auto_renew = 0;
+                    if ($price->amount == 0) {
+                        $auto_renew = 1;
+                    }
+                    $itemModel->subscriptions()->create([
+                        'userable_id' => $parentUserable->id,
+                        'price_id' => $price->id,
+                        'start' => $start,
+                        'end' => $end,
+                        'auto_renew' => $auto_renew,
+                    ]);   
                 }
-                $itemModel->subscriptions()->create([
-                    'userable_id' => $parentUserable->id,
-                    'price_id' => $price->id,
-                    'start' => $start,
-                    'end' => $end,
-                    'auto_renew' => $auto_renew,
-                ]);
             }
 
             if ($price->amount > 0) {
