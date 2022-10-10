@@ -194,7 +194,7 @@ test('purchase works', function()
             'price_id' => $free_content_in_free_digiverse->prices()->first()->id,
         ]);
 
-})->skip();
+});
 
 test('purchase works without optional parameters', function()
 {
@@ -579,4 +579,4 @@ test('subscription is not created when limit is reached', function()
             'price_id' => $free_content_in_free_digiverse->prices()->first()->id,
         ]);
 
-})->skip();
+});
