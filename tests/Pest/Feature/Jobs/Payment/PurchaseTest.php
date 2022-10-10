@@ -579,4 +579,4 @@ test('subscription is not created when limit is reached', function()
             'price_id' => $free_content_in_free_digiverse->prices()->first()->id,
         ]);
 
-})->only();
+});
