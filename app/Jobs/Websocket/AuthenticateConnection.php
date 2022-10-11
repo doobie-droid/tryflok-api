@@ -40,14 +40,14 @@ class AuthenticateConnection implements ShouldQueue
     public function handle()
     {
         $authorization = [];
-        Log::info(json_encode($this->headers));
-        Log::info(json_encode($this->cookies));
+        Log::error(json_encode($this->headers));
+        Log::error(json_encode($this->cookies));
         foreach ($this->headers as $key => $value) {
             $key = strtolower($key);
             if ($key === 'authorization') {
                 $authorization = $value;
             } else if ($key === 'cookie') {
-                Log::info(json_encode($value));
+                Log::error(json_encode($value));
             }
         }
         if (empty($authorization) || $authorization[0] == '' || is_null($authorization[0])) {
