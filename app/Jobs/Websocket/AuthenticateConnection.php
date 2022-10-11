@@ -17,6 +17,7 @@ class AuthenticateConnection implements ShouldQueue
     public $headers;
     public $resource_id;
     public $ws_identity;
+    public $cookies;
     /**
      * Create a new job instance.
      *
@@ -27,6 +28,7 @@ class AuthenticateConnection implements ShouldQueue
         $this->headers = $data['headers'];
         $this->resource_id = $data['resource_id'];
         $this->ws_identity = $data['ws_identity'];
+        $this->cookies = $data['cookies'];
         $this->onConnection('redis_local');
     }
 
@@ -38,6 +40,8 @@ class AuthenticateConnection implements ShouldQueue
     public function handle()
     {
         $authorization = [];
+        Log::info(json_encode($this->headers));
+        Log::info(json_encode($this->cookies));
         foreach ($this->headers as $key => $value) {
             $key = strtolower($key);
             if ($key === 'authorization') {
