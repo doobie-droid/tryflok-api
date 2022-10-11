@@ -48,6 +48,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
             AuthenticateConnection::dispatch([
                 'headers' => $conn->httpRequest->getHeaders(),
+                'cookies' => $conn->httpRequest->getHeader('Cookie'),
                 'resource_id' => $conn->resourceId,
                 'ws_identity' => $this->ws_identity,
             ]);
