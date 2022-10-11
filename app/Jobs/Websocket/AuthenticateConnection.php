@@ -43,8 +43,18 @@ class AuthenticateConnection implements ShouldQueue
             $key = strtolower($key);
             if ($key === 'authorization') {
                 $authorization = $value;
+                break;
             } else if ($key === 'cookie') {
-                Log::info(json_encode($value));
+                $cookies = explode(";", $value);
+                foreach ($cookies as $cookey => $coovalue) {
+                    Log::info(json_encode("{$cookey}: {$coovalue}"));
+                    $cookey = strtolower($cookey);
+                    if ($cookey === 'authorization') {
+                        $authorization[0] = $coovalue;
+                        break;
+                    }
+                }
+                
             }
         }
         if (empty($authorization) || $authorization[0] == '' || is_null($authorization[0])) {
