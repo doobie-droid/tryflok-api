@@ -286,3 +286,21 @@ test('filter by creators works', function()
         $this->assertArrayHasObjectWithElementValue($contents, $content2, 'id');
         $this->assertArrayHasObjectWithElementValue($contents, $content3, 'id');
 });
+test('contents whose lives ended more than two hours ago do not get returned', function()
+{
+        $user = Models\User::factory()->create();
+        $this->be($user);
+
+        $digiverse = Models\Collection::factory()->digiverse()->create();
+        Models\Content::factory()
+        ->setDigiverse($digiverse)
+        ->setTags([Models\Tag::factory()->create()])
+        ->count(4)
+        ->create([
+            'live_ended_at' => now()->subHours(3),
+        ]);
+        $response = $this->json('GET', "/api/v1/digiverses/{$digiverse->id}/contents?page=1&limit=10");
+        $response->assertStatus(200);
+        $contents = $response->getData()->data->contents;
+        $this->assertEquals($contents, []);
+});

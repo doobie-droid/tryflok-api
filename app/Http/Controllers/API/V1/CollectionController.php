@@ -117,7 +117,7 @@ class CollectionController extends Controller
             }
 
             if ($digiverse->user_id !== $user->id) {
-                return $this->respondBadRequest('You cannot to this digiverse because you do not own it');
+                return $this->respondBadRequest('You cannot add to this digiverse because you do not own it');
             }
 
             $collection = Collection::create([
@@ -177,7 +177,7 @@ class CollectionController extends Controller
     {
         try {
             $validator = Validator::make(['id' => $id], [
-                'id' => ['required', 'string', 'exists:collections,id'],
+                'id' => ['required', 'string', 'exists:collections,id,deleted_at,NULL'],
             ]);
 
             if ($validator->fails()) {

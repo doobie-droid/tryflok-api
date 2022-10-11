@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Payment;
 
+use App\Constants\Constants;
 use App\Models\Payment;
 use App\Models\WalletTransaction;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
@@ -30,6 +31,9 @@ class FundWallet implements ShouldQueue
     private $fund_type;
     private $funder_name;
     private $fund_note;
+    private $originating_currency;
+    private $originating_content_id;
+    private $originating_client_source;
 
     /**
      * Create a new job instance.
