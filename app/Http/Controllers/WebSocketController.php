@@ -127,7 +127,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 if (! $user_is_authenticated && $event !== 'join-rtm-channel') {
                     // only allow unauthenticated requests come from server node or api
                     // or requests that have to do with joining a channel
-                    $connection->send(json_encode([
+                    $conn->send(json_encode([
                         'event' => 'event-error',
                         'event_name' => $event,
                         'message' => 'Only authenticated users can perform this action',
