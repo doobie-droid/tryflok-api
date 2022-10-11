@@ -51,8 +51,6 @@ class AuthenticateConnection implements ShouldQueue
                     if (str_contains(strtolower($coovalue), 'authorization=')) {
                         $auth_parts = explode("=", $coovalue);
                         $authorization[0] = $auth_parts[1];
-                        Log::info(json_encode($auth_parts));
-                        Log::info(json_encode($authorization));
                         break;
                     }
                 }
