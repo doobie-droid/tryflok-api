@@ -47,7 +47,9 @@ class AuthenticateConnection implements ShouldQueue
             } else if ($key === 'cookie') {
                 Log::info($value);
                 $value = $value[0];
+                Log::info($value);
                 $cookies = explode(";", $value);
+                Log::info($cookies);
                 foreach ($cookies as $cookey => $coovalue) {
                     Log::info(json_encode("{$cookey}: {$coovalue}"));
                     $cookey = strtolower($cookey);
