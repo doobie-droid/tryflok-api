@@ -50,7 +50,7 @@ class AuthenticateConnection implements ShouldQueue
                 foreach ($cookies as $cookey => $coovalue) {
                     if (str_contains(strtolower($coovalue), 'authorization=')) {
                         $auth_parts = explode("=", $coovalue);
-                        $authorization[0] = $auth_parts[1];
+                        $authorization[0] = urldecode($auth_parts[1]);
                         break;
                     }
                 }

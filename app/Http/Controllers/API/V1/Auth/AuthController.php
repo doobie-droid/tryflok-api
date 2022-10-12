@@ -243,7 +243,7 @@ class AuthController extends Controller
                 $path = '/';
                 $domain = '.tryflok.com';
                 $time_in_minutes = 2 * 60;
-                Cookie::queue($key, $token, $time_in_minutes, $path, $domain, $secure);
+                Cookie::queue($key, "Bearer {$token}", $time_in_minutes, $path, $domain, $secure);
                 return $this->respondWithSuccess('Login successful', [
                     'user' => new UserResourceWithSensitive($user),
                     'token' => $token,
