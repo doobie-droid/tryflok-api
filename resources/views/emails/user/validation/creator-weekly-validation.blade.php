@@ -457,7 +457,7 @@
                                                 @isset($contents[1]['previous_week'])
                                                     {{$contents[1]['previous_week']['week_comments']}}
                                                 @elseif(isset($contents[0]['previous_week']))
-                                                    {{$contents[0]['previous_week']['week_comments']}
+                                                    {{$contents[0]['previous_week']['week_comments']}}
                                                     @else
                                                     $ 0
                                                 @endisset

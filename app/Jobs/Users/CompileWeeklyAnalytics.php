@@ -54,7 +54,6 @@ class CompileWeeklyAnalytics implements ShouldQueue
             ->get();
             foreach ($digiverses as $digiverse)
             {  
-                Log::info($digiverse);
                 $user_analytics = array();
                 $previous_week = array();
                 $current_week = array(); 
@@ -239,7 +238,9 @@ class CompileWeeklyAnalytics implements ShouldQueue
                 $comments_percentage = $this->calculatePercentage($current_week_comments, $previous_week_comments);
                 array_push($analytics_percentages, ['comments_percentage' => $comments_percentage]);
             }
-            $this->sendWeeklyValidationMail($digiverse->id, $analytics_percentages); 
+            if ( $this->checkForNonZeroMetric($current_week) || $this->checkForNonZeroMetric($previous_week)) {
+                $this->sendWeeklyValidationMail($digiverse->id, $analytics_percentages); 
+            }
             Log::info("End Creator Weekly Validation");
             }
         } catch (\Exception $exception) {
@@ -558,16 +559,26 @@ class CompileWeeklyAnalytics implements ShouldQueue
         }
         if ($current_week > $previous_week) {
             $increase = $current_week - $previous_week;
-            $percentage = +($increase / $previous_week) * 100;
+            $percentage = +round(($increase / $previous_week) * 100, 2);
         }
         elseif ($current_week < $previous_week) {
             $decrease = $previous_week - $current_week;
-            $percentage = -($decrease / $current_week) * 100;
+            $percentage = -round(($decrease / $current_week) * 100, 2);
         }
         else {
             $percentage = 0;
         }
         return $percentage;
+    }
+
+    public function checkForNonZeroMetric($array) {
+        $sum = 0;
+        foreach ($array as $inner) {
+            $sum = $sum + array_sum($inner);
+            if($sum > 0) {
+                return true;
+            }
+        }
     }
 
     public function sendWeeklyValidationMail($digiverse_id, $analytics_percentages) {
