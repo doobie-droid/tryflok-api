@@ -238,8 +238,7 @@ class AuthController extends Controller
                     }
                 }
                 
-                $key = $request->user()->id;
-                $cookies = "Authorization=Bearer {$token};";
+                $key = "Authorization";
                 $secure = true;
                 $path = '/';
                 $domain = '.tryflok.com';
