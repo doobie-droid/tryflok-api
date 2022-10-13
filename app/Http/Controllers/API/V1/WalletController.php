@@ -228,7 +228,7 @@ class WalletController extends Controller
                     $subscriptions = $itemModel->subscriptions()->count();
                     $max_subscribers = $itemModel->max_subscribers;
                     if ( (! is_null($max_subscribers) && $subscriptions >= $max_subscribers)) {
-                        return $this->respondBadRequest('Purchase limit has been reached for this item');
+                        return $this->respondBadRequest("Purchase limit has been reached for the item: '{$itemModel->title}'");
                     }
                 }
                 //add total price
