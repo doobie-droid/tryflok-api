@@ -62,6 +62,11 @@ class Collection extends Model
         return $this->morphToMany(Asset::class, 'assetable')->wherePivot('purpose', 'cover');
     }
 
+    public function trailerVideo()
+    {
+        return $this->morphToMany(Asset::class, 'assetable')->wherePivot('purpose', 'trailer');
+    }
+
     public function benefactors()
     {
         return $this->morphMany(Benefactor::class, 'benefactable');
@@ -170,6 +175,7 @@ class Collection extends Model
             },
         ], 'rating')
         ->with('cover')
+        ->with('trailerVideo')
         ->with([
             'owner' => function ($query) {
                 $query->with('profile_picture')

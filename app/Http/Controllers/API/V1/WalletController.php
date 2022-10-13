@@ -271,6 +271,13 @@ class WalletController extends Controller
                 if (is_null($itemModel)) {
                     return $this->respondBadRequest('You selected an item that does not exist.');
                 }
+                if ($itemModel->type == 'digiverse') {
+                    $subscriptions = $itemModel->subscriptions()->count();
+                    $max_subscribers = $itemModel->max_subscribers;
+                    if ( (! is_null($max_subscribers) && $subscriptions >= $max_subscribers)) {
+                        return $this->respondBadRequest("Purchase limit has been reached for the item: '{$itemModel->title}'");
+                    }
+                }
                 //add total price
                 $total_amount_in_dollars = bcadd($total_amount_in_dollars, $price->amount, 2);
             }
