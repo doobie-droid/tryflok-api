@@ -377,4 +377,4 @@ test('purchase works without optional parameters', function()
             'price_id' => $free_content_in_free_digiverse->prices()->first()->id,
         ]);
 
-})->skip();
+});
