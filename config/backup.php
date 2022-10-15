@@ -130,7 +130,7 @@ return [
         * The password to be used for archive encryption.
         * Set to `null` to disable encryption.
         */
-        'password' => env('BACKUP_ARCHIVE_PASSWORD'),
+        'password' => null,
 
         /*
         * The encryption algorithm to be used for archive encryption.
@@ -167,7 +167,7 @@ return [
         'notifiable' => \Spatie\Backup\Notifications\Notifiable::class,
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => 'fanan@tryflok.com',
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
@@ -176,7 +176,7 @@ return [
         ],
 
         'slack' => [
-            'webhook_url' => '',
+            'webhook_url' => env('LOG_SLACK_WEBHOOK_URL'),
 
             /*
             * If this is set to null the default channel of the webhook will be used.
@@ -206,7 +206,7 @@ return [
     'monitor_backups' => [
         [
             'name' => env('APP_NAME', 'laravel-backup'),
-            'disks' => ['local'],
+            'disks' => ['google'],
             'health_checks' => [
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => 1,
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes::class => 5000,
