@@ -1,8 +1,8 @@
 FROM php:8.0.5-fpm
 ARG user
 ARG uid
-RUN apt-get update 
-RUN apt-get install -y mariadb-client
+RUN apt-get update --fix-missing
+RUN apt-get install -y default-mysql-client
 RUN apt-get install -y zlib1g-dev libsqlite3-dev
 RUN apt-get install -y libpng-dev libjpeg62-turbo-dev 
 RUN apt-get install -y libmagickwand-dev
