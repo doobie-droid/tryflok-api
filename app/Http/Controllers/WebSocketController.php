@@ -690,11 +690,23 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 $key = strtolower($key);
                 if ($key === 'authorization') {
                     $authorization = $value;
+                    break;
+                } else if ($key === 'cookie') {
+                    $value = $value[0];
+                    $cookies = explode(";", $value);
+                    foreach ($cookies as $cookey => $coovalue) {
+                        if (str_contains(strtolower($coovalue), 'authorization=')) {
+                            $auth_parts = explode("=", $coovalue);
+                            $authorization[0] = urldecode($auth_parts[1]);
+                            break;
+                        }
+                    }
+                    
                 }
             }
 
-            if (empty($authorization)) {
-                return '';
+            if (empty($authorization) || $authorization[0] == '' || is_null($authorization[0])) {
+                return;
             }
 
             $token = explode(' ', $authorization[0])[1];
