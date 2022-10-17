@@ -14,10 +14,11 @@ use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Jobs\Payment\AnonymousPurchase as AnonymousPurchaseJob;
+use Illuminate\Support\Str;
 
 class AnonymousPurchaseController extends Controller
 {
-    public function purchases (Request $request)
+    public function makePurchases (Request $request)
     {
         try {
             $validator = Validator::make($request->input(), [
@@ -30,7 +31,12 @@ class AnonymousPurchaseController extends Controller
                 'items.*.price.id' => ['required', 'string','exists:prices,id'],
                 'items.*.price.interval' => ['required', 'string', 'in:monthly,one-off'],
                 'items.*.price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
-                'items.*.originating_client_source' => ['sometimes', 'nullable', 'string', 'in:web,ios,android'],
+                'provider' => ['required', 'string', 'in:flutterwave,stripe'],
+                'provider_response' => ['required'],
+                'provider_response.transaction_id' => ['required_if:provider,flutterwave'],
+                'provider_response.id' => ['required_if:provider,stripe', 'string'],
+                'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
+                'expected_flk_amount' => ['required', 'integer', 'min:1'],
             ]);
 
             if ($validator->fails()) {
@@ -57,20 +63,61 @@ class AnonymousPurchaseController extends Controller
                 $total_amount_in_dollars = bcadd($total_amount_in_dollars, $price->amount, 2);
             }
 
-            $total_amount_in_dollars = (float) $total_amount_in_dollars;//convert from creator dollars to flk
-            $total_amount_in_flk = (float) bcmul($total_amount_in_dollars, 100, 2);
-            $wallet_balance = (float) $user->wallet->balance;
+
+
+            Log::info("Anonymous attempted purchase began");
+            $payment_verified = false;
+            $amount_in_dollars = 0;
+            $fee = 0;
+            $expected_flk_based_on_amount = 0;
+            $provider_id = '';
+
+            switch ($request->provider) {
+                case 'flutterwave':
+                    $flutterwave = new Flutterwave;
+                    $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
+                    if (($req->status === 'success' && $req->data->status === 'successful')) {
+                        $amount_in_dollars = bcdiv($req->data->amount, Constants::NAIRA_TO_DOLLAR, 2);
+                        $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                        $fee = bcdiv($req->data->app_fee, Constants::NAIRA_TO_DOLLAR, 2);
+                        $provider_id = $req->data->id;
+                        $payment_verified = true;
+                    }
+                    break;
+                case 'stripe':
+                    $stripe = new StripePayment;
+                    $amount_in_dollars = bcdiv($request->amount_in_cents, 100, 2);
+                    $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                    $req = $stripe->chargeViaToken($request->amount_in_cents, $request->provider_response['id']);
+
+                    if (($req->status === 'succeeded' && $req->paid === true)) {
+                        $fee = bcdiv(bcadd(bcmul(0.029, $req->amount, 2), 30, 2), 100, 2); //2.9% + 30c convert to dollar
+                        $amount_in_dollars = bcdiv($req->amount, 100, 2);
+                        $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                        $provider_id = $req->id;
+                        $payment_verified = true;
+                    }
+                    
+                    break;
+                default:
+                    return $this->respondBadRequest('Invalid provider specified');
+            }
+
+            if (!$payment_verified) {
+                return $this->respondBadRequest('Payment provider did not verify payment');
+            }
 
             AnonymousPurchaseJob::dispatch([
-                'total_amount' => $total_amount_in_dollars,
+                'total_amount' => $amount_in_dollars,
                 'total_fees' => 0,
-                'purchaser_email' => $request->email,
-                'provider' => 'wallet',
-                'provider_id' => $transaction->id,
+                'payer_email' => $request->email,
+                'provider' => $request->provider,
+                'provider_id' => $provider_id,
                 'items' => $request->items,
             ]);
 
-            return $this->respondAccepted("Items queued to be added to user's library.");
+            Log::info("Anonymous attempted purchase was successful");
+            return $this->respondWithSuccess('Payment received successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

@@ -14,7 +14,7 @@ class TestingSeeder extends Seeder
     public function run()
     {
         $this->call(RolesAndPermissionSeeder::class);
-        // $this->call(UsersTableSeeder::class);
+        $this->call(UsersTableSeeder::class);
         $this->call(LocationsSeeder::class);
         $this->call(CategorysTableSeeder::class);
         $this->call(TagsTableSeeder::class);

@@ -16,6 +16,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use App\Mail\User\AnonymousPurchaseMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AnonymousPurchase implements ShouldQueue
 {
@@ -78,12 +79,12 @@ class AnonymousPurchase implements ShouldQueue
 
            //record payment on payment table
            $payment = $itemModel->payments()->create([
-               'payer_id' => $payer->id,
                'payee_id' => $itemModel->owner->id,
                'amount' => $amount,
                'payment_processor_fee' => $fee,
                'provider' => $this->data['provider'],
                'provider_id' => $this->data['provider_id'],
+               'payer_email' => $this->data['payer_email']
            ]);
 
            //record sales for the benefactors of this item
@@ -106,10 +107,6 @@ class AnonymousPurchase implements ShouldQueue
                    'referral_bonus' => 0,
                    'revenue_from' => 'sale',
                ]);
-               if ( ! empty($item['originating_client_source'])) {
-                    $benefactorUser->originating_client_source = $item['originating_client_source'];
-               }
-               $benefactorUser->save();
            }
            //record revenue from referral of the item
            if ($itemModel->owner->referrer()->exists()) {
@@ -123,28 +120,16 @@ class AnonymousPurchase implements ShouldQueue
                    'referral_bonus' => bcmul(bcsub($net_amount, $fee, 6), Constants::REFERRAL_BONUS, 6),
                    'revenue_from' => 'referral',
                ]);
-               if ( ! empty($item['originating_client_source'])) {
-                   $itemModelOwner->originating_client_source = $item['originating_client_source'];
-              }
-              $itemModelOwner->save();
            }
-
-           $anonymous_purchase = Models\AnonymousPurchase::where('anonymous_purchaseable_type', $item['type'])->where('anonymous_purchaseable_id', $itemModel->id)->where('email', $payer->email)->first();
-           if (is_null($anonymous_purchase)) {
-               //add content/collection to anonymous purchase
-               $anonymous_purchase = Models\AnonymousPurchase::create([
-                   'email' => $this->data['purchaser_email'],
-                   'status' => 'available',
-                   'access_token' => 'token',
-                   'anonymous_purchaseable_type' => $item['type'],
-                   'anonymous_purchaseable_id' => $itemModel->id,
-               ]);
-           } else {
-               //update the already exisitng content/collection in anonymous purchase
-               $anonymous_purchase->status = 'available';
-               $anonymous_purchase->save();
-           }
-           //if subscription create subscription record
+            $anonymous_purchase = Models\AnonymousPurchase::create([
+                'email' => $this->data['payer_email'],
+                'status' => 'available',
+                'access_token' => Str::random(10),
+                'anonymous_purchaseable_type' => $item['type'],
+                'anonymous_purchaseable_id' => $itemModel->id,
+            ]);
+        
+        //if subscription create subscription record
         //    if ($item['type'] === 'collection' && $price->interval === 'monthly') {
         //        $start = now();
         //        $cloneOfStart = clone $start;
@@ -161,10 +146,17 @@ class AnonymousPurchase implements ShouldQueue
         //            'auto_renew' => $auto_renew,
         //        ]);
         //    }
-            
-           if ($price->amount > 0) {
-               NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
-           }
+           
+        $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token to access the content you purchased on flok!";
+        $access_token = $anonymous_purchase->access_token;
+            Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
+            'message' => $message,
+            'access_token' => $access_token,
+        ]));
+
+        if ($price->amount > 0) {
+            NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
+        }
        }
     }
 
