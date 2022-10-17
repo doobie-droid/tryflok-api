@@ -97,6 +97,11 @@ class Collection extends Model
         return $this->morphMany(Userable::class, 'userable');
     }
 
+    public function anonymousPurchases()
+    {
+        return $this->morphMany(AnonymousPurchase::class, 'anonymous_purchaseable');
+    }
+
     public function categories()
     {
         return $this->morphToMany(Category::class, 'categorable');
