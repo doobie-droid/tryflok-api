@@ -124,28 +124,28 @@ class AnonymousPurchase implements ShouldQueue
             $anonymous_purchase = Models\AnonymousPurchase::create([
                 'email' => $this->data['payer_email'],
                 'status' => 'available',
-                'access_token' => Str::random(10),
+                'access_token' => Str::random(20),
                 'anonymous_purchaseable_type' => $item['type'],
                 'anonymous_purchaseable_id' => $itemModel->id,
             ]);
         
         //if subscription create subscription record
-        //    if ($item['type'] === 'collection' && $price->interval === 'monthly') {
-        //        $start = now();
-        //        $cloneOfStart = clone $start;
-        //        $end = $cloneOfStart->add($price->interval_amount, 'month');
-        //        $auto_renew = 0;
-        //        if ($price->amount == 0) {
-        //            $auto_renew = 1;
-        //        }
-        //        $itemModel->subscriptions()->create([
-        //            'userable_id' => $purchase->id,
-        //            'price_id' => $price->id,
-        //            'start' => $start,
-        //            'end' => $end,
-        //            'auto_renew' => $auto_renew,
-        //        ]);
-        //    }
+           if ($item['type'] === 'collection' && $price->interval === 'monthly') {
+               $start = now();
+               $cloneOfStart = clone $start;
+               $end = $cloneOfStart->add($price->interval_amount, 'month');
+               $auto_renew = 0;
+               if ($price->amount == 0) {
+                   $auto_renew = 1;
+               }
+               $itemModel->subscriptions()->create([
+                   'anonymous_purchaseable_id' => $anonymous_purchase->id,
+                   'price_id' => $price->id,
+                   'start' => $start,
+                   'end' => $end,
+                   'auto_renew' => $auto_renew,
+               ]);
+           }
            
         $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token to access the content you purchased on flok!";
         $access_token = $anonymous_purchase->access_token;

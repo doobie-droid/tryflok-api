@@ -16,7 +16,7 @@ class CreateAnonymousPurchasesTable extends Migration
         Schema::create('anonymous_purchases', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('email');
-            $table->string('access_token');
+            $table->string('access_token')->unique();
             $table->uuidMorphs('anonymous_purchaseable');
             $table->string('status')->default('available'); // wishlist, available, subscription-ended, content-deleted
             $table->timestamps();
