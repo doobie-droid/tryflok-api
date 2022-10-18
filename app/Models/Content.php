@@ -243,7 +243,15 @@ class Content extends Model
             });
         })->count();
         $anonymousPurchasesCount = $this->anonymousPurchases()->where('status', 'available')->where('access_token', $access_token)->count();
-        return $userablesCount > 0 || $parentUserablesCount > 0 || $grandParentUserablesCount > 0 || $anonymousPurchasesCount > 0;
+        $parentAnonymousPurchasesCount = $this->collections()->whereHas('anonymousPurchases', function (Builder $query) use ($access_token) {
+            $query->where('status', 'available')->where('access_token', $access_token);
+        })->count();
+        $grandParentAnonymousPurchasesCount = $this->collections()->whereHas('parentCollections', function (Builder $query) use ($access_token) {
+            $query->whereHas('anonymousPurchases', function (Builder $query) use ($access_token) {
+                $query->where('status', 'available')->where('access_token', $access_token);
+            });
+        })->count();
+        return $userablesCount > 0 || $parentUserablesCount > 0 || $grandParentUserablesCount > 0 || $anonymousPurchasesCount > 0 || $parentAnonymousPurchasesCount > 0 || $grandParentAnonymousPurchasesCount > 0;
     }
 
     public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')

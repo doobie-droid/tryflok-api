@@ -35,4 +35,14 @@ class AnonymousPurchase extends Model
     {
         return $this->morphTo(AnonymousPurchase::class);
     }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class, 'anonymous_purchaseable_id');
+    }
+
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class, 'anonymous_purchaseable_id')->where('status', 'active');
+    }
 }

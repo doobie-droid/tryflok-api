@@ -39,6 +39,11 @@ class Subscription extends Model
         return $this->belongsTo(Userable::class, 'userable_id');
     }
 
+    public function anonymousPurchaseable()
+    {
+        return $this->belongsTo(AnonymousPurchase::class, 'anonymous_purchaseable_id');
+    }
+
     public function price()
     {
         return $this->belongsTo(Price::class);
