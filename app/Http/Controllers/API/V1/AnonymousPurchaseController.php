@@ -104,16 +104,16 @@ class AnonymousPurchaseController extends Controller
                     return $this->respondBadRequest('Invalid provider specified');
             }
 
-            // if (!$payment_verified) {
-            //     return $this->respondBadRequest('Payment provider did not verify payment');
-            // }
+            if (!$payment_verified) {
+                return $this->respondBadRequest('Payment provider did not verify payment');
+            }
 
             AnonymousPurchaseJob::dispatch([
                 'total_amount' => $amount_in_dollars,
                 'total_fees' => 0,
                 'payer_email' => $request->email,
                 'provider' => $request->provider,
-                'provider_id' => Str::uuid(),
+                'provider_id' => $provider_id,
                 'items' => $request->items,
             ]);
 
