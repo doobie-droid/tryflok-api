@@ -231,7 +231,7 @@ class Content extends Model
         return $freePriceCount > 0 && $parentPaidPriceCount === 0 && $grandParentPaidPriceCount === 0;
     }
 
-    public function userHasPaid($user_id)
+    public function userHasPaid( string $user_id = '', string $access_token = '')
     {
         $userablesCount = $this->userables()->where('status', 'available')->where('user_id', $user_id)->count();
         $parentUserablesCount = $this->collections()->whereHas('userables', function (Builder $query) use ($user_id) {
@@ -242,7 +242,8 @@ class Content extends Model
                 $query->where('status', 'available')->where('user_id', $user_id);
             });
         })->count();
-        return $userablesCount > 0 || $parentUserablesCount > 0 || $grandParentUserablesCount > 0;
+        $anonymousPurchasesCount = $this->anonymousPurchases()->where('status', 'available')->where('access_token', $access_token)->count();
+        return $userablesCount > 0 || $parentUserablesCount > 0 || $grandParentUserablesCount > 0 || $anonymousPurchasesCount > 0;
     }
 
     public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')

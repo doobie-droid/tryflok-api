@@ -15,10 +15,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Jobs\Payment\AnonymousPurchase as AnonymousPurchaseJob;
 use Illuminate\Support\Str;
+use App\Http\Resources\ContentResource;
 
 class AnonymousPurchaseController extends Controller
 {
-    public function makePurchases (Request $request)
+    public function makePurchase (Request $request)
     {
         try {
             $validator = Validator::make($request->input(), [

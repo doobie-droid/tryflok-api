@@ -69,8 +69,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'account'], function () {
-        Route::post('anonymous-purchases', 'AnonymousPurchaseController@makePurchases')->name('make-anonymous-purchases');
-        Route::get('anonymous-purchases', 'AnonymousPurchaseController@showPurchases')->name('show-anonymous-purchases');
+        Route::post('anonymous-purchases', 'AnonymousPurchaseController@makePurchase')->name('make-anonymous-purchases');
     });
 
     Route::group(['prefix' => 'users'], function () {
