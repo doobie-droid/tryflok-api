@@ -35,7 +35,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::group(['prefix' => 'contents'], function () {
         Route::get('trending', 'ContentController@listTrending')->name('list-trending-contents');
 
-        Route::patch('{id}/live', 'ContentController@joinLive');
+        Route::patch('{id}/live', 'ContentController@joinLive')->name('join-live');
+        Route::patch('{id}/leave-live', 'ContentController@leaveLive')->name('leave-live');
         
         Route::post('{id}/views', 'ContentController@addViews');
         Route::get('{id}', 'ContentController@show')->name('show-content');
@@ -200,8 +201,6 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::delete('{id}/subscription', 'ContentController@unsubscribeFromContent');
 
             Route::post('{id}/live', 'ContentController@startLive')->name('start-live');
-            Route::patch('{id}/live', 'ContentController@joinLive')->name('join-live');
-            Route::patch('{id}/leave-live', 'ContentController@leaveLive')->name('leave-live');
             Route::delete('{id}/live', 'ContentController@endLive')->name('end-live');
 
             Route::patch('{id}/respond-to-challenge', 'ContentController@respondToChallenge')->name('respond-to-challenge');

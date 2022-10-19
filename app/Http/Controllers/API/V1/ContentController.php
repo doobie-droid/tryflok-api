@@ -1189,10 +1189,9 @@ class ContentController extends Controller
     public function joinLive(Request $request, $id)
     {
         try {
-            $validator = Validator::make([
-                'id' => $id,
-            ], [
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
+                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token']
             ]);
 
             if ($validator->fails()) {
@@ -1206,12 +1205,14 @@ class ContentController extends Controller
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
+                if (! $content->isFree() && ! $content->userHasPaid($request->access_code) && ! ($content->user_id == $user_id)) {
+                    return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
+                }
             } else {
                 $user_id = $request->user()->id;
-            }
-
-            if (! $content->isFree() && ! $content->userHasPaid($user_id) && ! ($content->user_id == $user_id)) {
-                return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
+                if (! $content->isFree() && ! $content->userHasPaid($user_id) && ! ($content->user_id == $user_id)) {
+                    return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
+                }
             }
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
@@ -1230,8 +1231,16 @@ class ContentController extends Controller
                         'id' => Str::uuid(),
                     ],
                 ]);
-            }
+            } 
             
+            if ($user_id == '') {
+                // $content->subscribers()->syncWithoutDetaching([
+                //     $request->user()->id => [
+                //         'id' => Str::uuid(),
+                //     ],
+                // ]);
+            }
+
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
             $join_count->value = (int) $join_count->value + 1;
