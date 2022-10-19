@@ -33,6 +33,5 @@ class AnonymousLiveEvent extends Mailable
         return $this->view('emails.user.content.anonymous-live-events')->with([
             'contents' => $this->message,
         ])->subject('Live Event Reminder!');
-        Log::info($this->message);
     }
 }
