@@ -60,9 +60,6 @@ test('join live works for anonymous user', function ()
         $this->be($user2);
         $this->json('POST', "/api/v1/contents/{$content->id}/live");
 
-
-        
-
         $request = [
             'access_token' => $accessToken,
         ];
