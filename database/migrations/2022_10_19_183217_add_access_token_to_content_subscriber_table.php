@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddAnonymousUserEmailToContentSubscriberTable extends Migration
+class AddAccessTokenToContentSubscriberTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,7 +15,7 @@ class AddAnonymousUserEmailToContentSubscriberTable extends Migration
     {
         Schema::table('content_subscriber', function (Blueprint $table) {
             $table->foreignUuid('user_id')->nullable()->change();
-            $table->string('anonymous_user_email')->nullable();
+            $table->string('access_token')->nullable();
         });
     }
 

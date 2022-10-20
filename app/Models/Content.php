@@ -58,10 +58,10 @@ class Content extends Model
         return $this->belongsToMany(User::class, 'content_subscriber', 'content_id', 'user_id');
     }
 
-    // public function anonymousSubscribers()
-    // {
-    //     return $this->belongsToMany(anonymousPurchases::class, 'content_subscriber', 'content_id', 'email');
-    // }
+    public function anonymousSubscribers()
+    {
+        return $this->belongsToMany(ContentSubscriber::class, 'content_subscriber', 'content_id', 'access_token');
+    }
 
     public function prices()
     {

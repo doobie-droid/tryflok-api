@@ -1191,7 +1191,7 @@ class ContentController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
-                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token']
+                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token'],   
             ]);
 
             if ($validator->fails()) {
@@ -1205,7 +1205,7 @@ class ContentController extends Controller
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
-                if (! $content->isFree() && ! $content->userHasPaid($request->access_code) && ! ($content->user_id == $user_id)) {
+                if (! $content->isFree() && ! $content->userHasPaid($user_id, $request->access_token)) {
                     return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
                 }
             } else {
@@ -1221,6 +1221,7 @@ class ContentController extends Controller
             if (is_null($rtc_token) || $rtc_token->value == '' || is_null($rtm_token) || $rtm_token->value == '') {
                 return $this->respondBadRequest('You cannot join a broadcast that has not been started');
             }
+
             if ($content->live_status !== 'active') {
                 return $this->respondBadRequest('You cannot join a broadcast that has not been started');
             }
@@ -1234,11 +1235,12 @@ class ContentController extends Controller
             } 
             
             if ($user_id == '') {
-                // $content->subscribers()->syncWithoutDetaching([
-                //     $request->user()->id => [
-                //         'id' => Str::uuid(),
-                //     ],
-                // ]);
+                $content->anonymousSubscribers()->detach([$request->access_token]);
+                $content->anonymousSubscribers()->syncWithoutDetaching([
+                    $request->access_token => [
+                        'id' => Str::uuid(),
+                    ],
+                ]);
             }
 
             $join_count = $content->metas()->where('key', 'join_count')->first();

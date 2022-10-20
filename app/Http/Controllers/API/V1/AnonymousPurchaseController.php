@@ -37,7 +37,7 @@ class AnonymousPurchaseController extends Controller
                 'provider_response.transaction_id' => ['required_if:provider,flutterwave'],
                 'provider_response.id' => ['required_if:provider,stripe', 'string'],
                 'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
-                'expected_flk_amount' => ['required', 'integer', 'min:1'],
+                // 'expected_flk_amount' => ['required', 'integer', 'min:1'],
             ]);
 
             if ($validator->fails()) {

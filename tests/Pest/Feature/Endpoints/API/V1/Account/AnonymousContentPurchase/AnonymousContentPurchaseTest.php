@@ -62,7 +62,7 @@ test('non signed up user can purchase a content', function ()
         'provider' => 'flutterwave',
         'provider_id' => $transaction_id,
         'currency' => 'USD',
-        // 'amount' => 100,
+        'amount' => 100,
         // 'payment_processor_fee' => bcdiv($fee_in_naira, Constants\Constants::NAIRA_TO_DOLLAR, 2),
         'payer_email' => $anonymousUserEmail,
         'payee_id' => $user->id,
@@ -95,7 +95,8 @@ test('non signed up user can purchase a collection', function ()
     $price = Models\Price::factory()->create([
         'priceable_id' => $collection->id,
         'priceable_type' => 'collection',
-        'interval' => 'monthly'
+        'interval' => 'monthly',
+        'amount' => 100
     ]);
     $expected_flk_amount = 100;
     $transaction_id = date('YmdHis');
@@ -142,7 +143,7 @@ test('non signed up user can purchase a collection', function ()
         'provider' => 'flutterwave',
         'provider_id' => $transaction_id,
         'currency' => 'USD',
-        // 'amount' => 1.03,
+        'amount' => 100,
         // 'payment_processor_fee' => bcdiv($fee_in_naira, Constants\Constants::NAIRA_TO_DOLLAR, 2),
         'payer_email' => $anonymousUserEmail,
         'payee_id' => $user->id,
