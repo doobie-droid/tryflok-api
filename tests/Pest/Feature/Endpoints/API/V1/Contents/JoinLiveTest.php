@@ -96,7 +96,6 @@ test('join live works for anonymous user', function ()
         ];
 
         $response = $this->json('PATCH', "/api/v1/contents/{$content->id}/live", $request);
-        // dd($response->getData());
         $response->assertStatus(200)
         ->assertJsonStructure([
             'data' => [
