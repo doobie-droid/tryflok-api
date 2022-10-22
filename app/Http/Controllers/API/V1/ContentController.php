@@ -1189,10 +1189,9 @@ class ContentController extends Controller
     public function joinLive(Request $request, $id)
     {
         try {
-            $validator = Validator::make([
-                'id' => $id,
-            ], [
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
+                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token'],   
             ]);
 
             if ($validator->fails()) {
@@ -1206,12 +1205,14 @@ class ContentController extends Controller
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
+                if (! $content->isFree() && ! $content->userHasPaid($user_id, $request->access_token)) {
+                    return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
+                }
             } else {
                 $user_id = $request->user()->id;
-            }
-
-            if (! $content->isFree() && ! $content->userHasPaid($user_id) && ! ($content->user_id == $user_id)) {
-                return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
+                if (! $content->isFree() && ! $content->userHasPaid($user_id) && ! ($content->user_id == $user_id)) {
+                    return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
+                }
             }
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
@@ -1220,6 +1221,7 @@ class ContentController extends Controller
             if (is_null($rtc_token) || $rtc_token->value == '' || is_null($rtm_token) || $rtm_token->value == '') {
                 return $this->respondBadRequest('You cannot join a broadcast that has not been started');
             }
+
             if ($content->live_status !== 'active') {
                 return $this->respondBadRequest('You cannot join a broadcast that has not been started');
             }
@@ -1230,8 +1232,17 @@ class ContentController extends Controller
                         'id' => Str::uuid(),
                     ],
                 ]);
-            }
+            } 
             
+            if ($user_id == '') {
+                $content->anonymousSubscribers()->detach([$request->access_token]);
+                $content->anonymousSubscribers()->syncWithoutDetaching([
+                    $request->access_token => [
+                        'id' => Str::uuid(),
+                    ],
+                ]);
+            }
+
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
             $join_count->value = (int) $join_count->value + 1;
@@ -1352,8 +1363,9 @@ class ContentController extends Controller
     public function listAssets(Request $request, $id)
     {
         try {
-            $validator = Validator::make(['id' => $id], [
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
+                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token']
             ]);
 
             if ($validator->fails()) {
@@ -1368,7 +1380,7 @@ class ContentController extends Controller
 
             $content = Content::where('id', $id)->first();
 
-            if (! $content->isFree() && ! $content->userHasPaid($user_id) && ! ($content->user_id == $user_id)) {
+            if (! $content->isFree() && ! $content->userHasPaid($user_id, $request->access_token) && ! ($content->user_id == $user_id)) {
                 return $this->respondBadRequest('You are not permitted to view the assets of this content');
             }
             // get signed cookies
