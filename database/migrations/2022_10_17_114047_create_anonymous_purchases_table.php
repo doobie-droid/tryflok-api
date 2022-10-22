@@ -17,7 +17,8 @@ class CreateAnonymousPurchasesTable extends Migration
             $table->uuid('id')->primary();
             $table->string('email');
             $table->string('access_token')->unique();
-            $table->uuidMorphs('anonymous_purchaseable');
+            $table->string('anonymous_purchaseable_type');
+            $table->uuid('anonymous_purchaseable_id');
             $table->string('status')->default('available'); // wishlist, available, subscription-ended, content-deleted
             $table->timestamps();
         });
