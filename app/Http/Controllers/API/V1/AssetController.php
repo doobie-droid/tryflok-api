@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Rules\YoutubeUrl;
+use App\Services\Youtube\Youtube;
 
 class AssetController extends Controller
 {
@@ -20,8 +22,9 @@ class AssetController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'files.*' => ['required', 'file'],
+                'files.*' => ['required_without:youtube_url', 'file'],
                 'type' => ['required', 'string', 'in:image,pdf,audio,video'],
+                'youtube_url' => ['required_without:files', 'string', new YouTubeUrl],
             ]);
 
             if ($validator->fails()) {
@@ -42,7 +45,6 @@ class AssetController extends Controller
                     $response = $this->uploadVideo($request);
                     break;
             }
-
             return $response;
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -114,38 +116,78 @@ class AssetController extends Controller
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
-            }
+            }         
             $assets = [];
-            foreach ($request->file('files') as $file) {
-                //create the asset on the table
-                $filename = date('Ymd') . Str::random(16);
-                $originalName = $file->getClientOriginalName();
-                $ext = $file->getClientOriginalExtension();
-                $folder = join_path('assets', Str::random(16) . date('Ymd'), 'video');
-                $fullFilename = join_path($folder, $filename . '.m3u8');
-                $url = join_path(config('flok.private_media_url'), $fullFilename);
 
-                $asset = Asset::create([
-                    'url' => $url,
-                    'storage_provider' => 'private-s3',
-                    'storage_provider_id' => $fullFilename,
-                    'asset_type' => 'video',
-                    'mime_type' => 'application/vnd.apple.mpegurl',
-                ]);
-                //append to assets array
-                $asset->original_name = $originalName;
-                $assets[] = $asset;
-                //delegate upload to job
-                $path = Storage::disk('local')->put('uploads/videos', $file);
-                $uploadedFilePath = storage_path() . '/app/' . $path;
-                GenerateVideoResolutionsJob::dispatch([
-                    'asset' => $asset,
-                    'filepath' => $uploadedFilePath,
-                    'folder' => $folder,
-                    'ext' => $ext,
-                    'filename' => $filename,
-                    'full_file_name' => $fullFilename,
-                ]);
+            if ( ! is_null($request->file('files') ))  {
+                foreach ($request->file('files') as $file) {
+                    //create the asset on the table
+                    $filename = date('Ymd') . Str::random(16);
+                    $originalName = $file->getClientOriginalName();
+                    $ext = $file->getClientOriginalExtension();
+                    $folder = join_path('assets', Str::random(16) . date('Ymd'), 'video');
+                    $fullFilename = join_path($folder, $filename . '.m3u8');
+                    $url = join_path(config('flok.private_media_url'), $fullFilename);
+    
+                    $asset = Asset::create([
+                        'url' => $url,
+                        'storage_provider' => 'private-s3',
+                        'storage_provider_id' => $fullFilename,
+                        'asset_type' => 'video',
+                        'mime_type' => 'application/vnd.apple.mpegurl',
+                    ]);
+                     //append to assets array
+                    $asset->original_name = $originalName;
+                    $assets[] = $asset;
+                    Log::info("here");
+                    //delegate upload to job
+                    $path = Storage::disk('local')->put('uploads/videos', $file);
+                    $uploadedFilePath = storage_path() . '/app/' . $path;
+                    GenerateVideoResolutionsJob::dispatch([
+                        'asset' => $asset,
+                        'filepath' => $uploadedFilePath,
+                        'folder' => $folder,
+                        'ext' => $ext,
+                        'filename' => $filename,
+                        'full_file_name' => $fullFilename,
+                    ]);
+            }
+            }
+
+            if ( ! is_null($request->youtube_url)) {
+                preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $request->youtube_url, $match);
+                if (! empty($match))
+                {
+                    $videoId = $match[2];
+                }
+                if (empty($match))
+                {
+                    parse_str( parse_url( $request->youtube_url, PHP_URL_QUERY ), $array );        
+                    $index = array_key_first($array);                    
+                    $value = $array[$index];        
+                    if (($value) != '')
+                    {
+                        $videoId = $value;
+                    }
+                    else{
+                        $videoId = $index;
+                    }
+                }
+                $youtube = new Youtube;
+                $response = $youtube->fetchVideo($videoId);
+
+                if (count($response->items) > 0)
+                {
+                    $asset = Asset::create([
+                        'url' => 'https://youtube.com/embed/'.$videoId,
+                        'storage_provider' => 'youtube',
+                        'storage_provider_id' => $videoId,
+                        'asset_type' => 'video',
+                        'mime_type' => 'video/mp4',
+                    ]);
+                     //append to assets array
+                     $assets[] = $asset;
+                }                
             }
             return $this->respondWithSuccess('Assets have been created successfully.', [
                 'assets' => $assets,
