@@ -57,6 +57,7 @@ class ContentController extends Controller
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
                 'type' => ['required', 'string', 'in:pdf,audio,video,newsletter,live-audio,live-video'],
                 'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
+                'youtube_url' => ['required_if:type,live-video', 'nullable', new YoutubeUrl],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['required_if:type,newsletter', 'string'],
                 'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
@@ -241,6 +242,10 @@ class ContentController extends Controller
                     'id' => Str::uuid(),
                     'purpose' => 'content-asset',
                 ]);
+            }
+
+            if ( ! is_null($request->youtube_url)) {
+                
             }
 
             if (isset($request->tags) && is_array($request->tags)) {
