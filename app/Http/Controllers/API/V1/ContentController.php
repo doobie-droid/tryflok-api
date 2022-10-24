@@ -18,6 +18,7 @@ use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
+use App\Models\ContentSubscriber;
 use App\Models\ContentComment;
 use App\Models\ContentCommentComment;
 use App\Models\ContentLike;
@@ -1227,6 +1228,10 @@ class ContentController extends Controller
             }
 
             if ($user_id !== '') {
+                $content_subscriber = ContentSubscriber::where('user_id', $user_id)->first();
+                if ( ! is_null($content_subscriber)) {
+                    return $this->respondBadRequest("Subcriber with the user ID '$user_id' already joined");
+                }
                 $content->subscribers()->syncWithoutDetaching([
                     $request->user()->id => [
                         'id' => Str::uuid(),
@@ -1235,7 +1240,10 @@ class ContentController extends Controller
             } 
             
             if ($user_id == '') {
-                $content->anonymousSubscribers()->detach([$request->access_token]);
+                $content_subscriber = ContentSubscriber::where('access_token', $request->access_token)->first();
+                if ( ! is_null($content_subscriber)) {
+                    return $this->respondBadRequest("Subcriber with the access token '$request->access_token' already joined");
+                }
                 $content->anonymousSubscribers()->syncWithoutDetaching([
                     $request->access_token => [
                         'id' => Str::uuid(),
