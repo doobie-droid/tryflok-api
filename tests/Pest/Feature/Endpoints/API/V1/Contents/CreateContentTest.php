@@ -1066,3 +1066,92 @@ test('challenge content gets created', function()
         'message' => "You have been added as a contestant to the {$content->title} challenge. You can choose to accept or decline",
     ]);
 });
+
+test('content is created with optional youtube video url', function()
+{
+    $request = [
+        'title' => 'A content ' . date('YmdHis'),
+        'description' => 'Content description',
+        'type' => 'live-video',
+        'youtube_url' => 'https://www.youtube-nocookie.com/embed/up_lNV-yoK4?rel=0',
+        'digiverse_id' => $this->digiverse->id,
+        'is_available' => 0,
+        'price' => [
+            'amount' => 0,
+        ],
+        'tags' => [
+            $this->tag1->id,
+            $this->tag2->id,
+        ],
+        'cover' => [
+            'asset_id' => $this->coverAsset->id,
+        ],
+        'scheduled_date' => $this->scheduled_date->format('Y-m-d H:i:s'),
+    ];
+
+    $response = $this->json('POST', '/api/v1/contents', $request);
+        $response->assertStatus(200)
+        ->assertJsonStructure(MockData\Content::generateStandardCreateResponse());
+
+        $this->assertDatabaseHas('contents', [
+            'title' => $request['title'],
+            'description' => $request['description'],
+            'user_id' => $this->user->id,
+            'type' => 'live-video',
+            'is_available' => 1,
+            'approved_by_admin' => 1,
+            'show_only_in_digiverses' => 1,
+            'scheduled_date' => $this->scheduled_date->format('Y-m-d H:i:s'),
+            'live_status' => 'inactive',
+        ]);
+        $content = Models\Content::where('title', $request['title'])->first();
+      
+        // content is attached to collection
+        $this->assertDatabaseHas('collection_content', [
+            'collection_id' => $this->digiverse->id,
+            'content_id' => $content->id
+        ]);
+        $this->assertTrue($this->digiverse->contents()->where('contents.id', $content->id)->count() === 1);
+
+        //validate tags was attached
+        $this->assertDatabaseHas('taggables', [
+            'tag_id' => $this->tag1->id,
+            'taggable_type' => 'content',
+            'taggable_id' => $content->id,
+        ]);
+        $this->assertTrue($content->tags()->where('tags.id', $this->tag1->id)->count() === 1);
+        $this->assertDatabaseHas('taggables', [
+            'tag_id' => $this->tag2->id,
+            'taggable_type' => 'content',
+            'taggable_id' => $content->id,
+        ]);
+        $this->assertTrue($content->tags()->where('tags.id', $this->tag2->id)->count() === 1);
+
+        //validate price was created
+        $this->assertDatabaseHas('prices', [
+            'priceable_type' => 'content',
+            'priceable_id' => $content->id,
+            'amount' => $request['price']['amount'],
+            'interval' => 'one-off',
+            'interval_amount' => 1,
+            'currency' => 'USD',
+        ]);
+        $this->assertTrue($content->prices()->count() === 1);
+
+        //validate benefactor was created
+        $this->assertDatabaseHas('benefactors', [
+            'benefactable_type' => 'content',
+            'benefactable_id' => $content->id,
+            'user_id' => $this->user->id,
+            'share' => 100,
+        ]);
+        $this->assertTrue($content->benefactors()->count() === 1);
+
+        //validate asset was attached
+        $this->assertDatabaseHas('assetables', [
+            'assetable_type' => 'content',
+            'assetable_id' => $content->id,
+            // 'asset_id' => $this->videoAsset->id,
+            'purpose' => 'content-asset',
+        ]);
+});

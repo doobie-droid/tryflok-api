@@ -55,8 +55,8 @@ class ContentController extends Controller
                 'tags' => ['sometimes'],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
                 'type' => ['required', 'string', 'in:pdf,audio,video,newsletter,live-audio,live-video'],
-                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'prohibited_unless:youtube_url,NULL', 'exists:assets,id', new AssetTypeRule($request->type)],
-                'youtube_url' => ['required_if:type,live-video', 'nullable', 'prohibited_unless:asset_id,NULL', new YoutubeUrl],
+                'asset_id' => ['required_if:type,pdf,audio', 'nullable', 'prohibited_unless:youtube_url,NULL', 'exists:assets,id', new AssetTypeRule($request->type)],
+                'youtube_url' => ['required_if:type,live-video,asset_id,NULL', 'nullable', 'prohibited_unless:asset_id,NULL', new YoutubeUrl],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['required_if:type,newsletter', 'string'],
                 'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
@@ -114,7 +114,7 @@ class ContentController extends Controller
                 'is_challenge' => $is_challenge,
             ]);
 
-            if ( ! is_null($request->youtube_url) && $request->type == 'live-video') { 
+            if ( ! is_null($request->youtube_url) && ($request->type == 'live-video' || $request->type == 'video')) { 
                 $this->importYoutubeVideo($request->youtube_url, $content);  
                 $content->live_provider = 'youtube';
                 $content->save();             
@@ -295,9 +295,15 @@ class ContentController extends Controller
                     'url' => 'https://youtube.com/embed/'.$videoId,
                     'storage_provider' => 'youtube',
                     'storage_provider_id' => $videoId,
-                    'asset_type' => 'live-video',
                     'mime_type' => 'video/mp4',
                 ]);
+                if ($request->type == 'live-video') {
+                    $asset->type = 'live-video';
+                }
+                if ($request->type == 'video') {
+                    $asset->type = 'video';
+                }
+                $asset->save();
                 $content->assets()->attach($asset->id, [
                     'id' => Str::uuid(),
                     'purpose' => 'content-asset',
