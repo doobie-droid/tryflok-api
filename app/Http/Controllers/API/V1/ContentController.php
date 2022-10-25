@@ -1328,11 +1328,16 @@ class ContentController extends Controller
             ]));
             $websocket_client->close();
 
+            $asset_url = '';
+
             if ($content->live_provider == 'youtube') {
                 $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
-                return $this->respondWithSuccess('Channel joined successfully', [
-                    'asset' => $asset->url,
-                ]);
+                $asset_url = $asset->url;
+                $rtc_token->value = '';
+                $rtm_token->value = '';
+                $channel->value = '';
+                $uid = '';
+                $join_count->value = '';
             }
             return $this->respondWithSuccess('Channel joined successfully', [
                 'rtc_token' => $rtc_token->value,
@@ -1340,6 +1345,7 @@ class ContentController extends Controller
                 'channel_name' => $channel->value,
                 'uid' => (int) $uid,
                 'subscribers_count' => (int) $join_count->value,
+                'asset' => $asset_url,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);

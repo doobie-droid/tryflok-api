@@ -138,7 +138,6 @@ class AssetController extends Controller
                      //append to assets array
                     $asset->original_name = $originalName;
                     $assets[] = $asset;
-                    Log::info("here");
                     //delegate upload to job
                     $path = Storage::disk('local')->put('uploads/videos', $file);
                     $uploadedFilePath = storage_path() . '/app/' . $path;
@@ -298,6 +297,35 @@ class AssetController extends Controller
                 $asset->delete();
             }
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function importAssetFromThirdParty(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'items.*' => ['required'],
+                'items.*.provider' => ['required', 'string'],
+                'items.*.assets.url' => ['required', 'string'],
+                'items.*.assets.type' => ['required', 'string', 'in:video,live-video'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            switch ($request->items['provider']) {
+                case 'youtube':
+                    $response = $this->importFromAgora($request);
+                    break;
+                case 'agora':
+                    $response = $this->importFromYoutube($request);
+                    break;
+            }
+            return $response;
+
+        } catch (\Exception $exception) {
+            Log::error($exception);
         }
     }
 }
