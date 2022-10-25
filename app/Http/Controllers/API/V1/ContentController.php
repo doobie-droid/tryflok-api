@@ -1378,9 +1378,14 @@ class ContentController extends Controller
                 $user_id = $request->user()->id;
             }
 
+            if (is_null($request->access_token)) {
+                $access_token = '';
+            } else{
+                $access_token = $request->access_token;
+            }
             $content = Content::where('id', $id)->first();
 
-            if (! $content->isFree() && ! $content->userHasPaid($user_id, $request->access_token) && ! ($content->user_id == $user_id)) {
+            if (! $content->isFree() && ! $content->userHasPaid($user_id, $access_token) && ! ($content->user_id == $user_id)) {
                 return $this->respondBadRequest('You are not permitted to view the assets of this content');
             }
             // get signed cookies
