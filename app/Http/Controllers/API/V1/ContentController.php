@@ -40,7 +40,6 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use App\Rules\YoutubeUrl;
 
-
 class ContentController extends Controller
 {
     public function create(Request $request)
@@ -56,8 +55,8 @@ class ContentController extends Controller
                 'tags' => ['sometimes'],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
                 'type' => ['required', 'string', 'in:pdf,audio,video,newsletter,live-audio,live-video'],
-                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
-                'youtube_url' => ['required_if:type,live-video', 'nullable', new YoutubeUrl],
+                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'prohibited_unless:youtube_url,NULL', 'exists:assets,id', new AssetTypeRule($request->type)],
+                'youtube_url' => ['required_if:type,live-video', 'nullable', 'prohibited_unless:asset_id,NULL', new YoutubeUrl],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['required_if:type,newsletter', 'string'],
                 'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
@@ -114,6 +113,12 @@ class ContentController extends Controller
                 'live_status' => 'inactive',
                 'is_challenge' => $is_challenge,
             ]);
+
+            if ( ! is_null($request->youtube_url) && $request->type == 'live-video') { 
+                $this->importYoutubeVideo($request->youtube_url, $content);  
+                $content->live_provider = 'youtube';
+                $content->save();             
+            }
 
             if (! is_null($request->scheduled_date)) {
                 $content->scheduled_date = $request->scheduled_date;
@@ -244,10 +249,6 @@ class ContentController extends Controller
                 ]);
             }
 
-            if ( ! is_null($request->youtube_url)) {
-                
-            }
-
             if (isset($request->tags) && is_array($request->tags)) {
                 foreach ($request->tags as $tag_id) {
                     $content->tags()->attach($tag_id, [
@@ -270,6 +271,43 @@ class ContentController extends Controller
         }
     }
 
+    public function importYoutubeVideo($video_url, $content) {
+        try {
+            preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $video_url, $match);
+                if (! empty($match))
+                {
+                    $videoId = $match[2];
+                }
+                if (empty($match))
+                {
+                    parse_str( parse_url( $video_url, PHP_URL_QUERY ), $array );        
+                    $index = array_key_first($array);                    
+                    $value = $array[$index];        
+                    if (($value) != '')
+                    {
+                        $videoId = $value;
+                    }
+                    else{
+                        $videoId = $index;
+                    }
+                }            
+                $asset = Asset::create([
+                    'url' => 'https://youtube.com/embed/'.$videoId,
+                    'storage_provider' => 'youtube',
+                    'storage_provider_id' => $videoId,
+                    'asset_type' => 'live-video',
+                    'mime_type' => 'video/mp4',
+                ]);
+                $content->assets()->attach($asset->id, [
+                    'id' => Str::uuid(),
+                    'purpose' => 'content-asset',
+                ]);               
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
     public function update(Request $request, $id)
     {
         try {
@@ -278,6 +316,8 @@ class ContentController extends Controller
                 'title' => ['sometimes', 'nullable', 'string', 'max:200', 'min:1'],
                 'description' => ['sometimes', 'nullable', 'string'],
                 'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'prohibited_unless:youtube_url,NULL', 'exists:assets,id'],
+                'youtube_url' => ['required_if:type,live-video', 'nullable', 'prohibited_unless:asset_id,NULL', new YoutubeUrl],
                 'price' => ['sometimes', 'nullable'],
                 'price.amount' => ['sometimes', 'nullable', 'min:0', 'numeric', 'max:1000'],
                 'tags' => ['sometimes'],
@@ -357,6 +397,16 @@ class ContentController extends Controller
                     'id' => Str::uuid(),
                     'purpose' => 'content-asset',
                 ]);
+            }
+
+            if (! is_null($request->youtube_url)) {
+                    $oldAsset = $content->assets()->first();
+                    $content->assets()->detach($oldAsset->id);
+                    $oldAsset->resolutions()->delete();
+                    $oldAsset->delete();
+                    $this->importYoutubeVideo($request->youtube_url, $content);  
+                    $content->live_provider = 'youtube';
+                    $content->save();             
             }
 
             if (! is_null($request->tags) && is_array($request->tags)) {

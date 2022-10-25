@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Rules\YoutubeUrl;
-use App\Services\Youtube\Youtube;
 
 class AssetController extends Controller
 {
@@ -173,21 +172,15 @@ class AssetController extends Controller
                         $videoId = $index;
                     }
                 }
-                $youtube = new Youtube;
-                $response = $youtube->fetchVideo($videoId);
-
-                if (count($response->items) > 0)
-                {
-                    $asset = Asset::create([
-                        'url' => 'https://youtube.com/embed/'.$videoId,
-                        'storage_provider' => 'youtube',
-                        'storage_provider_id' => $videoId,
-                        'asset_type' => 'video',
-                        'mime_type' => 'video/mp4',
-                    ]);
-                     //append to assets array
-                     $assets[] = $asset;
-                }                
+                $asset = Asset::create([
+                    'url' => 'https://youtube.com/embed/'.$videoId,
+                    'storage_provider' => 'youtube',
+                    'storage_provider_id' => $videoId,
+                    'asset_type' => 'video',
+                    'mime_type' => 'video/mp4',
+                ]);
+                    //append to assets array
+                    $assets[] = $asset;                
             }
             return $this->respondWithSuccess('Assets have been created successfully.', [
                 'assets' => $assets,
