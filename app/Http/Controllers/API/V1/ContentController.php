@@ -1283,7 +1283,7 @@ class ContentController extends Controller
             }
 
             if ($user_id !== '') {
-                $content_subscriber = ContentSubscriber::where('user_id', $user_id)->first();
+                $content_subscriber = ContentSubscriber::where('content_id', $content->id)->where('user_id', $user_id)->first();
                 if ( ! is_null($content_subscriber)) {
                     return $this->respondBadRequest("Subcriber with the user ID '$user_id' already joined");
                 }
@@ -1295,7 +1295,7 @@ class ContentController extends Controller
             } 
             
             if ($user_id == '') {
-                $content_subscriber = ContentSubscriber::where('access_token', $request->access_token)->first();
+                $content_subscriber = ContentSubscriber::where('content_id', $content->id)->where('access_token', $request->access_token)->first();
                 if ( ! is_null($content_subscriber)) {
                     return $this->respondBadRequest("Subcriber with the access token '$request->access_token' already joined");
                 }
@@ -1322,6 +1322,12 @@ class ContentController extends Controller
             ]));
             $websocket_client->close();
 
+            if ($content->live_provider == 'youtube') {
+                $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
+                return $this->respondWithSuccess('Channel joined successfully', [
+                    'asset' => $asset->url,
+                ]);
+            }
             return $this->respondWithSuccess('Channel joined successfully', [
                 'rtc_token' => $rtc_token->value,
                 'rtm_token' => $rtm_token->value,
