@@ -76,11 +76,15 @@ class AnonymousPurchase implements ShouldQueue
            } else {
                $fee = 0;
            }
-
+           if ($itemModel->type == 'live-video' || $itemModel->type == 'live-audio') {
+                $number_of_tickets = $item['number_of_tickets'];
+           } else {
+                $number_of_tickets = 1;
+           }
            //record payment on payment table
            $payment = $itemModel->payments()->create([
                'payee_id' => $itemModel->owner->id,
-               'amount' => $amount,
+               'amount' => $amount * $number_of_tickets,
                'payment_processor_fee' => $fee,
                'provider' => $this->data['provider'],
                'provider_id' => $this->data['provider_id'],
@@ -96,6 +100,7 @@ class AnonymousPurchase implements ShouldQueue
            }
            $platform_share = bcmul($net_amount, $platform_charge, 6);
            $creator_share = bcmul($net_amount, 1 - $platform_charge, 6);
+           for($i = 0; $i < $number_of_tickets; $i++) {
            foreach ($itemModel->benefactors as $benefactor) {
                $benefactorUser = $benefactor->user->revenues()->create([
                    'revenueable_type' => $item['type'],
@@ -108,6 +113,20 @@ class AnonymousPurchase implements ShouldQueue
                    'revenue_from' => 'sale',
                ]);
            }
+            $anonymous_purchase = Models\AnonymousPurchase::create([
+            'email' => $this->data['payer_email'],
+            'status' => 'available',
+            'access_token' => Str::random(20),
+            'anonymous_purchaseable_type' => $item['type'],
+            'anonymous_purchaseable_id' => $itemModel->id,
+                ]);
+            }
+            $access_tokens = [];
+            $anonymous_purchases = Models\AnonymousPurchase::where('anonymous_purchaseable_id', $itemModel->id)->where('email', $this->data['payer_email'])->get();
+            foreach( $anonymous_purchases as $anonymous_purchase) {
+                    $access_tokens[] = $anonymous_purchase->access_token;
+            }
+
            //record revenue from referral of the item
            if ($itemModel->owner->referrer()->exists()) {
                $itemModelOwner = $itemModel->owner->referrer->revenues()->create([
@@ -121,13 +140,6 @@ class AnonymousPurchase implements ShouldQueue
                    'revenue_from' => 'referral',
                ]);
            }
-            $anonymous_purchase = Models\AnonymousPurchase::create([
-                'email' => $this->data['payer_email'],
-                'status' => 'available',
-                'access_token' => Str::random(20),
-                'anonymous_purchaseable_type' => $item['type'],
-                'anonymous_purchaseable_id' => $itemModel->id,
-            ]);
         
         //if subscription create subscription record
            if ($item['type'] === 'collection' && $price->interval === 'monthly') {
@@ -147,11 +159,10 @@ class AnonymousPurchase implements ShouldQueue
                ]);
            }
            
-        $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token to access the content you purchased on flok!";
-        $access_token = $anonymous_purchase->access_token;
+        $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
             Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
             'message' => $message,
-            'access_token' => $access_token,
+            'access_tokens' => $access_tokens,
         ]));
 
         if ($price->amount > 0) {

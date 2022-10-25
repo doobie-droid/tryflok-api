@@ -21,7 +21,7 @@ class AnonymousPurchaseMail extends Mailable
     public function __construct($data)
     {
         $this->message = $data['message'];
-        $this->access_token = $data['access_token'];
+        $this->access_tokens = $data['access_tokens'];
     }
 
     /**
@@ -33,7 +33,7 @@ class AnonymousPurchaseMail extends Mailable
     {
         return $this->view('emails.user.content.anonymous-content-purchase')->with([
             'contents' => $this->message,
-            'access_token' => $this->access_token,
+            'access_tokens' => $this->access_tokens,
         ])->subject('Anonymous Purchase on Flok!');
     }
 }

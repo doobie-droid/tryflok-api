@@ -11,8 +11,9 @@
                     <div class="f-fallback">
                         <h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left;" align="left">Hi there!</h1>
                         <p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">{{ $contents }}</p>
-                        <p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;"><span style="background-color: #00008b; color: #ffffff; border-radius: 5px;">{{ $access_token }}</span></p>
-
+                    @foreach ($access_tokens as $access_token )
+                    <p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;"><span style="background-color: #00008b; color: #ffffff; border-radius: 5px;">{{ $access_token }}</span></p>
+                    @endforeach
 						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you have any questions, feel free to <a href="mailto:contact@tryflok.com" style="color: #6E4CF5;">send us an email</a>.</p>
 						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">Thanks,
 							<br />Flok</p>
