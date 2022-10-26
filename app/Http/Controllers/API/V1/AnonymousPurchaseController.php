@@ -32,7 +32,7 @@ class AnonymousPurchaseController extends Controller
                 'items.*.price.id' => ['required', 'string','exists:prices,id'],
                 'items.*.price.interval' => ['required', 'string', 'in:monthly,one-off'],
                 'items.*.price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
-                'items.*.number_of_tickets' => ['sometimes', 'min:1', 'integer'],
+                'items.*.number_of_tickets' => ['sometimes', 'nullable', 'min:1', 'integer'],
                 'provider' => ['required', 'string', 'in:flutterwave,stripe'],
                 'provider_response' => ['required'],
                 'provider_response.transaction_id' => ['required_if:provider,flutterwave'],
@@ -48,8 +48,13 @@ class AnonymousPurchaseController extends Controller
             foreach ($request->items as $item) {
                 $price = Price::where('id', $item['price']['id'])->first();
                 //validate amount is equal to total number of tickets
-                if ($item['price']['amount'] != ($price->amount * $item['number_of_tickets'])) {
-                    return $this->respondBadRequest('Amount does not match total number of tickets');
+                $number_of_tickets = 1;
+                if (isset($item['number_of_tickets'])) {
+                    $number_of_tickets = $item['number_of_tickets'];
+                }
+
+                if ($item['price']['amount'] != ($price->amount * $number_of_tickets )) {
+                    return $this->respondBadRequest('Amount does not match total item to be purchased');
                 }
                 //validate that the content or collection exists
                 $itemModel = null;

@@ -76,11 +76,10 @@ class AnonymousPurchase implements ShouldQueue
            } else {
                $fee = 0;
            }
-           if ($itemModel->type == 'live-video' || $itemModel->type == 'live-audio') {
+           $number_of_tickets = 1;
+           if (isset($item['number_of_tickets']) && $itemModel->type == 'live-video' || $itemModel->type == 'live-audio') {
                 $number_of_tickets = $item['number_of_tickets'];
-           } else {
-                $number_of_tickets = 1;
-           }
+           } 
            //record payment on payment table
            $payment = $itemModel->payments()->create([
                'payee_id' => $itemModel->owner->id,
