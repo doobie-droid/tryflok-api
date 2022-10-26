@@ -32,12 +32,12 @@ class AnonymousPurchaseController extends Controller
                 'items.*.price.id' => ['required', 'string','exists:prices,id'],
                 'items.*.price.interval' => ['required', 'string', 'in:monthly,one-off'],
                 'items.*.price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
+                'items.*.number_of_tickets' => ['sometimes', 'nullable', 'min:1', 'integer'],
                 'provider' => ['required', 'string', 'in:flutterwave,stripe'],
                 'provider_response' => ['required'],
                 'provider_response.transaction_id' => ['required_if:provider,flutterwave'],
                 'provider_response.id' => ['required_if:provider,stripe', 'string'],
                 'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
-                // 'expected_flk_amount' => ['required', 'integer', 'min:1'],
             ]);
 
             if ($validator->fails()) {
@@ -47,6 +47,15 @@ class AnonymousPurchaseController extends Controller
             $total_amount_in_dollars = 0;
             foreach ($request->items as $item) {
                 $price = Price::where('id', $item['price']['id'])->first();
+                //validate amount is equal to total number of tickets
+                $number_of_tickets = 1;
+                if (isset($item['number_of_tickets'])) {
+                    $number_of_tickets = $item['number_of_tickets'];
+                }
+
+                if ($item['price']['amount'] != ($price->amount * $number_of_tickets )) {
+                    return $this->respondBadRequest('Amount does not match total item to be purchased');
+                }
                 //validate that the content or collection exists
                 $itemModel = null;
                 switch ($item['type']) {
@@ -63,8 +72,6 @@ class AnonymousPurchaseController extends Controller
                 //add total price
                 $total_amount_in_dollars = bcadd($total_amount_in_dollars, $price->amount, 2);
             }
-
-
 
             Log::info("Anonymous attempted purchase began");
             $payment_verified = false;
