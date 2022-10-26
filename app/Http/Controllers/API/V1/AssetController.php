@@ -324,7 +324,7 @@ class AssetController extends Controller
                         'url' => 'https://youtube.com/embed/'.$videoId,
                         'storage_provider' => 'youtube',
                         'storage_provider_id' => $videoId,
-                        'asset_type' => 'video',
+                        'asset_type' => $item['type'],
                         'mime_type' => 'video/mp4',
                     ]);
              
