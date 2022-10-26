@@ -289,8 +289,11 @@ class AssetController extends Controller
                         $assets[] = $this->importFromYoutube($item);
                         break;
                 }
-                return $response;
             }
+
+            return $this->respondWithSuccess('Assets have been created successfully.', [
+                'assets' => $assets,
+            ]);
         } catch (\Exception $exception) {
             Log::error($exception);
         }
