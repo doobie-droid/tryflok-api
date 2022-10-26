@@ -72,6 +72,7 @@ class AnonymousPurchaseController extends Controller
                 //add total price
                 $total_amount_in_dollars = bcadd($total_amount_in_dollars, $price->amount, 2);
             }
+
             Log::info("Anonymous attempted purchase began");
             $payment_verified = false;
             $amount_in_dollars = 0;
