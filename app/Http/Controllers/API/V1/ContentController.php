@@ -1150,13 +1150,32 @@ class ContentController extends Controller
                     'value' => 0,
                 ]);
             }
+
             //ensure that the live has not been started before
             if ($content->live_status === 'active') {
+                $rtc_token = '';
+                $rtm_token = '';
+                $channel = '';
+                $asset_url = '';
+
+                if ( $content->live_provider == 'agora') {
+                    $channel_model = $content->metas()->where('key', 'channel_name')->first(); 
+                    $channel = $channel_model->value;
+                    $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
+                    $rtc_token = $rtc_token_model ->value;
+                    $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
+                    $rtm_token = $rtm_token_model->value;
+                }
+                if ($content->live_provider == 'youtube') {
+                    $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
+                    $asset_url = $asset->url; 
+                }
                 return $this->respondWithSuccess('Channel started successfully', [
-                    'rtc_token' => $rtc_token->value,
-                    'rtm_token' => $rtm_token->value,
-                    'channel_name' => $channel->value,
+                    'rtc_token' => $rtc_token,
+                    'rtm_token' => $rtm_token,
+                    'channel_name' => $channel,
                     'uid' => 0,
+                    'asset' => $asset_url,
                 ]);
             }
 
@@ -1186,11 +1205,26 @@ class ContentController extends Controller
                 'message' => "@{$request->user()->username} has started a new live",
             ]);
 
+            if ( $content->live_provider == 'agora') {
+                $channel = $channel->value;
+                $rtc_token = $rtc_token->value;
+                $rtm_token = $rtm_token->value;
+                $asset_url = '';
+            }
+            if ($content->live_provider == 'youtube') {
+                $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
+                $asset_url = $asset->url; 
+                $channel = '';
+                $rtc_token = '';
+                $rtm_token = '';
+            }
+
             return $this->respondWithSuccess('Channel started successfully', [
-                'rtc_token' => $rtc_token->value,
-                'rtm_token' => $rtm_token->value,
-                'channel_name' => $channel->value,
+                'rtc_token' => $rtc_token,
+                'rtm_token' => $rtm_token,
+                'channel_name' => $channel,
                 'uid' => 0,
+                'asset' => $asset_url,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
