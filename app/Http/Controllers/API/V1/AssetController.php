@@ -21,9 +21,8 @@ class AssetController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'files.*' => ['required_without:youtube_url', 'file'],
+                'files.*' => ['required', 'file'],
                 'type' => ['required', 'string', 'in:image,pdf,audio,video'],
-                'youtube_url' => ['required_without:files', 'string', new YouTubeUrl],
             ]);
 
             if ($validator->fails()) {
@@ -272,7 +271,7 @@ class AssetController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'items.*' => ['required'],
-                'items.*.provider' => ['required', 'string'],
+                'items.*.provider' => ['required', 'string', 'in:agora,youtube'],
                 'items.*.assets.url' => ['required', 'string'],
                 'items.*.assets.type' => ['required', 'string', 'in:video,live-video'],
             ]);
@@ -280,57 +279,56 @@ class AssetController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-
-            switch ($request->items['provider']) {
-                case 'youtube':
-                    $response = $this->importFromAgora($request);
-                    break;
-                case 'agora':
-                    $response = $this->importFromYoutube($request);
-                    break;
+            foreach ($request->items as $item) {
+                switch ($item['provider']) {
+                    // case 'agora':
+                    //     $response = $this->importFromAgora($request);
+                    //     break;
+                    case 'youtube':
+                        $response = $this->importFromYoutube($request);
+                        break;
+                }
+                return $response;
             }
-            return $response;
-
         } catch (\Exception $exception) {
             Log::error($exception);
         }
     }
 
-    public function importFromAgora($request) {
-
-    }
-
     public function importFromYoutube($request) {
         try {
-            if ( ! is_null($request->items['assets']['url'])) {
-                preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $request->items['assets']['url'], $match);
-                if (! empty($match))
-                {
-                    $videoId = $match[2];
-                }
-                if (empty($match))
-                {
-                    parse_str( parse_url( $request->items['assets']['url'], PHP_URL_QUERY ), $array );        
-                    $index = array_key_first($array);                    
-                    $value = $array[$index];        
-                    if (($value) != '')
+            foreach ($request->items as $item) {
+                if ( ! is_null($item['assets']['url'])) {
+                    preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $item['assets']['url'], $match);
+                    if (! empty($match))
                     {
-                        $videoId = $value;
+                        $videoId = $match[2];
                     }
-                    else{
-                        $videoId = $index;
+                    if (empty($match))
+                    {
+                        parse_str( parse_url( $item['assets']['url'], PHP_URL_QUERY ), $array );        
+                        $index = array_key_first($array);                    
+                        $value = $array[$index];        
+                        if (($value) != '')
+                        {
+                            $videoId = $value;
+                        }
+                        else{
+                            $videoId = $index;
+                        }
                     }
+                    $asset = Asset::create([
+                        'url' => 'https://youtube.com/embed/'.$videoId,
+                        'storage_provider' => 'youtube',
+                        'storage_provider_id' => $videoId,
+                        'asset_type' => 'video',
+                        'mime_type' => 'video/mp4',
+                    ]);
+                        //append to assets array
+                        $assets[] = $asset;                
                 }
-                $asset = Asset::create([
-                    'url' => 'https://youtube.com/embed/'.$videoId,
-                    'storage_provider' => 'youtube',
-                    'storage_provider_id' => $videoId,
-                    'asset_type' => 'video',
-                    'mime_type' => 'video/mp4',
-                ]);
-                    //append to assets array
-                    $assets[] = $asset;                
             }
+            
             return $this->respondWithSuccess('Assets have been created successfully.', [
                 'assets' => $assets,
             ]);

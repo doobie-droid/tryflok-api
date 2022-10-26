@@ -119,6 +119,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'assets'], function () {
             Route::post('/', 'AssetController@uploadFile');
+            Route::post('/third-party', 'AssetController@importAssetFromThirdParty');
         });
 
         Route::group(['prefix' => 'approvals'], function () {
