@@ -117,8 +117,6 @@ class AssetController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }         
             $assets = [];
-
-            if ( ! is_null($request->file('files') ))  {
                 foreach ($request->file('files') as $file) {
                     //create the asset on the table
                     $filename = date('Ymd') . Str::random(16);
@@ -149,37 +147,6 @@ class AssetController extends Controller
                         'filename' => $filename,
                         'full_file_name' => $fullFilename,
                     ]);
-            }
-            }
-
-            if ( ! is_null($request->youtube_url)) {
-                preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $request->youtube_url, $match);
-                if (! empty($match))
-                {
-                    $videoId = $match[2];
-                }
-                if (empty($match))
-                {
-                    parse_str( parse_url( $request->youtube_url, PHP_URL_QUERY ), $array );        
-                    $index = array_key_first($array);                    
-                    $value = $array[$index];        
-                    if (($value) != '')
-                    {
-                        $videoId = $value;
-                    }
-                    else{
-                        $videoId = $index;
-                    }
-                }
-                $asset = Asset::create([
-                    'url' => 'https://youtube.com/embed/'.$videoId,
-                    'storage_provider' => 'youtube',
-                    'storage_provider_id' => $videoId,
-                    'asset_type' => 'video',
-                    'mime_type' => 'video/mp4',
-                ]);
-                    //append to assets array
-                    $assets[] = $asset;                
             }
             return $this->respondWithSuccess('Assets have been created successfully.', [
                 'assets' => $assets,
@@ -324,6 +291,49 @@ class AssetController extends Controller
             }
             return $response;
 
+        } catch (\Exception $exception) {
+            Log::error($exception);
+        }
+    }
+
+    public function importFromAgora($request) {
+
+    }
+
+    public function importFromYoutube($request) {
+        try {
+            if ( ! is_null($request->items['assets']['url'])) {
+                preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $request->items['assets']['url'], $match);
+                if (! empty($match))
+                {
+                    $videoId = $match[2];
+                }
+                if (empty($match))
+                {
+                    parse_str( parse_url( $request->items['assets']['url'], PHP_URL_QUERY ), $array );        
+                    $index = array_key_first($array);                    
+                    $value = $array[$index];        
+                    if (($value) != '')
+                    {
+                        $videoId = $value;
+                    }
+                    else{
+                        $videoId = $index;
+                    }
+                }
+                $asset = Asset::create([
+                    'url' => 'https://youtube.com/embed/'.$videoId,
+                    'storage_provider' => 'youtube',
+                    'storage_provider_id' => $videoId,
+                    'asset_type' => 'video',
+                    'mime_type' => 'video/mp4',
+                ]);
+                    //append to assets array
+                    $assets[] = $asset;                
+            }
+            return $this->respondWithSuccess('Assets have been created successfully.', [
+                'assets' => $assets,
+            ]);
         } catch (\Exception $exception) {
             Log::error($exception);
         }
