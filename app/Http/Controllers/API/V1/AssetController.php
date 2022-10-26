@@ -272,8 +272,8 @@ class AssetController extends Controller
             $validator = Validator::make($request->all(), [
                 'items.*' => ['required'],
                 'items.*.provider' => ['required', 'string', 'in:google-meet,youtube'],
-                'items.*.assets.url' => ['required', 'string'],
-                'items.*.assets.type' => ['required', 'string', 'in:video,live-video'],
+                'items.*.url' => ['required', 'string'],
+                'items.*.type' => ['required', 'string', 'in:video,live-video'],
             ]);
 
             if ($validator->fails()) {
@@ -298,15 +298,15 @@ class AssetController extends Controller
 
     public function importFromYoutube($item) {
         try {
-                if ( ! is_null($item['assets']['url'])) {
-                    preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $item['assets']['url'], $match);
+                if ( ! is_null($item['url'])) {
+                    preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $item['url'], $match);
                     if (! empty($match))
                     {
                         $videoId = $match[2];
                     }
                     if (empty($match))
                     {
-                        parse_str( parse_url( $item['assets']['url'], PHP_URL_QUERY ), $array );        
+                        parse_str( parse_url( $item['url'], PHP_URL_QUERY ), $array );        
                         $index = array_key_first($array);                    
                         $value = $array[$index];        
                         if (($value) != '')
