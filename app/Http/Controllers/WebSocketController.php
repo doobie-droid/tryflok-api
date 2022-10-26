@@ -156,6 +156,9 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 case 'request-broadcast-in-rtm-channel':
                     $this->requestBroadcastInRtmChannel($data, $conn);
                     break;
+                case 'update-screen-share-status':
+                    $this->updateScreenShareStatus($data, $conn);
+                    break;
                 case 'app-update-rtm-channel-subscribers-count':
                     $this->updateRtmChannelSubscribersCount($data, $conn);
                     break;
@@ -166,12 +169,14 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     $this->propagateToOtherNodes($data, $conn);
                     $echo = ['echo' => $data->message];
                     $conn->send(json_encode($echo));
+                    break;
                 case 'broadcast-test':
                     $this->propagateToOtherNodes($data, $conn);
                     foreach ($this->connections as $connection) {
                         $broadcast = ['broadcast' => $data->message];
                         $connection['socket_connection']->send(json_encode($broadcast));
                     }
+                    break;
                 case 'notify-user':
                     break;
             }
@@ -591,6 +596,67 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 'broadcaster_id' => $broadcaster_id,
                 'agora_uid' => $agora_uid,
                 'stream' => $stream,
+            ];
+
+            foreach ($channel_subscribers as $key => $resourceId) {
+                // make sure the user is still connected
+                $connection_data = null;
+                if (array_key_exists($resourceId, $this->connections)) {
+                    $connection_data = $this->connections[$resourceId];
+                } else {
+                    unset($this->rtm_channel_subscribers[$channel_name][$key]);
+                }
+
+                if (! is_null($connection_data)) {
+                    $connection_data['socket_connection']->send(json_encode($message));
+                }
+            }
+        } catch (\Exception $exception) {
+            $connection->send(json_encode([
+                'event' => 'event-error',
+                'event_name' => $data->event,
+                'message' => 'Oops, an error occurred, please try again later',
+                'errors' => [],
+            ]));
+            Log::error($exception);
+            return;
+        }
+    }
+
+    private function updateScreenShareStatus($data, $connection)
+    {
+        try {
+            $validator = Validator::make((array) $data, [
+                'channel_name' => ['required', 'string'],
+                'user_id' => ['required', 'string'],
+                'status' => ['required', 'string'],
+            ]);
+
+            if ($validator->fails()) {
+                $connection->send(json_encode([
+                    'event' => 'event-error',
+                    'event_name' => $data->event,
+                    'message' => 'Invalid or missing input fields',
+                    'errors' => $validator->errors()->toArray(),
+                ]));
+                return;
+            }
+
+            $this->propagateToOtherNodes($data, $connection);
+
+            $user_id = $data->user_id;
+            $status = $data->status;
+            $channel_name = $data->channel_name;
+            $channel_subscribers = [];
+            if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
+                $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
+            }
+
+            $message = [
+                'event' => 'screen-share-status-updated',
+                'channel_name' => $channel_name,
+                'status' => $status,
+                'user_id' => $user_id,
             ];
 
             foreach ($channel_subscribers as $key => $resourceId) {

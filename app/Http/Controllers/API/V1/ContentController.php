@@ -1216,7 +1216,11 @@ class ContentController extends Controller
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
-                if (! $content->isFree() && ! $content->userHasPaid($user_id, $request->access_token)) {
+                $access_token = '';
+                if (! is_null($request->access_token)) {
+                    $access_token = $request->access_token;
+                }
+                if (! $content->isFree() && ! $content->userHasPaid($user_id, $access_token)) {
                     return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
                 }
             } else {
@@ -1408,9 +1412,11 @@ class ContentController extends Controller
                 $user_id = $request->user()->id;
             }
 
+            $access_token = $request->query('access_token', 1);
+            
             $content = Content::where('id', $id)->first();
 
-            if (! $content->isFree() && ! $content->userHasPaid($user_id, $request->access_token) && ! ($content->user_id == $user_id)) {
+            if (! $content->isFree() && ! $content->userHasPaid($user_id, $access_token) && ! ($content->user_id == $user_id)) {
                 return $this->respondBadRequest('You are not permitted to view the assets of this content');
             }
             // get signed cookies

@@ -28,9 +28,9 @@ class YoutubeUrl implements Rule
         if (preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $value, $matches)) {
             return true;
         }
-        if (preg_match("/https?:\/\/(w{3}\.)?youtube\.com.+?(\s|$)/", $value, $matches)) {
-            return true;
-        }
+        // if (preg_match("/https?:\/\/(w{3}\.)?youtube\.com.+?(\s|$)/", $value, $matches)) {
+        //     return true;
+        // }
         return false;
     }
 
