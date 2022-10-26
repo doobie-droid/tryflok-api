@@ -326,9 +326,7 @@ class AssetController extends Controller
                     ]);
              
                 }            
-                return $this->respondWithSuccess('Assets have been created successfully.', [
-                    'asset' => $asset,
-                ]);
+                return $asset;
         } catch (\Exception $exception) {
             Log::error($exception);
         }

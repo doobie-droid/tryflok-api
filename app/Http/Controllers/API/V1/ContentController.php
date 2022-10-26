@@ -1297,7 +1297,7 @@ class ContentController extends Controller
                 $rtm_token = $rtm_token_model->value;
             }
             if ($content->live_provider == 'youtube') {
-                $asset = $content->assets()->first();
+                $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
                 $asset_url = $asset->url; 
             }
 
