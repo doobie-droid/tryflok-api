@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Rules\YoutubeUrl;
 
 class AssetController extends Controller
 {
@@ -42,7 +43,6 @@ class AssetController extends Controller
                     $response = $this->uploadVideo($request);
                     break;
             }
-
             return $response;
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -114,38 +114,38 @@ class AssetController extends Controller
 
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
-            }
+            }         
             $assets = [];
-            foreach ($request->file('files') as $file) {
-                //create the asset on the table
-                $filename = date('Ymd') . Str::random(16);
-                $originalName = $file->getClientOriginalName();
-                $ext = $file->getClientOriginalExtension();
-                $folder = join_path('assets', Str::random(16) . date('Ymd'), 'video');
-                $fullFilename = join_path($folder, $filename . '.m3u8');
-                $url = join_path(config('flok.private_media_url'), $fullFilename);
-
-                $asset = Asset::create([
-                    'url' => $url,
-                    'storage_provider' => 'private-s3',
-                    'storage_provider_id' => $fullFilename,
-                    'asset_type' => 'video',
-                    'mime_type' => 'application/vnd.apple.mpegurl',
-                ]);
-                //append to assets array
-                $asset->original_name = $originalName;
-                $assets[] = $asset;
-                //delegate upload to job
-                $path = Storage::disk('local')->put('uploads/videos', $file);
-                $uploadedFilePath = storage_path() . '/app/' . $path;
-                GenerateVideoResolutionsJob::dispatch([
-                    'asset' => $asset,
-                    'filepath' => $uploadedFilePath,
-                    'folder' => $folder,
-                    'ext' => $ext,
-                    'filename' => $filename,
-                    'full_file_name' => $fullFilename,
-                ]);
+                foreach ($request->file('files') as $file) {
+                    //create the asset on the table
+                    $filename = date('Ymd') . Str::random(16);
+                    $originalName = $file->getClientOriginalName();
+                    $ext = $file->getClientOriginalExtension();
+                    $folder = join_path('assets', Str::random(16) . date('Ymd'), 'video');
+                    $fullFilename = join_path($folder, $filename . '.m3u8');
+                    $url = join_path(config('flok.private_media_url'), $fullFilename);
+    
+                    $asset = Asset::create([
+                        'url' => $url,
+                        'storage_provider' => 'private-s3',
+                        'storage_provider_id' => $fullFilename,
+                        'asset_type' => 'video',
+                        'mime_type' => 'application/vnd.apple.mpegurl',
+                    ]);
+                     //append to assets array
+                    $asset->original_name = $originalName;
+                    $assets[] = $asset;
+                    //delegate upload to job
+                    $path = Storage::disk('local')->put('uploads/videos', $file);
+                    $uploadedFilePath = storage_path() . '/app/' . $path;
+                    GenerateVideoResolutionsJob::dispatch([
+                        'asset' => $asset,
+                        'filepath' => $uploadedFilePath,
+                        'folder' => $folder,
+                        'ext' => $ext,
+                        'filename' => $filename,
+                        'full_file_name' => $fullFilename,
+                    ]);
             }
             return $this->respondWithSuccess('Assets have been created successfully.', [
                 'assets' => $assets,
@@ -263,6 +263,72 @@ class AssetController extends Controller
                 $asset->delete();
             }
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function importAssetFromThirdParty(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'items.*' => ['required'],
+                'items.*.provider' => ['required', 'string', 'in:google-meet,youtube'],
+                'items.*.assets.url' => ['required', 'string'],
+                'items.*.assets.type' => ['required', 'string', 'in:video,live-video'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+            $assets = [];
+            foreach ($request->items as $item) {
+                switch ($item['provider']) {
+                    // case 'agora':
+                    //     $response = $this->importFromAgora($request);
+                    //     break;
+                    case 'youtube':
+                        $assets[] = $this->importFromYoutube($item);
+                        break;
+                }
+                return $response;
+            }
+        } catch (\Exception $exception) {
+            Log::error($exception);
+        }
+    }
+
+    public function importFromYoutube($item) {
+        try {
+                if ( ! is_null($item['assets']['url'])) {
+                    preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $item['assets']['url'], $match);
+                    if (! empty($match))
+                    {
+                        $videoId = $match[2];
+                    }
+                    if (empty($match))
+                    {
+                        parse_str( parse_url( $item['assets']['url'], PHP_URL_QUERY ), $array );        
+                        $index = array_key_first($array);                    
+                        $value = $array[$index];        
+                        if (($value) != '')
+                        {
+                            $videoId = $value;
+                        }
+                        else{
+                            $videoId = $index;
+                        }
+                    }
+                    $asset = Asset::create([
+                        'url' => 'https://youtube.com/embed/'.$videoId,
+                        'storage_provider' => 'youtube',
+                        'storage_provider_id' => $videoId,
+                        'asset_type' => 'video',
+                        'mime_type' => 'video/mp4',
+                    ]);
+             
+                }            
+                return $asset;
+        } catch (\Exception $exception) {
+            Log::error($exception);
         }
     }
 }

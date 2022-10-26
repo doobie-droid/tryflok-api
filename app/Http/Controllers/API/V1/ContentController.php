@@ -18,6 +18,7 @@ use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
+use App\Models\ContentSubscriber;
 use App\Models\ContentComment;
 use App\Models\ContentCommentComment;
 use App\Models\ContentLike;
@@ -39,7 +40,6 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use App\Rules\YoutubeUrl;
 
-
 class ContentController extends Controller
 {
     public function create(Request $request)
@@ -54,8 +54,9 @@ class ContentController extends Controller
                 'price.amount' => ['required', 'min:0', 'numeric', 'max:1000'],
                 'tags' => ['sometimes'],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
+                'live_provider' => ['required_if:type,live-video,live-audio', 'string', 'in:youtube,agora'],
                 'type' => ['required', 'string', 'in:pdf,audio,video,newsletter,live-audio,live-video'],
-                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
+                'asset_id' => ['required_if:type,pdf,audio,video', 'required_if:live_provider,youtube', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['required_if:type,newsletter', 'string'],
                 'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
@@ -116,6 +117,10 @@ class ContentController extends Controller
             if (! is_null($request->scheduled_date)) {
                 $content->scheduled_date = $request->scheduled_date;
                 $content->save();
+            }
+            if (! is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
+                $content->live_provider = 'youtube';
+                $content->save();             
             }
 
             if (! is_null($request->newsletter_position_elements)) {
@@ -272,6 +277,8 @@ class ContentController extends Controller
                 'title' => ['sometimes', 'nullable', 'string', 'max:200', 'min:1'],
                 'description' => ['sometimes', 'nullable', 'string'],
                 'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'live_provider' => ['required_if:type,live-audio,live-video', 'string', 'in:youtube,agora'],
+                'asset_id' => ['required_if:type,pdf,audio,video', 'required_if:live_provider,youtube', 'exists:assets,id'],
                 'price' => ['sometimes', 'nullable'],
                 'price.amount' => ['sometimes', 'nullable', 'min:0', 'numeric', 'max:1000'],
                 'tags' => ['sometimes'],
@@ -351,6 +358,11 @@ class ContentController extends Controller
                     'id' => Str::uuid(),
                     'purpose' => 'content-asset',
                 ]);
+            }
+
+            if (! is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
+                    $content->live_provider = 'youtube';
+                    $content->save();             
             }
 
             if (! is_null($request->tags) && is_array($request->tags)) {
@@ -1231,6 +1243,10 @@ class ContentController extends Controller
             }
 
             if ($user_id !== '') {
+                $content_subscriber = ContentSubscriber::where('content_id', $content->id)->where('user_id', $user_id)->first();
+                if ( ! is_null($content_subscriber)) {
+                    return $this->respondBadRequest("Subcriber with the user ID '$user_id' already joined");
+                }
                 $content->subscribers()->syncWithoutDetaching([
                     $request->user()->id => [
                         'id' => Str::uuid(),
@@ -1239,7 +1255,10 @@ class ContentController extends Controller
             } 
             
             if ($user_id == '') {
-                $content->anonymousSubscribers()->detach([$request->access_token]);
+                $content_subscriber = ContentSubscriber::where('content_id', $content->id)->where('access_token', $request->access_token)->first();
+                if ( ! is_null($content_subscriber)) {
+                    return $this->respondBadRequest("Subcriber with the access token '$request->access_token' already joined");
+                }
                 $content->anonymousSubscribers()->syncWithoutDetaching([
                     $request->access_token => [
                         'id' => Str::uuid(),
@@ -1263,12 +1282,32 @@ class ContentController extends Controller
             ]));
             $websocket_client->close();
 
+            $rtc_token = '';
+            $rtm_token = '';
+            $channel = '';
+            $join_count = '';
+            $asset_url = '';
+
+            if ( $content->live_provider == 'agora') {
+                $channel_model = $content->metas()->where('key', 'channel_name')->first(); 
+                $channel = $channel_model->value;
+                $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
+                $rtc_token = $rtc_token_model ->value;
+                $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
+                $rtm_token = $rtm_token_model->value;
+            }
+            if ($content->live_provider == 'youtube') {
+                $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
+                $asset_url = $asset->url; 
+            }
+
             return $this->respondWithSuccess('Channel joined successfully', [
-                'rtc_token' => $rtc_token->value,
-                'rtm_token' => $rtm_token->value,
-                'channel_name' => $channel->value,
-                'uid' => (int) $uid,
-                'subscribers_count' => (int) $join_count->value,
+                'rtc_token' => $rtc_token,
+                'rtm_token' => $rtm_token,
+                'channel_name' => $channel,
+                'uid' => (int) $join_count,
+                'subscribers_count' => (int) $join_count,
+                'asset' => $asset_url,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
