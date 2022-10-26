@@ -68,12 +68,9 @@ class MigrateYoutubeVideo implements ShouldQueue
         }
         if (empty($match))
         {
-            parse_str( parse_url( $url, PHP_URL_QUERY ), $array );
- 
-             $index = array_key_first($array);
-             
-             $value = $array[$index];
- 
+            parse_str( parse_url( $url, PHP_URL_QUERY ), $array ); 
+             $index = array_key_first($array);             
+             $value = $array[$index]; 
              if (($value) != '')
              {
                  $videoId = $value;

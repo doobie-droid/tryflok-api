@@ -69,7 +69,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}/reviews', 'ReviewController@listReviews');
     });
 
-    Route::group(['prefix' => 'account'], function () {
+    Route::group(['prefix' => 'payments'], function () {
         Route::post('anonymous-purchases', 'AnonymousPurchaseController@makePurchase')->name('make-anonymous-purchases');
     });
 
