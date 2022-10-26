@@ -271,7 +271,7 @@ class AssetController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'items.*' => ['required'],
-                'items.*.provider' => ['required', 'string', 'in:agora,youtube'],
+                'items.*.provider' => ['required', 'string', 'in:google-meet,youtube'],
                 'items.*.assets.url' => ['required', 'string'],
                 'items.*.assets.type' => ['required', 'string', 'in:video,live-video'],
             ]);
@@ -279,13 +279,14 @@ class AssetController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
+            $assets = [];
             foreach ($request->items as $item) {
                 switch ($item['provider']) {
                     // case 'agora':
                     //     $response = $this->importFromAgora($request);
                     //     break;
                     case 'youtube':
-                        $response = $this->importFromYoutube($request);
+                        $assets[] = $this->importFromYoutube($item);
                         break;
                 }
                 return $response;
@@ -295,9 +296,8 @@ class AssetController extends Controller
         }
     }
 
-    public function importFromYoutube($request) {
+    public function importFromYoutube($item) {
         try {
-            foreach ($request->items as $item) {
                 if ( ! is_null($item['assets']['url'])) {
                     preg_match("/(\/|%3D|v=|vi=)([0-9A-z-_]{11})([%#?&]|$)/", $item['assets']['url'], $match);
                     if (! empty($match))
@@ -324,14 +324,11 @@ class AssetController extends Controller
                         'asset_type' => 'video',
                         'mime_type' => 'video/mp4',
                     ]);
-                        //append to assets array
-                        $assets[] = $asset;                
-                }
-            }
-            
-            return $this->respondWithSuccess('Assets have been created successfully.', [
-                'assets' => $assets,
-            ]);
+             
+                }            
+                return $this->respondWithSuccess('Assets have been created successfully.', [
+                    'asset' => $asset,
+                ]);
         } catch (\Exception $exception) {
             Log::error($exception);
         }

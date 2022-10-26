@@ -54,8 +54,9 @@ class ContentController extends Controller
                 'price.amount' => ['required', 'min:0', 'numeric', 'max:1000'],
                 'tags' => ['sometimes'],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
+                'live_provider' => ['required_if:type,live-video,live-audio', 'string', 'in:youtube,google-meet'],
                 'type' => ['required', 'string', 'in:pdf,audio,video,newsletter,live-audio,live-video'],
-                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
+                'asset_id' => ['required_if:type,pdf,audio,video', 'required_if:live_provider,youtube', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['required_if:type,newsletter', 'string'],
                 'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
@@ -116,6 +117,10 @@ class ContentController extends Controller
             if (! is_null($request->scheduled_date)) {
                 $content->scheduled_date = $request->scheduled_date;
                 $content->save();
+            }
+            if (! is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
+                $content->live_provider = 'youtube';
+                $content->save();             
             }
 
             if (! is_null($request->newsletter_position_elements)) {
@@ -242,11 +247,6 @@ class ContentController extends Controller
                 ]);
             }
 
-            // if (! is_null($request->asset_id) && ($content->type == 'live-video' || $content->type == 'live-audio')) {
-            //     $content->live_provider = 'youtube';
-            //     $content->save();             
-            // }
-
             if (isset($request->tags) && is_array($request->tags)) {
                 foreach ($request->tags as $tag_id) {
                     $content->tags()->attach($tag_id, [
@@ -277,7 +277,8 @@ class ContentController extends Controller
                 'title' => ['sometimes', 'nullable', 'string', 'max:200', 'min:1'],
                 'description' => ['sometimes', 'nullable', 'string'],
                 'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
-                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'prohibited_unless:youtube_url,NULL', 'exists:assets,id'],
+                'live_provider' => ['required_if:type,live-audio,live-video', 'string', 'in:youtube,google-meet'],
+                'asset_id' => ['required_if:type,pdf,audio,video', 'required_if:live_provider,youtube', 'exists:assets,id'],
                 'price' => ['sometimes', 'nullable'],
                 'price.amount' => ['sometimes', 'nullable', 'min:0', 'numeric', 'max:1000'],
                 'tags' => ['sometimes'],
@@ -359,10 +360,10 @@ class ContentController extends Controller
                 ]);
             }
 
-            // if (! is_null($request->asset_id) && ($content->type == 'live-video' || $content->type == 'live-audio')) {
-            //         $content->live_provider = 'youtube';
-            //         $content->save();             
-            // }
+            if (! is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
+                    $content->live_provider = 'youtube';
+                    $content->save();             
+            }
 
             if (! is_null($request->tags) && is_array($request->tags)) {
                 foreach ($request->tags as $tagData) {
@@ -1281,23 +1282,31 @@ class ContentController extends Controller
             ]));
             $websocket_client->close();
 
+            $rtc_token = '';
+            $rtm_token = '';
+            $channel = '';
+            $join_count = '';
             $asset_url = '';
 
-            if ($content->live_provider == 'youtube') {
-                $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
-                $asset_url = $asset->url;
-                $rtc_token->value = '';
-                $rtm_token->value = '';
-                $channel->value = '';
-                $uid = '';
-                $join_count->value = '';
+            if ( $content->live_provider == 'agora') {
+                $channel_model = $content->metas()->where('key', 'channel_name')->first(); 
+                $channel = $channel_model->value;
+                $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
+                $rtc_token = $rtc_token_model ->value;
+                $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
+                $rtm_token = $rtm_token_model->value;
             }
+            if ($content->live_provider == 'youtube') {
+                $asset = $content->assets()->first();
+                $asset_url = $asset->url; 
+            }
+
             return $this->respondWithSuccess('Channel joined successfully', [
-                'rtc_token' => $rtc_token->value,
-                'rtm_token' => $rtm_token->value,
-                'channel_name' => $channel->value,
-                'uid' => (int) $uid,
-                'subscribers_count' => (int) $join_count->value,
+                'rtc_token' => $rtc_token,
+                'rtm_token' => $rtm_token,
+                'channel_name' => $channel,
+                'uid' => (int) $join_count,
+                'subscribers_count' => (int) $join_count,
                 'asset' => $asset_url,
             ]);
         } catch (\Exception $exception) {
