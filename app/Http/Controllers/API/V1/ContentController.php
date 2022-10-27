@@ -1183,8 +1183,13 @@ class ContentController extends Controller
             }
 
             if ( $content->live_provider == 'agora') {
-                $rtc_token = $rtc_token_model->value;
+                $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
+                $rtc_token = $rtc_token_model ->value;
+                $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
                 $rtm_token = $rtm_token_model->value;
+
+                $rtc_token = $rtc_token_model;
+                $rtm_token = $rtm_token_model;
                 $asset_url = '';
 
                 $expires = time() + (24 * 60 * 60); // let token last for 24hrs
@@ -1207,6 +1212,12 @@ class ContentController extends Controller
                 $asset_url = $asset->url; 
                 $rtc_token = '';
                 $rtm_token = '';
+            }
+
+            if ($content->live_provider == 'agora') {
+                $asset_url = ''; 
+                $rtc_token = $rtc_token->value;
+                $rtm_token = $rtm_token->value;
             }
 
             $content->live_status = 'active';
@@ -1251,10 +1262,10 @@ class ContentController extends Controller
             if ($content->type !== 'live-video' && $content->type !== 'live-audio') {
                 return $this->respondBadRequest('Live broadcasts can only be joined for live content types');
             }
-
+            
+            $user_id = '';
+            $access_token = '';
             if ($request->user() == null || $request->user()->id == null) {
-                $user_id = '';
-                $access_token = '';
                 if (! is_null($request->access_token)) {
                     $access_token = $request->access_token;
                 }
