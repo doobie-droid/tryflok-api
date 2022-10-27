@@ -1129,6 +1129,7 @@ class ContentController extends Controller
                     'value' => "{$content->id}-" . date('Ymd'),
                 ]);
             }
+            if ( $content->live_provider == 'agora') {
             $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
             if (is_null($rtc_token)) {
                 $rtc_token = $content->metas()->create([
@@ -1150,29 +1151,63 @@ class ContentController extends Controller
                     'value' => 0,
                 ]);
             }
+            }
+
             //ensure that the live has not been started before
             if ($content->live_status === 'active') {
+                $rtc_token = '';
+                $rtm_token = '';
+                $channel = '';
+                $asset_url = '';
+
+                $channel_model = $content->metas()->where('key', 'channel_name')->first(); 
+                $channel = $channel_model->value;
+
+                if ( $content->live_provider == 'agora') {
+                    $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
+                    $rtc_token = $rtc_token_model ->value;
+                    $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
+                    $rtm_token = $rtm_token_model->value;
+                }
+                if ($content->live_provider == 'youtube') {
+                    $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
+                    $asset_url = $asset->url; 
+                }
                 return $this->respondWithSuccess('Channel started successfully', [
-                    'rtc_token' => $rtc_token->value,
-                    'rtm_token' => $rtm_token->value,
-                    'channel_name' => $channel->value,
+                    'rtc_token' => $rtc_token,
+                    'rtm_token' => $rtm_token,
+                    'channel_name' => $channel,
                     'uid' => 0,
+                    'asset' => $asset_url,
                 ]);
             }
 
-            $expires = time() + (24 * 60 * 60); // let token last for 24hrs
-            $agora_rtc_token = AgoraRtcToken::buildTokenWithUid(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
+            if ( $content->live_provider == 'agora') {
+                $rtc_token = $rtc_token->value;
+                $rtm_token = $rtm_token->value;
+                $asset_url = '';
 
-            $agora_rtm_token = AgoraRtmToken::buildToken(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtmToken::ROLE_RTM_USER, $expires);
+                $expires = time() + (24 * 60 * 60); // let token last for 24hrs
+                $agora_rtc_token = AgoraRtcToken::buildTokenWithUid(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
 
-            $rtc_token->value = $agora_rtc_token;
-            $rtc_token->save();
+                $agora_rtm_token = AgoraRtmToken::buildToken(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtmToken::ROLE_RTM_USER, $expires);
 
-            $rtm_token->value = $agora_rtm_token;
-            $rtm_token->save();
+                $rtc_token->value = $agora_rtc_token;
+                $rtc_token->save();
 
-            $join_count->value = 1;
-            $join_count->save();
+                $rtm_token->value = $agora_rtm_token;
+                $rtm_token->save();
+
+                $join_count->value = 1;
+                $join_count->save();
+            }
+
+            if ($content->live_provider == 'youtube') {
+                $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
+                $asset_url = $asset->url; 
+                $rtc_token = '';
+                $rtm_token = '';
+            }
 
             $content->live_status = 'active';
             $content->scheduled_date = now();
@@ -1187,10 +1222,11 @@ class ContentController extends Controller
             ]);
 
             return $this->respondWithSuccess('Channel started successfully', [
-                'rtc_token' => $rtc_token->value,
-                'rtm_token' => $rtm_token->value,
+                'rtc_token' => $rtc_token,
+                'rtm_token' => $rtm_token,
                 'channel_name' => $channel->value,
                 'uid' => 0,
+                'asset' => $asset_url,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -1203,7 +1239,8 @@ class ContentController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
-                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token'],   
+                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token'],
+                // 'device_token' => ['required', 'string'],   
             ]);
 
             if ($validator->fails()) {
@@ -1232,10 +1269,12 @@ class ContentController extends Controller
             }
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
-            $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
-            $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
-            if (is_null($rtc_token) || $rtc_token->value == '' || is_null($rtm_token) || $rtm_token->value == '') {
-                return $this->respondBadRequest('You cannot join a broadcast that has not been started');
+            if ($content->live_provider == 'agora') {
+                $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
+                $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
+                if (is_null($rtc_token) || $rtc_token->value == '' || is_null($rtm_token) || $rtm_token->value == '') {
+                    return $this->respondBadRequest('You cannot join a broadcast that has not been started');
+                }   
             }
 
             if ($content->live_status !== 'active') {
@@ -1243,10 +1282,6 @@ class ContentController extends Controller
             }
 
             if ($user_id !== '') {
-                $content_subscriber = ContentSubscriber::where('content_id', $content->id)->where('user_id', $user_id)->first();
-                if ( ! is_null($content_subscriber)) {
-                    return $this->respondBadRequest("Subcriber with the user ID '$user_id' already joined");
-                }
                 $content->subscribers()->syncWithoutDetaching([
                     $request->user()->id => [
                         'id' => Str::uuid(),
@@ -1255,17 +1290,13 @@ class ContentController extends Controller
             } 
             
             if ($user_id == '') {
-                $content_subscriber = ContentSubscriber::where('content_id', $content->id)->where('access_token', $request->access_token)->first();
-                if ( ! is_null($content_subscriber)) {
-                    return $this->respondBadRequest("Subcriber with the access token '$request->access_token' already joined");
-                }
                 $content->anonymousSubscribers()->syncWithoutDetaching([
                     $request->access_token => [
                         'id' => Str::uuid(),
                     ],
                 ]);
             }
-
+           
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
             $join_count->value = (int) $join_count->value + 1;
@@ -1280,6 +1311,13 @@ class ContentController extends Controller
                 'subscribers_count' => (int) $join_count->value,
                 'source_type' => 'app',
             ]));
+            $websocket_client->text(json_encode([
+                'event' => 'app-sign-out-other-devices',
+                'channel_name' => $channel->value,
+                'source_type' => 'app',
+                'access_token' => $access_token,
+                'device_token' => $request->device_token
+            ]));
             $websocket_client->close();
 
             $rtc_token = '';
@@ -1288,9 +1326,10 @@ class ContentController extends Controller
             $join_count = '';
             $asset_url = '';
 
+            $channel_model = $content->metas()->where('key', 'channel_name')->first(); 
+            $channel = $channel_model->value;
+
             if ( $content->live_provider == 'agora') {
-                $channel_model = $content->metas()->where('key', 'channel_name')->first(); 
-                $channel = $channel_model->value;
                 $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
                 $rtc_token = $rtc_token_model ->value;
                 $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
