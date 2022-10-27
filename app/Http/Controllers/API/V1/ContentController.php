@@ -1183,8 +1183,8 @@ class ContentController extends Controller
             }
 
             if ( $content->live_provider == 'agora') {
-                $rtc_token = $rtc_token->value;
-                $rtm_token = $rtm_token->value;
+                $rtc_token = $rtc_token_model->value;
+                $rtm_token = $rtm_token_model->value;
                 $asset_url = '';
 
                 $expires = time() + (24 * 60 * 60); // let token last for 24hrs
