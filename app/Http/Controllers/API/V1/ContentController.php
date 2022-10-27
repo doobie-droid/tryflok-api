@@ -1237,7 +1237,8 @@ class ContentController extends Controller
         try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
-                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token'],   
+                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token'],
+                'device_token' => ['required', 'string'],   
             ]);
 
             if ($validator->fails()) {
@@ -1277,10 +1278,6 @@ class ContentController extends Controller
             }
 
             if ($user_id !== '') {
-                $content_subscriber = ContentSubscriber::where('content_id', $content->id)->where('user_id', $user_id)->first();
-                if ( ! is_null($content_subscriber)) {
-                    return $this->respondBadRequest("Subcriber with the user ID '$user_id' already joined");
-                }
                 $content->subscribers()->syncWithoutDetaching([
                     $request->user()->id => [
                         'id' => Str::uuid(),
@@ -1289,17 +1286,13 @@ class ContentController extends Controller
             } 
             
             if ($user_id == '') {
-                $content_subscriber = ContentSubscriber::where('content_id', $content->id)->where('access_token', $request->access_token)->first();
-                if ( ! is_null($content_subscriber)) {
-                    return $this->respondBadRequest("Subcriber with the access token '$request->access_token' already joined");
-                }
                 $content->anonymousSubscribers()->syncWithoutDetaching([
                     $request->access_token => [
                         'id' => Str::uuid(),
                     ],
                 ]);
             }
-
+           
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
             $join_count->value = (int) $join_count->value + 1;
@@ -1313,6 +1306,13 @@ class ContentController extends Controller
                 'channel_name' => $channel->value,
                 'subscribers_count' => (int) $join_count->value,
                 'source_type' => 'app',
+            ]));
+            $websocket_client->text(json_encode([
+                'event' => 'app-sign-out-other-devices',
+                'channel_name' => $channel->value,
+                'source_type' => 'app',
+                'access_token' => $access_token,
+                'device_token' => $request->device_token
             ]));
             $websocket_client->close();
 
