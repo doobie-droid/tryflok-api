@@ -163,7 +163,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                     $this->updateRtmChannelSubscribersCount($data, $conn);
                     break;
                 case 'app-sign-out-other-devices':
-                    $this->SignOutOtherDevices($data, $conn);
+                    $this->signOutOtherDevices($data, $conn);
                     break;
                 case 'app-set-connection-as-authenticated':
                     $this->setConnectionAsAuthenticated($data, $conn);
@@ -726,7 +726,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         }
     }
 
-    private function SignOutOtherDevices($data, $connection)
+    private function signOutOtherDevices($data, $connection)
     {
         try {
             // send message to channel subscribers
