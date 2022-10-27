@@ -1240,7 +1240,7 @@ class ContentController extends Controller
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
                 'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token'],
-                'device_token' => ['required', 'string'],   
+                // 'device_token' => ['required', 'string'],   
             ]);
 
             if ($validator->fails()) {
