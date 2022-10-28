@@ -772,29 +772,15 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     private function updateNumberOfTipsForContent($data, $connection)
     {
         try {
-            // // send message to channel subscribers
-            // $channel_name = $data->channel_name;
-            // $channel_subscribers = [];
-            // if (array_key_exists($channel_name, $this->rtm_channel_subscribers)) {
-            //     $channel_subscribers = $this->rtm_channel_subscribers[$channel_name];
-            // }
             $this->propagateToOtherNodes($data, $connection);
             $message = [
                 'event' => 'update-number-of-tips-for-content',
                 'content_id' => $data->content_id,
                 'tips_count' => $data->tips_count,
             ];
-            foreach ($channel_subscribers as $key => $resourceId) {
-                $connection_data = null;
-                if (array_key_exists($resourceId, $this->connections)) {
-                    $connection_data = $this->connections[$resourceId];
-                } else {
-                    unset($this->rtm_channel_subscribers[$channel_name][$key]);
-                }
 
-                if (! is_null($connection_data)) {
-                    $connection_data['socket_connection']->send(json_encode($message));
-                }
+            foreach ($this->connections as $connection) {
+                $connection['socket_connection']->send(json_encode($message));
             }
         } catch (\Exception $exception) {
             $connection->send(json_encode([

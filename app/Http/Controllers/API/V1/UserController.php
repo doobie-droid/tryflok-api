@@ -1015,13 +1015,13 @@ class UserController extends Controller
             $revenue->save();
 
             if (! is_null($revenue->originating_content_id)) {
-                $content_tip_count = $userToTip->revenues()->where('originating_content_id', $revenue->originating_content_id)->count();
+                $content_tip_count = $userToTip->revenues()->where('originating_content_id', $revenue->originating_content_id)->where('revenue_from', 'tip')->count();
                 $websocket_client = new \WebSocket\Client(config('services.websocket.url'));
                 $websocket_client->text(json_encode([
-                'event' => 'app-update-number-of-tips-for-content',
-                'source_type' => 'app',
-                'content_id' => $revenue->originating_content_id,
-                'tips_count' => $content_tip_count
+                    'event' => 'app-update-number-of-tips-for-content',
+                    'source_type' => 'app',
+                    'content_id' => $revenue->originating_content_id,
+                    'tips_count' => $content_tip_count
             ]));
             $websocket_client->close();
             }
