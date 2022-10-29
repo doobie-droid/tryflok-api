@@ -165,6 +165,9 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 case 'app-sign-out-other-devices':
                     $this->signOutOtherDevices($data, $conn);
                     break;
+                case 'app-update-number-of-tips-for-content':
+                    $this->updateNumberOfTipsForContent($data, $conn);
+                    break;
                 case 'app-set-connection-as-authenticated':
                     $this->setConnectionAsAuthenticated($data, $conn);
                     break;
@@ -753,6 +756,31 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 if (! is_null($connection_data)) {
                     $connection_data['socket_connection']->send(json_encode($message));
                 }
+            }
+        } catch (\Exception $exception) {
+            $connection->send(json_encode([
+                'event' => 'event-error',
+                'event_name' => $data->event,
+                'message' => 'Oops, an error occurred, please try again later',
+                'errors' => [],
+            ]));
+            Log::error($exception);
+            return;
+        }
+    }
+
+    private function updateNumberOfTipsForContent($data, $connection)
+    {
+        try {
+            $this->propagateToOtherNodes($data, $connection);
+            $message = [
+                'event' => 'update-number-of-tips-for-content',
+                'content_id' => $data->content_id,
+                'tips_count' => $data->tips_count,
+            ];
+
+            foreach ($this->connections as $connection) {
+                $connection['socket_connection']->send(json_encode($message));
             }
         } catch (\Exception $exception) {
             $connection->send(json_encode([
