@@ -116,7 +116,7 @@ class AnonymousPurchase implements ShouldQueue
            }
             $anonymous_purchase = Models\AnonymousPurchase::create([
             'email' => $this->data['payer_email'],
-            'first_name' => $this->data['payer_first_name'],
+            'name' => $this->data['payer_name'],
             'status' => 'available',
             'access_token' => Str::random(20),
             'anonymous_purchaseable_type' => $item['type'],
@@ -163,18 +163,18 @@ class AnonymousPurchase implements ShouldQueue
                ]);
            }
            
-        $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
-            Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
-            'message' => $message,
-            'access_tokens' => $access_tokens,
-            'avatar_url' => $avatar_url,
-            'sales_count' => $sales_count,
-            'first_name' => $this->data['payer_first_name']
-        ]));
+        // $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
+        //     Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
+        //     'message' => $message,
+        //     'access_tokens' => $access_tokens,
+        //     'avatar_url' => $avatar_url,
+        //     'sales_count' => $sales_count,
+        //     'name' => $this->data['payer_name']
+        // ]));
 
-        // if ($price->amount > 0) {
-        //     NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
-        // }
+        if ($price->amount > 0) {
+            NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
+        }
        }
     }
 

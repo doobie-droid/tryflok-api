@@ -14,7 +14,7 @@ class AnonymousPurchaseMail extends Mailable
     public $access_token;
     public $avatar_url;
     public $sales_count;
-    public $first_name;
+    public $name;
 
     /**
      * Create a new message instance.
@@ -27,7 +27,7 @@ class AnonymousPurchaseMail extends Mailable
         $this->access_tokens = $data['access_tokens'];
         $this->avatar_url = $data['avatar_url'];
         $this->sales_count = $data['sales_count'];
-        $this->first_name = $data['first_name'];
+        $this->name = $data['name'];
      }
 
     /**
@@ -42,7 +42,7 @@ class AnonymousPurchaseMail extends Mailable
             'access_tokens' => $this->access_tokens,
             'sales_count' => $this->sales_count,
             'avatar_url' => $this->avatar_url,
-            'first_name' => $this->first_name
+            'name' => $this->name
         ])->subject('Anonymous Purchase on Flok!');
     }
 }

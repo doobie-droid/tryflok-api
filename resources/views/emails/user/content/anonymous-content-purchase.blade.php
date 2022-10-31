@@ -13,7 +13,7 @@
                     <table width="85%" style="margin: 0 auto; color: #51545E;">
                     <tr>
                         <td style="padding: 10px;">
-                            <p>Hi {{ $first_name}}! </p>
+                            <p>Hi {{ $name}}! </p>
                             <p style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold;" align="center">You are Johnny's friend #{{$sales_count}} </br>
                             <span style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;" align="center"> Johnny’s Room IV Virtual Concert </span> </p>
                         </td>
@@ -33,11 +33,14 @@
                     <tr>
                         <td style="text-align: center">
                             <p style="font-size: 16px; color: #ffffff; padding: 20px; width: 90%; height: 100px; margin-bottom: 20px; background-color: #6730D0;">
-                                <span>Your livestream access code(s):</span>
-                            </p>
-                                @foreach {{ $access_tokens as $access_token }}
-                                    {{ $access_token }}
+                                <span>Your livestream access code(s): </span>
+                                @foreach ($access_tokens  as $access_token)
+                                    {{ $access_token}}  
+                                        @if( !$loop->last)
+                                            ,
+                                        @endif                              
                                 @endforeach
+                            </p>
                         </td>
                     </tr>
                     <tr>

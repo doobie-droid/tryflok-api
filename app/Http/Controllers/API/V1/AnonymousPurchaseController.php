@@ -24,7 +24,7 @@ class AnonymousPurchaseController extends Controller
         try {
             $validator = Validator::make($request->input(), [
                 'email' => ['required', 'string', 'email', 'max:255'],
-                'first_name' => ['required', 'string'],
+                'name' => ['required', 'string'],
                 'items' => ['required'],
                 'items.*.id' => ['required', 'string' ],
                 'items.*.type' => ['required', 'string', 'in:collection,content'],
@@ -112,17 +112,17 @@ class AnonymousPurchaseController extends Controller
                     return $this->respondBadRequest('Invalid provider specified');
             }
 
-            // if (!$payment_verified) {
-            //     return $this->respondBadRequest('Payment provider did not verify payment');
-            // }
+            if (!$payment_verified) {
+                return $this->respondBadRequest('Payment provider did not verify payment');
+            }
 
             AnonymousPurchaseJob::dispatch([
                 'total_amount' => $amount_in_dollars,
                 'total_fees' => 0,
                 'payer_email' => $request->email,
-                'payer_first_name' => $request->first_name,
+                'payer_name' => $request->name,
                 'provider' => $request->provider,
-                'provider_id' => Str::uuid(),
+                'provider_id' => $provider_id,
                 'items' => $request->items,
             ]);
 
