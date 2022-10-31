@@ -1022,8 +1022,8 @@ class UserController extends Controller
                     'source_type' => 'app',
                     'content_id' => $revenue->originating_content_id,
                     'tips_count' => $content_tip_count
-            ]));
-            $websocket_client->close();
+                ]));
+                $websocket_client->close();
             }
 
             $creator_share_in_flk = $creator_share * 100;
