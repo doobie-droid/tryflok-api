@@ -1327,7 +1327,8 @@ class ContentController extends Controller
                 'channel_name' => $channel->value,
                 'source_type' => 'app',
                 'access_token' => $access_token,
-                'device_token' => $request->device_token
+                'device_token' => $request->device_token,
+                'user_id' => $user_id
             ]));
             $websocket_client->close();
 
