@@ -24,6 +24,7 @@ class AnonymousPurchaseController extends Controller
         try {
             $validator = Validator::make($request->input(), [
                 'email' => ['required', 'string', 'email', 'max:255'],
+                'first_name' => ['required', 'string'],
                 'items' => ['required'],
                 'items.*.id' => ['required', 'string' ],
                 'items.*.type' => ['required', 'string', 'in:collection,content'],
@@ -119,6 +120,7 @@ class AnonymousPurchaseController extends Controller
                 'total_amount' => $amount_in_dollars,
                 'total_fees' => 0,
                 'payer_email' => $request->email,
+                'payer_first_name' => $request->email,
                 'provider' => $request->provider,
                 'provider_id' => $provider_id,
                 'items' => $request->items,
