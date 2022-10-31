@@ -1266,17 +1266,17 @@ class ContentController extends Controller
             $user_id = '';
             $access_token = '';
             if ($request->user() == null || $request->user()->id == null) {
-                if (! is_null($request->access_token)) {
-                    $access_token = $request->access_token;
-                }
-                if (! $content->isFree() && ! $content->userHasPaid($user_id, $access_token)) {
-                    return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
-                }
+                $user_id = '';
             } else {
                 $user_id = $request->user()->id;
-                if (! $content->isFree() && ! $content->userHasPaid($user_id) && ! ($content->user_id == $user_id)) {
-                    return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
-                }
+            }
+
+            if (! is_null($request->access_token)) {
+                $access_token = $request->access_token;
+            }
+
+            if (! $content->isFree() && ! $content->userHasPaid($user_id, $access_token) && ! ($content->user_id == $user_id)) {
+                return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
             }
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
