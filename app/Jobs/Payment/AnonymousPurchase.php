@@ -6,6 +6,7 @@ use App\Constants\Constants;
 use App\Jobs\Users\NotifySale;
 use App\Models\Collection;
 use App\Models\Content;
+use App\Models\Revenue;
 use App\Models\Price;
 use App\Models;
 use Illuminate\Bus\Queueable;
@@ -123,12 +124,12 @@ class AnonymousPurchase implements ShouldQueue
                 ]);
             }
             $access_tokens = [];
-            $avatar_urls = [];
             $anonymous_purchases = Models\AnonymousPurchase::where('anonymous_purchaseable_id', $itemModel->id)->where('email', $this->data['payer_email'])->get();
+            $sales_count = Models\Revenue::where('revenueable_id', $itemModel->id)->where('revenue_from', 'sale')->count();
             foreach( $anonymous_purchases as $anonymous_purchase) {
                     $access_tokens[] = $anonymous_purchase->access_token;
-                    $avatar_urls[] = $this->getAvatarUrl();
             }
+            $avatar_url = $this->getAvatarUrl($sales_count);
 
            //record revenue from referral of the item
            if ($itemModel->owner->referrer()->exists()) {
@@ -162,30 +163,30 @@ class AnonymousPurchase implements ShouldQueue
                ]);
            }
            
-        // $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
-        //     Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
-        //     'message' => $message,
-        //     'access_tokens' => $access_tokens,
-        //     'avatar_urls' => $avatar_urls
-        // ]));
+        $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
+            Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
+            'message' => $message,
+            'access_tokens' => $access_tokens,
+            'avatar_url' => $avatar_url,
+            'sales_count' => $sales_count,
+            'first_name' => $this->data['payer_first_name']
+        ]));
 
-        if ($price->amount > 0) {
-            NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
-        }
+        // if ($price->amount > 0) {
+        //     NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
+        // }
        }
     }
 
-    public function getAvatarUrl() 
+    public function getAvatarUrl($sales_count) 
     {
         $avatar_urls = file(public_path("avatar.csv"));
-        foreach ($avatar_urls as $key => $avatar_url) {
-            Log::info($avatar_url);
-            $avatar_url = Cache::get("avatar:{$key}");
-            if (is_null($avatar_url)) {
-                Cache::put("avatar:{$key}", $avatar_url);
-            }
+        $url_index = $sales_count - 1;
+        $avatar_url = $avatar_urls[$url_index];
+        if ( ! is_null($avatar_url))
+        {
             return $avatar_url;
-        };
+        }
     }
 
     public function failed(\Throwable $exception)
