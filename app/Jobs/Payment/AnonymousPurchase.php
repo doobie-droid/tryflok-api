@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use App\Mail\User\AnonymousPurchaseMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 class AnonymousPurchase implements ShouldQueue
 {
@@ -114,6 +115,7 @@ class AnonymousPurchase implements ShouldQueue
            }
             $anonymous_purchase = Models\AnonymousPurchase::create([
             'email' => $this->data['payer_email'],
+            'first_name' => $this->data['payer_first_name'],
             'status' => 'available',
             'access_token' => Str::random(20),
             'anonymous_purchaseable_type' => $item['type'],
@@ -121,9 +123,11 @@ class AnonymousPurchase implements ShouldQueue
                 ]);
             }
             $access_tokens = [];
+            $avatar_urls = [];
             $anonymous_purchases = Models\AnonymousPurchase::where('anonymous_purchaseable_id', $itemModel->id)->where('email', $this->data['payer_email'])->get();
             foreach( $anonymous_purchases as $anonymous_purchase) {
                     $access_tokens[] = $anonymous_purchase->access_token;
+                    $avatar_urls[] = $this->getAvatarUrl();
             }
 
            //record revenue from referral of the item
@@ -158,16 +162,30 @@ class AnonymousPurchase implements ShouldQueue
                ]);
            }
            
-        $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
-            Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
-            'message' => $message,
-            'access_tokens' => $access_tokens,
-        ]));
+        // $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
+        //     Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
+        //     'message' => $message,
+        //     'access_tokens' => $access_tokens,
+        //     'avatar_urls' => $avatar_urls
+        // ]));
 
         if ($price->amount > 0) {
             NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
         }
        }
+    }
+
+    public function getAvatarUrl() 
+    {
+        $avatar_urls = file(public_path("avatar.csv"));
+        foreach ($avatar_urls as $key => $avatar_url) {
+            Log::info($avatar_url);
+            $avatar_url = Cache::get("avatar:{$key}");
+            if (is_null($avatar_url)) {
+                Cache::put("avatar:{$key}", $avatar_url);
+            }
+            return $avatar_url;
+        };
     }
 
     public function failed(\Throwable $exception)
