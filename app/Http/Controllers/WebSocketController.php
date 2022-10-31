@@ -744,6 +744,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 'channel_name' => $channel_name,
                 'access_token' => $data->access_token,
                 'device_token' => $data->device_token,
+                'user_id' => $data->user_id,
             ];
             foreach ($channel_subscribers as $key => $resourceId) {
                 $connection_data = null;
