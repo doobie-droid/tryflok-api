@@ -136,10 +136,8 @@ class FundWallet implements ShouldQueue
 
             $revenue->save();
 
-            Log::info($revenue->originating_content_id);
             if (! is_null($revenue->originating_content_id)) {
                 $content_tip_count = $this->user->revenues()->where('originating_content_id', $revenue->originating_content_id)->where('revenue_from', 'tip')->count();
-                Log::info($content_tip_count);
                 $websocket_client = new \WebSocket\Client(config('services.websocket.url'));
                 $websocket_client->text(json_encode([
                     'event' => 'app-update-number-of-tips-for-content',
