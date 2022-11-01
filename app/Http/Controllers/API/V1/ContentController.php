@@ -1251,7 +1251,7 @@ class ContentController extends Controller
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
                 'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token'],
-                'device_token' => ['required', 'string'],   
+                'device_token' => ['sometimes', 'string'],   
             ]);
 
             if ($validator->fails()) {
@@ -1265,6 +1265,7 @@ class ContentController extends Controller
             
             $user_id = '';
             $access_token = '';
+            $device_token = '';
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
             } else {
@@ -1273,6 +1274,10 @@ class ContentController extends Controller
 
             if (! is_null($request->access_token)) {
                 $access_token = $request->access_token;
+            }
+
+            if (! is_null($request->device_token)) {
+                $device_token = $request->device_token;
             }
 
             if (! $content->isFree() && ! $content->userHasPaid($user_id, $access_token) && ! ($content->user_id == $user_id)) {
@@ -1327,7 +1332,7 @@ class ContentController extends Controller
                 'channel_name' => $channel->value,
                 'source_type' => 'app',
                 'access_token' => $access_token,
-                'device_token' => $request->device_token,
+                'device_token' => $device_token,
                 'user_id' => $user_id
             ]));
             $websocket_client->close();
