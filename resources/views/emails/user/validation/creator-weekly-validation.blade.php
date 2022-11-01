@@ -542,19 +542,9 @@
             <table width="85%" style="margin: 0 auto; color: #51545E;">
                 <tr>
                 <td>
-                    <p>Pro Tips for next week:</p>
-                        <ol>
-                            @if(isset($contents[0]['current_week']))
-                            <li>Focus on @isset($contents[0]['current_week']) {{{$contents[0]['current_week']['content_with_highest_engagements']['content_type']}}}@endisset, as it has had the highest engagement in the past week.</li>
-                            @elseif(isset($contents[0]['previous_week']))
-                            <li>Focus on @isset($contents[0]['previous_week']) {{{$contents[0]['previous_week']['content_with_highest_engagements']['content_type']}}}@endisset, as it has had the highest engagement in the past week.</li>
-                            @endisset
-                            <li>Remember to share your link to contacts outside Flok!</li>
-                        </ol>
-                        <!-- Click this <a href="">link </a> to see detailed breakdown of your numbers this week. <br /> -->
-                    <p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">See you next week!
-                            <br />Flok</div>
-                    </p>
+                            <p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">See you next week!
+                                <br />Flok</div>
+                            </p>
                 </td>
                 </tr>
             </table>
