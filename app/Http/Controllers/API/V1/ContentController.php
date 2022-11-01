@@ -18,6 +18,7 @@ use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
+use App\Models\ContentSubscriber;
 use App\Models\ContentComment;
 use App\Models\ContentCommentComment;
 use App\Models\ContentLike;
@@ -39,7 +40,6 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use App\Rules\YoutubeUrl;
 
-
 class ContentController extends Controller
 {
     public function create(Request $request)
@@ -54,8 +54,9 @@ class ContentController extends Controller
                 'price.amount' => ['required', 'min:0', 'numeric', 'max:1000'],
                 'tags' => ['sometimes'],
                 'tags.*' => ['required', 'string', 'exists:tags,id'],
+                'live_provider' => ['required_if:type,live-video,live-audio', 'string', 'in:youtube,agora'],
                 'type' => ['required', 'string', 'in:pdf,audio,video,newsletter,live-audio,live-video'],
-                'asset_id' => ['required_if:type,pdf,audio,video', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
+                'asset_id' => ['required_if:type,pdf,audio,video', 'required_if:live_provider,youtube', 'nullable', 'exists:assets,id', new AssetTypeRule($request->type)],
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['required_if:type,newsletter', 'string'],
                 'is_challenge' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1'],
@@ -116,6 +117,10 @@ class ContentController extends Controller
             if (! is_null($request->scheduled_date)) {
                 $content->scheduled_date = $request->scheduled_date;
                 $content->save();
+            }
+            if (! is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
+                $content->live_provider = 'youtube';
+                $content->save();             
             }
 
             if (! is_null($request->newsletter_position_elements)) {
@@ -272,6 +277,8 @@ class ContentController extends Controller
                 'title' => ['sometimes', 'nullable', 'string', 'max:200', 'min:1'],
                 'description' => ['sometimes', 'nullable', 'string'],
                 'cover.asset_id' => ['sometimes', 'nullable', 'string', 'exists:assets,id', new AssetTypeRule('image')],
+                'live_provider' => ['required_if:type,live-audio,live-video', 'string', 'in:youtube,agora'],
+                'asset_id' => ['required_if:type,pdf,audio,video', 'required_if:live_provider,youtube', 'exists:assets,id'],
                 'price' => ['sometimes', 'nullable'],
                 'price.amount' => ['sometimes', 'nullable', 'min:0', 'numeric', 'max:1000'],
                 'tags' => ['sometimes'],
@@ -351,6 +358,11 @@ class ContentController extends Controller
                     'id' => Str::uuid(),
                     'purpose' => 'content-asset',
                 ]);
+            }
+
+            if (! is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
+                    $content->live_provider = 'youtube';
+                    $content->save();             
             }
 
             if (! is_null($request->tags) && is_array($request->tags)) {
@@ -1117,6 +1129,7 @@ class ContentController extends Controller
                     'value' => "{$content->id}-" . date('Ymd'),
                 ]);
             }
+            if ( $content->live_provider == 'agora') {
             $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
             if (is_null($rtc_token)) {
                 $rtc_token = $content->metas()->create([
@@ -1138,29 +1151,74 @@ class ContentController extends Controller
                     'value' => 0,
                 ]);
             }
+            }
+
             //ensure that the live has not been started before
             if ($content->live_status === 'active') {
+                $rtc_token = '';
+                $rtm_token = '';
+                $channel = '';
+                $asset_url = '';
+
+                $channel_model = $content->metas()->where('key', 'channel_name')->first(); 
+                $channel = $channel_model->value;
+
+                if ( $content->live_provider == 'agora') {
+                    $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
+                    $rtc_token = $rtc_token_model ->value;
+                    $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
+                    $rtm_token = $rtm_token_model->value;
+                }
+                if ($content->live_provider == 'youtube') {
+                    $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
+                    $asset_url = $asset->url; 
+                }
                 return $this->respondWithSuccess('Channel started successfully', [
-                    'rtc_token' => $rtc_token->value,
-                    'rtm_token' => $rtm_token->value,
-                    'channel_name' => $channel->value,
+                    'rtc_token' => $rtc_token,
+                    'rtm_token' => $rtm_token,
+                    'channel_name' => $channel,
                     'uid' => 0,
+                    'asset' => $asset_url,
                 ]);
             }
 
-            $expires = time() + (24 * 60 * 60); // let token last for 24hrs
-            $agora_rtc_token = AgoraRtcToken::buildTokenWithUid(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
+            if ( $content->live_provider == 'agora') {
+                $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
+                $rtc_token = $rtc_token_model ->value;
+                $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
+                $rtm_token = $rtm_token_model->value;
 
-            $agora_rtm_token = AgoraRtmToken::buildToken(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtmToken::ROLE_RTM_USER, $expires);
+                $rtc_token = $rtc_token_model;
+                $rtm_token = $rtm_token_model;
+                $asset_url = '';
 
-            $rtc_token->value = $agora_rtc_token;
-            $rtc_token->save();
+                $expires = time() + (24 * 60 * 60); // let token last for 24hrs
+                $agora_rtc_token = AgoraRtcToken::buildTokenWithUid(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtcToken::ROLE_PUBLISHER, $expires);
 
-            $rtm_token->value = $agora_rtm_token;
-            $rtm_token->save();
+                $agora_rtm_token = AgoraRtmToken::buildToken(config('services.agora.id'), config('services.agora.certificate'), $channel->value, 0, AgoraRtmToken::ROLE_RTM_USER, $expires);
 
-            $join_count->value = 1;
-            $join_count->save();
+                $rtc_token->value = $agora_rtc_token;
+                $rtc_token->save();
+
+                $rtm_token->value = $agora_rtm_token;
+                $rtm_token->save();
+
+                $join_count->value = 1;
+                $join_count->save();
+            }
+
+            if ($content->live_provider == 'youtube') {
+                $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
+                $asset_url = $asset->url; 
+                $rtc_token = '';
+                $rtm_token = '';
+            }
+
+            if ($content->live_provider == 'agora') {
+                $asset_url = ''; 
+                $rtc_token = $rtc_token->value;
+                $rtm_token = $rtm_token->value;
+            }
 
             $content->live_status = 'active';
             $content->scheduled_date = now();
@@ -1175,10 +1233,11 @@ class ContentController extends Controller
             ]);
 
             return $this->respondWithSuccess('Channel started successfully', [
-                'rtc_token' => $rtc_token->value,
-                'rtm_token' => $rtm_token->value,
+                'rtc_token' => $rtc_token,
+                'rtm_token' => $rtm_token,
                 'channel_name' => $channel->value,
                 'uid' => 0,
+                'asset' => $asset_url,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -1189,10 +1248,10 @@ class ContentController extends Controller
     public function joinLive(Request $request, $id)
     {
         try {
-            $validator = Validator::make([
-                'id' => $id,
-            ], [
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
+                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token'],
+                'device_token' => ['required', 'string'],   
             ]);
 
             if ($validator->fails()) {
@@ -1203,23 +1262,32 @@ class ContentController extends Controller
             if ($content->type !== 'live-video' && $content->type !== 'live-audio') {
                 return $this->respondBadRequest('Live broadcasts can only be joined for live content types');
             }
-
+            
+            $user_id = '';
+            $access_token = '';
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
             } else {
                 $user_id = $request->user()->id;
             }
 
-            if (! $content->isFree() && ! $content->userHasPaid($user_id) && ! ($content->user_id == $user_id)) {
+            if (! is_null($request->access_token)) {
+                $access_token = $request->access_token;
+            }
+
+            if (! $content->isFree() && ! $content->userHasPaid($user_id, $access_token) && ! ($content->user_id == $user_id)) {
                 return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
             }
 
             $channel = $content->metas()->where('key', 'channel_name')->first();
-            $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
-            $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
-            if (is_null($rtc_token) || $rtc_token->value == '' || is_null($rtm_token) || $rtm_token->value == '') {
-                return $this->respondBadRequest('You cannot join a broadcast that has not been started');
+            if ($content->live_provider == 'agora') {
+                $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
+                $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
+                if (is_null($rtc_token) || $rtc_token->value == '' || is_null($rtm_token) || $rtm_token->value == '') {
+                    return $this->respondBadRequest('You cannot join a broadcast that has not been started');
+                }   
             }
+
             if ($content->live_status !== 'active') {
                 return $this->respondBadRequest('You cannot join a broadcast that has not been started');
             }
@@ -1230,8 +1298,16 @@ class ContentController extends Controller
                         'id' => Str::uuid(),
                     ],
                 ]);
-            }
+            } 
             
+            if ($user_id == '') {
+                $content->anonymousSubscribers()->syncWithoutDetaching([
+                    $request->access_token => [
+                        'id' => Str::uuid(),
+                    ],
+                ]);
+            }
+           
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
             $join_count->value = (int) $join_count->value + 1;
@@ -1246,14 +1322,43 @@ class ContentController extends Controller
                 'subscribers_count' => (int) $join_count->value,
                 'source_type' => 'app',
             ]));
+            $websocket_client->text(json_encode([
+                'event' => 'app-sign-out-other-devices',
+                'channel_name' => $channel->value,
+                'source_type' => 'app',
+                'access_token' => $access_token,
+                'device_token' => $request->device_token,
+                'user_id' => $user_id
+            ]));
             $websocket_client->close();
 
+            $rtc_token = '';
+            $rtm_token = '';
+            $channel = '';
+            $join_count = '';
+            $asset_url = '';
+
+            $channel_model = $content->metas()->where('key', 'channel_name')->first(); 
+            $channel = $channel_model->value;
+
+            if ( $content->live_provider == 'agora') {
+                $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
+                $rtc_token = $rtc_token_model ->value;
+                $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
+                $rtm_token = $rtm_token_model->value;
+            }
+            if ($content->live_provider == 'youtube') {
+                $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
+                $asset_url = $asset->url; 
+            }
+
             return $this->respondWithSuccess('Channel joined successfully', [
-                'rtc_token' => $rtc_token->value,
-                'rtm_token' => $rtm_token->value,
-                'channel_name' => $channel->value,
-                'uid' => (int) $uid,
-                'subscribers_count' => (int) $join_count->value,
+                'rtc_token' => $rtc_token,
+                'rtm_token' => $rtm_token,
+                'channel_name' => $channel,
+                'uid' => (int) $join_count,
+                'subscribers_count' => (int) $join_count,
+                'asset' => $asset_url,
             ]);
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -1352,8 +1457,9 @@ class ContentController extends Controller
     public function listAssets(Request $request, $id)
     {
         try {
-            $validator = Validator::make(['id' => $id], [
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
+                'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token']
             ]);
 
             if ($validator->fails()) {
@@ -1366,9 +1472,11 @@ class ContentController extends Controller
                 $user_id = $request->user()->id;
             }
 
+            $access_token = $request->query('access_token', 1);
+            
             $content = Content::where('id', $id)->first();
 
-            if (! $content->isFree() && ! $content->userHasPaid($user_id) && ! ($content->user_id == $user_id)) {
+            if (! $content->isFree() && ! $content->userHasPaid($user_id, $access_token) && ! ($content->user_id == $user_id)) {
                 return $this->respondBadRequest('You are not permitted to view the assets of this content');
             }
             // get signed cookies

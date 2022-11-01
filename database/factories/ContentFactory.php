@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Asset;
+use App\Models\Meta;
 use App\Models\Collection;
 use App\Models\Content;
 use App\Models\User;
@@ -151,6 +152,15 @@ class ContentFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'is_available' => 0,
+            ];
+        });
+    }
+
+    public function live()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'live_status' => 'active',
             ];
         });
     }

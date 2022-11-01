@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use App\Traits\Uuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Uuid;
 
-class Subscription extends Model
+class AnonymousPurchase extends Model
 {
     use HasFactory;
     use Uuid;
@@ -25,27 +25,24 @@ class Subscription extends Model
      *
      * @var array
      */
-    protected $hidden = [];
+    protected $hidden = [
+        'id',
+    ];
 
     protected $guard_name = 'api';
 
-    public function subscriptionable()
+    public function anonymous_purchaseable()
     {
-        return $this->morphTo();
+        return $this->morphTo(AnonymousPurchase::class);
     }
 
-    public function userable()
+    public function subscriptions()
     {
-        return $this->belongsTo(Userable::class, 'userable_id');
+        return $this->hasMany(Subscription::class, 'anonymous_purchaseable_id');
     }
 
-    public function anonymousPurchaseable()
+    public function subscription()
     {
-        return $this->belongsTo(AnonymousPurchase::class, 'anonymous_purchaseable_id');
-    }
-
-    public function price()
-    {
-        return $this->belongsTo(Price::class);
+        return $this->hasOne(Subscription::class, 'anonymous_purchaseable_id')->where('status', 'active');
     }
 }

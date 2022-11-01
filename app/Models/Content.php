@@ -58,6 +58,11 @@ class Content extends Model
         return $this->belongsToMany(User::class, 'content_subscriber', 'content_id', 'user_id');
     }
 
+    public function anonymousSubscribers()
+    {
+        return $this->belongsToMany(ContentSubscriber::class, 'content_subscriber', 'content_id', 'access_token');
+    }
+
     public function prices()
     {
         return $this->morphMany(Price::class, 'priceable');
@@ -131,6 +136,11 @@ class Content extends Model
     public function userables()
     {
         return $this->morphMany(Userable::class, 'userable');
+    }
+
+    public function anonymousPurchases()
+    {
+        return $this->morphMany(AnonymousPurchase::class, 'anonymous_purchaseable');
     }
 
     public function tags()
@@ -226,7 +236,7 @@ class Content extends Model
         return $freePriceCount > 0 && $parentPaidPriceCount === 0 && $grandParentPaidPriceCount === 0;
     }
 
-    public function userHasPaid($user_id)
+    public function userHasPaid( string $user_id = '', string $access_token = '')
     {
         $userablesCount = $this->userables()->where('status', 'available')->where('user_id', $user_id)->count();
         $parentUserablesCount = $this->collections()->whereHas('userables', function (Builder $query) use ($user_id) {
@@ -237,7 +247,16 @@ class Content extends Model
                 $query->where('status', 'available')->where('user_id', $user_id);
             });
         })->count();
-        return $userablesCount > 0 || $parentUserablesCount > 0 || $grandParentUserablesCount > 0;
+        $anonymousPurchasesCount = $this->anonymousPurchases()->where('status', 'available')->where('access_token', $access_token)->count();
+        $parentAnonymousPurchasesCount = $this->collections()->whereHas('anonymousPurchases', function (Builder $query) use ($access_token) {
+            $query->where('status', 'available')->where('access_token', $access_token);
+        })->count();
+        $grandParentAnonymousPurchasesCount = $this->collections()->whereHas('parentCollections', function (Builder $query) use ($access_token) {
+            $query->whereHas('anonymousPurchases', function (Builder $query) use ($access_token) {
+                $query->where('status', 'available')->where('access_token', $access_token);
+            });
+        })->count();
+        return $userablesCount > 0 || $parentUserablesCount > 0 || $grandParentUserablesCount > 0 || $anonymousPurchasesCount > 0 || $parentAnonymousPurchasesCount > 0 || $grandParentAnonymousPurchasesCount > 0;
     }
 
     public function scopeEagerLoadBaseRelations($mainQuery, string $user_id = '')
