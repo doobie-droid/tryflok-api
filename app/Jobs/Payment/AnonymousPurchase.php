@@ -6,6 +6,7 @@ use App\Constants\Constants;
 use App\Jobs\Users\NotifySale;
 use App\Models\Collection;
 use App\Models\Content;
+use App\Models\Revenue;
 use App\Models\Price;
 use App\Models;
 use Illuminate\Bus\Queueable;
@@ -14,9 +15,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use App\Mail\User\JohnnyDrillPurchaseMail;
 use App\Mail\User\AnonymousPurchaseMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 class AnonymousPurchase implements ShouldQueue
 {
@@ -114,6 +117,7 @@ class AnonymousPurchase implements ShouldQueue
            }
             $anonymous_purchase = Models\AnonymousPurchase::create([
             'email' => $this->data['payer_email'],
+            'name' => $this->data['payer_name'],
             'status' => 'available',
             'access_token' => Str::random(20),
             'anonymous_purchaseable_type' => $item['type'],
@@ -122,9 +126,11 @@ class AnonymousPurchase implements ShouldQueue
             }
             $access_tokens = [];
             $anonymous_purchases = Models\AnonymousPurchase::where('anonymous_purchaseable_id', $itemModel->id)->where('email', $this->data['payer_email'])->get();
+            $sales_count = $anonymous_purchases->count();
             foreach( $anonymous_purchases as $anonymous_purchase) {
                     $access_tokens[] = $anonymous_purchase->access_token;
             }
+            $avatar_url = $this->getAvatarUrl($sales_count);
 
            //record revenue from referral of the item
            if ($itemModel->owner->referrer()->exists()) {
@@ -157,17 +163,38 @@ class AnonymousPurchase implements ShouldQueue
                    'auto_renew' => $auto_renew,
                ]);
            }
-           
-        $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
+        if ($itemModel->id == env('JOHNNY_DRILL_CONTENT_ID'))
+        {
+            Mail::to($this->data['payer_email'])->send(new JohnnyDrillPurchaseMail([
+            'access_tokens' => $access_tokens,
+            'avatar_url' => $avatar_url,
+            'sales_count' => $sales_count,
+            'name' => $this->data['payer_name']
+        ]));  
+        } else {
+            $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
             Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
             'message' => $message,
             'access_tokens' => $access_tokens,
+            'name' => $this->data['payer_name']
         ]));
-
+        }   
         if ($price->amount > 0) {
             NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
         }
        }
+    }
+
+    public function getAvatarUrl($sales_count) 
+    {
+        $avatar_urls = file(public_path("avatar.csv"));
+        $csv_items_count = count($avatar_urls);
+        $url_index = $sales_count - 1;
+        if ($csv_items_count > $url_index)
+        {
+            $avatar_url = $avatar_urls[$url_index];
+            return $avatar_url;
+        }
     }
 
     public function failed(\Throwable $exception)
