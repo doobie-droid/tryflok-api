@@ -238,7 +238,7 @@ class CompileWeeklyAnalytics implements ShouldQueue
                 $comments_percentage = $this->calculatePercentage($current_week_comments, $previous_week_comments);
                 array_push($analytics_percentages, ['comments_percentage' => $comments_percentage]);
             }
-            if ( ($this->checkForNonZeroMetric($current_week) || $this->checkForNonZeroMetric($previous_week)) && ($this->checkForTipOrSaleInCurrentWeek($current_week_sales) || $this->checkForTipOrSaleInCurrentWeek($current_week_tips)) ) {
+            if ( $this->checkForTipOrSaleInCurrentWeek($current_week_sales) || $this->checkForTipOrSaleInCurrentWeek($current_week_tips)) {
                 $this->sendWeeklyValidationMail($digiverse->id, $analytics_percentages); 
             }
             Log::info("End Creator Weekly Validation");
@@ -569,16 +569,6 @@ class CompileWeeklyAnalytics implements ShouldQueue
             $percentage = 0;
         }
         return $percentage;
-    }
-
-    public function checkForNonZeroMetric($array) {
-        $sum = 0;
-        foreach ($array as $inner) {
-            $sum = $sum + array_sum($inner);
-            if($sum > 0) {
-                return true;
-            }
-        }
     }
 
     public function checkForTipOrSaleInCurrentWeek($data) {
