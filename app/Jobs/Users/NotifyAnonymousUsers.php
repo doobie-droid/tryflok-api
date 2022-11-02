@@ -37,18 +37,19 @@ class NotifyAnonymousUsers implements ShouldQueue
         try {
             switch ($this->anonymousPurchase['anonymous_purchaseable_type']) {
                 case 'content':
-                    $content = Content::where('id', $this->anonymousPurchase['anonymous_purchaseable_id'])->where('live_status', 'active')->first();
+                    $content = Content::where('id', $this->anonymousPurchase['anonymous_purchaseable_id'])->first();
                     if (! is_null($content) && ($content->type == 'live-audio' || $content->type == 'live-video'))
                     {
                         EmailAnonymousUsersJob::dispatch([
                             'content' => $content,
                             'user_email' => $this->anonymousPurchase->email,
+                            'name' => $this->anonymousPurchase->name,
                         ]);
                     }
                     break;
                 case 'collection':
                     $collection = Collection::where('id', $this->anonymousPurchase['anonymous_purchaseable_id'])->first();
-                    $contents = $collection->contents()->where('live_status', 'active')
+                    $contents = $collection->contents()
                     ->where(function ($query) {
                         $query->where('type', 'live-video')
                                 ->orWhere('type', 'live-audio');
@@ -58,6 +59,7 @@ class NotifyAnonymousUsers implements ShouldQueue
                             EmailAnonymousUsersJob::dispatch([
                                 'content' => $content,
                                 'user_email' => $this->anonymousPurchase->email,
+                                'name' => $this->anonymousPurchase->name,
                             ]); 
                         }
                     break;
