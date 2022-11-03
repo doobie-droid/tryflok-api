@@ -68,6 +68,7 @@ class ContentController extends Controller
                 'contestants' => ['required_if:is_challenge,1', 'size:2'],
                 'contestants.*' => ['required_if:is_challenge,1', 'string', 'distinct', 'exists:users,id', "not_in:{$request->user()->id}"],
                 'newsletter_position_elements' => ['sometimes', 'nullable', 'json'],
+                'live_type' => ['sometimes', 'nullable', 'string', 'in:broadcast,interactive'],
 
             ], [
                 'contestants.*.not_in' => 'You cannot make yourself a contestant',
@@ -118,6 +119,12 @@ class ContentController extends Controller
                 $content->scheduled_date = $request->scheduled_date;
                 $content->save();
             }
+
+            if (! is_null($request->live_type)) {
+                $content->live_type = $request->live_type;
+                $content->save();
+            }
+
             if (! is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
                 $content->live_provider = 'youtube';
                 $content->save();             
@@ -288,6 +295,7 @@ class ContentController extends Controller
                 'scheduled_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:now'],
                 'article' => ['sometimes', 'nullable', 'string'],
                 'newsletter_position_elements' => ['sometimes', 'nullable', 'json'],
+                'live_type' => ['sometimes', 'nullable', 'string', 'in:broadcast,interactive'],
             ]);
 
             if ($validator1->fails()) {
@@ -361,8 +369,13 @@ class ContentController extends Controller
             }
 
             if (! is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
-                    $content->live_provider = 'youtube';
-                    $content->save();             
+                $content->live_provider = 'youtube';
+                $content->save();             
+            }
+
+            if (! is_null($request->live_type)) {
+                $content->live_type = $request->live_type;
+                $content->save();
             }
 
             if (! is_null($request->tags) && is_array($request->tags)) {
