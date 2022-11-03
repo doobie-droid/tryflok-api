@@ -12,6 +12,7 @@ class AnonymousLiveEvent extends Mailable
 {
     use Queueable, SerializesModels;
     public $message;
+    public $name;
 
     /**
      * Create a new message instance.
@@ -21,6 +22,7 @@ class AnonymousLiveEvent extends Mailable
     public function __construct($data)
     {
         $this->message = $data['message'];
+        $this->name = $data['name'];
     }
 
     /**
@@ -32,6 +34,7 @@ class AnonymousLiveEvent extends Mailable
     {
         return $this->view('emails.user.content.anonymous-live-events')->with([
             'contents' => $this->message,
+            'name' => $this->name
         ])->subject('Live Event Reminder!');
     }
 }
