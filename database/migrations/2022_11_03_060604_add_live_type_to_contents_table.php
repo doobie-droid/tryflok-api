@@ -14,7 +14,7 @@ class AddLiveTypeToContentsTable extends Migration
     public function up()
     {
         Schema::table('contents', function (Blueprint $table) {
-            $table->string('live_type')->nullable();
+            $table->string('live_type')->default('broadcast');
         });
     }
 

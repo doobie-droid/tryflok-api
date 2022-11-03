@@ -68,7 +68,7 @@ class ContentController extends Controller
                 'contestants' => ['required_if:is_challenge,1', 'size:2'],
                 'contestants.*' => ['required_if:is_challenge,1', 'string', 'distinct', 'exists:users,id', "not_in:{$request->user()->id}"],
                 'newsletter_position_elements' => ['sometimes', 'nullable', 'json'],
-                'live_type' => ['required_if:type,live-video,live-audio', 'string', 'in:broadcast,interactive'],
+                'live_type' => ['sometimes', 'nullable', 'string', 'in:broadcast,interactive'],
 
             ], [
                 'contestants.*.not_in' => 'You cannot make yourself a contestant',
