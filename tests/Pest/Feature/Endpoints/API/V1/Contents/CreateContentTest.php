@@ -497,6 +497,7 @@ test('live audio content gets created', function()
         'title' => 'A content ' . date('YmdHis'),
         'description' => 'Content description',
         'type' => 'live-audio',
+        'live_provider' => 'agora',
         'digiverse_id' => $this->digiverse->id,
         'is_available' => 0,
         'price' => [
@@ -618,6 +619,7 @@ test('live video content gets created', function()
         'title' => 'A content ' . date('YmdHis'),
         'description' => 'Content description',
         'type' => 'live-video',
+        'live_provider' => 'agora',
         'digiverse_id' => $this->digiverse->id,
         'is_available' => 0,
         'price' => [
@@ -879,6 +881,7 @@ test('challenge content gets created', function()
         'title' => 'A content ' . date('YmdHis'),
         'description' => 'Content description',
         'type' => 'live-video',
+        'live_provider' => 'agora',
         'digiverse_id' => $this->digiverse->id,
         'is_available' => 0,
         'price' => [
@@ -1069,11 +1072,16 @@ test('challenge content gets created', function()
 
 test('content is created with optional youtube video url', function()
 {
+    $live_video_asset = Models\Asset::factory()->video()->create([
+        'asset_type' => 'live-video'
+    ]);
     $request = [
         'title' => 'A content ' . date('YmdHis'),
         'description' => 'Content description',
         'type' => 'live-video',
+        'live_provider' => 'youtube',
         'youtube_url' => 'https://www.youtube-nocookie.com/embed/up_lNV-yoK4?rel=0',
+        'asset_id' => $live_video_asset->id,
         'digiverse_id' => $this->digiverse->id,
         'is_available' => 0,
         'price' => [
