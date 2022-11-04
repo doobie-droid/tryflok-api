@@ -46,6 +46,7 @@ test('join live works', function()
 test('join live works for anonymous user', function ()
 {
         $anonymousUserEmail = 'charlesagate3@gmail.com';
+        $name = 'John Doe';
         $accessToken = Str::random(20);
         $user2 = Models\User::factory()->create();
         $content = Models\Content::factory()
@@ -54,6 +55,7 @@ test('join live works for anonymous user', function ()
         ->create();
         $anonymousPurchase = Models\AnonymousPurchase::create([
             'email' => $anonymousUserEmail,
+            'name' => $name,
             'access_token' => $accessToken,
             'anonymous_purchaseable_type' => 'content',
             'anonymous_purchaseable_id' => $content->id,

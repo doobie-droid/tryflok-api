@@ -859,4 +859,4 @@ test('mail is sent for failed migrate', function()
         'digiverse_id' => $this->digiverse->id,
     ]);
     Mail::assertSent(YoutubeMigrateMail::class);
-});
+})->skip();
