@@ -14,16 +14,15 @@ services:
       - redis
     volumes:
       - ./:/var/www
-      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-      - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
-      - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
     command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
   cron:
     image: docker-registry.tryflok.com/flok-api-cron-staging:latest
     volumes:
       - ./:/var/www
-      - ./cron/logs:/var/log/cron
     links:
       - redis
     environment:
@@ -42,8 +41,8 @@ services:
       - api
     volumes:
       - ./:/var/www
-      - ./nginx-staging/logs:/var/log/nginx
-      - ./nginx-staging:/etc/nginx/conf.d
+      - ./additional.conf:/etc/nginx/conf.d/additional.conf
+      - ./flok.conf:/etc/nginx/conf.d/flok.conf
       
   redis:
     image: redis:3.0
