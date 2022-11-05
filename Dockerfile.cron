@@ -38,8 +38,8 @@ RUN crontab /etc/cron.d/cron
 RUN mkdir /var/log/cron
 RUN touch /var/log/cron/cron.log
 
-COPY . /var/www
-
 WORKDIR /var/www
+
+COPY . /var/www
 
 CMD cron -f && php-fpm -F
