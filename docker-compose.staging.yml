@@ -1,11 +1,7 @@
 version: "3.3"
 services:
   api:
-    build: 
-      args:
-        user: flok
-        uid: 1000
-      context: ./
+    image: docker-registry.tryflok.com/flok-api-staging:latest
     ports:
       - 8080:8080 # for websocket
     environment:
@@ -24,9 +20,7 @@ services:
     command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
   cron:
-    build:
-      context: ./
-      dockerfile: Dockerfile.cron
+    image: docker-registry.tryflok.com/flok-api-cron-staging:latest
     volumes:
       - ./:/var/www
       - ./cron/logs:/var/log/cron
