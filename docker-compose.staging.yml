@@ -14,9 +14,9 @@ services:
       - redis
     volumes:
       - ./:/var/www
-      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-      - ./supervisord.conf:/etc/supervisor/supervisord.conf
-      - ./flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
     command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
   cron:
@@ -41,8 +41,7 @@ services:
       - api
     volumes:
       - ./:/var/www
-      - ./additional.conf:/etc/nginx/conf.d/additional.conf
-      - ./flok.conf:/etc/nginx/conf.d/flok.conf
+      - ./nginx-staging/conf.d:/etc/nginx/conf.d
       
   redis:
     image: redis:3.0
