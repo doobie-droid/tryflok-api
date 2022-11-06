@@ -1,6 +1,5 @@
 FROM php:8.0.5-fpm
-ARG user
-ARG uid
+
 RUN apt-get update --fix-missing
 RUN apt-get install -y default-mysql-client
 RUN apt-get install -y zlib1g-dev libsqlite3-dev
@@ -64,7 +63,13 @@ RUN mkdir -p /home/$user/.composer && \
 # Set working directory
 WORKDIR /var/www
 
-COPY . /var/www
+# Add user for laravel application
+RUN groupadd -g 1000 www
+RUN useradd -u 1000 -ms /bin/bash -g www www
+
+COPY --chown=www:www-data . /var/www
+
+RUN chmod -R ug+w /var/www/storage
 
 # Copy nginx/php/supervisor configs
 RUN cp php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
@@ -74,8 +79,6 @@ RUN cp nginx-production/additional.conf /etc/nginx/conf.d/additional.conf
 RUN cp nginx-production/flok.conf /etc/nginx/sites-enabled/default
 
 RUN chmod +x /var/www/deploy.sh
-
-USER $user
 
 EXPOSE 80
 EXPOSE 8080
