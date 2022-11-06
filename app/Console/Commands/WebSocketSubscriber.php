@@ -34,10 +34,6 @@ class WebSocketSubscriber extends Command
     public function __construct()
     {
         parent::__construct();
-
-        $this->ws_identity = Cache::store('redis_local')->rememberForever('ws-identity', function () {
-            return Str::random(8) . date('YmdHis');
-        });
     }
 
     /**
@@ -47,6 +43,9 @@ class WebSocketSubscriber extends Command
      */
     public function handle()
     {
+        $this->ws_identity = Cache::store('redis_local')->rememberForever('ws-identity', function () {
+            return Str::random(8) . date('YmdHis');
+        });
         $ws_identity = $this->ws_identity;
         Redis::subscribe([Constants::WEBSOCKET_MESSAGE_CHANNEL], function ($message) use ($ws_identity) {
             $message = json_decode($message);
