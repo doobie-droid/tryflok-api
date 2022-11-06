@@ -9,6 +9,7 @@ test('non signed up user can purchase a content', function ()
 {
     $user = Models\User::factory()->create();
     $anonymousUserEmail = 'charlesagate3@gmail.com';
+    $name = 'John Doe';
     $content = Models\Content::factory()->create([
         'user_id' => $user->id,
     ]);
@@ -46,6 +47,7 @@ test('non signed up user can purchase a content', function ()
         ]
         ],
         'email' => $anonymousUserEmail,
+        'name' => $name,
         'provider' => 'flutterwave',
         'expected_flk_amount' => $expected_flk_amount,
         'provider_response' => [
@@ -53,7 +55,7 @@ test('non signed up user can purchase a content', function ()
         ],
     ];
 
-    $response = $this->json('POST', '/api/v1/account/anonymous-purchases', $request);
+    $response = $this->json('POST', '/api/v1/payments/anonymous-purchases', $request);
     $response->assertStatus(200)->assertJson([
         'message' => 'Payment received successfully',
     ]);
@@ -89,6 +91,7 @@ test('non signed up user can purchase a collection', function ()
 {
     $user = Models\User::factory()->create();
     $anonymousUserEmail = 'charlesagate3@gmail.com';
+    $name = 'John Doe';
     $collection = Models\Collection::factory()->create([
         'user_id' => $user->id,
     ]);
@@ -127,6 +130,7 @@ test('non signed up user can purchase a collection', function ()
         ]
         ],
         'email' => $anonymousUserEmail,
+        'name' => $name,
         'provider' => 'flutterwave',
         'expected_flk_amount' => $expected_flk_amount,
         'provider_response' => [
@@ -134,7 +138,7 @@ test('non signed up user can purchase a collection', function ()
         ],
     ];
 
-    $response = $this->json('POST', '/api/v1/account/anonymous-purchases', $request);
+    $response = $this->json('POST', '/api/v1/payments/anonymous-purchases', $request);
     $response->assertStatus(200)->assertJson([
         'message' => 'Payment received successfully',
     ]);
@@ -175,10 +179,12 @@ test('non signed up user can purchase a collection', function ()
 test('non signed up users can access anonymously purchased content asset', function ()
 {
     $anonymousUserEmail = 'charlesagate3@gmail.com';
+    $name = 'John Doe';
     $accessToken = Str::random(20);
     $content = Models\Content::factory()->create();
     $anonymousPurchase = Models\AnonymousPurchase::create([
         'email' => $anonymousUserEmail,
+        'name' => $name,
         'access_token' => $accessToken,
         'anonymous_purchaseable_type' => 'content',
         'anonymous_purchaseable_id' => $content->id,
@@ -206,9 +212,11 @@ test('non signed in user can access anonymously purchased content via ancestor',
     ->create();
 
     $anonymousUserEmail = 'charlesagate3@gmail.com';
+    $name = 'John Doe';
     $accessToken = Str::random(20);
     $anonymousPurchase = Models\AnonymousPurchase::create([
         'email' => $anonymousUserEmail,
+        'name' => $name,
         'access_token' => $accessToken,
         'anonymous_purchaseable_type' => 'collection',
         'anonymous_purchaseable_id' => $digiverse->id,
@@ -220,18 +228,20 @@ test('non signed in user can access anonymously purchased content via ancestor',
     ];
 
     $response = $this->json('GET', "/api/v1/contents/{$content->id}/assets", $request);
-        $response->assertStatus(200)
-        ->assertJsonStructure(MockData\Content::generateGetAssetsResponse());
+    $response->assertStatus(200)
+    ->assertJsonStructure(MockData\Content::generateGetAssetsResponse());
 
-});
+})->skip();
 
 test('non signed up user cannot access purchased content with invalid access token', function ()
 {
     $anonymousUserEmail = 'charlesagate3@gmail.com';
+    $name = 'John Doe';
     $accessToken = Str::random(20);
     $content = Models\Content::factory()->create();
     $anonymousPurchase = Models\AnonymousPurchase::create([
         'email' => $anonymousUserEmail,
+        'name' => $name,
         'access_token' => $accessToken,
         'anonymous_purchaseable_type' => 'content',
         'anonymous_purchaseable_id' => $content->id,

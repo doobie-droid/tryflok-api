@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel
         Commands\Assets\MigratePrivateAssets::class,
         Commands\Assets\MigratePublicAssets::class,
         Commands\Users\CreatorsWeeklyValidation::class,
-        // Commands\Users\MailAnonymousUsersForLiveEvents::class,
+        Commands\Users\MailAnonymousUsersForLiveEvents::class,
         // Commands\Users\CreatorsMonthlyValidation::class,
         // Commands\Users\CreatorsYearlyValidation::class,
         // Commands\Users\CreatorsQuarterlyValidation::class,
@@ -47,7 +47,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('backup:clean')->daily()->at('00:00');
         $schedule->command('backup:run')->hourly();
         $schedule->command('flok:send-creator-weekly-validation-emails')->weeklyOn(6, '00:00');
-        // $schedule->command('flok:mail-anonymous-users-for-live-events')->hourly();
+        $schedule->command('flok:mail-anonymous-users-for-live-events')->hourly();
         // $schedule->command('flok:send-monthly-validation-emails')->lastDayOfMonth('15:00');
         // $schedule->command('flok:send-yearly-validation-emails')->yearlyOn(12, 31, '15:00');
         // $schedule->command('flok:send-quarterly-validation-emails')->cron('0 0 30 3,6,9,12 *');

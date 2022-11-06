@@ -17,6 +17,7 @@ class EmailAnonymousUsers implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     private $content;
     private $user_email;
+    public $name;
 
     /**
      * Create a new job instance.
@@ -27,6 +28,7 @@ class EmailAnonymousUsers implements ShouldQueue
     {
         $this->content = $data['content'];
         $this->user_email = $data['user_email'];
+        $this->name = $data['name'];
     }
 
     /**
@@ -38,17 +40,21 @@ class EmailAnonymousUsers implements ShouldQueue
     {
         try {
             $scheduled_date = $this->content->scheduled_date;
-            if ($scheduled_date == now()->addHours(3))
-            Log::info($scheduled_date);
+            $message = '';
+            if ($scheduled_date->format('Y-m-d H') == now()->addHours(3)->format('Y-m-d H'))
             {
-                Mail::to($this->user_email)->send(new AnonymousLiveEvent([
-                    'message' => "The live event you purchased on flok '{$this->content->title}' will begin in three(3) hours",
-                ]));
+                Log::info("LIVE EVENT: ".$this->content->title." begins in 3 hours");
+                $message = "The live event you purchased on flok '{$this->content->title}' will begin in three(3) hours";
             }
-            if ($scheduled_date == now()->addHours(1))
+            if ($scheduled_date->format('Y-m-d H') == now()->addHours(1)->format('Y-m-d H'))
             {
+                Log::info("LIVE EVENT: ".$this->content->title." begins in 1 hour");
+                $message = "The live event you purchased on flok '{$this->content->title}' will begin in one(1) hour";
+            }
+            if ($message != '') {
                 Mail::to($this->user_email)->send(new AnonymousLiveEvent([
-                    'message' => "The live event you purchased on flok '{$this->content->title}' will begin in one(1) hour",
+                    'message' => $message,
+                    'name' => $this->name
                 ]));
             }
 

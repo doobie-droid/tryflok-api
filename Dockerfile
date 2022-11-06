@@ -1,6 +1,5 @@
 FROM php:8.0.5-fpm
-ARG user
-ARG uid
+
 RUN apt-get update --fix-missing
 RUN apt-get install -y default-mysql-client
 RUN apt-get install -y zlib1g-dev libsqlite3-dev
@@ -14,7 +13,9 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev \
     zip \
-    unzip
+    unzip \
+    nginx
+
 RUN apt-get install -y ffmpeg
 
 RUN pecl install redis
@@ -54,12 +55,26 @@ RUN apt-get update \
 # Install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Create system user to run Composer and Artisan Commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
-
 # Set working directory
 WORKDIR /var/www
 
-USER $user
+# Add user for laravel application
+RUN groupadd -g 1000 www
+RUN useradd -u 1000 -ms /bin/bash -g www www
+
+COPY --chown=www:www-data . /var/www
+
+RUN chmod -R ug+w /var/www/storage
+
+# Copy nginx/php/supervisor configs
+RUN cp php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+RUN cp supervisord/supervisord.conf /etc/supervisor/supervisord.conf
+RUN cp supervisord/conf.d/flok_worker.conf /etc/supervisor/conf.d/flok_worker.conf
+RUN cp nginx-production/additional.conf /etc/nginx/conf.d/additional.conf
+RUN cp nginx-production/flok.conf /etc/nginx/sites-enabled/default
+
+RUN chmod +x /var/www/deploy.sh
+
+EXPOSE 80
+EXPOSE 8080
+ENTRYPOINT ["/var/www/deploy.sh"]

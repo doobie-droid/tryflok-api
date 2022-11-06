@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   api:
-    image: docker-registry.tryflok.com/flok-api-staging:latest
+    image: docker-registry.tryflok.com/flok-api-production:latest
     ports:
       - 8080:8080 # for websocket
       - 8000:80
@@ -13,6 +13,6 @@ services:
       - TZ=Africa/Lagos
     links:
       - redis
-
+  
   redis:
     image: redis:3.0
