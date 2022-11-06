@@ -4,6 +4,7 @@ services:
     image: docker-registry.tryflok.com/flok-api-staging:latest
     ports:
       - 8080:8080 # for websocket
+      - 8000:80
     environment:
       - WAIT_HOSTS=mysql:3306
       - WAIT_HOSTS_TIMEOUT=7200
@@ -12,36 +13,6 @@ services:
       - TZ=Africa/Lagos
     links:
       - redis
-    volumes:
-      - ./app:/var/www
-      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-      - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
-      - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
-    command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
-  cron:
-    image: docker-registry.tryflok.com/flok-api-cron-staging:latest
-    volumes:
-      - ./:/var/www
-    links:
-      - redis
-    environment:
-      - WAIT_HOSTS=mysql:3306
-      - WAIT_HOSTS_TIMEOUT=3600
-      - WAIT_SLEEP_INTERVAL=30
-      - WAIT_HOST_CONNECT_TIMEOUT=30
-      - TZ=Africa/Lagos
-
-  nginx:
-    image: nginx:1.17-alpine
-    restart: unless-stopped
-    ports:
-     - 8000:80
-    links:
-      - api
-    volumes:
-      - ./app:/var/www
-      - ./nginx-staging/conf.d:/etc/nginx/conf.d
-      
   redis:
     image: redis:3.0

@@ -14,7 +14,9 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev \
     zip \
-    unzip
+    unzip \
+    nginx
+
 RUN apt-get install -y ffmpeg
 
 RUN pecl install redis
@@ -59,9 +61,23 @@ RUN useradd -G www-data,root -u $uid -d /home/$user $user
 RUN mkdir -p /home/$user/.composer && \
     chown -R $user:$user /home/$user
 
-COPY --chown=www:www-data . /var/www
-
 # Set working directory
 WORKDIR /var/www
 
+COPY . /var/www
+
+# Copy nginx/php/supervisor configs
+RUN cp php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+RUN cp supervisord/supervisord.conf /etc/supervisor/supervisord.conf
+RUN cp supervisord/conf.d/flok_worker.conf /etc/supervisor/conf.d/flok_worker.conf
+RUN cp nginx-production/additional.conf /etc/nginx/conf.d/additional.conf
+RUN cp nginx-production/flok.conf /etc/nginx/sites-enabled/default
+
+RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs
+RUN chmod +x /var/www/deploy.sh
+
 USER $user
+
+EXPOSE 80
+EXPOSE 8080
+ENTRYPOINT ["/var/www/deploy.sh"]
