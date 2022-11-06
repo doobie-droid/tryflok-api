@@ -73,7 +73,6 @@ RUN cp supervisord/conf.d/flok_worker.conf /etc/supervisor/conf.d/flok_worker.co
 RUN cp nginx-production/additional.conf /etc/nginx/conf.d/additional.conf
 RUN cp nginx-production/flok.conf /etc/nginx/sites-enabled/default
 
-RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs
 RUN chmod +x /var/www/deploy.sh
 
 USER $user
