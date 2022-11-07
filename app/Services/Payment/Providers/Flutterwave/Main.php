@@ -6,6 +6,7 @@ use App\Models\PaymentAccount;
 use GuzzleHttp\ClientException;
 use GuzzleHttp\Middleware;
 use Psr\Http\Message\RequestInterface;
+use App\Models\Configuration;
 
 use App\Services\API;
 
@@ -48,9 +49,10 @@ class Main extends API
     public function transferFundsToRecipient(PaymentAccount $transferData, float $amount): \stdClass
     {
         $need_branch_code = ['GH', 'UG', 'TZ'];
+        $naira_to_dollar = Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
         //TO DO: might want to implement a currency converter among providers
         $neededData = [
-            'amount' => bcmul($amount, Constants::NAIRA_TO_DOLLAR, 0), //convert to Naira from dollars
+            'amount' => bcmul($amount, $naira_to_dollar->value, 0), //convert to Naira from dollars
             'account_number' => $transferData->identifier,
             'account_bank' => $transferData->bank_code,
             'currency' => 'NGN',
