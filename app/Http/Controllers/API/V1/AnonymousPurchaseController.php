@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Constants\Constants;
 use App\Models\Collection;
+use App\Models\Configuration;
 use App\Models\Content;
 use App\Models\Price;
 use App\Services\Payment\Providers\ApplePay\ApplePay;
@@ -80,15 +81,16 @@ class AnonymousPurchaseController extends Controller
             $fee = 0;
             $expected_flk_based_on_amount = 0;
             $provider_id = '';
+            $naira_to_dollar = Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first(); 
 
             switch ($request->provider) {
                 case 'flutterwave':
                     $flutterwave = new Flutterwave;
                     $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
                     if (($req->status === 'success' && $req->data->status === 'successful')) {
-                        $amount_in_dollars = bcdiv($req->data->amount, Constants::NAIRA_TO_DOLLAR, 2);
+                        $amount_in_dollars = bcdiv($req->data->amount, $naira_to_dollar->value, 2);
                         $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
-                        $fee = bcdiv($req->data->app_fee, Constants::NAIRA_TO_DOLLAR, 2);
+                        $fee = bcdiv($req->data->app_fee, $naira_to_dollar->value, 2);
                         $provider_id = $req->data->id;
                         $payment_verified = true;
                     }
