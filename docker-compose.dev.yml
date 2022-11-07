@@ -10,50 +10,16 @@ services:
       - mysql
     ports:
       - 8080:8080
-    environment:
-      - WAIT_HOSTS=mysql:3306
-      - WAIT_HOSTS_TIMEOUT=7200
-      - WAIT_SLEEP_INTERVAL=30
-      - WAIT_HOST_CONNECT_TIMEOUT=30
-      - TZ=Africa/Lagos
-    links:
-      - redis
-      - mysql
-    volumes:
-      - ./:/var/www
-      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-      - ./supervisord/supervisord.conf:/etc/supervisor/supervisord.conf
-      - ./supervisord/conf.d/flok_worker.conf:/etc/supervisor/conf.d/flok_worker.conf
-    command: ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
-
-  cron:
-    build:
-      context: ./
-      dockerfile: Dockerfile.cron
-    volumes:
-      - ./:/var/www
-      - ./cron/logs:/var/log/cron
-    links:
-      - redis
-      - mysql
-    environment:
-      - WAIT_HOSTS=mysql:3306
-      - WAIT_HOSTS_TIMEOUT=7200
-      - WAIT_SLEEP_INTERVAL=30
-      - WAIT_HOST_CONNECT_TIMEOUT=30
-      - TZ=Africa/Lagos
-
-  nginx:
-    image: nginx:1.17-alpine
-    restart: unless-stopped
-    links:
-      - api
-    ports:
       - 8000:80
-    volumes:
-      - ./:/var/www
-      - ./nginx-dev/logs:/var/log/nginx
-      - ./nginx-dev:/etc/nginx/conf.d
+    environment:
+      - WAIT_HOSTS=mysql:3306
+      - WAIT_HOSTS_TIMEOUT=7200
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+      - TZ=Africa/Lagos
+    links:
+      - redis
+      - mysql
 
   mysql:
     image: mysql:5.7.12
