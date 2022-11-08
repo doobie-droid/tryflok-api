@@ -53,6 +53,10 @@
                                             ,
                                         @endif                              
                                 @endforeach
+                                </br>
+                                @if($content_url != '')
+                                <span>Follow <a href="{{ $content_url }}" style="color: #ffffff;"> this link </a> to view the content </span>
+                                @endif
                             </p>
                         </td>
                     </tr>

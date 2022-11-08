@@ -119,18 +119,22 @@ class AnonymousPurchase implements ShouldQueue
             'email' => $this->data['payer_email'],
             'name' => $this->data['payer_name'],
             'status' => 'available',
-            'access_token' => Str::random(20),
+            'access_token' => Str::random(10) . date('Ymd'),
             'anonymous_purchaseable_type' => $item['type'],
             'anonymous_purchaseable_id' => $itemModel->id,
                 ]);
             }
             $access_tokens = [];
+            $content_url = '';
             $anonymous_purchases = Models\AnonymousPurchase::where('anonymous_purchaseable_id', $itemModel->id)->where('email', $this->data['payer_email'])->get();
             $sales_count = $anonymous_purchases->count();
             foreach( $anonymous_purchases as $anonymous_purchase) {
                     $access_tokens[] = $anonymous_purchase->access_token;
             }
             $avatar_url = $this->getAvatarUrl($sales_count);
+            if ($itemModel->type == 'video' || $itemModel->type == 'audio' || $itemModel->type == 'newsletter' || $itemModel->type == 'live-video' || $itemModel->type == 'live-audio') {
+                $content_url = "https://www.tryflok.com/contents/". $itemModel->id;
+            }
 
            //record revenue from referral of the item
            if ($itemModel->owner->referrer()->exists()) {
@@ -169,14 +173,16 @@ class AnonymousPurchase implements ShouldQueue
             'access_tokens' => $access_tokens,
             'avatar_url' => $avatar_url,
             'sales_count' => $sales_count,
-            'name' => $this->data['payer_name']
+            'name' => $this->data['payer_name'],
+            'content_url' => $content_url,
         ]));  
         } else {
             $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
             Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
             'message' => $message,
             'access_tokens' => $access_tokens,
-            'name' => $this->data['payer_name']
+            'name' => $this->data['payer_name'],
+            'content_url' => $content_url,
         ]));
         }   
         if ($price->amount > 0) {

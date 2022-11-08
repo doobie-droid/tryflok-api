@@ -11,8 +11,9 @@ class AnonymousPurchaseMail extends Mailable
 {
     use Queueable, SerializesModels;
     public $message;
-    public $access_token;
+    public $access_tokens;
     public $name;
+    public $content_url;
 
     /**
      * Create a new message instance.
@@ -24,6 +25,7 @@ class AnonymousPurchaseMail extends Mailable
         $this->message = $data['message'];
         $this->access_tokens = $data['access_tokens'];
         $this->name = $data['name'];
+        $this->content_url = $data['content_url'];
      }
 
     /**
@@ -36,7 +38,8 @@ class AnonymousPurchaseMail extends Mailable
         return $this->view('emails.user.content.anonymous-content-purchase')->with([
             'contents' => $this->message,
             'access_tokens' => $this->access_tokens,
-            'name' => $this->name
+            'name' => $this->name,
+            'content_url' => $this->content_url,
         ])->subject('Anonymous Purchase on Flok!');
     }
 }
