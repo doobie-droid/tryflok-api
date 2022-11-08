@@ -20,7 +20,8 @@ test('non signed up user can purchase a content', function ()
     ]);
     $expected_flk_amount = 100;
     $transaction_id = date('YmdHis');
-    $amount_spent = Constants\Constants::NAIRA_TO_DOLLAR * 1.03;
+    $naira_to_dollar = Models\Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
+    $amount_spent = $naira_to_dollar->value * 1.03;
     $fee_in_naira = bcmul($amount_spent, .015, 2);
 
     stub_request("https://api.flutterwave.com/v3/transactions/{$transaction_id}/verify", [
@@ -65,7 +66,7 @@ test('non signed up user can purchase a content', function ()
         'provider_id' => $transaction_id,
         'currency' => 'USD',
         'amount' => 100,
-        // 'payment_processor_fee' => bcdiv($fee_in_naira, Constants\Constants::NAIRA_TO_DOLLAR, 2),
+        // 'payment_processor_fee' => bcdiv($fee_in_naira, $naira_to_dollar->value, 2),
         'payer_email' => $anonymousUserEmail,
         'payee_id' => $user->id,
         'paymentable_type' => 'content',
@@ -103,7 +104,8 @@ test('non signed up user can purchase a collection', function ()
     ]);
     $expected_flk_amount = 100;
     $transaction_id = date('YmdHis');
-    $amount_spent = Constants\Constants::NAIRA_TO_DOLLAR * 1.03;
+    $naira_to_dollar = Models\Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
+    $amount_spent = $naira_to_dollar->value * 1.03;
     $fee_in_naira = bcmul($amount_spent, .015, 2);
 
     stub_request("https://api.flutterwave.com/v3/transactions/{$transaction_id}/verify", [
@@ -148,7 +150,7 @@ test('non signed up user can purchase a collection', function ()
         'provider_id' => $transaction_id,
         'currency' => 'USD',
         'amount' => 100,
-        // 'payment_processor_fee' => bcdiv($fee_in_naira, Constants\Constants::NAIRA_TO_DOLLAR, 2),
+        // 'payment_processor_fee' => bcdiv($fee_in_naira, $naira_to_dollar->value, 2),
         'payer_email' => $anonymousUserEmail,
         'payee_id' => $user->id,
         'paymentable_type' => 'collection',
