@@ -57,7 +57,7 @@ services:
       - ./nginx-dev:/etc/nginx/conf.d
 
   mysql:
-    image: mysql:5.7.12
+    image: arm64v8/mysql:oracle
     volumes:
       - ./mysql:/var/lib/mysql
     restart: always
@@ -68,7 +68,7 @@ services:
       MYSQL_DATABASE: flok
 
   redis:
-    image: redis:3.0
+    image: arm64v8/redis:alpine
 
   redis-local:
-    image: redis:3.0
+    image: arm64v8/redis:alpine
