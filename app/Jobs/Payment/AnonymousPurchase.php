@@ -20,6 +20,8 @@ use App\Mail\User\AnonymousPurchaseMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
+use App\Utils\Crypter;
+use Illuminate\Support\Facades\Storage;
 
 class AnonymousPurchase implements ShouldQueue
 {
@@ -126,6 +128,7 @@ class AnonymousPurchase implements ShouldQueue
             }
             $access_tokens = [];
             $content_url = '';
+            $decrypted_pdf = '';
             $anonymous_purchases = Models\AnonymousPurchase::where('anonymous_purchaseable_id', $itemModel->id)->where('email', $this->data['payer_email'])->get();
             $sales_count = $anonymous_purchases->count();
             foreach( $anonymous_purchases as $anonymous_purchase) {
@@ -134,6 +137,16 @@ class AnonymousPurchase implements ShouldQueue
             $avatar_url = $this->getAvatarUrl($sales_count);
             if ($itemModel->type == 'video' || $itemModel->type == 'audio' || $itemModel->type == 'newsletter' || $itemModel->type == 'live-video' || $itemModel->type == 'live-audio') {
                 $content_url = "https://www.tryflok.com/contents/". $itemModel->id;
+            }
+
+            if ($itemModel->type == 'pdf') {
+                $pdfItem = $itemModel->assets()->where('asset_type', 'pdf')->first();
+                $encryption_key = $pdfItem->encryption_key;
+                $provider_id = $pdfItem->storage_provider_id;
+                $contents = Storage::disk('public_s3')->get($provider_id);
+
+                $decrypted_key = Crypter::symmetricalDecryptUsingOwnKey($encryption_key);
+                $decrypted_pdf = Crypter::symmetricalDecryptUsingOtherKey($contents, $decrypted_key);
             }
 
            //record revenue from referral of the item
@@ -183,6 +196,7 @@ class AnonymousPurchase implements ShouldQueue
             'access_tokens' => $access_tokens,
             'name' => $this->data['payer_name'],
             'content_url' => $content_url,
+            'decrypted_pdf' => $decrypted_pdf,
         ]));
         }   
         if ($price->amount > 0) {

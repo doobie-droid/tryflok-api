@@ -14,6 +14,7 @@ class AnonymousPurchaseMail extends Mailable
     public $access_tokens;
     public $name;
     public $content_url;
+    public $decryted_pdf;
 
     /**
      * Create a new message instance.
@@ -26,6 +27,7 @@ class AnonymousPurchaseMail extends Mailable
         $this->access_tokens = $data['access_tokens'];
         $this->name = $data['name'];
         $this->content_url = $data['content_url'];
+        $this->decrypted_pdf = $data['decrypted_pdf'];
      }
 
     /**
@@ -40,6 +42,7 @@ class AnonymousPurchaseMail extends Mailable
             'access_tokens' => $this->access_tokens,
             'name' => $this->name,
             'content_url' => $this->content_url,
-        ])->subject('Anonymous Purchase on Flok!');
+        ])->subject('Anonymous Purchase on Flok!')
+        ->attach($this->decrypted_pdf);
     }
 }
