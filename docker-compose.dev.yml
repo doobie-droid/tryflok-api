@@ -20,6 +20,8 @@ services:
     links:
       - redis
       - mysql
+    volumes:
+      - ./:/var/www
 
   mysql:
     image: mysql:5.7.12
