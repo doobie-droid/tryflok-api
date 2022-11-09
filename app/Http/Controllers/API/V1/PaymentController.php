@@ -109,6 +109,7 @@ class PaymentController extends Controller
                 return $this->respondWithSuccess('Payment received successfully');
             }
 
+            $naira_to_dollar = Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
             switch ($request->event) {
                 case 'charge.completed':
                     
@@ -123,7 +124,7 @@ class PaymentController extends Controller
                         $funder_name = property_exists($meta, 'funder_name') ? $meta->funder_name : '';
                         $fund_note = property_exists($meta, 'fund_note') ? $meta->fund_note : '';
 
-                        $amount_in_dollars = bcdiv($req->data->amount, Constants::NAIRA_TO_DOLLAR, 2);
+                        $amount_in_dollars = bcdiv($req->data->amount, $naira_to_dollar->value, 2);
                         $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
 
                         $user = User::where('email', $username)->orWhere('username', $username)->first();
@@ -135,7 +136,7 @@ class PaymentController extends Controller
                                 'provider_id' => $req->data->id,
                                 'amount' => $amount_in_dollars,
                                 'flk' => $expected_flk_based_on_amount,
-                                'fee' => bcdiv($req->data->app_fee, Constants::NAIRA_TO_DOLLAR, 2),
+                                'fee' => bcdiv($req->data->app_fee, $naira_to_dollar->value, 2),
                                 'fund_type' => $fund_type,
                                 'funder_name' => $funder_name,
                                 'fund_note' => $fund_note,

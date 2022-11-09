@@ -13,9 +13,10 @@ test('fund wallet fails via flutterwave when charged amount is not up to expecte
     $initial_wallet_balance = (int) $user_wallet->balance;
     $transaction_id = date('YmdHis');
     $expected_flok = 100;
-    $amount_spent = Constants\Constants::NAIRA_TO_DOLLAR * 1.03;
+    $naira_to_dollar = Models\Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
+    $amount_spent = $naira_to_dollar->value * 1.03;
     $charged_amount = 200;
-    $charged_amount_in_dollars = bcdiv($charged_amount, Constants\Constants::NAIRA_TO_DOLLAR, 2);
+    $charged_amount_in_dollars = bcdiv($charged_amount, $naira_to_dollar->value, 2);
     $expected_flk_based_on_amount = bcdiv($charged_amount_in_dollars, 1.03, 2) * 100;
 
     stub_request("https://api.flutterwave.com/v3/transactions/{$transaction_id}/verify", [
@@ -68,7 +69,8 @@ test('fund wallet fails via flutterwave when transaction id is not valid', funct
     $initial_wallet_balance = (int) $user_wallet->balance;
     $transaction_id = date('YmdHis');
     $expected_flok = 100;
-    $amount_spent = Constants\Constants::NAIRA_TO_DOLLAR * 1.03;
+    $naira_to_dollar = Models\Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
+    $amount_spent = $naira_to_dollar->value * 1.03;
 
     stub_request("https://api.flutterwave.com/v3/transactions/{$transaction_id}/verify", [
         'status' => 'error',
@@ -120,7 +122,8 @@ test('fund wallet works via flutterwave when parameters are valid', function () 
     $initial_wallet_balance = (int) $user_wallet->balance;
     $transaction_id = date('YmdHis');
     $expected_flok = 100;
-    $amount_spent = Constants\Constants::NAIRA_TO_DOLLAR * 1.03;
+    $naira_to_dollar = Models\Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
+    $amount_spent = $naira_to_dollar->value * 1.03;
     $fee_in_naira = bcmul($amount_spent, .015, 2);
 
     stub_request("https://api.flutterwave.com/v3/transactions/{$transaction_id}/verify", [
@@ -152,7 +155,7 @@ test('fund wallet works via flutterwave when parameters are valid', function () 
         'provider_id' => $transaction_id,
         'currency' => 'USD',
         'amount' => 1.03,
-        'payment_processor_fee' => bcdiv($fee_in_naira, Constants\Constants::NAIRA_TO_DOLLAR, 2),
+        'payment_processor_fee' => bcdiv($fee_in_naira, $naira_to_dollar->value, 2),
         'payer_id' => $user->id,
         'payee_id' => $user->id,
     ]);
