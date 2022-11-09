@@ -143,7 +143,7 @@ class AnonymousPurchase implements ShouldQueue
                 $pdfItem = $itemModel->assets()->where('asset_type', 'pdf')->first();
                 $encryption_key = $pdfItem->encryption_key;
                 $provider_id = $pdfItem->storage_provider_id;
-                $contents = Storage::disk('public_s3')->get($provider_id);
+                $contents = Storage::disk('private_s3')->get($provider_id);
 
                 $decrypted_key = Crypter::symmetricalDecryptUsingOwnKey($encryption_key);
                 $decrypted_pdf = Crypter::symmetricalDecryptUsingOtherKey($contents, $decrypted_key);
@@ -180,28 +180,28 @@ class AnonymousPurchase implements ShouldQueue
                    'auto_renew' => $auto_renew,
                ]);
            }
-        if ($itemModel->id == env('JOHNNY_DRILL_CONTENT_ID'))
-        {
-            Mail::to($this->data['payer_email'])->send(new JohnnyDrillPurchaseMail([
-            'access_tokens' => $access_tokens,
-            'avatar_url' => $avatar_url,
-            'sales_count' => $sales_count,
-            'name' => $this->data['payer_name'],
-            'content_url' => $content_url,
-        ]));  
-        } else {
-            $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
-            Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
-            'message' => $message,
-            'access_tokens' => $access_tokens,
-            'name' => $this->data['payer_name'],
-            'content_url' => $content_url,
-            'decrypted_pdf' => $decrypted_pdf,
-        ]));
-        }   
-        if ($price->amount > 0) {
-            NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
-        }
+        // if ($itemModel->id == env('JOHNNY_DRILL_CONTENT_ID'))
+        // {
+        //     Mail::to($this->data['payer_email'])->send(new JohnnyDrillPurchaseMail([
+        //     'access_tokens' => $access_tokens,
+        //     'avatar_url' => $avatar_url,
+        //     'sales_count' => $sales_count,
+        //     'name' => $this->data['payer_name'],
+        //     'content_url' => $content_url,
+        // ]));  
+        // } else {
+        //     $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
+        //     Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
+        //     'message' => $message,
+        //     'access_tokens' => $access_tokens,
+        //     'name' => $this->data['payer_name'],
+        //     'content_url' => $content_url,
+        //     'decrypted_pdf' => $decrypted_pdf,
+        // ]));
+        // }   
+        // if ($price->amount > 0) {
+        //     NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
+        // }
        }
     }
 
