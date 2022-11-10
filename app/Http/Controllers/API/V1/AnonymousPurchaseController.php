@@ -8,6 +8,8 @@ use App\Constants\Constants;
 use App\Models\Collection;
 use App\Models\Configuration;
 use App\Models\Content;
+use App\Models\AnonymousPurchase;
+use App\Models\Userable;
 use App\Models\Price;
 use App\Services\Payment\Providers\ApplePay\ApplePay;
 use App\Services\Payment\Providers\Flutterwave\Flutterwave;
@@ -134,5 +136,39 @@ class AnonymousPurchaseController extends Controller
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
+    }
+
+    public function linkAnonymousPurchase(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->input(), [
+                'access_tokens' => ['required'],
+                'access_tokens.*.access_token' => ['required', 'string', 'exists:anonymous_purchases,access_token'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            foreach ($request->access_tokens as $access_token) {
+                $anonymous_purchase = AnonymousPurchase::where('access_token', $access_token)->whereNull('link_user_id')->first();
+
+                if (! is_null($anonymous_purchase)) {
+                    Userable::create([
+                        'user_id' => $request->user()->id,
+                        'status' => 'available',
+                        'userable_type' => $anonymous_purchase->anonymous_purchaseable_type,
+                        'userable_id' => $anonymous_purchase->anonymous_purchaseable_id,
+                    ]);
+
+                    $anonymous_purchase->link_user_id = $request->user()->id;
+                    $anonymous_purchase->save();
+                }
+            }            
+            return $this->respondWithSuccess('Anonymous Purchase has been successfully linked');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }   
     }
 }
