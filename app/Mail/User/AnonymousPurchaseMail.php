@@ -15,6 +15,8 @@ class AnonymousPurchaseMail extends Mailable
     public $name;
     public $content_url;
     public $decryted_pdf;
+    public $pdf_status;
+    public $pdf_message;
 
     /**
      * Create a new message instance.
@@ -28,6 +30,8 @@ class AnonymousPurchaseMail extends Mailable
         $this->name = $data['name'];
         $this->content_url = $data['content_url'];
         $this->decrypted_pdf = $data['decrypted_pdf'];
+        $this->pdf_status = $data['pdf_status'];
+        $this->pdf_message = $data['pdf_message'];
      }
 
     /**
@@ -37,12 +41,24 @@ class AnonymousPurchaseMail extends Mailable
      */
     public function build()
     {
+        if ($this->decrypted_pdf == '') {
+            return $this->view('emails.user.content.anonymous-content-purchase')->with([
+                'contents' => $this->message,
+                'access_tokens' => $this->access_tokens,
+                'name' => $this->name,
+                'content_url' => $this->content_url,
+                'pdf_status' => $this->pdf_status,
+                'pdf_message' => $this->pdf_message,
+            ])->subject('Anonymous Purchase on Flok!');
+        }
         return $this->view('emails.user.content.anonymous-content-purchase')->with([
             'contents' => $this->message,
             'access_tokens' => $this->access_tokens,
             'name' => $this->name,
             'content_url' => $this->content_url,
+            'pdf_status' => $this->pdf_status,
+            'pdf_message' => $this->pdf_message,
         ])->subject('Anonymous Purchase on Flok!')
-        ->attach($this->decrypted_pdf);
+          ->attachData($this->decrypted_pdf, 'file.pdf');
     }
 }

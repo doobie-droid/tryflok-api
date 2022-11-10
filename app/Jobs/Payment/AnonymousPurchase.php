@@ -129,24 +129,24 @@ class AnonymousPurchase implements ShouldQueue
             $access_tokens = [];
             $content_url = '';
             $decrypted_pdf = '';
+            $pdf_status = 0;
             $anonymous_purchases = Models\AnonymousPurchase::where('anonymous_purchaseable_id', $itemModel->id)->where('email', $this->data['payer_email'])->get();
             $sales_count = $anonymous_purchases->count();
             foreach( $anonymous_purchases as $anonymous_purchase) {
                     $access_tokens[] = $anonymous_purchase->access_token;
             }
             $avatar_url = $this->getAvatarUrl($sales_count);
-            if ($itemModel->type == 'video' || $itemModel->type == 'audio' || $itemModel->type == 'newsletter' || $itemModel->type == 'live-video' || $itemModel->type == 'live-audio') {
-                $content_url = "https://www.tryflok.com/contents/". $itemModel->id;
-            }
+            $content_url = "https://www.tryflok.com/contents/". $itemModel->id;
 
-            if ($itemModel->type == 'pdf') {
-                $pdfItem = $itemModel->assets()->where('asset_type', 'pdf')->first();
+            if ($itemModel->type == 'pdf') {    
+                $pdfItem = $itemModel->assets()->first();
                 $encryption_key = $pdfItem->encryption_key;
                 $provider_id = $pdfItem->storage_provider_id;
                 $contents = Storage::disk('private_s3')->get($provider_id);
 
                 $decrypted_key = Crypter::symmetricalDecryptUsingOwnKey($encryption_key);
-                $decrypted_pdf = Crypter::symmetricalDecryptUsingOtherKey($contents, $decrypted_key);
+                $decrypted_pdf = base64_decode(Crypter::symmetricalDecryptUsingOtherKey($contents, $decrypted_key));
+                $pdf_status = 1;
             }
 
            //record revenue from referral of the item
@@ -180,28 +180,31 @@ class AnonymousPurchase implements ShouldQueue
                    'auto_renew' => $auto_renew,
                ]);
            }
-        // if ($itemModel->id == env('JOHNNY_DRILL_CONTENT_ID'))
-        // {
-        //     Mail::to($this->data['payer_email'])->send(new JohnnyDrillPurchaseMail([
-        //     'access_tokens' => $access_tokens,
-        //     'avatar_url' => $avatar_url,
-        //     'sales_count' => $sales_count,
-        //     'name' => $this->data['payer_name'],
-        //     'content_url' => $content_url,
-        // ]));  
-        // } else {
-        //     $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
-        //     Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
-        //     'message' => $message,
-        //     'access_tokens' => $access_tokens,
-        //     'name' => $this->data['payer_name'],
-        //     'content_url' => $content_url,
-        //     'decrypted_pdf' => $decrypted_pdf,
-        // ]));
-        // }   
-        // if ($price->amount > 0) {
-        //     NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
-        // }
+        if ($itemModel->id == env('JOHNNY_DRILL_CONTENT_ID'))
+        {
+            Mail::to($this->data['payer_email'])->send(new JohnnyDrillPurchaseMail([
+            'access_tokens' => $access_tokens,
+            'avatar_url' => $avatar_url,
+            'sales_count' => $sales_count,
+            'name' => $this->data['payer_name'],
+            'content_url' => $content_url,
+        ]));  
+        } else {
+            $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
+            $pdf_message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!. Attached to this mail is the pdf";
+            Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
+            'message' => $message,
+            'access_tokens' => $access_tokens,
+            'name' => $this->data['payer_name'],
+            'content_url' => $content_url,
+            'decrypted_pdf' => $decrypted_pdf,
+            'pdf_status' => $pdf_status,
+            'pdf_message' => $pdf_message,
+        ]));
+        }   
+        if ($price->amount > 0) {
+            NotifySale::dispatch($itemModel->owner()->first(), $itemModel, $item['type']);
+        }
        }
     }
 
