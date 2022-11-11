@@ -37,13 +37,13 @@ return [
     'channels' => [
         'production' => [
             'driver' => 'stack',
-            'channels' => ['daily', 'slack'],
+            'channels' => ['slack'],
             'ignore_exceptions' => false,
         ],
 
         'staging' => [
             'driver' => 'stack',
-            'channels' => ['daily', 'slack'],
+            'channels' => ['slack'],
             'ignore_exceptions' => false,
         ],
 
