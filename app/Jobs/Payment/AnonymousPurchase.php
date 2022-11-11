@@ -96,7 +96,7 @@ class AnonymousPurchase implements ShouldQueue
            ]);
 
            //record sales for the benefactors of this item
-           $net_amount = $amount;
+           $net_amount = $amount * $number_of_tickets;
            
            $platform_charge = Constants::NORMAL_CREATOR_CHARGE;
            if ($itemModel->owner->user_charge_type === 'non-profit') {

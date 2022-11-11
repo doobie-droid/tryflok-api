@@ -42,6 +42,7 @@ class AnonymousPurchaseController extends Controller
                 'provider_response.transaction_id' => ['required_if:provider,flutterwave'],
                 'provider_response.id' => ['required_if:provider,stripe', 'string'],
                 'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
+                'expected_flk_amount' => ['required', 'integer', 'min:1'],
             ]);
 
             if ($validator->fails()) {
@@ -119,7 +120,11 @@ class AnonymousPurchaseController extends Controller
             if (!$payment_verified) {
                 return $this->respondBadRequest('Payment provider did not verify payment');
             }
-
+            $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, .03, 2);
+            $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, 0.03, 2);
+            if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
+                return $this->respondBadRequest("Flok Cowrie conversion is not correct. Expects +/-3% of {$expected_flk_based_on_amount} for \${$amount_in_dollars} but got {$request->expected_flk_amount}");
+            }
             AnonymousPurchaseJob::dispatch([
                 'total_amount' => $amount_in_dollars,
                 'total_fees' => 0,
