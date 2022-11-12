@@ -49,7 +49,7 @@ class AnonymousPurchaseMail extends Mailable
                 'content_url' => $this->content_url,
                 'pdf_status' => $this->pdf_status,
                 'pdf_message' => $this->pdf_message,
-            ])->subject('Anonymous Purchase on Flok!');
+            ])->subject('Your Flok Purchase Has Arrived!');
         }
         return $this->view('emails.user.content.anonymous-content-purchase')->with([
             'contents' => $this->message,
@@ -58,7 +58,7 @@ class AnonymousPurchaseMail extends Mailable
             'content_url' => $this->content_url,
             'pdf_status' => $this->pdf_status,
             'pdf_message' => $this->pdf_message,
-        ])->subject('Anonymous Purchase on Flok!')
+        ])->subject('Your Flok Purchase Has Arrived!')
           ->attachData($this->decrypted_pdf, 'file.pdf');
     }
 }

@@ -116,11 +116,14 @@ class WalletController extends Controller
             if (!$payment_verified) {
                 return $this->respondBadRequest('Payment provider did not verify payment');
             }
-            $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, .03, 2);
-            $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, 0.03, 2);
-            if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
+            /**
+             * Removing this line because frontend and backend are now synced in conversion rates and the center of control for conversion is now on the backend
+             * $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, .03, 2);
+             * $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, 0.03, 2);
+             */
+            /*if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
                 return $this->respondBadRequest("Flok Cowrie conversion is not correct. Expects +/-3% of {$expected_flk_based_on_amount} for \${$amount_in_dollars} but got {$request->expected_flk_amount}");
-            }
+            }*/
             FundWalletJob::dispatch([
                 'user' => $user,
                 'wallet' => $user->wallet()->first(),

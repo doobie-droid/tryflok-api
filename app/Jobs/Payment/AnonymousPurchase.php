@@ -76,11 +76,11 @@ class AnonymousPurchase implements ShouldQueue
            }
 
            $amount = $price->amount;
+           $fee = 0;
            if ($this->data['total_fees'] > 0) {
                $fee = bcmul(bcdiv($amount, $this->data['total_amount'], 6), $this->data['total_fees'], 6);
-           } else {
-               $fee = 0;
-           }
+           } 
+
            $number_of_tickets = 1;
            if (isset($item['number_of_tickets']) && $itemModel->type == 'live-video' || $itemModel->type == 'live-audio') {
                 $number_of_tickets = $item['number_of_tickets'];
@@ -89,7 +89,7 @@ class AnonymousPurchase implements ShouldQueue
            $payment = $itemModel->payments()->create([
                'payee_id' => $itemModel->owner->id,
                'amount' => $amount * $number_of_tickets,
-               'payment_processor_fee' => $fee,
+               'payment_processor_fee' => $fee, // the fee is added here because this table is mainly for record purposes for us and does not affect payout to the user
                'provider' => $this->data['provider'],
                'provider_id' => $this->data['provider_id'],
                'payer_email' => $this->data['payer_email']
@@ -110,8 +110,8 @@ class AnonymousPurchase implements ShouldQueue
                    'revenueable_type' => $item['type'],
                    'revenueable_id' => $itemModel->id,
                    'amount' => $amount,
-                   'payment_processor_fee' => $fee,
-                   'platform_share' => bcsub($platform_share, $fee, 6),
+                   'payment_processor_fee' => 0, // this is 0 because we transferred fees to users
+                   'platform_share' => $platform_share,
                    'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share, 6), 100, 6),
                    'referral_bonus' => 0,
                    'revenue_from' => 'sale',
@@ -155,10 +155,10 @@ class AnonymousPurchase implements ShouldQueue
                    'revenueable_type' => $item['type'],
                    'revenueable_id' => $itemModel->id,
                    'amount' => $amount,
-                   'payment_processor_fee' => $fee,
-                   'platform_share' => bcsub($platform_share, $fee, 6),
+                   'payment_processor_fee' => 0,
+                   'platform_share' => $platform_share,
                    'benefactor_share' => 0,
-                   'referral_bonus' => bcmul(bcsub($net_amount, $fee, 6), Constants::REFERRAL_BONUS, 6),
+                   'referral_bonus' => bcmul(bcsub($net_amount, 0, 6), Constants::REFERRAL_BONUS, 6),
                    'revenue_from' => 'referral',
                ]);
            }

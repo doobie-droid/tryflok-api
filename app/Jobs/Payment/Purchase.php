@@ -80,10 +80,9 @@ class Purchase implements ShouldQueue
             }
 
             $amount = $price->amount;
+            $fee = 0;
             if ($this->data['total_fees'] > 0) {
                 $fee = bcmul(bcdiv($amount, $this->data['total_amount'], 6), $this->data['total_fees'], 6);
-            } else {
-                $fee = 0;
             }
 
             //checkout item from cart
