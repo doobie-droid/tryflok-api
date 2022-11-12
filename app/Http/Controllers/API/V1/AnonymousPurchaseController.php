@@ -117,21 +117,21 @@ class AnonymousPurchaseController extends Controller
                     return $this->respondBadRequest('Invalid provider specified');
             }
 
-            if (!$payment_verified) {
-                return $this->respondBadRequest('Payment provider did not verify payment');
-            }
-            $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, .03, 2);
-            $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, 0.03, 2);
-            if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
-                return $this->respondBadRequest("Flok Cowrie conversion is not correct. Expects +/-3% of {$expected_flk_based_on_amount} for \${$amount_in_dollars} but got {$request->expected_flk_amount}");
-            }
+            // if (!$payment_verified) {
+            //     return $this->respondBadRequest('Payment provider did not verify payment');
+            // }
+            // $min_variation = $expected_flk_based_on_amount - bcmul($expected_flk_based_on_amount, .03, 2);
+            // $max_variation = $expected_flk_based_on_amount + bcmul($expected_flk_based_on_amount, 0.03, 2);
+            // if ($request->expected_flk_amount < $min_variation || $request->expected_flk_amount > $max_variation) {
+            //     return $this->respondBadRequest("Flok Cowrie conversion is not correct. Expects +/-3% of {$expected_flk_based_on_amount} for \${$amount_in_dollars} but got {$request->expected_flk_amount}");
+            // }
             AnonymousPurchaseJob::dispatch([
                 'total_amount' => $amount_in_dollars,
-                'total_fees' => 0,
+                'total_fees' => $fee,
                 'payer_email' => $request->email,
                 'payer_name' => $request->name,
                 'provider' => $request->provider,
-                'provider_id' => $provider_id,
+                'provider_id' => Str::uuid(),
                 'items' => $request->items,
             ]);
 

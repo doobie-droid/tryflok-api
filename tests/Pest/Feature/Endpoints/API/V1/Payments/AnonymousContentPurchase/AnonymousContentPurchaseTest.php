@@ -86,7 +86,7 @@ test('non signed up user can purchase a content', function ()
         'user_id' => $user->id,
         'revenue_from' => 'sale',
     ]);
-});
+})->only();
 
 test('non signed up user can purchase a collection', function () 
 {
