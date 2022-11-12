@@ -130,6 +130,7 @@ class AnonymousPurchase implements ShouldQueue
             $content_url = '';
             $decrypted_pdf = '';
             $pdf_status = 0;
+            $pdfTitle = '';
             $anonymous_purchases = Models\AnonymousPurchase::where('anonymous_purchaseable_id', $itemModel->id)->where('email', $this->data['payer_email'])->get();
             $sales_count = $anonymous_purchases->count();
             foreach( $anonymous_purchases as $anonymous_purchase) {
@@ -143,6 +144,8 @@ class AnonymousPurchase implements ShouldQueue
                 $encryption_key = $pdfItem->encryption_key;
                 $provider_id = $pdfItem->storage_provider_id;
                 $contents = Storage::disk('private_s3')->get($provider_id);
+                $pdfTitle = strToLower($itemModel->title);
+                $pdfTitle = str_replace(' ','-',$pdfTitle);
 
                 $decrypted_key = Crypter::symmetricalDecryptUsingOwnKey($encryption_key);
                 $decrypted_pdf = base64_decode(Crypter::symmetricalDecryptUsingOtherKey($contents, $decrypted_key));
@@ -200,6 +203,7 @@ class AnonymousPurchase implements ShouldQueue
             'decrypted_pdf' => $decrypted_pdf,
             'pdf_status' => $pdf_status,
             'pdf_message' => $pdf_message,
+            'pdf_title' => $pdfTitle,
         ]));
         }   
         if ($price->amount > 0) {

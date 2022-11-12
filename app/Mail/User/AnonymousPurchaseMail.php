@@ -17,6 +17,7 @@ class AnonymousPurchaseMail extends Mailable
     public $decryted_pdf;
     public $pdf_status;
     public $pdf_message;
+    public $pdf_title;
 
     /**
      * Create a new message instance.
@@ -32,6 +33,7 @@ class AnonymousPurchaseMail extends Mailable
         $this->decrypted_pdf = $data['decrypted_pdf'];
         $this->pdf_status = $data['pdf_status'];
         $this->pdf_message = $data['pdf_message'];
+        $this->pdf_title = $data['pdf_title'];
      }
 
     /**
@@ -59,6 +61,6 @@ class AnonymousPurchaseMail extends Mailable
             'pdf_status' => $this->pdf_status,
             'pdf_message' => $this->pdf_message,
         ])->subject('Your Flok Purchase Has Arrived!')
-          ->attachData($this->decrypted_pdf, 'file.pdf');
+          ->attachData($this->decrypted_pdf, "{$this->pdf_title}.pdf");
     }
 }

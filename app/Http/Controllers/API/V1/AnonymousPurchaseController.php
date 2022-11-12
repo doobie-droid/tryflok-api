@@ -42,7 +42,6 @@ class AnonymousPurchaseController extends Controller
                 'provider_response.transaction_id' => ['required_if:provider,flutterwave'],
                 'provider_response.id' => ['required_if:provider,stripe', 'string'],
                 'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
-                'expected_flk_amount' => ['required', 'integer', 'min:1'],
             ]);
 
             if ($validator->fails()) {
@@ -133,22 +132,21 @@ class AnonymousPurchaseController extends Controller
                     return $this->respondBadRequest('Invalid provider specified');
             }
 
-            // if (!$payment_verified) {
-            //     return $this->respondBadRequest('Payment provider did not verify payment');
-            // }
-            // $min_variation = $expected_flk_based_on_content_price - bcmul($expected_flk_based_on_content_price, .03, 2);
-            // $max_variation = $expected_flk_based_on_content_price + bcmul($expected_flk_based_on_content_price, .03, 2);
-            // if ($actual_flk_from_amount_paid < $min_variation || $request->expected_flk_amount > $max_variation) {
-            //     return $this->respondBadRequest("Flok Cowrie conversion is not correct. Expects +/-3% of {$expected_flk_based_on_content_price} based on total content(s) price [{$total_amount_in_dollars}] but got {$actual_flk_from_amount_paid} from amount paid [{$amount_in_dollars}]");
-            // }
+            if (!$payment_verified) {
+                return $this->respondBadRequest('Payment provider did not verify payment');
+            }
+            $min_variation = $expected_flk_based_on_content_price - bcmul($expected_flk_based_on_content_price, .03, 2);
+            $max_variation = $expected_flk_based_on_content_price + bcmul($expected_flk_based_on_content_price, .03, 2);
+            if ($actual_flk_from_amount_paid < $min_variation || $request->expected_flk_amount > $max_variation) {
+                return $this->respondBadRequest("Flok Cowrie conversion is not correct. Expects +/-3% of {$expected_flk_based_on_content_price} based on total content(s) price [{$total_amount_in_dollars}] but got {$actual_flk_from_amount_paid} from amount paid [{$amount_in_dollars}]");
+            }
             AnonymousPurchaseJob::dispatch([
                 'total_amount' => $amount_in_dollars,
-                'total_fees' => $fee,
                 'total_fees' => $fee,
                 'payer_email' => $request->email,
                 'payer_name' => $request->name,
                 'provider' => $request->provider,
-                'provider_id' => Str::uuid(),
+                'provider_id' => $provider_id,
                 'items' => $request->items,
             ]);
 
