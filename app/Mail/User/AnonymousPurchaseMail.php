@@ -11,8 +11,13 @@ class AnonymousPurchaseMail extends Mailable
 {
     use Queueable, SerializesModels;
     public $message;
-    public $access_token;
+    public $access_tokens;
     public $name;
+    public $content_url;
+    public $decryted_pdf;
+    public $pdf_status;
+    public $pdf_message;
+    public $pdf_title;
 
     /**
      * Create a new message instance.
@@ -24,6 +29,11 @@ class AnonymousPurchaseMail extends Mailable
         $this->message = $data['message'];
         $this->access_tokens = $data['access_tokens'];
         $this->name = $data['name'];
+        $this->content_url = $data['content_url'];
+        $this->decrypted_pdf = $data['decrypted_pdf'];
+        $this->pdf_status = $data['pdf_status'];
+        $this->pdf_message = $data['pdf_message'];
+        $this->pdf_title = $data['pdf_title'];
      }
 
     /**
@@ -33,10 +43,24 @@ class AnonymousPurchaseMail extends Mailable
      */
     public function build()
     {
+        if ($this->decrypted_pdf == '') {
+            return $this->view('emails.user.content.anonymous-content-purchase')->with([
+                'contents' => $this->message,
+                'access_tokens' => $this->access_tokens,
+                'name' => $this->name,
+                'content_url' => $this->content_url,
+                'pdf_status' => $this->pdf_status,
+                'pdf_message' => $this->pdf_message,
+            ])->subject('Your Flok Purchase Has Arrived!');
+        }
         return $this->view('emails.user.content.anonymous-content-purchase')->with([
             'contents' => $this->message,
             'access_tokens' => $this->access_tokens,
-            'name' => $this->name
-        ])->subject('Anonymous Purchase on Flok!');
+            'name' => $this->name,
+            'content_url' => $this->content_url,
+            'pdf_status' => $this->pdf_status,
+            'pdf_message' => $this->pdf_message,
+        ])->subject('Your Flok Purchase Has Arrived!')
+          ->attachData($this->decrypted_pdf, "{$this->pdf_title}.pdf");
     }
 }

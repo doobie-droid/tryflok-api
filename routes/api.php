@@ -216,6 +216,7 @@ Route::group(['middleware' => 'auth:api'], function () {
             Route::delete('{id}/like', 'ContentController@unlikeContent')->name('unlike-content');
 
             Route::post('{id}/comments', 'ContentCommentController@createContentComment')->name('create-content-comment');    
+            Route::post('/anonymous-purchase-link', 'AnonymousPurchaseController@linkAnonymousPurchase')->name('link-anonymous-purchase-to-user');
         });
         Route::group(['prefix' => 'content-comments'], function () {
             Route::patch('{id}', 'ContentCommentController@updateContentComment')->name('update-content-comment');

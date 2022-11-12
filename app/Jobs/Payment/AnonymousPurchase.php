@@ -20,6 +20,8 @@ use App\Mail\User\AnonymousPurchaseMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
+use App\Utils\Crypter;
+use Illuminate\Support\Facades\Storage;
 
 class AnonymousPurchase implements ShouldQueue
 {
@@ -74,11 +76,11 @@ class AnonymousPurchase implements ShouldQueue
            }
 
            $amount = $price->amount;
+           $fee = 0;
            if ($this->data['total_fees'] > 0) {
                $fee = bcmul(bcdiv($amount, $this->data['total_amount'], 6), $this->data['total_fees'], 6);
-           } else {
-               $fee = 0;
-           }
+           } 
+
            $number_of_tickets = 1;
            if (isset($item['number_of_tickets']) && $itemModel->type == 'live-video' || $itemModel->type == 'live-audio') {
                 $number_of_tickets = $item['number_of_tickets'];
@@ -87,14 +89,14 @@ class AnonymousPurchase implements ShouldQueue
            $payment = $itemModel->payments()->create([
                'payee_id' => $itemModel->owner->id,
                'amount' => $amount * $number_of_tickets,
-               'payment_processor_fee' => $fee,
+               'payment_processor_fee' => $fee, // the fee is added here because this table is mainly for record purposes for us and does not affect payout to the user
                'provider' => $this->data['provider'],
                'provider_id' => $this->data['provider_id'],
                'payer_email' => $this->data['payer_email']
            ]);
 
            //record sales for the benefactors of this item
-           $net_amount = $amount;
+           $net_amount = $amount * $number_of_tickets;
            
            $platform_charge = Constants::NORMAL_CREATOR_CHARGE;
            if ($itemModel->owner->user_charge_type === 'non-profit') {
@@ -108,8 +110,8 @@ class AnonymousPurchase implements ShouldQueue
                    'revenueable_type' => $item['type'],
                    'revenueable_id' => $itemModel->id,
                    'amount' => $amount,
-                   'payment_processor_fee' => $fee,
-                   'platform_share' => bcsub($platform_share, $fee, 6),
+                   'payment_processor_fee' => 0, // this is 0 because we transferred fees to users
+                   'platform_share' => $platform_share,
                    'benefactor_share' => bcdiv(bcmul($creator_share, $benefactor->share, 6), 100, 6),
                    'referral_bonus' => 0,
                    'revenue_from' => 'sale',
@@ -119,18 +121,36 @@ class AnonymousPurchase implements ShouldQueue
             'email' => $this->data['payer_email'],
             'name' => $this->data['payer_name'],
             'status' => 'available',
-            'access_token' => Str::random(20),
+            'access_token' => Str::random(10) . date('Ymd'),
             'anonymous_purchaseable_type' => $item['type'],
             'anonymous_purchaseable_id' => $itemModel->id,
                 ]);
             }
             $access_tokens = [];
+            $content_url = '';
+            $decrypted_pdf = '';
+            $pdf_status = 0;
+            $pdfTitle = '';
             $anonymous_purchases = Models\AnonymousPurchase::where('anonymous_purchaseable_id', $itemModel->id)->where('email', $this->data['payer_email'])->get();
             $sales_count = $anonymous_purchases->count();
             foreach( $anonymous_purchases as $anonymous_purchase) {
                     $access_tokens[] = $anonymous_purchase->access_token;
             }
             $avatar_url = $this->getAvatarUrl($sales_count);
+            $content_url = "https://www.tryflok.com/contents/". $itemModel->id;
+
+            if ($itemModel->type == 'pdf') {    
+                $pdfItem = $itemModel->assets()->first();
+                $encryption_key = $pdfItem->encryption_key;
+                $provider_id = $pdfItem->storage_provider_id;
+                $contents = Storage::disk('private_s3')->get($provider_id);
+                $pdfTitle = strToLower($itemModel->title);
+                $pdfTitle = str_replace(' ','-',$pdfTitle);
+
+                $decrypted_key = Crypter::symmetricalDecryptUsingOwnKey($encryption_key);
+                $decrypted_pdf = base64_decode(Crypter::symmetricalDecryptUsingOtherKey($contents, $decrypted_key));
+                $pdf_status = 1;
+            }
 
            //record revenue from referral of the item
            if ($itemModel->owner->referrer()->exists()) {
@@ -138,10 +158,10 @@ class AnonymousPurchase implements ShouldQueue
                    'revenueable_type' => $item['type'],
                    'revenueable_id' => $itemModel->id,
                    'amount' => $amount,
-                   'payment_processor_fee' => $fee,
-                   'platform_share' => bcsub($platform_share, $fee, 6),
+                   'payment_processor_fee' => 0,
+                   'platform_share' => $platform_share,
                    'benefactor_share' => 0,
-                   'referral_bonus' => bcmul(bcsub($net_amount, $fee, 6), Constants::REFERRAL_BONUS, 6),
+                   'referral_bonus' => bcmul(bcsub($net_amount, 0, 6), Constants::REFERRAL_BONUS, 6),
                    'revenue_from' => 'referral',
                ]);
            }
@@ -169,14 +189,21 @@ class AnonymousPurchase implements ShouldQueue
             'access_tokens' => $access_tokens,
             'avatar_url' => $avatar_url,
             'sales_count' => $sales_count,
-            'name' => $this->data['payer_name']
+            'name' => $this->data['payer_name'],
+            'content_url' => $content_url,
         ]));  
         } else {
             $message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!";
+            $pdf_message = "You've just purchased the content '{$itemModel->title}' on flok, use this token(s) to access the content you purchased on flok!. Attached to this mail is the pdf";
             Mail::to($this->data['payer_email'])->send(new AnonymousPurchaseMail([
             'message' => $message,
             'access_tokens' => $access_tokens,
-            'name' => $this->data['payer_name']
+            'name' => $this->data['payer_name'],
+            'content_url' => $content_url,
+            'decrypted_pdf' => $decrypted_pdf,
+            'pdf_status' => $pdf_status,
+            'pdf_message' => $pdf_message,
+            'pdf_title' => $pdfTitle,
         ]));
         }   
         if ($price->amount > 0) {
