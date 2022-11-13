@@ -88,7 +88,7 @@ class AnonymousPurchase implements ShouldQueue
            //record payment on payment table
            $payment = $itemModel->payments()->create([
                'payee_id' => $itemModel->owner->id,
-               'amount' => $amount * $number_of_tickets,
+               'amount' => $this->data['total_amount'],
                'payment_processor_fee' => $fee, // the fee is added here because this table is mainly for record purposes for us and does not affect payout to the user
                'provider' => $this->data['provider'],
                'provider_id' => $this->data['provider_id'],
