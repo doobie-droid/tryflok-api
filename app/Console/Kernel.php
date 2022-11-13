@@ -49,7 +49,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('backup:run')->hourly();
         $schedule->command('flok:send-creator-weekly-validation-emails')->weeklyOn(6, '00:00');
         $schedule->command('flok:mail-anonymous-users-for-live-events')->hourly();
-        $schedule->command('flok:link-anonymous-purchases-to-users')->hourly();
+        $schedule->command('flok:link-anonymous-purchases-to-users')->everyTwelveHours();
         // $schedule->command('flok:send-monthly-validation-emails')->lastDayOfMonth('15:00');
         // $schedule->command('flok:send-yearly-validation-emails')->yearlyOn(12, 31, '15:00');
         // $schedule->command('flok:send-quarterly-validation-emails')->cron('0 0 30 3,6,9,12 *');
