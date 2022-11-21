@@ -16,12 +16,12 @@ test('non signed up user can purchase a content', function ()
     $price = Models\Price::factory()->create([
         'priceable_id' => $content->id,
         'priceable_type' => 'content',
-        'amount' => 100,
+        'amount' => 10,
     ]);
-    $expected_flk_amount = 100;
     $transaction_id = date('YmdHis');
     $naira_to_dollar = Models\Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
-    $amount_spent = $naira_to_dollar->value * 1.03;
+    $content_price_in_naira = $price->amount * $naira_to_dollar->value;
+    $amount_spent = $content_price_in_naira * 1.03;
     $fee_in_naira = bcmul($amount_spent, .015, 2);
 
     stub_request("https://api.flutterwave.com/v3/transactions/{$transaction_id}/verify", [
@@ -40,7 +40,7 @@ test('non signed up user can purchase a content', function ()
             'id' => $content->id,
             'type' => 'content',
             'price' => [
-                'amount' => 100,
+                'amount' => 10,
                 'id' => $price->id,
                 'interval' => 'one-off',
                 'interval_amount' => 1,
@@ -50,7 +50,6 @@ test('non signed up user can purchase a content', function ()
         'email' => $anonymousUserEmail,
         'name' => $name,
         'provider' => 'flutterwave',
-        'expected_flk_amount' => $expected_flk_amount,
         'provider_response' => [
             'transaction_id' => $transaction_id,
         ],
@@ -65,8 +64,8 @@ test('non signed up user can purchase a content', function ()
         'provider' => 'flutterwave',
         'provider_id' => $transaction_id,
         'currency' => 'USD',
-        'amount' => 100,
-        // 'payment_processor_fee' => bcdiv($fee_in_naira, $naira_to_dollar->value, 2),
+        'amount' => 10,
+        'payment_processor_fee' => bcdiv($fee_in_naira, $naira_to_dollar->value, 2),
         'payer_email' => $anonymousUserEmail,
         'payee_id' => $user->id,
         'paymentable_type' => 'content',
@@ -102,10 +101,10 @@ test('non signed up user can purchase a collection', function ()
         'interval' => 'monthly',
         'amount' => 100
     ]);
-    $expected_flk_amount = 100;
     $transaction_id = date('YmdHis');
     $naira_to_dollar = Models\Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
-    $amount_spent = $naira_to_dollar->value * 1.03;
+    $content_price_in_naira = $price->amount * $naira_to_dollar->value;
+    $amount_spent = $content_price_in_naira * 1.03;
     $fee_in_naira = bcmul($amount_spent, .015, 2);
 
     stub_request("https://api.flutterwave.com/v3/transactions/{$transaction_id}/verify", [
@@ -134,7 +133,6 @@ test('non signed up user can purchase a collection', function ()
         'email' => $anonymousUserEmail,
         'name' => $name,
         'provider' => 'flutterwave',
-        'expected_flk_amount' => $expected_flk_amount,
         'provider_response' => [
             'transaction_id' => $transaction_id,
         ],
@@ -256,4 +254,85 @@ test('non signed up user cannot access purchased content with invalid access tok
 
     $response = $this->json('GET', "/api/v1/contents/{$content->id}/assets", $request);
     $response->assertStatus(400);
+});
+
+it('does not work if price does not match', function()
+{
+    $user = Models\User::factory()->create();
+    $anonymousUserEmail = 'charlesagate3@gmail.com';
+    $name = 'John Doe';
+    $content = Models\Content::factory()->create([
+        'user_id' => $user->id,
+    ]);
+    $price = Models\Price::factory()->create([
+        'priceable_id' => $content->id,
+        'priceable_type' => 'content',
+        'amount' => 10,
+    ]);
+    $transaction_id = date('YmdHis');
+    $naira_to_dollar = Models\Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
+    $content_price_in_naira = $price->amount * $naira_to_dollar->value;
+    $amount_spent = $content_price_in_naira * 1.03;
+    $fee_in_naira = bcmul($amount_spent, .015, 2);
+
+    stub_request("https://api.flutterwave.com/v3/transactions/{$transaction_id}/verify", [
+        'status' => 'success',
+        'data' => [
+            'status' => 'successful',
+            'id' => $transaction_id,
+            'app_fee' => $fee_in_naira,
+            'amount' => $amount_spent,
+        ],
+    ]);
+
+    $request = [
+        'items' => [
+            [
+            'id' => $content->id,
+            'type' => 'content',
+            'number_of_tickets' => 2,
+            'price' => [
+                'amount' => 10,
+                'id' => $price->id,
+                'interval' => 'one-off',
+                'interval_amount' => 1,
+            ],
+        ]
+        ],
+        'email' => $anonymousUserEmail,
+        'name' => $name,
+        'provider' => 'flutterwave',
+        'provider_response' => [
+            'transaction_id' => $transaction_id,
+        ],
+    ];
+
+    $response = $this->json('POST', '/api/v1/payments/anonymous-purchases', $request);
+    $response->assertStatus(400);
+
+    $this->assertDatabaseMissing('payments', [
+        'provider' => 'flutterwave',
+        'provider_id' => $transaction_id,
+        'currency' => 'USD',
+        'amount' => 10,
+        'payment_processor_fee' => bcdiv($fee_in_naira, $naira_to_dollar->value, 2),
+        'payer_email' => $anonymousUserEmail,
+        'payee_id' => $user->id,
+        'paymentable_type' => 'content',
+        'paymentable_id' => $content->id
+    ]);
+
+    $this->assertDatabaseMissing('anonymous_purchases', [
+        'email' => $anonymousUserEmail,
+        'anonymous_purchaseable_type' => 'content',
+        'anonymous_purchaseable_id' => $content->id,
+
+    ]);
+
+    $this->assertDatabaseMissing('revenues', [
+        'revenueable_type' => 'content',
+        'revenueable_id' => $content->id,
+        'user_id' => $user->id,
+        'revenue_from' => 'sale',
+    ]);
 });

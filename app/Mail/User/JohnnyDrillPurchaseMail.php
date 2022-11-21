@@ -10,10 +10,11 @@ use Illuminate\Queue\SerializesModels;
 class JohnnyDrillPurchaseMail extends Mailable
 {
     use Queueable, SerializesModels;
-    public $access_token;
+    public $access_tokens;
     public $avatar_url;
     public $sales_count;
     public $name;
+    public $content_url;
 
     /**
      * Create a new message instance.
@@ -26,6 +27,7 @@ class JohnnyDrillPurchaseMail extends Mailable
         $this->avatar_url = $data['avatar_url'];
         $this->sales_count = $data['sales_count'];
         $this->name = $data['name'];
+        $this->content_url = $data['content_url'];
      }
 
     /**
@@ -39,7 +41,8 @@ class JohnnyDrillPurchaseMail extends Mailable
             'access_tokens' => $this->access_tokens,
             'sales_count' => $this->sales_count,
             'avatar_url' => $this->avatar_url,
-            'name' => $this->name
+            'name' => $this->name,
+            'content_url' => $this->content_url,
         ])->subject('Anonymous Purchase on Flok!');
     }
 }
