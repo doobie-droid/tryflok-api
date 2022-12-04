@@ -104,6 +104,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
         Route::get('exchange-rates', 'PaymentController@listExchangeRates')->name('list-exchange-rates');
     });
+
+    Route::group(['prefix' => 'assets'], function () {
+        Route::post('/nft', 'AssetController@uploadNft');
+    });
 });
 
 Route::group(['middleware' => 'auth:api'], function () {
