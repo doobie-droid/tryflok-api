@@ -7,6 +7,8 @@ use App\Jobs\Assets\GenerateResolutions\Audio as GenerateAudioResolutionsJob;
 use App\Jobs\Assets\GenerateResolutions\Image as GenerateImageResolutionsJob;
 use App\Jobs\Assets\GenerateResolutions\Pdf as GeneratePdfResolutionsJob;
 use App\Jobs\Assets\GenerateResolutions\Video as GenerateVideoResolutionsJob;
+use App\Jobs\Assets\UploadResource\Image as UploadImageJob;
+use App\Jobs\Assets\UploadResource\Json as UploadJsonJob;
 use App\Models\Asset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -332,6 +334,96 @@ class AssetController extends Controller
                 return $asset;
         } catch (\Exception $exception) {
             Log::error($exception);
+        }
+    }
+
+    public function uploadNft(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'file' => ['required', 'image', 'max:5120', 'mimetypes:image/gif,image/jpeg,image/png'], //5MB
+                'metadata' => ['required', 'string'],
+                'nft_id' => ['required'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $metadata = json_decode($request->metadata, true);
+
+            $validator = Validator::make($metadata, [
+                'title' => ['required', 'string'],
+                'type' => ['required', 'string'],
+                'properties' => ['required'],
+                'properties.name' => ['required', 'string'],
+                'properties.decimals' => ['required', 'integer'],
+                'properties.description' => ['required', 'string'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            // handle image asset
+            $file = $request->file('file')
+            $image_filename = $request->nft_id;
+            $originalName = $file->getClientOriginalName();
+            $image_ext = $file->getClientOriginalExtension();
+            $image_folder = 'assets/nft/image';
+            $fullImageFilename = join_path($image_folder, $image_filename . '.' . $image_ext);
+            $image_url = join_path(config('flok.public_media_url'), $fullImageFilename);
+            $imageAsset = Asset::create([
+                'url' => $image_url,
+                'storage_provider' => 'public-s3',
+                'storage_provider_id' => $fullImageFilename,
+                'asset_type' => 'image',
+                'mime_type' => $file->getMimeType(),
+            ]);
+
+            $path = Storage::disk('local')->put('uploads/images', $file);
+            $uploadedFilePath = storage_path() . '/app/' . $path;
+            UploadImageJob::dispatch([
+                'asset' => $imageAsset,
+                'filepath' => $uploadedFilePath,
+                'folder' => $image_folder,
+                'filename' => $image_filename,
+                'ext' => $image_ext,
+                'full_file_name' => $fullImageFilename,
+            ]);
+
+            // add image to nft
+            $metadata['properties']['image'] = $imageAsset->url;
+
+            // handle JSON asset
+            $filename = $request->nft_id;
+            $folder = 'assets/nft/meta';
+            $fullFilename = join_path($folder, $filename . '.json');
+            $url = join_path(config('flok.public_media_url'), $fullFilename);
+            $asset = Asset::create([
+                'url' => $url,
+                'storage_provider' => 'public-s3',
+                'storage_provider_id' => $fullFilename,
+                'asset_type' => 'text',
+                'mime_type' => 'text/json',
+            ]);
+            
+            UploadJsonJob::dispatch([
+                'asset' => $asset,
+                'json' => json_encode($metadata),
+                'full_file_name' => $fullFilename,
+            ]);
+
+            return $this->respondWithSuccess('Assets have been created successfully.', [
+                'image_asset' => $imageAsset,
+                'nft_asset' => $asset,
+            ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            if (! is_null($asset)) {
+                $asset->delete();
+            }
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 }
