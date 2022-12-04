@@ -353,12 +353,9 @@ class AssetController extends Controller
             $metadata = json_decode($request->metadata, true);
 
             $validator = Validator::make($metadata, [
-                'title' => ['required', 'string'],
-                'type' => ['required', 'string'],
-                'properties' => ['required'],
-                'properties.name' => ['required', 'string'],
-                'properties.decimals' => ['required', 'integer'],
-                'properties.description' => ['required', 'string'],
+                'name' => ['required', 'string'],
+                'decimals' => ['required', 'integer'],
+                'description' => ['required', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -393,7 +390,7 @@ class AssetController extends Controller
             ]);
 
             // add image to nft
-            $metadata['properties']['image'] = $imageAsset->url;
+            $metadata['image'] = $imageAsset->url;
 
             // handle JSON asset
             $filename = $request->nft_id;
