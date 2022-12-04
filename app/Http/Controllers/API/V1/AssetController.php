@@ -363,7 +363,7 @@ class AssetController extends Controller
             }
 
             // handle image asset
-            $file = $request->file('file')
+            $file = $request->file('file');
             $image_filename = $request->nft_id;
             $originalName = $file->getClientOriginalName();
             $image_ext = $file->getClientOriginalExtension();
