@@ -946,7 +946,8 @@ class UserController extends Controller
                 'id' => ['required', 'string', 'exists:users,id'],
                 'originating_content_id' => ['sometimes', 'nullable', 'string', 'exists:contents,id'],
                 'originating_client_source' => ['sometimes', 'nullable', 'string', 'in:web,ios,android'],
-                'originating_currency' => ['sometimes', 'nullable', 'string']
+                'originating_currency' => ['sometimes', 'nullable', 'string'],
+                'tip_frequency' => ['sometimes', 'nullable', 'string', 'in:one-off,daily,weekly,monthly'],
             ]);
 
             if ($validator->fails()) {
@@ -1044,6 +1045,7 @@ class UserController extends Controller
                 'amount_in_flk' => $creator_share_in_flk,
                 'wallet_transaction' => $transaction,
             ]);
+            
             return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {
             DB::rollBack();
