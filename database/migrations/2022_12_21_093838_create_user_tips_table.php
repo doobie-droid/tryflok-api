@@ -18,6 +18,8 @@ class CreateUserTipsTable extends Migration
             $table->foreignUuid('tipper_user_id')->nullable();
             $table->string('tipper_email');
             $table->foreignUuid('tippee_user_id');
+            $table->string('card_token')->nullable();
+            $table->string('provider')->default('flutterwave');
             $table->unsignedInteger('amount_in_flk');
             $table->string('tip_frequency');
             $table->dateTime('last_tip');

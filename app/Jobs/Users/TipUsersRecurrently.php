@@ -171,7 +171,7 @@ class TipUsersRecurrently implements ShouldQueue
                 'wallet_transaction' => $transaction,
             ]);     
         }
-        }catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error($exception);
         }
     }

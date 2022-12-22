@@ -43,6 +43,7 @@ class TipUsersRecurrently extends Command
         try{
             UserTip::
                 where('status', 'active')
+                ->where('provider', 'wallet')
                 ->chunk(1000, function ($userTips) {                
                 // foreach ($userTips as $userTip) {
                 TipUsersRecurrentlyJob::dispatchNow($userTips);

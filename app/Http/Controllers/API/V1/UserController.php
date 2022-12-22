@@ -12,6 +12,7 @@ use App\Http\Resources\UserResourceWithSensitive;
 use App\Jobs\Users\NotifyFollow as NotifyFollowJob;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 use App\Jobs\Users\SendReferralEmails as SendReferralEmailsJob;
+use App\Jobs\Users\AnonymousUserTip as AnonymousUserTipJob;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\Content;
@@ -34,6 +35,9 @@ use \Stripe\Account as StripeAccount;
 use \Stripe\AccountLink as StripeAccountLink;
 use \Stripe\Stripe;
 use \Stripe\StripeClient;
+use App\Services\Payment\Providers\Flutterwave\Flutterwave;
+use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
+use App\Models\Configuration;
 
 class UserController extends Controller
 {
@@ -1060,6 +1064,7 @@ class UserController extends Controller
                     'originating_client_source' => $originating_client_source,
                     'originating_content_id' => $originating_content_id,
                     'last_tip' => now(),
+                    'provider' => 'wallet',
                 ]);
             }
             NotifyTippingJob::dispatch([
@@ -1137,6 +1142,95 @@ class UserController extends Controller
                 'month_subscribers' => $month_subscribers_count,
                 'subscription_graph' => $subscription_graph,
             ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function anonymousUserTip(Request $request)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'id' => ['required', 'string', 'exists:users,id'],
+                'email' => ['required', 'string', 'email', 'max:255'],
+                'provider' => ['required', 'string', 'in:flutterwave,stripe'],
+                'provider_response' => ['required'],
+                'provider_response.transaction_id' => ['required_if:provider,flutterwave'],
+                'provider_response.id' => ['required_if:provider,stripe', 'string'],
+                'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
+                'expected_flk_amount' => ['required', 'integer', 'min:1'],
+                'originating_content_id' => ['sometimes', 'nullable', 'string', 'exists:contents,id'],
+                'originating_client_source' => ['sometimes', 'nullable', 'string', 'in:web,ios,android'],
+                'originating_currency' => ['sometimes', 'nullable', 'string'],
+                'tip_frequency' => ['sometimes', 'nullable', 'string', 'in:one-off,daily,weekly,monthly'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            Log::info("Anonymous tipping began");
+            $payment_verified = false;
+            $amount_in_dollars = 0;
+            $fee = 0;
+            $expected_flk_based_on_amount = 0;
+            $provider_id = '';
+            $card_token = '';
+            $naira_to_dollar = Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
+
+            switch ($request->provider) {
+                case 'flutterwave':
+                    $flutterwave = new Flutterwave;
+                    $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
+                    if (($req->status === 'success' && $req->data->status === 'successful')) {
+                        $amount_in_dollars = bcdiv($req->data->amount, $naira_to_dollar->value, 2);
+                        $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                        $fee = bcdiv($req->data->app_fee, $naira_to_dollar->value, 2);
+                        $provider_id = $req->data->id;
+                        $card_token = $req->data->card->token;
+                        $payment_verified = true;
+                    }
+                    break;
+                case 'stripe':
+                    $stripe = new StripePayment;
+                    $amount_in_dollars = bcdiv($request->amount_in_cents, 100, 2);
+                    $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                    $req = $stripe->chargeViaToken($request->amount_in_cents, $request->provider_response['id']);
+
+                    if (($req->status === 'succeeded' && $req->paid === true)) {
+                        $fee = bcdiv(bcadd(bcmul(0.029, $req->amount, 2), 30, 2), 100, 2); //2.9% + 30c convert to dollar
+                        $amount_in_dollars = bcdiv($req->amount, 100, 2);
+                        $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                        $provider_id = $req->id;
+                        $payment_verified = true;
+                    }                    
+                    break;
+                default:
+                    return $this->respondBadRequest('Invalid provider specified');
+            }
+
+            if (!$payment_verified) {
+                return $this->respondBadRequest('Payment provider did not verify payment');
+            }
+
+            AnonymousUserTipJob::dispatchNow([
+                'email' => $request->email,
+                'card_token' => $card_token,
+                'tippee_id' => $request->id,
+                'provider' => $request->provider,
+                'provider_id' => $provider_id,
+                'amount' => $amount_in_dollars,
+                'flk' => $request->expected_flk_amount,
+                'fee' => $fee,
+                'originating_currency' => $request->originating_currency,
+                'originating_content_id' => $request->originating_content_id,
+                'originating_client_source' => $request->originating_client_source,
+                'tip_frequency' => $request->tip_frequency,
+            ]);
+            
+            Log::info("Anonymous tipping was successful");
+            return $this->respondWithSuccess('Tip sent successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
