@@ -18,6 +18,7 @@ use App\Models\Content;
 use App\Models\PaymentAccount;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Models\UserTip;
 use App\Models\Userable;
 use App\Models\WalletTransaction;
 use App\Rules\AssetType as AssetTypeRule;
@@ -989,6 +990,10 @@ class UserController extends Controller
             }
             $platform_share = bcmul($amount_in_dollars, $platform_charge, 6);
             $creator_share = bcmul($amount_in_dollars, 1 - $platform_charge, 6);
+
+            $originating_currency = '';
+            $originating_content_id = '';
+            $originating_client_source = '';
             $revenue = $userToTip->revenues()->create([
                 'revenueable_type' => 'user',
                 'revenueable_id' => $userToTip->id,
@@ -1002,15 +1007,18 @@ class UserController extends Controller
             ]);
 
             if ( ! is_null($request->originating_currency)) {
-                $revenue->originating_currency = $request->originating_currency;
+                $originating_currency = $request->originating_currency;
+                $revenue->originating_currency = $originating_currency;
             }
 
             if ( ! is_null($request->originating_content_id)) {
-                $revenue->originating_content_id = $request->originating_content_id;
+                $originating_content_id = $request->originating_content_id;
+                $revenue->originating_content_id = $originating_content_id;
             }
 
             if ( ! is_null($request->originating_client_source)) {
-                $revenue->originating_client_source = $request->originating_client_source;
+                $originating_client_source = $request->originating_client_source;
+                $revenue->originating_client_source = $originating_client_source;
             }
 
             $revenue->save();
@@ -1039,13 +1047,28 @@ class UserController extends Controller
             $userToTip->wallet->balance = $newWalletBalance;
             $userToTip->wallet->save();
             DB::commit();
+            
+            if(! is_null($request->tip_frequency) && $request->tip_frequency != 'one-off')
+            {
+                $userTip = UserTip::create([
+                    'tipper_user_id' => $request->user()->id,
+                    'tipper_email' => $request->user()->email,
+                    'tippee_user_id' => $userToTip->id,
+                    'amount_in_flk' => $request->amount_in_flk,
+                    'tip_frequency' => $request->tip_frequency,
+                    'originating_currency' => $originating_currency,
+                    'originating_client_source' => $originating_client_source,
+                    'originating_content_id' => $originating_content_id,
+                    'last_tip' => now(),
+                ]);
+            }
             NotifyTippingJob::dispatch([
                 'tipper' => $request->user(),
                 'tippee' => $userToTip,
                 'amount_in_flk' => $creator_share_in_flk,
                 'wallet_transaction' => $transaction,
             ]);
-            
+
             return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {
             DB::rollBack();

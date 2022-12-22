@@ -20,10 +20,12 @@ class CreateUserTipsTable extends Migration
             $table->foreignUuid('tippee_user_id');
             $table->unsignedInteger('amount_in_flk');
             $table->string('tip_frequency');
+            $table->dateTime('last_tip');
             $table->string('status')->default('active');
             $table->foreignUuid('originating_content_id')->nullable();
             $table->string('originating_currency')->default('NGN');
             $table->string('originating_client_source')->default('ios');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
