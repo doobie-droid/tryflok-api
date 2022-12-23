@@ -63,6 +63,9 @@ class TipUsersRecurrentlyWithFlutterwave implements ShouldQueue
                     'flk' => $data['amount_in_flk'],
                     'email' => $data['email'],
                     'last_tip' => $data['last_tip'],
+                    'originating_content_id' => $data['originating_content_id'],
+                    'originating_client_source' => $data['originating_client_source'],
+                    'originating_currency' => $data['originating_currency'],
                 ]);
             }
         } catch (\Exception $exception) {
