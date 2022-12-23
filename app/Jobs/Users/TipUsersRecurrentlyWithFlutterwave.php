@@ -38,6 +38,37 @@ class TipUsersRecurrentlyWithFlutterwave implements ShouldQueue
         try {
             foreach($this->datas as $data) 
             {
+                $next_tip = false;
+                switch ($data->tip_frequency) {
+                    case 'daily':
+                        if($userTip->last_tip <= now()->subDay())
+                        {
+                            $next_tip = true;
+                        }
+                        break;
+                    case 'weekly':
+                        if($userTip->last_tip <= now()->subWeek())
+                        {
+                            $next_tip = true;
+                        }
+                        break;                
+                    case 'monthly':
+                        if($userTip->last_tip <= now()->subMonth())
+                        {
+                            $next_tip = true;
+                        }
+                        break;
+                    default:
+                        Log::info('Invalid tip frequency');
+                        continue 2;
+                }
+
+                if(! $next_tip)
+                {
+                    Log::info("Not yet time for next tip");
+                    continue;
+                }
+                
                 $payment_verified = false;
                 $amount = //convert flk cowrie to NGN
                 $tx_ref = date('Ymdhis');
