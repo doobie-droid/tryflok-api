@@ -41,6 +41,18 @@ class Main extends API
         return $this->_post('v3/accounts/resolve', $data);
     }
 
+    public function recurrentTipCharge(string $card_token, string $email, string $tx_ref, string $amount): \stdClass
+    {
+        $data = [
+            'card_token' => $card_token,
+            'email' => $email,
+            'amount' => $amount,
+            'currency' => 'NGN',
+            'tx_ref' => $tx_ref,
+        ];
+        return $this->_post('v3/tokenized-charges', $data);
+    }
+
     public function verifyTransaction(string $id): \stdClass
     {
         return $this->_get("v3/transactions/{$id}/verify");

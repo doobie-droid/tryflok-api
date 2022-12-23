@@ -121,6 +121,13 @@ class AnonymousUserTip implements ShouldQueue
                     'card_token' => $this->data['card_token'],
                 ]);
             }
+
+            if (! is_null($this->data['last_tip']))
+            {
+                $userTip = UserTip::where('id', $this->data['id'])->first();
+                $userTip->last_tip = now();
+                $userTip->save();
+            }
             // NotifyTippingJob::dispatch([
             //     'tipper' => $request->user(),
             //     'tippee' => $userToTip,

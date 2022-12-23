@@ -38,6 +38,11 @@ class Flutterwave
         return $this->driver->validateAccountNumber($account_number, $bank_code);
     }
 
+    public function recurrentTipCharge(string $card_token, string $email, string $tx_ref, string $amount): \stdClass
+    {
+        return $this->driver->recurrentTipCharge($card_token, $email, $tx_ref, $amount);
+    }
+
     public function verifyTransaction(string $id): \stdClass
     {
         return $this->driver->verifyTransaction($id);
