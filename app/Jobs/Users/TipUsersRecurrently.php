@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use App\Constants\Constants;
 use App\Mail\User\FailedTipMail;
+use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 
 class TipUsersRecurrently implements ShouldQueue
 {
@@ -169,6 +170,7 @@ class TipUsersRecurrently implements ShouldQueue
                 'tippee' => $tippee,
                 'amount_in_flk' => $creator_share_in_flk,
                 'wallet_transaction' => $transaction,
+                'tipper_email' => '',
             ]);     
         }
         } catch (\Exception $exception) {
@@ -182,6 +184,7 @@ class TipUsersRecurrently implements ShouldQueue
         Mail::to($tipper)->send(new FailedTipMail([
         'user' => $tipper,
         'message' => $message,
+        // 'email' => '',
     ]));
     }
 }

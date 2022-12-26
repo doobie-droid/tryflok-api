@@ -128,12 +128,12 @@ class AnonymousUserTip implements ShouldQueue
                 $userTip->last_tip = now();
                 $userTip->save();
             }
-            // NotifyTippingJob::dispatch([
-            //     'tipper' => $request->user(),
-            //     'tippee' => $userToTip,
-            //     'amount_in_flk' => $creator_share_in_flk,
-            //     'wallet_transaction' => $transaction,
-            // ]);
+            NotifyTippingJob::dispatch([
+                'tipper_email' => $this->data['email'],
+                'tippee' => $userToTip,
+                'amount_in_flk' => $creator_share_in_flk,
+                'wallet_transaction' => $transaction,
+            ]);
         } catch (\Exception $exception) {
             Log::error($exception);
         }

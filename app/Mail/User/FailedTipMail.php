@@ -12,6 +12,7 @@ class FailedTipMail extends Mailable
     use Queueable, SerializesModels;
     public $user;
     public $message;
+    public $email;
 
     /**
      * Create a new message instance.
@@ -22,6 +23,7 @@ class FailedTipMail extends Mailable
     {
         $this->user = $data['user'];
         $this->message = $data['message'];
+        $this->email = $data['email'];
     }
 
     /**
@@ -34,6 +36,7 @@ class FailedTipMail extends Mailable
         return $this->view('emails.user.user-tip-unsuccessful')->with([
             'user' => $this->user,
             'failure_message' => $this->message,
+            'email' => $this->email,
         ])->subject('Tip User Failed!');
     }
 }

@@ -22,6 +22,7 @@ class NotifyTipping implements ShouldQueue
     private $amount_in_flk;
     private $wallet_transaction;
     private $custom_message;
+    private $tipper_email;
     /**
      * Create a new job instance.
      *
@@ -34,6 +35,7 @@ class NotifyTipping implements ShouldQueue
         $this->amount_in_flk = $data['amount_in_flk'];
         $this->wallet_transaction = $data['wallet_transaction'];
         $this->custom_message = array_key_exists('custom_message', $data) ? $data['custom_message'] : '';
+        $this->tipper_email = $data['tipper_email'];
     }
 
     /**
@@ -43,7 +45,16 @@ class NotifyTipping implements ShouldQueue
      */
     public function handle()
     {
-        $message = "@{$this->tipper->username} just gifted you {$this->amount_in_flk} Flok Cowries";
+        $tipper = '';
+        if (! is_null($this->tipper_email))
+        {
+            $tipper = $this->tipper_email;
+        }
+        if (! is_null($this->tipper))
+        {
+            $tipper = $this->tipper->username;
+        }
+        $message = "@{$tipper} just gifted you {$this->amount_in_flk} Flok Cowries";
         if (! is_null($this->custom_message) && $this->custom_message !== '') {
             $message = $this->custom_message;
         }

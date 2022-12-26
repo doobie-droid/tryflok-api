@@ -11,7 +11,10 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use App\Services\Payment\Providers\Flutterwave\Flutterwave;
 use App\Models\Configuration;
-use App\Jobs\Users\TipUsersRecurrentlyWithFlutterwave as TipUsersRecurrentlyWithFlutterwaveJob;
+use App\Models\User;
+use App\Jobs\Users\AnonymousUserTip as AnonymousUserTipJob;
+use Illuminate\Support\Facades\Mail;
+
 
 class TipUsersRecurrentlyWithFlutterwave implements ShouldQueue
 {
@@ -38,6 +41,7 @@ class TipUsersRecurrentlyWithFlutterwave implements ShouldQueue
         try {
             foreach($this->datas as $data) 
             {
+                $userToTip = User::where('id', $this->data['tippee_user_id'])->first();
                 $next_tip = false;
                 switch ($data->tip_frequency) {
                     case 'daily':
@@ -68,11 +72,11 @@ class TipUsersRecurrentlyWithFlutterwave implements ShouldQueue
                     Log::info("Not yet time for next tip");
                     continue;
                 }
-                
+
                 $payment_verified = false;
-                $amount = //convert flk cowrie to NGN
-                $tx_ref = date('Ymdhis');
                 $naira_to_dollar = Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
+                $amount = bcdiv($data['flk'], 100, 2) * $naira_to_dollar->value;
+                $tx_ref = date('Ymdhis');
                 $flutterwave = new Flutterwave;
                 $req = $flutterwave->recurrentTipCharge($data['card_token'], $data['email'], $tx_ref, $amount);
                 if (($req->status === 'success' && $req->data->status === 'successful')) {
@@ -85,12 +89,13 @@ class TipUsersRecurrentlyWithFlutterwave implements ShouldQueue
                 if(! $payment_verified)
                 {
                     Log::info("Payment not verified");
-                    //send mail to user?
+                    //send mail to user
+                    $this->sendFailedTipMail($data['email'], $userToTip);
                     continue;
                 }
 
-                TipUsersRecurrentlyWithFlutterwaveJob::dispatchNow([
-                    'tippee_id' => $data['tippee_user_id'],
+                AnonymousUserTipJob::dispatchNow([
+                    'tippee' => $userToTip,
                     'flk' => $data['amount_in_flk'],
                     'email' => $data['email'],
                     'last_tip' => $data['last_tip'],
@@ -102,5 +107,15 @@ class TipUsersRecurrentlyWithFlutterwave implements ShouldQueue
         } catch (\Exception $exception) {
             Log::error($exception);
         }
+    }
+
+    public function sendFailedTipMail($email, $userToTip)
+    {
+        $message = "Sorry, we could not tip {$userToTip->username} because the payment provider did not verify the payment";
+        Mail::to($email)->send(new FailedTipMail([
+        'email' => $email,
+        'message' => $message,
+        // 'user' => '',
+    ]));
     }
 }

@@ -1072,6 +1072,7 @@ class UserController extends Controller
                 'tippee' => $userToTip,
                 'amount_in_flk' => $creator_share_in_flk,
                 'wallet_transaction' => $transaction,
+                'tipper_email' => '',
             ]);
 
             return $this->respondWithSuccess('User has been tipped successfully');
@@ -1185,7 +1186,7 @@ class UserController extends Controller
                     $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
                     if (($req->status === 'success' && $req->data->status === 'successful')) {
                         $amount_in_dollars = bcdiv($req->data->amount, $naira_to_dollar->value, 2);
-                        $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                        $actual_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
                         $fee = bcdiv($req->data->app_fee, $naira_to_dollar->value, 2);
                         $provider_id = $req->data->id;
                         $card_token = $req->data->card->token;
@@ -1195,13 +1196,13 @@ class UserController extends Controller
                 case 'stripe':
                     $stripe = new StripePayment;
                     $amount_in_dollars = bcdiv($request->amount_in_cents, 100, 2);
-                    $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                    $actual_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
                     $req = $stripe->chargeViaToken($request->amount_in_cents, $request->provider_response['id']);
 
                     if (($req->status === 'succeeded' && $req->paid === true)) {
                         $fee = bcdiv(bcadd(bcmul(0.029, $req->amount, 2), 30, 2), 100, 2); //2.9% + 30c convert to dollar
                         $amount_in_dollars = bcdiv($req->amount, 100, 2);
-                        $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                        $actual_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
                         $provider_id = $req->id;
                         $payment_verified = true;
                     }                    
@@ -1221,7 +1222,7 @@ class UserController extends Controller
                 'provider' => $request->provider,
                 'provider_id' => $provider_id,
                 'amount' => $amount_in_dollars,
-                'flk' => $request->expected_flk_amount,
+                'flk' => $actual_flk_based_on_amount,
                 'fee' => $fee,
                 'originating_currency' => $request->originating_currency,
                 'originating_content_id' => $request->originating_content_id,
