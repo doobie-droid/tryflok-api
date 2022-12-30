@@ -46,11 +46,11 @@ class NotifyTipping implements ShouldQueue
     public function handle()
     {
         $tipper = '';
-        if (! is_null($this->tipper_email))
+        if ($this->tipper_email != '')
         {
             $tipper = $this->tipper_email;
         }
-        if (! is_null($this->tipper))
+        if ($this->tipper != '')
         {
             $tipper = $this->tipper->username;
         }
@@ -58,39 +58,44 @@ class NotifyTipping implements ShouldQueue
         if (! is_null($this->custom_message) && $this->custom_message !== '') {
             $message = $this->custom_message;
         }
+
         // TO DO: send push notification to user
-        $notification = $this->tippee->notifications()->create([
-            'notifier_id' => $this->tipper->id,
-            'message' => $message,
-            'notificable_type' => 'wallet_transaction',
-            'notificable_id' => $this->wallet_transaction->id,
-        ]);
-        $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notification->id)->first();
-        $notification = new NotificationResource($notification);
-        $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
-        if (! is_null($this->tipper->profile_picture()->first())) {
-            $image = $this->tipper->profile_picture()->first()->url;
-        }
-        // send push notification
-        $client = new Client;
-        $url = 'https://fcm.googleapis.com/fcm/send';
-        $authorization_key = config('services.google.fcm_server_key');
-        foreach ($this->tippee->notificationTokens as $notification_token) {
-            $client->post($url, [
-                'headers' => [
-                    'Authorization' => "key={$authorization_key}",
-                ],
-                'json' => [
-                    'to' => $notification_token->token,
-                    'notification' => [
-                        'title' => 'You just got gifted!',
-                        'body' => $message,
-                        'image' => $image,
-                    ],
-                    'data' => $notification,
-                ],
+        if ($this->tipper != '') 
+        {
+            $notification = $this->tippee->notifications()->create([
+                'notifier_id' => $this->tipper->id,
+                'message' => $message,
+                'notificable_type' => 'wallet_transaction',
+                'notificable_id' => $this->wallet_transaction->id,
             ]);
+            $notification = Notification::with('notifier', 'notifier.profile_picture', 'notificable')->where('id', $notification->id)->first();
+            $notification = new NotificationResource($notification);
+            $image = 'https://res.cloudinary.com/akiddie/image/upload/v1639156702/flok-logo.png';
+            if (! is_null($this->tipper->profile_picture()->first())) {
+                $image = $this->tipper->profile_picture()->first()->url;
+            }
+            // send push notification
+            $client = new Client;
+            $url = 'https://fcm.googleapis.com/fcm/send';
+            $authorization_key = config('services.google.fcm_server_key');
+            foreach ($this->tippee->notificationTokens as $notification_token) {
+                $client->post($url, [
+                    'headers' => [
+                        'Authorization' => "key={$authorization_key}",
+                    ],
+                    'json' => [
+                        'to' => $notification_token->token,
+                        'notification' => [
+                            'title' => 'You just got gifted!',
+                            'body' => $message,
+                            'image' => $image,
+                        ],
+                        'data' => $notification,
+                    ],
+                ]);
+            }
         }
+        
         Mail::to($this->tippee)->send(new TippedMail([
             'user' => $this->tippee,
             'message' => $message,

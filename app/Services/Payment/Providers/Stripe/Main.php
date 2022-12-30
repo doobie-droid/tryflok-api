@@ -50,6 +50,23 @@ class Main extends API
         ]);
     }
 
+    public function createCustomer(string $source, string $email)
+    {
+        return $this->_post('v1/customers', [
+            'source' => $source,
+            'email' => $email,
+        ]);
+    }
+
+    public function createCharge(int $amount, string $currency, string $customer_id)
+    {
+        return $this->_post('v1/charges', [
+            'amount' => $amount,
+            'currency' => $currency,
+            'customer' => $customer_id,
+        ]);
+    }
+
     public function getTransferStatus(string $id): \stdClass
     {
         return $this->_get("v1/transfers/{$id}");

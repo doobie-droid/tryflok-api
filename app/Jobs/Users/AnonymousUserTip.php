@@ -14,6 +14,7 @@ use App\Models\UserTip;
 use App\Models\WalletTransaction;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 
 class AnonymousUserTip implements ShouldQueue
 {
@@ -41,7 +42,6 @@ class AnonymousUserTip implements ShouldQueue
         try{
             $userToTip = User::where('id', $this->data['tippee_id'])->first();
             $amount_in_dollars = bcdiv($this->data['flk'], 100, 6);
-
             $platform_charge = Constants::TIPPING_CHARGE;
             if ($userToTip->user_charge_type === 'non-profit') {
                 $platform_charge = Constants::TIPPING_CHARGE;
@@ -63,7 +63,6 @@ class AnonymousUserTip implements ShouldQueue
                 'revenue_from' => 'tip',
                 'added_to_payout' => 1,
             ]);
-
             if ( ! is_null($this->data['originating_currency'])) {
                 $originating_currency = $this->data['originating_currency'];
                 $revenue->originating_currency = $originating_currency;
@@ -102,11 +101,36 @@ class AnonymousUserTip implements ShouldQueue
                 'transaction_type' => 'fund',
                 'details' => "@{$this->data['email']} gifted you {$creator_share_in_flk} Flok Cowries",
             ]);
+
+            //record payment on payment table
+            $transaction->payments()->create([
+                'payee_id' => $userToTip->id,
+                'amount' => $amount_in_dollars,
+                'payment_processor_fee' => $this->data['fee'],
+                'provider' => $this->data['provider'],
+                'provider_id' => $this->data['provider_id'],
+                'payer_email' => $this->data['email']
+            ]);
             $userToTip->wallet->balance = $newWalletBalance;
             $userToTip->wallet->save();
             DB::commit();
+
+            $customer_id = '';
+            $card_token = '';
             
-            if(! is_null($this->data['tip_frequency']) && $this->data['tip_frequency'] != 'one-off')
+            if ($this->data['provider'] === 'flutterwave')
+            {
+                $provider = 'flutterwave';
+                $card_token = $this->data['card_token'];
+            }
+
+            if ($this->data['provider'] === 'stripe')
+            {
+                $provider = 'stripe';
+                $customer_id = $this->data['customer_id'];
+            }
+            
+            if(! is_null($this->data['tip_frequency']) && $this->data['tip_frequency'] != 'one-off' && $this->data['tip_frequency'] != '')
             {
                 $userTip = UserTip::create([
                     'tipper_email' => $this->data['email'],
@@ -117,18 +141,19 @@ class AnonymousUserTip implements ShouldQueue
                     'originating_client_source' => $originating_client_source,
                     'originating_content_id' => $originating_content_id,
                     'last_tip' => now(),
-                    'provider' => 'flutterwave',
-                    'card_token' => $this->data['card_token'],
+                    'provider' => $provider,
+                    'card_token' => $card_token,
+                    'customer_id' => $customer_id,
                 ]);
             }
-
-            if (! is_null($this->data['last_tip']))
+            if (! is_null($this->data['last_tip']) && $this->data['last_tip'] != '')
             {
                 $userTip = UserTip::where('id', $this->data['id'])->first();
                 $userTip->last_tip = now();
                 $userTip->save();
             }
-            NotifyTippingJob::dispatch([
+            NotifyTippingJob::dispatchNow([
+                'tipper' => '',
                 'tipper_email' => $this->data['email'],
                 'tippee' => $userToTip,
                 'amount_in_flk' => $creator_share_in_flk,

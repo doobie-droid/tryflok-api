@@ -34,6 +34,7 @@ use PragmaRX\Countries\Package\Countries as PragmarxCountries;
 use \Stripe\Account as StripeAccount;
 use \Stripe\AccountLink as StripeAccountLink;
 use \Stripe\Stripe;
+use \Stripe\Customer;
 use \Stripe\StripeClient;
 use App\Services\Payment\Providers\Flutterwave\Flutterwave;
 use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
@@ -1178,6 +1179,7 @@ class UserController extends Controller
             $expected_flk_based_on_amount = 0;
             $provider_id = '';
             $card_token = '';
+            $customer_id = '';
             $naira_to_dollar = Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
 
             switch ($request->provider) {
@@ -1197,15 +1199,20 @@ class UserController extends Controller
                     $stripe = new StripePayment;
                     $amount_in_dollars = bcdiv($request->amount_in_cents, 100, 2);
                     $actual_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
-                    $req = $stripe->chargeViaToken($request->amount_in_cents, $request->provider_response['id']);
 
-                    if (($req->status === 'succeeded' && $req->paid === true)) {
-                        $fee = bcdiv(bcadd(bcmul(0.029, $req->amount, 2), 30, 2), 100, 2); //2.9% + 30c convert to dollar
-                        $amount_in_dollars = bcdiv($req->amount, 100, 2);
+                    //create a customer
+                    $customer = $stripe->createCustomer($request->provider_response['id'], $request->email );
+                    // Charge the Customer instead of the card:
+                    $charge = $stripe->createCharge($request->amount_in_cents, 'usd', $customer->id);
+                    if ($charge->status === 'succeeded')
+                    {
+                        $customer_id = $customer->id;
+                        $fee = bcdiv(bcadd(bcmul(0.029, $charge->amount, 2), 30, 2), 100, 2); //2.9% + 30c convert to dollar
+                        $amount_in_dollars = bcdiv($charge->amount, 100, 2);
                         $actual_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
-                        $provider_id = $req->id;
+                        $provider_id = $charge->id;
                         $payment_verified = true;
-                    }                    
+                    }                 
                     break;
                 default:
                     return $this->respondBadRequest('Invalid provider specified');
@@ -1218,6 +1225,7 @@ class UserController extends Controller
             AnonymousUserTipJob::dispatchNow([
                 'email' => $request->email,
                 'card_token' => $card_token,
+                'customer_id' => $customer_id,
                 'tippee_id' => $request->id,
                 'provider' => $request->provider,
                 'provider_id' => $provider_id,
@@ -1228,10 +1236,10 @@ class UserController extends Controller
                 'originating_content_id' => $request->originating_content_id,
                 'originating_client_source' => $request->originating_client_source,
                 'tip_frequency' => $request->tip_frequency,
-            ]);
-            
+                'last_tip' => '',
+            ]);            
             Log::info("Anonymous tipping was successful");
-            return $this->respondWithSuccess('Tip sent successfully');
+            return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

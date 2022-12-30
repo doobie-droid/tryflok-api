@@ -4,24 +4,24 @@ namespace App\Console\Commands\Users;
 
 use Illuminate\Console\Command;
 use App\Models\UserTip;
-use App\Jobs\Users\TipUsersRecurrentlyWithFlutterwave as TipUsersRecurrentlyWithFlutterwaveJob;
+use App\Jobs\Users\TipUsersRecurrentlyWithWallet as TipUsersRecurrentlyWithWalletJob;
 use Illuminate\Support\Facades\Log;
 
-class TipUsersRecurrentlyWithFlutterwave extends Command
+class TipUsersRecurrentlyWithWallet extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'flok:tip-users-recurrently-with-flutterwave';
+    protected $signature = 'flok:tip-users-recurrently-with-wallet';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Tip users recurrently with flutterwave';
+    protected $description = 'Tip users recurrently with wallet';
 
     /**
      * Create a new command instance.
@@ -43,9 +43,11 @@ class TipUsersRecurrentlyWithFlutterwave extends Command
         try{
             UserTip::
                 where('status', 'active')
-                ->where('provider', 'flutterwave')
+                ->where('provider', 'wallet')
                 ->chunk(1000, function ($userTips) {                
-                TipUsersRecurrentlyWithFlutterwaveJob::dispatchNow($userTips);
+                // foreach ($userTips as $userTip) {
+                    TipUsersRecurrentlyWithWalletJob::dispatchNow($userTips);
+                // }
             });
 
         } catch (\Exception $exception) {

@@ -38,4 +38,14 @@ class Stripe
     {
         return $this->driver->getTransferStatus($id);
     }
+
+    public function createCustomer(string $source, string $email): \stdClass
+    {
+        return $this->driver->createCustomer($source, $email);
+    }
+
+    public function createCharge(int $amount, string $currency, string $customer_id): \stdClass
+    {
+        return $this->driver->createCharge($amount, $currency, $customer_id);
+    }
 }

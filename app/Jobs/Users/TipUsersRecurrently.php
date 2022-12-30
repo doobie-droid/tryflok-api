@@ -8,15 +8,15 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Models;
-use App\Models\UserTip;
-use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\Log;
+use App\Services\Payment\Providers\Flutterwave\Flutterwave;
+use App\Models\Configuration;
+use App\Models\User;
+use App\Jobs\Users\AnonymousUserTip as AnonymousUserTipJob;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
-use App\Constants\Constants;
+use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
 use App\Mail\User\FailedTipMail;
-use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
+
 
 class TipUsersRecurrently implements ShouldQueue
 {
@@ -40,151 +40,112 @@ class TipUsersRecurrently implements ShouldQueue
      */
     public function handle()
     {
-        DB::beginTransaction();
         try {
             $datas = $this->data;
-            foreach ($datas as $userTip)
+            foreach($datas as $userTip) 
             {
-            $amount_in_flk = $userTip->amount_in_flk;
-            $tipper = Models\User::where('id', $userTip->tipper_user_id)->first();
-            $tippee = Models\User::where('id', $userTip->tippee_user_id)->first();
-            $next_tip = false;
-            switch ($userTip->tip_frequency) {
-                case 'daily':
-                    if($userTip->last_tip <= now()->subDay())
-                    {
-                        $next_tip = true;
-                    }
-                    break;
-                case 'weekly':
-                    if($userTip->last_tip <= now()->subWeek())
-                    {
-                        $next_tip = true;
-                    }
-                    break;                
-                case 'monthly':
-                    if($userTip->last_tip <= now()->subMonth())
-                    {
-                        $next_tip = true;
-                    }
-                    break;
-                default:
-                    Log::info('Invalid tip frequency');
+                $userToTip = User::where('id', $userTip->tippee_user_id)->first();
+                $next_tip = false;
+                switch ($userTip->tip_frequency) {
+                    case 'daily':
+                        if($userTip->last_tip <= now()->subDay())
+                        {
+                            $next_tip = true;
+                        }
+                        break;
+                    case 'weekly':
+                        if($userTip->last_tip <= now()->subWeek())
+                        {
+                            $next_tip = true;
+                        }
+                        break;                
+                    case 'monthly':
+                        if($userTip->last_tip <= now()->subMonth())
+                        {
+                            $next_tip = true;
+                        }
+                        break;
+                    default:
+                        Log::info('Invalid tip frequency');
+                        continue 2;
+                }
+                if(! $next_tip)
+                {
+                    Log::info("Not yet time for next tip");
+                    continue;
+                }
+                $payment_verified = false;                
+
+                switch ($userTip->provider) {
+                    case 'flutterwave':
+                        $naira_to_dollar = Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
+                        $amount = bcdiv($userTip->amount_in_flk, 100, 2) * $naira_to_dollar->value;
+                        $tx_ref = date('Ymdhis');
+                        $flutterwave = new Flutterwave;
+                        $req = $flutterwave->recurrentTipCharge($userTip->card_token, $userTip->tipper_email, $tx_ref, $amount);
+                        if (($req->status === 'success' && $req->data->status === 'successful')) {
+                            $amount_in_dollars = bcdiv($req->data->amount, $naira_to_dollar->value, 2);
+                            $actual_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                            $provider_id = $req->data->id;
+                            $fee = bcdiv($req->data->app_fee, $naira_to_dollar->value, 2);
+                            $payment_verified = true;
+                        }
+                        break;
+
+                    case 'stripe':
+                        $amount_in_cents = bcmul($userTip->amount_in_flk, 1.03, 2);
+                        $stripe = new StripePayment;
+                        // Charge the Customer instead of the card:
+                        $charge = $stripe->createCharge($amount_in_cents, 'usd', $userTip->customer_id);
+                        if ($charge->status === 'succeeded')
+                            {
+                                $fee = bcdiv(bcadd(bcmul(0.029, $charge->amount, 2), 30, 2), 100, 2); //2.9% + 30c convert to dollar
+                                $amount_in_dollars = bcdiv($charge->amount, 100, 2);
+                                $provider_id = $charge->id;
+                                $actual_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                                $payment_verified = true;
+                            }  
+                        break;
+                    default:
+                    Log::info('Invalid provider');
                     continue 2;
+                }                
+                if(! $payment_verified)
+                {
+                    Log::info("Payment not verified");
+                    //send mail to user
+                    // $this->sendFailedTipMail($userTip->tipper_email, $userToTip);
+                    continue;
+                }
+                AnonymousUserTipJob::dispatchNow([
+                    'tippee_id' => $userToTip->id,
+                    'flk' => $actual_flk_based_on_amount,
+                    'email' => $userTip->tipper_email,
+                    'last_tip' => $userTip->last_tip,
+                    'originating_content_id' => $userTip->originating_content_id,
+                    'originating_client_source' => $userTip->originating_client_source,
+                    'originating_currency' => $userTip->originating_currency,
+                    'id' => $userTip->id,
+                    'provider' => $userTip->provider,
+                    'card_token' => $userTip->card_token,
+                    'customer_id' => $userTip->customer_id,
+                    'fee' => $fee,
+                    'provider_id' => $provider_id,
+                    'tip_frequency' => '',
+                ]);
             }
-
-            if(! $next_tip)
-            {
-                Log::info("Not yet time for next tip");
-                continue;
-            }
-            if ((float) $tipper->wallet->balance < (float) $amount_in_flk) {
-                Log::info("Not enough flk balance");
-                $this->sendFailedTipMail($tipper, $tippee);
-                continue;
-            }
-
-            $amount_in_dollars = bcdiv($amount_in_flk, 100, 6);
-            $newWalletBalance = bcsub($tipper->wallet->balance, $amount_in_flk, 2);
-            $transaction = Models\WalletTransaction::create([
-                'wallet_id' => $tipper->wallet->id,
-                'amount' => $amount_in_flk,
-                'balance' => $newWalletBalance,
-                'transaction_type' => 'deduct',
-                'details' => "You gifted @{$tippee->username} {$amount_in_flk} Flok Cowries",
-            ]);
-            $transaction->payments()->create([
-                'payer_id' => $tipper->id,
-                'payee_id' => $tippee->id,
-                'amount' => $amount_in_dollars,
-                'payment_processor_fee' => 0,
-                'provider' => 'wallet',
-                'provider_id' => $transaction->id,
-            ]);
-            $tipper->wallet->balance = $newWalletBalance;
-            $tipper->wallet->save();
-
-            $platform_charge = Constants::TIPPING_CHARGE;
-            if ($tippee->user_charge_type === 'non-profit') {
-                $platform_charge = Constants::TIPPING_CHARGE;
-            }
-            $platform_share = bcmul($amount_in_dollars, $platform_charge, 6);
-            $creator_share = bcmul($amount_in_dollars, 1 - $platform_charge, 6);
-
-            $revenue = $tippee->revenues()->create([
-                'revenueable_type' => 'user',
-                'revenueable_id' => $tippee->id,
-                'amount' => $amount_in_dollars,
-                'payment_processor_fee' => 0,
-                'platform_share' => $platform_share,
-                'benefactor_share' => $creator_share,
-                'referral_bonus' => 0,
-                'revenue_from' => 'tip',
-                'added_to_payout' => 1,
-            ]);
-
-            if ( ! is_null($userTip->originating_currency)) {
-                $revenue->originating_currency = $userTip->originating_currency;
-            }
-
-            if ( ! is_null($userTip->originating_content_id)) {
-                $revenue->originating_content_id = $userTip->originating_content_id;
-            }
-
-            if ( ! is_null($userTip->originating_client_source)) {
-                $revenue->originating_client_source = $userTip->originating_client_source;
-            }
-
-            $revenue->save();
-
-            if (! is_null($revenue->originating_content_id)) {
-                $content_tip_count = $tippee->revenues()->where('originating_content_id', $revenue->originating_content_id)->where('revenue_from', 'tip')->count();
-                $websocket_client = new \WebSocket\Client(config('services.websocket.url'));
-                $websocket_client->text(json_encode([
-                    'event' => 'app-update-number-of-tips-for-content',
-                    'source_type' => 'app',
-                    'content_id' => $revenue->originating_content_id,
-                    'tips_count' => $content_tip_count
-                ]));
-                $websocket_client->close();
-            }
-
-            $creator_share_in_flk = $creator_share * 100;
-            $newWalletBalance = bcadd($tippee->wallet->balance, $creator_share_in_flk, 2);
-            $transaction = WalletTransaction::create([
-                'wallet_id' => $tippee->wallet->id,
-                'amount' => $creator_share_in_flk,
-                'balance' => $newWalletBalance,
-                'transaction_type' => 'fund',
-                'details' => "@{$tipper->username} gifted you {$creator_share_in_flk} Flok Cowries",
-            ]);
-            $tippee->wallet->balance = $newWalletBalance;
-            $tippee->wallet->save();
-
-            $userTip->last_tip = now();
-            $userTip->save();
-            DB::commit();
-            
-            NotifyTippingJob::dispatch([
-                'tipper' => $tipper,
-                'tippee' => $tippee,
-                'amount_in_flk' => $creator_share_in_flk,
-                'wallet_transaction' => $transaction,
-                'tipper_email' => '',
-            ]);     
-        }
         } catch (\Exception $exception) {
             Log::error($exception);
         }
     }
 
-    public function sendFailedTipMail($tipper, $tippee)
+    public function sendFailedTipMail($email, $userToTip)
     {
-        $message = "Sorry, we could not tip {$tippee->username} because you do not have enough flk in your wallet";
-        Mail::to($tipper)->send(new FailedTipMail([
-        'user' => $tipper,
+        $message = "Sorry, we could not tip {$userToTip->username} because the payment provider did not verify the payment";
+        Mail::to($email)->send(new FailedTipMail([
+        'email' => $email,
         'message' => $message,
-        // 'email' => '',
+        'user' => '',
     ]));
     }
 }

@@ -43,13 +43,12 @@ class TipUsersRecurrently extends Command
         try{
             UserTip::
                 where('status', 'active')
-                ->where('provider', 'wallet')
-                ->chunk(1000, function ($userTips) {                
-                // foreach ($userTips as $userTip) {
+                ->where(function ($query) {
+                    $query->where('provider', 'flutterwave')->orWhere('provider', 'stripe');
+                }) 
+                ->chunk(1000, function ($userTips) {      
                 TipUsersRecurrentlyJob::dispatchNow($userTips);
-                // }
             });
-
         } catch (\Exception $exception) {
             throw $exception;
         }

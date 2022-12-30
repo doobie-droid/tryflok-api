@@ -9,12 +9,12 @@
             <tr>
                 <td class="content-cell" style="word-break: break-word; font-family: &quot;Nunito Sans&quot;, Helvetica, Arial, sans-serif; font-size: 16px; padding: 45px;">
                     <div class="f-fallback">
-                    @isset($user)    
+                    @if ($user != '')    
                         <h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left;" align="left">Hi {{ $user['name'] }}!</h1>
-                    @endisset
-                    @isset($email)
-                    <h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left;" align="left">Hi {{ $user['name'] }}!</h1>
-                    @endisset
+                    @endif
+                    @if ($email != '')
+                    <h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left;" align="left">Hi {{ $email }}!</h1>
+                    @endif
                         <p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">{{ $failure_message }}</p>
 
 						<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you have any questions, feel free to <a href="mailto:contact@tryflok.com" style="color: #6E4CF5;">send us an email</a>.</p>
