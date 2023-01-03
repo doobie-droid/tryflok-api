@@ -42,7 +42,7 @@ class TipUsersRecurrentlyWithWallet extends Command
     {
         try{
             UserTip::
-                where('status', 'active')
+                where('is_active', 1)
                 ->where('provider', 'wallet')
                 ->chunk(1000, function ($userTips) {                
                 // foreach ($userTips as $userTip) {
