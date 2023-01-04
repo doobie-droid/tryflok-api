@@ -75,8 +75,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     });
 
     Route::group(['prefix' => 'external-community'], function () {
-        Route::post('/subscribe', 'UserController@subscribeExternalCommunity')->name('subscribe-external-community');
-        Route::patch('/unsubscribe', 'UserController@unSubscribeExternalCommunity')->name('unsubscribe-external-community');
+        Route::post('/{id}/join', 'UserController@joinExternalCommunity')->name('join-external-community');
+        Route::patch('/{id}/leave', 'UserController@leaveExternalCommunity')->name('leave-external-community');
     });
 
     Route::group(['prefix' => 'users'], function () {

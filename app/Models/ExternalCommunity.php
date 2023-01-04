@@ -34,4 +34,8 @@ class ExternalCommunity extends Model
 
     protected $guard_name = 'api';
 
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

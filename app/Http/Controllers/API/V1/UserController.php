@@ -18,6 +18,7 @@ use App\Models\Collection;
 use App\Models\Content;
 use App\Models\PaymentAccount;
 use App\Models\Subscription;
+use App\Models\ExternalCommunity;
 use App\Models\User;
 use App\Models\UserTip;
 use App\Models\Userable;
@@ -1246,14 +1247,61 @@ class UserController extends Controller
         }
     }
     
-    public function subscribeExternalCommunity(Request $request, $id) 
+    public function joinExternalCommunity(Request $request, $id) 
     {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:users,id'],
+                'email' => ['required', 'string', 'email', 'max:255'],
+                'name' => ['required', 'string'],
+            ]);
 
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $externalCommunity = ExternalCommunity::where('user_id', $request->id)->where('email', $request->email)->first();
+            if (is_null($externalCommunity))
+            {
+                ExternalCommunity::create([
+                    'user_id' => $request->id,
+                    'email' => $request->email,
+                    'name' => $request->name,
+                ]);
+            }
+            return $this->respondWithSuccess('Community joined successfully');           
+
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        } 
     }
     
-    public function unSubscribeExternalCommunity(Request $request, $id)
+    public function leaveExternalCommunity(Request $request, $id)
     {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:users,id'],
+                'email' => ['required', 'string', 'email', 'max:255'],
+            ]);
 
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            //make sure email matches
+            $externalCommunity = ExternalCommunity::where('user_id', $request->id)->where('email', $request->email)->first();
+            if (is_null($externalCommunity))
+            {
+                return $this->respondBadRequest('You cannot leave this community because your email does not match');
+            }
+            $externalCommunity->delete();
+            return $this->respondWithSuccess('Community left successfully');           
+
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
     }
     
     public function importExternalCommunity(Request $request)
