@@ -1245,4 +1245,24 @@ class UserController extends Controller
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
+    
+    public function subscribeExternalCommunity(Request $request, $id) 
+    {
+
+    }
+    
+    public function unSubscribeExternalCommunity(Request $request, $id)
+    {
+
+    }
+    
+    public function importExternalCommunity(Request $request)
+    {
+
+    }
+    
+    public function exportExternalCommunity(Request $request)
+    {
+
+    }
 }

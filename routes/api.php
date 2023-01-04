@@ -74,6 +74,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::post('anonymous-user-tip', 'UserController@anonymousUserTip')->name('anonymous-user-tip');
     });
 
+    Route::group(['prefix' => 'external-community'], function () {
+        Route::post('/subscribe', 'UserController@subscribeExternalCommunity')->name('subscribe-external-community');
+        Route::patch('/unsubscribe', 'UserController@unSubscribeExternalCommunity')->name('unsubscribe-external-community');
+    });
+
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', 'UserController@listUsers')->name('list-users');
         Route::get('{id}', 'UserController@showUser')->name('show-user');
@@ -183,6 +188,11 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'subscriptions'], function () {
             Route::patch('{id}', 'SubscriptionController@toggleAutorenew')->name('toggle-auto-renew');
+        });
+
+        Route::group(['prefix' => 'external-community'], function () {
+            Route::post('/', 'UserController@importExternalCommunity')->name('import-external-community');
+            Route::get('/', 'UserController@exportExternalCommunity')->name('export-external-community');
         });
 
         Route::group(['prefix' => 'tags'], function () {
