@@ -15,6 +15,7 @@ use App\Jobs\Content\MigrateYoutubeVideo as MigrateYoutubeVideoJob;
 use App\Jobs\Content\NotifyUserForLikedContent as NotifyUserForLikedContentJob;
 use App\Jobs\Users\NotifyAddedToChallenge as NotifyAddedToChallengeJob;
 use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
+use App\Jobs\Users\NotifyExternalCommunity as NotifyExternalCommunityJob;
 use App\Models\Asset;
 use App\Models\Collection;
 use App\Models\Content;
@@ -261,6 +262,11 @@ class ContentController extends Controller
                     ]);
                 }
             }
+
+            NotifyExternalCommunityJob::dispatchNow([
+                'user' => $user,
+                'content' => $content,
+            ]);
 
             $content = Content::where('id', $content->id)
             ->eagerLoadBaseRelations()

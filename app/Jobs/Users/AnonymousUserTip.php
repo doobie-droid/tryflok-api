@@ -13,6 +13,7 @@ use App\Constants\Constants;
 use App\Models\UserTip;
 use App\Models\WalletTransaction;
 use App\Models\User;
+use App\Models\ExternalCommunity;
 use Illuminate\Support\Facades\DB;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 
@@ -144,6 +145,11 @@ class AnonymousUserTip implements ShouldQueue
                     'provider' => $provider,
                     'card_token' => $card_token,
                     'customer_id' => $customer_id,
+                ]);
+
+                ExternalCommunity::create([
+                    'user_id' => $userToTip->id,
+                    'email' => $this->data['email'],
                 ]);
             }
             if (! is_null($this->data['last_tip']) && $this->data['last_tip'] != '')
