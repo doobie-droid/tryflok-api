@@ -13,6 +13,7 @@ use App\Jobs\Users\NotifyFollow as NotifyFollowJob;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 use App\Jobs\Users\SendReferralEmails as SendReferralEmailsJob;
 use App\Jobs\Users\AnonymousUserTip as AnonymousUserTipJob;
+use App\Jobs\Users\ImportExternalCommunity as ImportExternalCommunityJob;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\Content;
@@ -1306,7 +1307,23 @@ class UserController extends Controller
     
     public function importExternalCommunity(Request $request)
     {
+        try {
+            $validator = Validator::make($request->all(), [
+                'file' => ['required', 'max:102400', 'mimetypes:text/csv,text/plain,application/csv,text/comma-separated-values,text/anytext,application/octet-stream,application/txt'], // 100MB,
+            ]);
 
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+            
+            ImportExternalCommunityJob::dispatchNow([
+                'file' => $request->file,
+            ]);
+            return $this->respondWithSuccess('Community imported successfully');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
     }
     
     public function exportExternalCommunity(Request $request)
