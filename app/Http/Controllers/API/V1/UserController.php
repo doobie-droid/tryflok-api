@@ -14,6 +14,7 @@ use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 use App\Jobs\Users\SendReferralEmails as SendReferralEmailsJob;
 use App\Jobs\Users\AnonymousUserTip as AnonymousUserTipJob;
 use App\Jobs\Users\ImportExternalCommunity as ImportExternalCommunityJob;
+use App\Jobs\Users\ExportExternalCommunity as ExportExternalCommunityJob;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\Content;
@@ -1328,6 +1329,15 @@ class UserController extends Controller
     
     public function exportExternalCommunity(Request $request)
     {
+        try {
+            ExportExternalCommunityJob::dispatchNow([
+                'user' => $request->user(),
+            ]);
+            return $this->respondWithSuccess('Community retrieved successfully');
 
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
     }
 }
