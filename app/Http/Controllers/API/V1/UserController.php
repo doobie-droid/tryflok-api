@@ -1255,7 +1255,7 @@ class UserController extends Controller
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:users,id'],
                 'email' => ['required', 'string', 'email', 'max:255'],
-                'name' => ['required', 'string'],
+                'name' => ['sometimes', 'nullable', 'string'],
             ]);
 
             if ($validator->fails()) {
