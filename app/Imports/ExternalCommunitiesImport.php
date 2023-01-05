@@ -12,8 +12,16 @@ use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Validators\Failure;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class ExternalCommunitiesImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure, SkipsEmptyRows
+class ExternalCommunitiesImport implements ToModel, 
+WithHeadingRow, 
+WithValidation, 
+SkipsOnFailure, 
+SkipsEmptyRows,
+WithChunkReading,
+ShouldQueue
 {
     use Importable, SkipsFailures;
     /**
@@ -48,6 +56,11 @@ class ExternalCommunitiesImport implements ToModel, WithHeadingRow, WithValidati
              // Above is alias for as it always validates in batches
              '*.name' => ['sometimes', 'string'],
         ];
+    }
+
+    public function chunkSize(): int
+    {
+        return 1000;
     }
 
     /**

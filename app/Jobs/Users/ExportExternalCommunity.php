@@ -36,7 +36,7 @@ class ExportExternalCommunity implements ShouldQueue
      */
     public function handle()
     {
-        $externalCommunity = Excel::download(new ExternalCommunitiesExport($this->user), 'external-community.csv', \Maatwebsite\Excel\Excel::CSV);
+        $externalCommunity = Excel::download(new ExternalCommunitiesExport($this->user))->queue('external-community.csv', \Maatwebsite\Excel\Excel::CSV);
         $message = "Your external community is attached to this mail";
 
         Mail::to($this->user)->send(new ExportExternalCommunityMail([
