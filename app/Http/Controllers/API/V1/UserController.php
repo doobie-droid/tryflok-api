@@ -12,12 +12,17 @@ use App\Http\Resources\UserResourceWithSensitive;
 use App\Jobs\Users\NotifyFollow as NotifyFollowJob;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 use App\Jobs\Users\SendReferralEmails as SendReferralEmailsJob;
+use App\Jobs\Users\AnonymousUserTip as AnonymousUserTipJob;
+use App\Jobs\Users\ImportExternalCommunity as ImportExternalCommunityJob;
+use App\Jobs\Users\ExportExternalCommunity as ExportExternalCommunityJob;
 use App\Models\Cart;
 use App\Models\Collection;
 use App\Models\Content;
 use App\Models\PaymentAccount;
 use App\Models\Subscription;
+use App\Models\ExternalCommunity;
 use App\Models\User;
+use App\Models\UserTip;
 use App\Models\Userable;
 use App\Models\WalletTransaction;
 use App\Rules\AssetType as AssetTypeRule;
@@ -32,7 +37,11 @@ use PragmaRX\Countries\Package\Countries as PragmarxCountries;
 use \Stripe\Account as StripeAccount;
 use \Stripe\AccountLink as StripeAccountLink;
 use \Stripe\Stripe;
+use \Stripe\Customer;
 use \Stripe\StripeClient;
+use App\Services\Payment\Providers\Flutterwave\Flutterwave;
+use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
+use App\Models\Configuration;
 
 class UserController extends Controller
 {
@@ -946,7 +955,8 @@ class UserController extends Controller
                 'id' => ['required', 'string', 'exists:users,id'],
                 'originating_content_id' => ['sometimes', 'nullable', 'string', 'exists:contents,id'],
                 'originating_client_source' => ['sometimes', 'nullable', 'string', 'in:web,ios,android'],
-                'originating_currency' => ['sometimes', 'nullable', 'string']
+                'originating_currency' => ['sometimes', 'nullable', 'string'],
+                'tip_frequency' => ['sometimes', 'nullable', 'string', 'in:one-off,daily,weekly,monthly'],
             ]);
 
             if ($validator->fails()) {
@@ -988,6 +998,10 @@ class UserController extends Controller
             }
             $platform_share = bcmul($amount_in_dollars, $platform_charge, 6);
             $creator_share = bcmul($amount_in_dollars, 1 - $platform_charge, 6);
+
+            $originating_currency = '';
+            $originating_content_id = '';
+            $originating_client_source = '';
             $revenue = $userToTip->revenues()->create([
                 'revenueable_type' => 'user',
                 'revenueable_id' => $userToTip->id,
@@ -1001,15 +1015,18 @@ class UserController extends Controller
             ]);
 
             if ( ! is_null($request->originating_currency)) {
-                $revenue->originating_currency = $request->originating_currency;
+                $originating_currency = $request->originating_currency;
+                $revenue->originating_currency = $originating_currency;
             }
 
             if ( ! is_null($request->originating_content_id)) {
-                $revenue->originating_content_id = $request->originating_content_id;
+                $originating_content_id = $request->originating_content_id;
+                $revenue->originating_content_id = $originating_content_id;
             }
 
             if ( ! is_null($request->originating_client_source)) {
-                $revenue->originating_client_source = $request->originating_client_source;
+                $originating_client_source = $request->originating_client_source;
+                $revenue->originating_client_source = $originating_client_source;
             }
 
             $revenue->save();
@@ -1038,12 +1055,30 @@ class UserController extends Controller
             $userToTip->wallet->balance = $newWalletBalance;
             $userToTip->wallet->save();
             DB::commit();
+            
+            if(! is_null($request->tip_frequency) && $request->tip_frequency != 'one-off')
+            {
+                $userTip = UserTip::create([
+                    'tipper_user_id' => $request->user()->id,
+                    'tipper_email' => $request->user()->email,
+                    'tippee_user_id' => $userToTip->id,
+                    'amount_in_flk' => $request->amount_in_flk,
+                    'tip_frequency' => $request->tip_frequency,
+                    'originating_currency' => $originating_currency,
+                    'originating_client_source' => $originating_client_source,
+                    'originating_content_id' => $originating_content_id,
+                    'last_tip' => now(),
+                    'provider' => 'wallet',
+                ]);
+            }
             NotifyTippingJob::dispatch([
                 'tipper' => $request->user(),
                 'tippee' => $userToTip,
                 'amount_in_flk' => $creator_share_in_flk,
                 'wallet_transaction' => $transaction,
+                'tipper_email' => '',
             ]);
+
             return $this->respondWithSuccess('User has been tipped successfully');
         } catch (\Exception $exception) {
             DB::rollBack();
@@ -1112,6 +1147,194 @@ class UserController extends Controller
                 'month_subscribers' => $month_subscribers_count,
                 'subscription_graph' => $subscription_graph,
             ]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function anonymousUserTip(Request $request)
+    {
+        try{
+            $validator = Validator::make($request->all(), [
+                'id' => ['required', 'string', 'exists:users,id'],
+                'email' => ['required', 'string', 'email', 'max:255'],
+                'provider' => ['required', 'string', 'in:flutterwave,stripe'],
+                'provider_response' => ['required'],
+                'provider_response.transaction_id' => ['required_if:provider,flutterwave'],
+                'provider_response.id' => ['required_if:provider,stripe', 'string'],
+                'amount_in_cents' => ['required_if:provider,stripe', 'integer'],
+                'expected_flk_amount' => ['required', 'integer', 'min:1'],
+                'originating_content_id' => ['sometimes', 'nullable', 'string', 'exists:contents,id'],
+                'originating_client_source' => ['sometimes', 'nullable', 'string', 'in:web,ios,android'],
+                'originating_currency' => ['sometimes', 'nullable', 'string'],
+                'tip_frequency' => ['sometimes', 'nullable', 'string', 'in:one-off,daily,weekly,monthly'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            Log::info("Anonymous tipping began");
+            $payment_verified = false;
+            $amount_in_dollars = 0;
+            $fee = 0;
+            $expected_flk_based_on_amount = 0;
+            $provider_id = '';
+            $card_token = '';
+            $customer_id = '';
+            $naira_to_dollar = Configuration::where('name', 'naira_to_dollar')->where('type', 'exchange_rate')->first();
+
+            switch ($request->provider) {
+                case 'flutterwave':
+                    $flutterwave = new Flutterwave;
+                    $req = $flutterwave->verifyTransaction($request->provider_response['transaction_id']);
+                    if (($req->status === 'success' && $req->data->status === 'successful')) {
+                        $amount_in_dollars = bcdiv($req->data->amount, $naira_to_dollar->value, 2);
+                        $actual_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                        $fee = bcdiv($req->data->app_fee, $naira_to_dollar->value, 2);
+                        $provider_id = $req->data->id;
+                        $card_token = $req->data->card->token;
+                        $payment_verified = true;
+                    }
+                    break;
+                case 'stripe':
+                    $stripe = new StripePayment;
+                    $amount_in_dollars = bcdiv($request->amount_in_cents, 100, 2);
+                    $actual_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+
+                    //create a customer
+                    $customer = $stripe->createCustomer($request->provider_response['id'], $request->email );
+                    // Charge the Customer instead of the card:
+                    $charge = $stripe->createCharge($request->amount_in_cents, 'usd', $customer->id);
+                    if ($charge->status === 'succeeded')
+                    {
+                        $customer_id = $customer->id;
+                        $fee = bcdiv(bcadd(bcmul(0.029, $charge->amount, 2), 30, 2), 100, 2); //2.9% + 30c convert to dollar
+                        $amount_in_dollars = bcdiv($charge->amount, 100, 2);
+                        $actual_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+                        $provider_id = $charge->id;
+                        $payment_verified = true;
+                    }                 
+                    break;
+                default:
+                    return $this->respondBadRequest('Invalid provider specified');
+            }
+
+            if (!$payment_verified) {
+                return $this->respondBadRequest('Payment provider did not verify payment');
+            }
+
+            AnonymousUserTipJob::dispatch([
+                'email' => $request->email,
+                'card_token' => $card_token,
+                'customer_id' => $customer_id,
+                'tippee_id' => $request->id,
+                'provider' => $request->provider,
+                'provider_id' => $provider_id,
+                'amount' => $amount_in_dollars,
+                'flk' => $actual_flk_based_on_amount,
+                'fee' => $fee,
+                'originating_currency' => $request->originating_currency,
+                'originating_content_id' => $request->originating_content_id,
+                'originating_client_source' => $request->originating_client_source,
+                'tip_frequency' => $request->tip_frequency,
+                'last_tip' => '',
+            ]);            
+            Log::info("Anonymous tipping was successful");
+            return $this->respondWithSuccess('User has been tipped successfully');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+    
+    public function joinExternalCommunity(Request $request, $id) 
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:users,id'],
+                'email' => ['required', 'string', 'email', 'max:255'],
+                'name' => ['sometimes', 'nullable', 'string'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $externalCommunity = ExternalCommunity::where('user_id', $request->id)->where('email', $request->email)->first();
+            if (is_null($externalCommunity))
+            {
+                ExternalCommunity::create([
+                    'user_id' => $request->id,
+                    'email' => $request->email,
+                    'name' => $request->name,
+                ]);
+            }
+            return $this->respondWithSuccess('Community joined successfully');           
+
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        } 
+    }
+    
+    public function leaveExternalCommunity(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:users,id'],
+                'email' => ['required', 'string', 'email', 'max:255'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            //make sure email matches
+            $externalCommunity = ExternalCommunity::where('user_id', $request->id)->where('email', $request->email)->first();
+            if (is_null($externalCommunity))
+            {
+                return $this->respondBadRequest('You cannot leave this community because your email does not match');
+            }
+            $externalCommunity->delete();
+            return $this->respondWithSuccess('Community left successfully');           
+
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+    
+    public function importExternalCommunity(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'file' => ['required', 'max:102400', 'mimetypes:text/csv,text/plain,application/csv,text/comma-separated-values,text/anytext,application/octet-stream,application/txt'], // 100MB,
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+            
+            ImportExternalCommunityJob::dispatch([
+                'file' => $request->file,
+            ]);
+            return $this->respondWithSuccess('Community imported successfully');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+    
+    public function exportExternalCommunity(Request $request)
+    {
+        try {
+            ExportExternalCommunityJob::dispatch([
+                'user' => $request->user(),
+            ]);
+            return $this->respondWithSuccess('Community retrieved successfully');
+
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

@@ -49,4 +49,21 @@ class Test
         return response()->json($response)->getData();
     }
 
+    public function createCustomer(string $source, string $email): \stdClass
+    {
+        $key = "{$this->base_url}v1/customers";
+
+        $response = json_decode((string) Cache::get($key), true);
+
+        return response()->json($response)->getData();
+    }
+
+    public function createCharge(int $amount, string $currency, string $customer_id): \stdClass
+    {
+        $key = "{$this->base_url}v1/charges";
+
+        $response = json_decode((string) Cache::get($key), true);
+
+        return response()->json($response)->getData();
+    }
 }
