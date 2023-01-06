@@ -18,6 +18,7 @@ class CreateExternalCommunitiesTable extends Migration
             $table->foreignUuid('user_id');
             $table->string('email');
             $table->string('name')->nullable();
+            $table->unique(['user_id', 'email']);
             $table->softDeletes();
             $table->timestamps();
         });

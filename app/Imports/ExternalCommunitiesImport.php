@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Validators\Failure;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Maatwebsite\Excel\Concerns\SkipsOnError;
 
 class ExternalCommunitiesImport implements ToModel, 
 WithHeadingRow, 
@@ -21,6 +22,7 @@ WithValidation,
 SkipsOnFailure, 
 SkipsEmptyRows,
 WithChunkReading,
+SkipsOnError,
 ShouldQueue
 {
     use Importable, SkipsFailures;
@@ -69,5 +71,10 @@ ShouldQueue
     public function onFailure(Failure ...$failures)
     {
         Log::error($failures);
+    }
+
+    public function onError(\Throwable $e)
+    {
+        Log::error($e);
     }
 }
