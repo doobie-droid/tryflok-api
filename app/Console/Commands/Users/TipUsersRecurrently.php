@@ -47,7 +47,7 @@ class TipUsersRecurrently extends Command
                     $query->where('provider', 'flutterwave')->orWhere('provider', 'stripe');
                 }) 
                 ->chunk(1000, function ($userTips) {      
-                TipUsersRecurrentlyJob::dispatchNow($userTips);
+                TipUsersRecurrentlyJob::dispatch($userTips);
             });
         } catch (\Exception $exception) {
             throw $exception;

@@ -1225,7 +1225,7 @@ class UserController extends Controller
                 return $this->respondBadRequest('Payment provider did not verify payment');
             }
 
-            AnonymousUserTipJob::dispatchNow([
+            AnonymousUserTipJob::dispatch([
                 'email' => $request->email,
                 'card_token' => $card_token,
                 'customer_id' => $customer_id,
@@ -1317,7 +1317,7 @@ class UserController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
             
-            ImportExternalCommunityJob::dispatchNow([
+            ImportExternalCommunityJob::dispatch([
                 'file' => $request->file,
             ]);
             return $this->respondWithSuccess('Community imported successfully');
@@ -1330,7 +1330,7 @@ class UserController extends Controller
     public function exportExternalCommunity(Request $request)
     {
         try {
-            ExportExternalCommunityJob::dispatchNow([
+            ExportExternalCommunityJob::dispatch([
                 'user' => $request->user(),
             ]);
             return $this->respondWithSuccess('Community retrieved successfully');

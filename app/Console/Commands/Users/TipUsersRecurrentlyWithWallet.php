@@ -46,7 +46,7 @@ class TipUsersRecurrentlyWithWallet extends Command
                 ->where('provider', 'wallet')
                 ->chunk(1000, function ($userTips) {                
                 // foreach ($userTips as $userTip) {
-                    TipUsersRecurrentlyWithWalletJob::dispatchNow($userTips);
+                    TipUsersRecurrentlyWithWalletJob::dispatch($userTips);
                 // }
             });
 

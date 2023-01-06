@@ -114,10 +114,10 @@ class TipUsersRecurrently implements ShouldQueue
                 {
                     Log::info("Payment not verified");
                     //send mail to user
-                    // $this->sendFailedTipMail($userTip->tipper_email, $userToTip);
+                    $this->sendFailedTipMail($userTip->tipper_email, $userToTip);
                     continue;
                 }
-                AnonymousUserTipJob::dispatchNow([
+                AnonymousUserTipJob::dispatch([
                     'tippee_id' => $userToTip->id,
                     'flk' => $actual_flk_based_on_amount,
                     'email' => $userTip->tipper_email,

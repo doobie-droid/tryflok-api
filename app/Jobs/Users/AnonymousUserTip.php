@@ -158,7 +158,7 @@ class AnonymousUserTip implements ShouldQueue
                 $userTip->last_tip = now();
                 $userTip->save();
             }
-            NotifyTippingJob::dispatchNow([
+            NotifyTippingJob::dispatch([
                 'tipper' => '',
                 'tipper_email' => $this->data['email'],
                 'tippee' => $userToTip,

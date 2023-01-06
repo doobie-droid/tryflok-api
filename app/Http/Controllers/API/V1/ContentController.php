@@ -263,7 +263,7 @@ class ContentController extends Controller
                 }
             }
 
-            NotifyExternalCommunityJob::dispatchNow([
+            NotifyExternalCommunityJob::dispatch([
                 'user' => $user,
                 'content' => $content,
             ]);
