@@ -31,11 +31,10 @@ class AnonymousPurchaseController extends Controller
                 'items' => ['required'],
                 'items.*.id' => ['required', 'string' ],
                 'items.*.type' => ['required', 'string', 'in:collection,content'],
-                'items.*.price' => ['required'],
-                'items.*.price.amount' => ['required', 'numeric', 'min:0'],
-                'items.*.price.id' => ['required', 'string','exists:prices,id'],
-                'items.*.price.interval' => ['required', 'string', 'in:monthly,one-off'],
-                'items.*.price.interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
+                'items.*.price_amount' => ['required', 'numeric', 'min:0'],
+                'items.*.price_id' => ['required', 'string','exists:prices,id'],
+                'items.*.price_interval' => ['required', 'string', 'in:monthly,one-off'],
+                'items.*.price_interval_amount' => ['required','min:1', 'max:1', 'numeric', 'integer'],
                 'items.*.number_of_tickets' => ['sometimes', 'nullable', 'min:1', 'integer'],
                 'provider' => ['required', 'string', 'in:flutterwave,stripe'],
                 'provider_response' => ['required'],
@@ -50,7 +49,7 @@ class AnonymousPurchaseController extends Controller
 
             $total_amount_in_dollars = 0;
             foreach ($request->items as $item) {
-                $price = Price::where('id', $item['price']['id'])->first();
+                $price = Price::where('id', $item['price_id'])->first();
                 if (is_null($price)) {
                     // price does not exist so this purchase is probably nefarious and we should not add this item to the total purchase
                     continue;
@@ -62,13 +61,13 @@ class AnonymousPurchaseController extends Controller
                 }
 
                 /*
-                $item['price']['amount'] holds the price for a single item
+                $item['price_amount'] holds the price for a single item
                 The reason why the system design made the amount to be passed was because we wanted to prevent a situation where the user buys item at a specific price and the creator has changed price. We wanted the price to be locked in.
                 We are changing this soon though. Only the price ID should be passed because that is what we really need. The reason we need the price ID is that an item can have multiple prices based on location so we want the price the user saw for their location hence the need for the ID.
 
 
                 // Thus, this line of code is erroneous
-                if ($item['price']['amount'] != ($price->amount * $number_of_tickets )) {
+                if ($item['price_amount'] != ($price->amount * $number_of_tickets )) {
                     return $this->respondBadRequest('Amount does not match total item to be purchased');
                 }
                 */

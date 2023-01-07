@@ -69,10 +69,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}/reviews', 'ReviewController@listReviews');
     });
 
-    Route::group(['prefix' => 'payments'], function () {
-        Route::post('anonymous-purchases', 'AnonymousPurchaseController@makePurchase')->name('make-anonymous-purchases');
-    });
-
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', 'UserController@listUsers')->name('list-users');
         Route::get('{id}', 'UserController@showUser')->name('show-user');
@@ -85,6 +81,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::group(['prefix' => 'payments'], function () {
         Route::patch('easy-fund-wallet', 'WalletController@fundWallet')->name('easy-fund-wallet');
+        Route::post('anonymous-purchases', 'AnonymousPurchaseController@makePurchase')->name('make-anonymous-purchases');
 
         Route::group(['prefix' => 'flutterwave'], function () {
             Route::post('validate-bank-details', 'PaymentController@validateBankDetailsViaFlutterwave');
