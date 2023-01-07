@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Http\Resources\ConfigurationResource;   
+use App\Jobs\Payment\AnonymousPurchase as AnonymousPurchaseJob;
 
 class PaymentController extends Controller
 {
@@ -142,6 +143,27 @@ class PaymentController extends Controller
                                 'fund_note' => $fund_note,
                             ]);
                         }
+                    } else if (property_exists($req->data, 'meta') && 
+                    is_object($req->data->meta) && 
+                    property_exists($req->data->meta, 'payment_for') &&
+                    $req->data->meta->payment_for === 'anonymous_content_purchase') {
+                        $meta = $req->data->meta;
+
+                        $amount_in_dollars = bcdiv($req->data->amount, $naira_to_dollar->value, 2);
+                        $expected_flk_based_on_amount = bcdiv($amount_in_dollars, 1.03, 2) * 100;
+
+                        $email = property_exists($meta, 'email') ? $meta->email : '';
+                        $name = property_exists($meta, 'name') ? $meta->name : '';
+                        $items = property_exists($meta, 'items') ? json_decode($meta->items, true) : [];
+                        AnonymousPurchaseJob::dispatch([
+                            'total_amount' => $amount_in_dollars,
+                            'total_fees' => bcdiv($req->data->app_fee, $naira_to_dollar->value, 2),
+                            'payer_email' => $email,
+                            'payer_name' => $name,
+                            'provider' => 'flutterwave',
+                            'provider_id' => $req->data->id,
+                            'items' => $items,
+                        ]);
                     }
                     break;
 

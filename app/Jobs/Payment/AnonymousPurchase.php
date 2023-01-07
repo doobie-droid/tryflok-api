@@ -67,7 +67,7 @@ class AnonymousPurchase implements ShouldQueue
                continue;
            }
 
-           $price = Price::where('id', $item['price']['id'])->first();
+           $price = Price::where('id', $item['price_id'])->first();
            if (is_null($price)) {
                //in case model was deleted
                Log::error('Could not complete the transaction because price has been deleted or invalid id supplied');

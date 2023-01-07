@@ -69,11 +69,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}/reviews', 'ReviewController@listReviews');
     });
 
-    Route::group(['prefix' => 'payments'], function () {
-        Route::post('anonymous-purchases', 'AnonymousPurchaseController@makePurchase')->name('make-anonymous-purchases');
-        Route::post('anonymous-user-tip', 'UserController@anonymousUserTip')->name('anonymous-user-tip');
-    });
-
     Route::group(['prefix' => 'external-community'], function () {
         Route::post('/{id}/join', 'UserController@joinExternalCommunity')->name('join-external-community');
         Route::patch('/{id}/leave', 'UserController@leaveExternalCommunity')->name('leave-external-community');
@@ -91,6 +86,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::group(['prefix' => 'payments'], function () {
         Route::patch('easy-fund-wallet', 'WalletController@fundWallet')->name('easy-fund-wallet');
+        Route::post('anonymous-purchases', 'AnonymousPurchaseController@makePurchase')->name('make-anonymous-purchases');
+        Route::post('anonymous-user-tip', 'UserController@anonymousUserTip')->name('anonymous-user-tip');
 
         Route::group(['prefix' => 'flutterwave'], function () {
             Route::post('validate-bank-details', 'PaymentController@validateBankDetailsViaFlutterwave');
