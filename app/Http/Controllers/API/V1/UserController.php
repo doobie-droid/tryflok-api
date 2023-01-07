@@ -13,7 +13,6 @@ use App\Jobs\Users\NotifyFollow as NotifyFollowJob;
 use App\Jobs\Users\NotifyTipping as NotifyTippingJob;
 use App\Jobs\Users\SendReferralEmails as SendReferralEmailsJob;
 use App\Jobs\Users\AnonymousUserTip as AnonymousUserTipJob;
-use App\Jobs\Users\ImportExternalCommunity as ImportExternalCommunityJob;
 use App\Jobs\Users\ExportExternalCommunity as ExportExternalCommunityJob;
 use App\Models\Cart;
 use App\Models\Collection;
@@ -42,6 +41,8 @@ use \Stripe\StripeClient;
 use App\Services\Payment\Providers\Flutterwave\Flutterwave;
 use App\Services\Payment\Providers\Stripe\Stripe as StripePayment;
 use App\Models\Configuration;
+use App\Imports\ExternalCommunitiesImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -1316,10 +1317,9 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-            
-            ImportExternalCommunityJob::dispatch([
-                'file' => $request->file,
-            ]);
+
+            Excel::import(new ExternalCommunitiesImport, $request->file);
+
             return $this->respondWithSuccess('Community imported successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
