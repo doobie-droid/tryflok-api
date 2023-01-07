@@ -22,6 +22,7 @@ class ExternalCommunityMail extends Mailable
     {
         $this->email = $data['email'];
         $this->message = $data['message'];
+        $this->content_id = $data['content_id'];
     }
 
     /**
@@ -34,6 +35,7 @@ class ExternalCommunityMail extends Mailable
         return $this->view('emails.user.content.new-content-upload')->with([
             'email' => $this->email,
             'content_message' => $this->message,
+            'content_id' => $this->content_id,
         ])->subject('New Content Upload!');
     }
 }
