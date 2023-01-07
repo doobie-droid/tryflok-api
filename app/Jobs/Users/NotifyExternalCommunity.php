@@ -44,6 +44,7 @@ class NotifyExternalCommunity implements ShouldQueue
                 Mail::to($externalCommunity->email)->send(new ExternalCommunityMail([
                 'email' => $externalCommunity->email,
                 'message' => $message,
+                'content_id' => $this->content->id,
                 ]));
             }
 
