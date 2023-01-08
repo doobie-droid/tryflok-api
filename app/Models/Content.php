@@ -165,7 +165,7 @@ class Content extends Model
 
     public function comments()
     {
-        return $this->hasMany(ContentComment::class, 'content_id');                                                                                                                                                                                                                                                                             Many(Like::class, 'likeable');
+        return $this->hasMany(ContentComment::class, 'content_id');                                                                 
     }
 
     public function collections()
