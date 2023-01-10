@@ -130,8 +130,8 @@ class AnonymousUserTip implements ShouldQueue
                 $provider = 'stripe';
                 $customer_id = $this->data['customer_id'];
             }
-            
-            if(! is_null($this->data['tip_frequency']) && $this->data['tip_frequency'] != 'one-off' && $this->data['tip_frequency'] != '')
+            $userTip = UserTip::where('tipper_email', $this->data['email'])->where('tippee_user_id', $userToTip->id)->where('is_active', 1)->first();
+            if(! is_null($this->data['tip_frequency']) && $this->data['tip_frequency'] != 'one-off' && $this->data['tip_frequency'] != '' && is_null($userTip))
             {
                 $userTip = UserTip::create([
                     'tipper_email' => $this->data['email'],

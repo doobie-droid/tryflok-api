@@ -77,6 +77,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', 'UserController@listUsers')->name('list-users');
         Route::get('{id}', 'UserController@showUser')->name('show-user');
+        Route::patch('{id}/tip', 'UserController@cancelRecurrentTipping')->name('cancel-recurrent-tipping');
     });
 
     Route::group(['prefix' => 'polls'], function () {

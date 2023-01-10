@@ -1056,8 +1056,9 @@ class UserController extends Controller
             $userToTip->wallet->balance = $newWalletBalance;
             $userToTip->wallet->save();
             DB::commit();
-            
-            if(! is_null($request->tip_frequency) && $request->tip_frequency != 'one-off')
+
+            $userTip = UserTip::where('tipper_user_id', $request->user()->id)->where('tippee_user_id', $userToTip->id)->where('is_active', 1)->first();            
+            if(! is_null($request->tip_frequency) && $request->tip_frequency != 'one-off' && is_null($userTip))
             {
                 $userTip = UserTip::create([
                     'tipper_user_id' => $request->user()->id,
@@ -1335,6 +1336,44 @@ class UserController extends Controller
             ]);
             return $this->respondWithSuccess('Community retrieved successfully');
 
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function cancelRecurrentTipping(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
+                'id' => ['required', 'string', 'exists:users,id'],
+                'email' => ['sometimes', 'string', 'email', 'max:255', 'exists:user_tips,tipper_email'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+
+            $userTip = '';
+    
+            if ($request->user() != null) {
+                $user_id = $request->user()->id;
+                $userTip = UserTip::where('tipper_user_id', $user_id)->where('tippee_user_id', $request->id)->where('is_active', 1)->first();
+            }
+            if ($request->email != null) {
+                $email = $request->email;
+                $userTip = UserTip::where('tipper_email', $email)->where('tippee_user_id', $request->id)->where('is_active', 1)->first();
+            }
+            
+            if (is_null($userTip))
+            {
+                return $this->respondBadRequest('You cannot cancel this tip because you did not create it');
+            }
+
+            $userTip->is_active = 0;
+            $userTip->save();
+            
+            return $this->respondWithSuccess('recurrent tipping cancelled successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
