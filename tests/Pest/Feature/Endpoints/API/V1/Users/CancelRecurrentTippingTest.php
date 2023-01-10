@@ -151,3 +151,38 @@ test('cancel recurrent tipping does not work for signed in user if user id does 
         'is_active' => 1,
     ]);
 });
+
+it('does not work if user is not signed in and does not provide an email', function()
+{
+    $user = Models\User::factory()->create();
+    $user2 = Models\User::factory()->create();
+    $user3 = Models\User::factory()->create();
+    $customer_id = 'cus_'.date('YmdHis');
+    $last_tip = now();
+    $userTip = Models\UserTip::create([
+        'tipper_user_id' => $user2->id,
+        'tipper_email' => $user2->email,
+        'tippee_user_id' => $user->id,
+        'customer_id' => $customer_id,
+        'provider' => 'stripe',
+        'amount_in_flk' => 100,
+        'tip_frequency' => 'daily',
+        'last_tip' => $last_tip,
+        'is_active' => 1,
+    ]);
+
+    $response = $this->json('PATCH', "/api/v1/users/{$user->id}/tip");
+    $response->assertStatus(400);
+
+    $this->assertDatabaseHas('user_tips', [
+        'tipper_user_id' => $user2->id,
+        'tipper_email' => $user2->email,
+        'tippee_user_id' => $user->id,
+        'customer_id' => $customer_id,
+        'provider' => 'stripe',
+        'amount_in_flk' => 100,
+        'tip_frequency' => 'daily',
+        'last_tip' => $last_tip,
+        'is_active' => 1,
+    ]);
+});

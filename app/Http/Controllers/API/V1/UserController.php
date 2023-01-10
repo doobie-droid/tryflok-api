@@ -1355,6 +1355,9 @@ class UserController extends Controller
             }
 
             $userTip = '';
+            if ($request->user() == null && $request->email == null) {
+                return $this->respondBadRequest('Invalid or missing email field');
+            }
     
             if ($request->user() != null) {
                 $user_id = $request->user()->id;
@@ -1372,7 +1375,7 @@ class UserController extends Controller
 
             $userTip->is_active = 0;
             $userTip->save();
-            
+
             return $this->respondWithSuccess('recurrent tipping cancelled successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
