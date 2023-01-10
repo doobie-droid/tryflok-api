@@ -1365,11 +1365,14 @@ class UserController extends Controller
                 $userTip = UserTip::where('tipper_email', $email)->where('tippee_user_id', $request->id)->where('is_active', 1)->first();
             }
             
-            if (! is_null($userTip))
+            if (is_null($userTip))
             {
-                $userTip->is_active = 0;
-                $userTip->save();
+                return $this->respondBadRequest('You cannot cancel this tip because you did not create it');
             }
+
+            $userTip->is_active = 0;
+            $userTip->save();
+            
             return $this->respondWithSuccess('recurrent tipping cancelled successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
