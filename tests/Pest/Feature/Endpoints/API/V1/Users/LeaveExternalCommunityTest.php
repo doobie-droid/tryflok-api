@@ -19,7 +19,12 @@ test('leave external community works', function()
     $response = $this->json('PATCH', "/api/v1/external-community/{$user->id}/leave", $request);
     $response->assertStatus(200);
 
-    $this->assertSoftDeleted($externalUser);
+    $this->assertDatabaseMissing('external_communities', [
+        'user_id' => $user->id,
+        'name' => $user2->name,
+        'email' => $user2->email,
+    ]);
+
 });
 
 it('does not work if emails do not match', function()
@@ -44,6 +49,5 @@ it('does not work if emails do not match', function()
         'user_id' => $user->id,
         'name' => $user2->name,
         'email' => $user2->email,
-        'deleted_at' => null,
     ]);
 });
