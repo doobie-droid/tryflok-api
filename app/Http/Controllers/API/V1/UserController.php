@@ -1334,7 +1334,7 @@ class UserController extends Controller
             ExportExternalCommunityJob::dispatch([
                 'user' => $request->user(),
             ]);
-            return $this->respondWithSuccess('Community retrieved successfully');
+            return $this->respondWithSuccess('Community exported successfully');
 
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -1377,6 +1377,21 @@ class UserController extends Controller
             $userTip->save();
 
             return $this->respondWithSuccess('recurrent tipping cancelled successfully');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+        }
+    }
+
+    public function listExternalCommunity(Request $request) 
+    {
+        try {
+            $externalCommunity = $request->user()->externalCommunities()->get();
+
+            return $this->respondWithSuccess('community retrieved successfully', [
+                'externalCommunity' => $externalCommunity,
+            ]);
+
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');

@@ -190,7 +190,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'external-community'], function () {
             Route::post('/', 'UserController@importExternalCommunity')->name('import-external-community');
-            Route::get('/', 'UserController@exportExternalCommunity')->name('export-external-community');
+            Route::get('/', 'UserController@listExternalCommunity')->name('list-external-community');
+            Route::get('/exports', 'UserController@exportExternalCommunity')->name('export-external-community');
         });
 
         Route::group(['prefix' => 'tags'], function () {
