@@ -12,6 +12,7 @@ use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJ
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
 use App\Jobs\Content\MigrateYoutubeVideo as MigrateYoutubeVideoJob;
+use App\Jobs\Content\MigratePodcastDataFast as MigratePodcastJob;
 use App\Jobs\Content\NotifyUserForLikedContent as NotifyUserForLikedContentJob;
 use App\Jobs\Users\NotifyAddedToChallenge as NotifyAddedToChallengeJob;
 use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;
@@ -48,7 +49,7 @@ class ContentController extends Controller
             $validator = Validator::make($request->all(), [
                 'title' => ['required', 'string', 'max: 200'],
                 'description' => ['required', 'string'],
-                'digiverse_id' => ['required','exists:collections,id'],
+                'digiverse_id' => ['required', 'exists:collections,id'],
                 'cover.asset_id' => ['required_if:type,pdf,audio,video,newsletter', 'string', 'exists:assets,id', new AssetTypeRule('image')],
                 'price' => ['required'],
                 'price.amount' => ['required', 'min:0', 'numeric', 'max:1000'],
@@ -78,7 +79,7 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
 
-            if (! in_array($request->type, ['live-video']) && isset($request->is_challenge) && (int) $request->is_challenge === 1) {
+            if (!in_array($request->type, ['live-video']) && isset($request->is_challenge) && (int) $request->is_challenge === 1) {
                 return $this->respondBadRequest("Only live video content can be a challenge");
             }
 
@@ -115,22 +116,22 @@ class ContentController extends Controller
                 'is_challenge' => $is_challenge,
             ]);
 
-            if (! is_null($request->scheduled_date)) {
+            if (!is_null($request->scheduled_date)) {
                 $content->scheduled_date = $request->scheduled_date;
                 $content->save();
             }
 
-            if (! is_null($request->live_type)) {
+            if (!is_null($request->live_type)) {
                 $content->live_type = $request->live_type;
                 $content->save();
             }
 
-            if (! is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
+            if (!is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
                 $content->live_provider = 'youtube';
-                $content->save();             
+                $content->save();
             }
 
-            if (! is_null($request->newsletter_position_elements)) {
+            if (!is_null($request->newsletter_position_elements)) {
                 $content->newsletter_position_elements = $request->newsletter_position_elements;
                 $content->save();
             }
@@ -188,7 +189,7 @@ class ContentController extends Controller
                         'value' => $request->loser_share,
                     ],
                 ]);
-                
+
                 foreach ($request->contestants as $contestant_id) {
                     $content->challengeContestants()->create([
                         'user_id' => $contestant_id,
@@ -217,7 +218,7 @@ class ContentController extends Controller
                     'id' => Str::uuid(),
                     'purpose' => 'content-asset',
                 ]);
-                
+
                 UploadHtmlJob::dispatch([
                     'asset' => $asset,
                     'article' => $request->article,
@@ -240,14 +241,14 @@ class ContentController extends Controller
                 'interval_amount' => 1,
             ]);
 
-            if (! is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
+            if (!is_null($request->cover) && array_key_exists('asset_id', $request->cover)) {
                 $content->cover()->attach($request->cover['asset_id'], [
                     'id' => Str::uuid(),
                     'purpose' => 'cover',
                 ]);
             }
 
-            if (! is_null($request->asset_id)) {
+            if (!is_null($request->asset_id)) {
                 $content->assets()->attach($request->asset_id, [
                     'id' => Str::uuid(),
                     'purpose' => 'content-asset',
@@ -263,9 +264,9 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $content->id)
-            ->eagerLoadBaseRelations()
-            ->eagerLoadSingleContentRelations()
-            ->first();
+                ->eagerLoadBaseRelations()
+                ->eagerLoadSingleContentRelations()
+                ->first();
 
             return $this->respondWithSuccess('Content has been created successfully', [
                 'content' => new ContentResource($content),
@@ -304,8 +305,8 @@ class ContentController extends Controller
 
             //make sure user owns content
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)
-            ->eagerLoadBaseRelations()
-            ->first();
+                ->eagerLoadBaseRelations()
+                ->first();
             if (is_null($content)) {
                 return $this->respondBadRequest('You do not have permission to update this content');
             }
@@ -317,7 +318,7 @@ class ContentController extends Controller
                 return $this->respondBadRequest('Invalid or missing input fields', $validator2->errors()->toArray());
             }
 
-            if (! is_null($request->is_available)) {
+            if (!is_null($request->is_available)) {
                 // ensure that asset content is ready before it can be marked as available
                 if (in_array($content->type, ['video', 'pdf', 'audio', 'newsletter']) && $content->assets()->first()->processing_complete != 1) {
                     return $this->respondBadRequest("Hey there! We are making some optimizations to your content, please wait till you get a notification that it is ready then you can mark it as available.");
@@ -326,38 +327,38 @@ class ContentController extends Controller
             }
 
             $user = $request->user();
-            if (! is_null($request->title)) {
+            if (!is_null($request->title)) {
                 $content->title = $request->title;
             }
 
-            if (! is_null($request->description)) {
+            if (!is_null($request->description)) {
                 $content->description = $request->description;
             }
 
-            if (! is_null($request->scheduled_date)) {
+            if (!is_null($request->scheduled_date)) {
                 $content->scheduled_date = $request->scheduled_date;
             }
 
-            if (! is_null($request->newsletter_position_elements)) {
+            if (!is_null($request->newsletter_position_elements)) {
                 $content->newsletter_position_elements = $request->newsletter_position_elements;
             }
 
             $content->save();
 
-            if (! is_null($request->cover) && array_key_exists('asset_id', $request->cover) && ! is_null($request->cover['asset_id']) && $request->cover['asset_id'] != '') {
+            if (!is_null($request->cover) && array_key_exists('asset_id', $request->cover) && !is_null($request->cover['asset_id']) && $request->cover['asset_id'] != '') {
                 $oldCover = $content->cover()->first();
-                if (! is_null($oldCover)) {
+                if (!is_null($oldCover)) {
                     $content->cover()->detach($oldCover->id);
                     $oldCover->delete();
                 }
-                
+
                 $content->cover()->attach($request->cover['asset_id'], [
                     'id' => Str::uuid(),
                     'purpose' => 'cover',
                 ]);
             }
 
-            if (! is_null($request->asset_id)) {
+            if (!is_null($request->asset_id)) {
                 $oldAsset = $content->assets()->first();
                 $content->assets()->detach($oldAsset->id);
                 $oldAsset->resolutions()->delete();
@@ -368,25 +369,25 @@ class ContentController extends Controller
                 ]);
             }
 
-            if (! is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
+            if (!is_null($request->asset_id) && $request->live_provider == 'youtube' && ($content->type == 'live-video' || $content->type == 'live-audio')) {
                 $content->live_provider = 'youtube';
-                $content->save();             
+                $content->save();
             }
 
-            if (! is_null($request->live_type)) {
+            if (!is_null($request->live_type)) {
                 $content->live_type = $request->live_type;
                 $content->save();
             }
 
-            if (! is_null($request->tags) && is_array($request->tags)) {
+            if (!is_null($request->tags) && is_array($request->tags)) {
                 foreach ($request->tags as $tagData) {
                     if ($tagData['action'] === 'add') {
                         $content->tags()
-                        ->syncWithoutDetaching([
-                            $tagData['id'] => [
-                                'id' => Str::uuid(),
-                            ],
-                        ]);
+                            ->syncWithoutDetaching([
+                                $tagData['id'] => [
+                                    'id' => Str::uuid(),
+                                ],
+                            ]);
                     }
 
                     if ($tagData['action'] === 'remove') {
@@ -395,7 +396,7 @@ class ContentController extends Controller
                 }
             }
 
-            if (! is_null($request->price)) {
+            if (!is_null($request->price)) {
                 $price = $content->prices()->first();
                 if (is_null($price)) {
                     $content->prices()->create([
@@ -409,7 +410,7 @@ class ContentController extends Controller
                 }
             }
 
-            if (! is_null($request->article) && $content->type === 'newsletter') {
+            if (!is_null($request->article) && $content->type === 'newsletter') {
                 $filename = date('Ymd') . Str::random(16);
                 $folder = join_path('assets', Str::random(16) . date('Ymd'), 'text');
                 $fullFilename = join_path($folder, $filename . '.html');
@@ -440,8 +441,8 @@ class ContentController extends Controller
         try {
             //make sure user owns content
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)
-            ->eagerLoadBaseRelations()
-            ->first();
+                ->eagerLoadBaseRelations()
+                ->first();
 
             if (is_null($content)) {
                 return $this->respondBadRequest('You do not have permission to update this content');
@@ -463,8 +464,8 @@ class ContentController extends Controller
         try {
             //make sure user owns content
             $content = Content::where('id', $id)->where('user_id', $request->user()->id)
-            ->eagerLoadBaseRelations()
-            ->first();
+                ->eagerLoadBaseRelations()
+                ->first();
             if (is_null($content)) {
                 return $this->respondBadRequest('You do not have permission to update this content');
             }
@@ -510,7 +511,7 @@ class ContentController extends Controller
                     'purpose' => 'attached-media',
                 ]);
             }
-            
+
             return $this->respondWithSuccess('Assets attached successfully');
         } catch (\Exception $exception) {
             Log::error($exception);
@@ -580,11 +581,11 @@ class ContentController extends Controller
 
             $issue = $content->issues()->where('id', $request->issue_id)->first();
 
-            if (! is_null($request->title)) {
+            if (!is_null($request->title)) {
                 $issue->title = $request->title;
             }
 
-            if (! is_null($request->description)) {
+            if (!is_null($request->description)) {
                 $issue->description = $request->description;
             }
 
@@ -657,9 +658,9 @@ class ContentController extends Controller
             }
 
             $content = Content::where('id', $id)
-            ->eagerLoadBaseRelations($user_id)
-            ->eagerLoadSingleContentRelations($user_id)
-            ->first();
+                ->eagerLoadBaseRelations($user_id)
+                ->eagerLoadSingleContentRelations($user_id)
+                ->first();
             return $this->respondWithSuccess('Content retrieved successfully', [
                 'content' => new ContentResource($content),
             ]);
@@ -769,20 +770,20 @@ class ContentController extends Controller
             if ($validator->fails()) {
                 return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
             }
-            
+
             $contents = Content::where('is_available', 1)
-            ->whereNull('archived_at')
-            ->where('is_adult', 0)
-            ->where('approved_by_admin', 1)
-            ->whereHas('digiverses', function (Builder $query) {
-                $query->where('is_available', 1)
+                ->whereNull('archived_at')
                 ->where('is_adult', 0)
-                ->where('approved_by_admin', 1);
-            })->where(function ($query) {
-                $query->whereNull('live_ended_at')->orWhere('live_ended_at', '>=', now()->subHours(2));
-            })->where(function ($query) {
-                $query->whereNull('scheduled_date')->orWhere('scheduled_date', '>=', now()->subHours(24));
-            });
+                ->where('approved_by_admin', 1)
+                ->whereHas('digiverses', function (Builder $query) {
+                    $query->where('is_available', 1)
+                        ->where('is_adult', 0)
+                        ->where('approved_by_admin', 1);
+                })->where(function ($query) {
+                    $query->whereNull('live_ended_at')->orWhere('live_ended_at', '>=', now()->subHours(2));
+                })->where(function ($query) {
+                    $query->whereNull('scheduled_date')->orWhere('scheduled_date', '>=', now()->subHours(24));
+                });
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
@@ -790,10 +791,10 @@ class ContentController extends Controller
                 $user_id = $request->user()->id;
             }
 
-            if (! empty($keywords)) {
+            if (!empty($keywords)) {
                 $contents = $contents->where(function ($query) use ($keywords) {
                     $query->where('title', 'LIKE', "%{$keywords[0]}%")
-                    ->orWhere('description', 'LIKE', "%{$keywords[0]}%");
+                        ->orWhere('description', 'LIKE', "%{$keywords[0]}%");
                     for ($i = 1; $i < count($keywords); $i++) {
                         $query->orWhere('title', 'LIKE', "%{$keywords[$i]}%")
                             ->orWhere('description', 'LIKE', "%{$keywords[$i]}%");
@@ -801,24 +802,24 @@ class ContentController extends Controller
                 });
             }
 
-            if (! empty($types)) {
+            if (!empty($types)) {
                 $contents = $contents->whereIn('type', $types);
             }
 
-            if (! empty($tags)) {
+            if (!empty($tags)) {
                 $contents = $contents->whereHas('tags', function (Builder $query) use ($tags) {
                     $query->whereIn('tags.id', $tags);
                 });
             }
 
-            if (! empty($creators)) {
+            if (!empty($creators)) {
                 $contents = $contents->whereIn('user_id', $creators);
             }
 
             if ($activeLiveContent === 'true') {
                 $contents = $contents->where(function ($query) {
                     $query->where('live_status', 'active')
-                    ->orWhere('live_status', 'inactive');
+                        ->orWhere('live_status', 'inactive');
                 });
             }
 
@@ -827,10 +828,10 @@ class ContentController extends Controller
             }
 
             $contents = $contents
-            ->eagerLoadBaseRelations($user_id)
-            ->orderBy("contents.{$orderBy}", $orderDirection)
-            ->orderBy('contents.trending_points', 'desc')
-            ->paginate($limit, ['*'], 'page', $page);
+                ->eagerLoadBaseRelations($user_id)
+                ->orderBy("contents.{$orderBy}", $orderDirection)
+                ->orderBy('contents.trending_points', 'desc')
+                ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Contents retrieved successfully', [
                 'contents' => ContentResource::collection($contents),
@@ -914,10 +915,10 @@ class ContentController extends Controller
             }
             $collection = Collection::where('id', $request->collection_id)->first();
             $contents = $collection->contents()
-                            ->whereNull('archived_at')
-                            ->where(function ($query) {
-                                $query->whereNull('live_ended_at')->orWhere('live_ended_at', '>=', now()->subHours(2));
-                            });
+                ->whereNull('archived_at')
+                ->where(function ($query) {
+                    $query->whereNull('live_ended_at')->orWhere('live_ended_at', '>=', now()->subHours(2));
+                });
 
             if ($request->user() == null || $request->user()->id == null) {
                 $user_id = '';
@@ -929,10 +930,10 @@ class ContentController extends Controller
                 $contents = $contents->where('is_available', 1)->where('approved_by_admin', 1);
             }
 
-            if (! empty($keywords)) {
+            if (!empty($keywords)) {
                 $contents = $contents->where(function ($query) use ($keywords) {
                     $query->where('title', 'LIKE', "%{$keywords[0]}%")
-                    ->orWhere('description', 'LIKE', "%{$keywords[0]}%");
+                        ->orWhere('description', 'LIKE', "%{$keywords[0]}%");
                     for ($i = 1; $i < count($keywords); $i++) {
                         $query->orWhere('title', 'LIKE', "%{$keywords[$i]}%")
                             ->orWhere('description', 'LIKE', "%{$keywords[$i]}%");
@@ -940,24 +941,24 @@ class ContentController extends Controller
                 });
             }
 
-            if (! empty($types)) {
+            if (!empty($types)) {
                 $contents = $contents->whereIn('type', $types);
             }
 
-            if (! empty($tags)) {
+            if (!empty($tags)) {
                 $contents = $contents->whereHas('tags', function (Builder $query) use ($tags) {
                     $query->whereIn('tags.id', $tags);
                 });
             }
 
-            if (! empty($creators)) {
+            if (!empty($creators)) {
                 $contents = $contents->whereIn('user_id', $creators);
             }
 
             if ($activeLiveContent === 'true') {
                 $contents = $contents->where(function ($query) {
                     $query->where('live_status', 'active')
-                    ->orWhere('live_status', 'inactive');
+                        ->orWhere('live_status', 'inactive');
                 });
             }
 
@@ -966,9 +967,9 @@ class ContentController extends Controller
             }
 
             $contents = $contents
-            ->eagerLoadBaseRelations($user_id)
-            ->orderBy("contents.{$orderBy}", $orderDirection)
-            ->paginate($limit, ['*'], 'page', $page);
+                ->eagerLoadBaseRelations($user_id)
+                ->orderBy("contents.{$orderBy}", $orderDirection)
+                ->paginate($limit, ['*'], 'page', $page);
 
             return $this->respondWithSuccess('Contents retrieved successfully', [
                 'contents' => ContentResource::collection($contents),
@@ -1015,10 +1016,10 @@ class ContentController extends Controller
                 $issues = $issues->where('is_available', 1);
             }
 
-            if (! empty($keywords)) {
+            if (!empty($keywords)) {
                 $issues = $issues->where(function ($query) use ($keywords) {
                     $query->where('title', 'LIKE', "%{$keywords[0]}%")
-                    ->orWhere('description', 'LIKE', "%{$keywords[0]}%");
+                        ->orWhere('description', 'LIKE', "%{$keywords[0]}%");
                     for ($i = 1; $i < count($keywords); $i++) {
                         $query->orWhere('title', 'LIKE', "%{$keywords[$i]}%")
                             ->orWhere('description', 'LIKE', "%{$keywords[$i]}%");
@@ -1027,9 +1028,9 @@ class ContentController extends Controller
             }
 
             $issues = $issues
-            ->with('content')
-            ->orderBy('content_issues.created_at', 'desc')
-            ->paginate($limit, ['*'], 'page', $page);
+                ->with('content')
+                ->orderBy('content_issues.created_at', 'desc')
+                ->paginate($limit, ['*'], 'page', $page);
             return $this->respondWithSuccess('Issues retrieved successfully', [
                 'issues' => ContentIssueResource::collection($issues),
                 'current_page' => (int) $issues->currentPage(),
@@ -1142,28 +1143,28 @@ class ContentController extends Controller
                     'value' => "{$content->id}-" . date('Ymd'),
                 ]);
             }
-            if ( $content->live_provider == 'agora') {
-            $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
-            if (is_null($rtc_token)) {
-                $rtc_token = $content->metas()->create([
-                    'key' => 'rtc_token',
-                    'value' => '',
-                ]);
-            }
-            $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
-            if (is_null($rtm_token)) {
-                $rtm_token = $content->metas()->create([
-                    'key' => 'rtm_token',
-                    'value' => '',
-                ]);
-            }
-            $join_count = $content->metas()->where('key', 'join_count')->first();
-            if (is_null($join_count)) {
-                $join_count = $content->metas()->create([
-                    'key' => 'join_count',
-                    'value' => 0,
-                ]);
-            }
+            if ($content->live_provider == 'agora') {
+                $rtc_token = $content->metas()->where('key', 'rtc_token')->first();
+                if (is_null($rtc_token)) {
+                    $rtc_token = $content->metas()->create([
+                        'key' => 'rtc_token',
+                        'value' => '',
+                    ]);
+                }
+                $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
+                if (is_null($rtm_token)) {
+                    $rtm_token = $content->metas()->create([
+                        'key' => 'rtm_token',
+                        'value' => '',
+                    ]);
+                }
+                $join_count = $content->metas()->where('key', 'join_count')->first();
+                if (is_null($join_count)) {
+                    $join_count = $content->metas()->create([
+                        'key' => 'join_count',
+                        'value' => 0,
+                    ]);
+                }
             }
 
             //ensure that the live has not been started before
@@ -1173,18 +1174,18 @@ class ContentController extends Controller
                 $channel = '';
                 $asset_url = '';
 
-                $channel_model = $content->metas()->where('key', 'channel_name')->first(); 
+                $channel_model = $content->metas()->where('key', 'channel_name')->first();
                 $channel = $channel_model->value;
 
-                if ( $content->live_provider == 'agora') {
+                if ($content->live_provider == 'agora') {
                     $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
-                    $rtc_token = $rtc_token_model ->value;
+                    $rtc_token = $rtc_token_model->value;
                     $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
                     $rtm_token = $rtm_token_model->value;
                 }
                 if ($content->live_provider == 'youtube') {
                     $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
-                    $asset_url = $asset->url; 
+                    $asset_url = $asset->url;
                 }
                 return $this->respondWithSuccess('Channel started successfully', [
                     'rtc_token' => $rtc_token,
@@ -1195,9 +1196,9 @@ class ContentController extends Controller
                 ]);
             }
 
-            if ( $content->live_provider == 'agora') {
+            if ($content->live_provider == 'agora') {
                 $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
-                $rtc_token = $rtc_token_model ->value;
+                $rtc_token = $rtc_token_model->value;
                 $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
                 $rtm_token = $rtm_token_model->value;
 
@@ -1222,13 +1223,13 @@ class ContentController extends Controller
 
             if ($content->live_provider == 'youtube') {
                 $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
-                $asset_url = $asset->url; 
+                $asset_url = $asset->url;
                 $rtc_token = '';
                 $rtm_token = '';
             }
 
             if ($content->live_provider == 'agora') {
-                $asset_url = ''; 
+                $asset_url = '';
                 $rtc_token = $rtc_token->value;
                 $rtm_token = $rtm_token->value;
             }
@@ -1264,7 +1265,7 @@ class ContentController extends Controller
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
                 'access_token' => ['sometimes', 'string', 'exists:anonymous_purchases,access_token'],
-                'device_token' => ['sometimes', 'string'],   
+                'device_token' => ['sometimes', 'string'],
             ]);
 
             if ($validator->fails()) {
@@ -1275,7 +1276,7 @@ class ContentController extends Controller
             if ($content->type !== 'live-video' && $content->type !== 'live-audio') {
                 return $this->respondBadRequest('Live broadcasts can only be joined for live content types');
             }
-            
+
             $user_id = '';
             $access_token = '';
             $device_token = '';
@@ -1285,15 +1286,15 @@ class ContentController extends Controller
                 $user_id = $request->user()->id;
             }
 
-            if (! is_null($request->access_token)) {
+            if (!is_null($request->access_token)) {
                 $access_token = $request->access_token;
             }
 
-            if (! is_null($request->device_token)) {
+            if (!is_null($request->device_token)) {
                 $device_token = $request->device_token;
             }
 
-            if (! $content->isFree() && ! $content->userHasPaid($user_id, $access_token) && ! ($content->user_id == $user_id)) {
+            if (!$content->isFree() && !$content->userHasPaid($user_id, $access_token) && !($content->user_id == $user_id)) {
                 return $this->respondBadRequest('You do not have access to this live because you have not purchased it');
             }
 
@@ -1303,7 +1304,7 @@ class ContentController extends Controller
                 $rtm_token = $content->metas()->where('key', 'rtm_token')->first();
                 if (is_null($rtc_token) || $rtc_token->value == '' || is_null($rtm_token) || $rtm_token->value == '') {
                     return $this->respondBadRequest('You cannot join a broadcast that has not been started');
-                }   
+                }
             }
 
             if ($content->live_status !== 'active') {
@@ -1316,8 +1317,8 @@ class ContentController extends Controller
                         'id' => Str::uuid(),
                     ],
                 ]);
-            } 
-            
+            }
+
             if ($user_id == '') {
                 $content->anonymousSubscribers()->syncWithoutDetaching([
                     $request->access_token => [
@@ -1325,14 +1326,14 @@ class ContentController extends Controller
                     ],
                 ]);
             }
-           
+
             $join_count = $content->metas()->where('key', 'join_count')->first();
             $uid = $join_count->value;
             $join_count->value = (int) $join_count->value + 1;
             $join_count->save();
             $expires = time() + (24 * 60 * 60); // let token last for 24hrs
             // $token = AgoraRtcToken::buildTokenWithUid(env('AGORA_APP_ID'), env('AGORA_APP_CERTIFICATE'), $channel->value, $uid, AgoraRtcToken::ROLE_ATTENDEE, $expires);
-           // $subscribers_count = $content->subscribers()->count();
+            // $subscribers_count = $content->subscribers()->count();
             $websocket_client = new \WebSocket\Client(config('services.websocket.url'));
             $websocket_client->text(json_encode([
                 'event' => 'app-update-rtm-channel-subscribers-count',
@@ -1356,18 +1357,18 @@ class ContentController extends Controller
             $join_count = '';
             $asset_url = '';
 
-            $channel_model = $content->metas()->where('key', 'channel_name')->first(); 
+            $channel_model = $content->metas()->where('key', 'channel_name')->first();
             $channel = $channel_model->value;
 
-            if ( $content->live_provider == 'agora') {
+            if ($content->live_provider == 'agora') {
                 $rtc_token_model = $content->metas()->where('key', 'rtc_token')->first();
-                $rtc_token = $rtc_token_model ->value;
+                $rtc_token = $rtc_token_model->value;
                 $rtm_token_model = $content->metas()->where('key', 'rtm_token')->first();
                 $rtm_token = $rtm_token_model->value;
             }
             if ($content->live_provider == 'youtube') {
                 $asset = $content->assets()->wherePivot('purpose', 'content-asset')->first();
-                $asset_url = $asset->url; 
+                $asset_url = $asset->url;
             }
 
             return $this->respondWithSuccess('Channel joined successfully', [
@@ -1491,10 +1492,10 @@ class ContentController extends Controller
             }
 
             $access_token = $request->query('access_token', 1);
-            
+
             $content = Content::where('id', $id)->first();
 
-            if (! $content->isFree() && ! $content->userHasPaid($user_id, $access_token) && ! ($content->user_id == $user_id)) {
+            if (!$content->isFree() && !$content->userHasPaid($user_id, $access_token) && !($content->user_id == $user_id)) {
                 return $this->respondBadRequest('You are not permitted to view the assets of this content');
             }
             // get signed cookies
@@ -1567,8 +1568,8 @@ class ContentController extends Controller
             ]);
 
             $content = $content
-            ->eagerLoadBaseRelations()
-            ->first();
+                ->eagerLoadBaseRelations()
+                ->first();
 
             return $this->respondWithSuccess('View recorded successfully', [
                 'content' => new ContentResource($content),
@@ -1612,9 +1613,9 @@ class ContentController extends Controller
             }
 
             $content = $content
-            ->eagerLoadBaseRelations()
-            ->eagerLoadSingleContentRelations()
-            ->first();
+                ->eagerLoadBaseRelations()
+                ->eagerLoadSingleContentRelations()
+                ->first();
 
             return $this->respondWithSuccess('Your response has been recorded successfully', [
                 'content' => new ContentResource($content),
@@ -1653,10 +1654,10 @@ class ContentController extends Controller
                 }
             }
 
-            if (! $all_contestants_accepted) {
+            if (!$all_contestants_accepted) {
                 return $this->respondBadRequest('Both contestants need to accept this challenge before you can contribute to it');
             }
-            
+
             if ($content->live_status === 'ended') {
                 return $this->respondBadRequest('You cannot contribute to a challenge that has ended');
             }
@@ -1669,7 +1670,7 @@ class ContentController extends Controller
             $minimum_contribution = $content->metas()->where('key', 'minimum_contribution')->first();
             $previous_contribution = $content->challengeContributions()->where('user_id', $user->id)->first();
             $total_contribution_amount = (int) $request->amount;
-            if (! is_null($previous_contribution)) {
+            if (!is_null($previous_contribution)) {
                 $total_contribution_amount += (int) $previous_contribution->amount;
             }
 
@@ -1680,7 +1681,7 @@ class ContentController extends Controller
             if ((int) $request->amount > (int) $user->wallet->balance) {
                 return $this->respondBadRequest("You do not have enough Flok Cowries to contribute to this challenge");
             }
-            
+
             $new_wallet_balance = bcsub($user->wallet->balance, $request->amount, 2);
             WalletTransaction::create([
                 'wallet_id' => $user->wallet->id,
@@ -1692,7 +1693,7 @@ class ContentController extends Controller
             $user->wallet->balance = $new_wallet_balance;
             $user->wallet->save();
 
-            if (! is_null($previous_contribution)) {
+            if (!is_null($previous_contribution)) {
                 $previous_contribution->amount = $total_contribution_amount;
                 $previous_contribution->save();
             } else {
@@ -1703,9 +1704,9 @@ class ContentController extends Controller
             }
 
             $content = $content
-            ->eagerLoadBaseRelations()
-            ->eagerLoadSingleContentRelations()
-            ->first();
+                ->eagerLoadBaseRelations()
+                ->eagerLoadSingleContentRelations()
+                ->first();
 
             return $this->respondWithSuccess('Your contribution has been recorded successfully', [
                 'content' => new ContentResource($content),
@@ -1751,7 +1752,7 @@ class ContentController extends Controller
             $user = $request->user();
             $user_contributed = false;
             $contribution = $content->challengeContributions()->where('user_id', $user->id)->first();
-            if (! is_null($contribution)) {
+            if (!is_null($contribution)) {
                 $user_contributed = true;
             }
 
@@ -1762,20 +1763,20 @@ class ContentController extends Controller
             if ((int) $post_size->value > 0 && $user_contributed === false) {
                 return $this->respondBadRequest('You can only vote on this challenge if you contribute to the pot');
             }
- 
-            if (! is_null($user_vote)) {
+
+            if (!is_null($user_vote)) {
                 return $this->respondBadRequest('You have already cast a vote before');
             }
-            
+
             $content->challengeVotes()->create([
                 'voter_id' => $user->id,
                 'contestant_id' => $request->contestant,
             ]);
 
             $content = $content
-            ->eagerLoadBaseRelations()
-            ->eagerLoadSingleContentRelations()
-            ->first();
+                ->eagerLoadBaseRelations()
+                ->eagerLoadSingleContentRelations()
+                ->first();
 
             return $this->respondWithSuccess('Your vote has been recorded successfully', [
                 'content' => new ContentResource($content),
@@ -1814,16 +1815,16 @@ class ContentController extends Controller
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
-    }  
+    }
 
     public function youtubeMigrate(Request $request)
     {
-        try{
+        try {
             $validator = Validator::make($request->all(), [
                 'urls' => ['required'],
                 'urls.*.url' => ['required', 'string', new YouTubeUrl],
                 'urls.*.price_in_dollars' => ['required', 'numeric', 'min:0', 'max:10000'],
-                'digiverse_id' => ['required','exists:collections,id'],
+                'digiverse_id' => ['required', 'exists:collections,id'],
             ]);
 
             if ($validator->fails()) {
@@ -1832,31 +1833,70 @@ class ContentController extends Controller
 
             $user = $request->user();
             $digiverse = Collection::where('id', $request->digiverse_id)->where('type', 'digiverse')->first();
-            
+
             if ($digiverse->user_id !== $user->id) {
                 return $this->respondBadRequest('You cannot add to this digiverse because you do not own it');
             }
 
-            foreach($request->urls as $url)
-            {            
+            foreach ($request->urls as $url) {
                 MigrateYoutubeVideoJob::dispatch([
-                'url' => $url['url'],
-                'price_in_dollars' => $url['price_in_dollars'],
-                'digiverse' => $digiverse,
-                'user' => $user,                
-            ]);
+                    'url' => $url['url'],
+                    'price_in_dollars' => $url['price_in_dollars'],
+                    'digiverse' => $digiverse,
+                    'user' => $user,
+                ]);
             }
-            return $this->respondWithSuccess('Content has been created successfully'); 
-
-        } catch(\Exception $exception){
+            return $this->respondWithSuccess('Content has been created successfully');
+        } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
     }
 
+    public function podcastMigrate(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'rssLink' => ['required'],
+                'digiverse_id' => ['required', 'exists:collections,id'],
+            ]);
+            if ($validator->fails()) {
+                return $this->respondBadRequest('Invalid or missing input fields', $validator->errors()->toArray());
+            }
+            
+            $user = $request->user();
+            $digiverse = Collection::where('id', $request->digiverse_id)->where('type', 'digiverse')->first();
+
+            if ($digiverse->user_id !== $user->id) {
+                return $this->respondBadRequest('You cannot add to this digiverse because you do not own it');
+            }
+            $client = new GuzzleClient;
+            $response = $client->get($request->rssLink);
+            $headers = $response->getHeaders();
+            foreach ($headers as $name => $value) {
+                if (strtolower($name) === 'content-type' && str_contains($value[0], 'xml')) {
+                    
+                    MigratePodcastJob::dispatch([
+                        'rssLink' => $request->rssLink,
+                        'digiverse' => $digiverse,
+                        'user' => $user,
+                    ]);
+                    return $this->respondWithSuccess('Podcasts have been added successfully');
+                }
+            }
+            return $this->respondBadRequest('Invalid Rss Link');
+        } catch (\Exception $exception) {
+            if ($exception->getResponse()->getStatusCode() == 404) {
+                return $this->respondInternalError('You entered an invalid Rss Link');
+            } else {
+                return $this->respondInternalError('Oops, an error occurred. Please try again later.');
+            }
+        }
+    }
+
     public function likeContent(Request $request, $id)
     {
-        try{
+        try {
 
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
@@ -1874,20 +1914,20 @@ class ContentController extends Controller
 
             //check if the user has liked the content already
             $contentLike = ContentLike::where('content_id', $id)
-            ->where('user_id', $user_id)
-            ->first();
+                ->where('user_id', $user_id)
+                ->first();
 
-            if ( is_null($contentLike)) //user has not liked the content before; create
+            if (is_null($contentLike)) //user has not liked the content before; create
             {
-            ContentLike::create([
-                'user_id' => $user_id,
-                'content_id' => $id,
-            ]);
+                ContentLike::create([
+                    'user_id' => $user_id,
+                    'content_id' => $id,
+                ]);
             }
             $content = Content::where('id', $id)
-            ->eagerLoadBaseRelations($user_id)
-            ->eagerLoadSingleContentRelations()
-            ->first();
+                ->eagerLoadBaseRelations($user_id)
+                ->eagerLoadSingleContentRelations()
+                ->first();
 
             $likee = User::where('id', $content->user_id)->first();
             NotifyUserForLikedContentJob::dispatch([
@@ -1898,8 +1938,7 @@ class ContentController extends Controller
             return $this->respondWithSuccess('You have liked this content', [
                 'content' => new ContentResource($content),
             ]);
-            
-        }catch(\Exception $exception){
+        } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
@@ -1907,7 +1946,7 @@ class ContentController extends Controller
 
     public function unlikeContent(Request $request, $id)
     {
-        try{
+        try {
             $validator = Validator::make(array_merge($request->all(), ['id' => $id]), [
                 'id' => ['required', 'string', 'exists:contents,id'],
             ]);
@@ -1924,22 +1963,20 @@ class ContentController extends Controller
 
 
             $contentLike = ContentLike::where('user_id', $user_id)->first();
-            if ( ! is_null($contentLike))
-            {
-                $contentLike->where('user_id', $user_id)->delete();  
+            if (!is_null($contentLike)) {
+                $contentLike->where('user_id', $user_id)->delete();
             }
-                $content = Content::where('id', $id)
-                    ->eagerLoadBaseRelations($user_id)
-                    ->eagerLoadSingleContentRelations()
-                    ->first();    
+            $content = Content::where('id', $id)
+                ->eagerLoadBaseRelations($user_id)
+                ->eagerLoadSingleContentRelations()
+                ->first();
 
             return $this->respondWithSuccess('You have unliked this content', [
                 'content' => new ContentResource($content),
-            ]); 
-
-        }catch(\Exception $exception){
+            ]);
+        } catch (\Exception $exception) {
             Log::error($exception);
             return $this->respondInternalError('Oops, an error occurred. Please try again later.');
         }
-    }   
+    }
 }

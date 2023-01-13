@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\V1\Admin\ContentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -216,6 +217,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 
             Route::post('/youtube-migrate', 'ContentController@youtubeMigrate')->name('youtube-migrate');
 
+            Route::post('/podcast-migrate', 'ContentController@podcastMigrate')->name('podcast-migrate');
+            Route::post('/podcast-migration', 'ContentController@podcastMigration')->name('podcast-migration');
             Route::post('{id}/like', 'ContentController@likeContent')->name('like-content');
             Route::delete('{id}/like', 'ContentController@unlikeContent')->name('unlike-content');
 

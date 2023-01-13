@@ -110,6 +110,11 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
         ],
 
+        'applog' => [
+            'driver' => 'syslog',
+            'level' => env('LOG_LEVEL', 'info'),
+        ],
+
         'null' => [
             'driver' => 'monolog',
             'handler' => NullHandler::class,
