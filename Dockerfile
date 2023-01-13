@@ -64,7 +64,13 @@ RUN useradd -u 1000 -ms /bin/bash -g www www
 
 COPY --chown=www:www-data . /var/www
 
-RUN chmod -R ug+w /var/www/storage
+RUN chmod -R 777 /var/www/storage /var/www/bootstrap /var/www/public
+
+#RUN chgrp -R www-data /var/www/storage /var/www/bootstrap /var/www/public
+
+# add root to www group
+RUN chmod -R ug+w /var/www/storage /var/www/bootstrap /var/www/public
+
 
 # Copy nginx/php/supervisor configs
 RUN cp php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini

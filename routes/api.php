@@ -70,13 +70,15 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
         Route::get('{id}/reviews', 'ReviewController@listReviews');
     });
 
-    Route::group(['prefix' => 'payments'], function () {
-        Route::post('anonymous-purchases', 'AnonymousPurchaseController@makePurchase')->name('make-anonymous-purchases');
+    Route::group(['prefix' => 'external-community'], function () {
+        Route::post('/{id}/join', 'UserController@joinExternalCommunity')->name('join-external-community');
+        Route::patch('/{id}/leave', 'UserController@leaveExternalCommunity')->name('leave-external-community');
     });
 
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', 'UserController@listUsers')->name('list-users');
         Route::get('{id}', 'UserController@showUser')->name('show-user');
+        Route::patch('{id}/tip', 'UserController@cancelRecurrentTipping')->name('cancel-recurrent-tipping');
     });
 
     Route::group(['prefix' => 'polls'], function () {
@@ -86,6 +88,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'V1'], function () {
 
     Route::group(['prefix' => 'payments'], function () {
         Route::patch('easy-fund-wallet', 'WalletController@fundWallet')->name('easy-fund-wallet');
+        Route::post('anonymous-purchases', 'AnonymousPurchaseController@makePurchase')->name('make-anonymous-purchases');
+        Route::post('anonymous-user-tip', 'UserController@anonymousUserTip')->name('anonymous-user-tip');
 
         Route::group(['prefix' => 'flutterwave'], function () {
             Route::post('validate-bank-details', 'PaymentController@validateBankDetailsViaFlutterwave');
@@ -183,6 +187,12 @@ Route::group(['middleware' => 'auth:api'], function () {
 
         Route::group(['prefix' => 'subscriptions'], function () {
             Route::patch('{id}', 'SubscriptionController@toggleAutorenew')->name('toggle-auto-renew');
+        });
+
+        Route::group(['prefix' => 'external-community'], function () {
+            Route::post('/', 'UserController@importExternalCommunity')->name('import-external-community');
+            Route::get('/', 'UserController@listExternalCommunity')->name('list-external-community');
+            Route::get('/exports', 'UserController@exportExternalCommunity')->name('export-external-community');
         });
 
         Route::group(['prefix' => 'tags'], function () {

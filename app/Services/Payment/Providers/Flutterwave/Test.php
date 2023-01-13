@@ -42,6 +42,15 @@ class Test
         return response()->json($response)->getData();
     }
 
+    public function recurrentTipCharge(string $card_token, string $email, string $tx_ref, string $amount): \stdClass
+    {
+        $key = "{$this->base_url}v3/tokenized-charges";
+
+        $response = json_decode((string) Cache::get($key), true);
+
+        return response()->json($response)->getData();
+    }
+
     public function verifyTransaction(string $id): \stdClass
     {
         $key = "{$this->base_url}v3/transactions/{$id}/verify";
