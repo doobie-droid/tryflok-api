@@ -12,7 +12,7 @@ use App\Jobs\Content\DispatchDisableLiveUserable as DispatchDisableLiveUserableJ
 use App\Jobs\Content\DispatchNotificationToFollowers as DispatchNotificationToFollowersJob;
 use App\Jobs\Content\DispatchSubscribersNotification as DispatchSubscribersNotificationJob;
 use App\Jobs\Content\MigrateYoutubeVideo as MigrateYoutubeVideoJob;
-use App\Jobs\Content\MigratePodcastDataFast as MigratePodcastJob;
+use App\Jobs\Content\MigrateDetailedPodcastData as MigratePodcastJob;
 use App\Jobs\Content\NotifyUserForLikedContent as NotifyUserForLikedContentJob;
 use App\Jobs\Users\NotifyAddedToChallenge as NotifyAddedToChallengeJob;
 use App\Jobs\Users\NotifyChallengeResponse as NotifyChallengeResponseJob;

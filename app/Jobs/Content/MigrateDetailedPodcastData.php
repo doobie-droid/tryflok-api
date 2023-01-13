@@ -30,8 +30,7 @@ class MigrateDetailedPodcastData implements ShouldQueue
      *
      * @var int
      */
-    public $timeout = 50; //default timeout
-    public $failOnTimeout = true;
+
     public $rssLink;
     public $digiverse;
     public $user;
@@ -124,5 +123,6 @@ class MigrateDetailedPodcastData implements ShouldQueue
             'user' => $this->user,
         ]);
         Log::error($exception);
+        $this->delete(); 
     }
 }

@@ -90,13 +90,14 @@ class MigratePodcastDataFast implements ShouldQueue
         ]);
         $arraylength = count($response["channel"]["item"]);
         foreach ($response["channel"]["item"] as $key=>$value) {
-      
+            
             MigratePodcastAudioJob::dispatch([
                 'user' => $this->user,
                 'podcast_collection' => $podcast_collection,
                 'description' =>  $value["description"] != [] ? $value["description"] : null ,
                 'title' => $value["title"] != [] ? $value["title"] : 'Chapter '.$arraylength - $key,
                 'published_date' => $value["pubDate"],
+                //TODO1 the audio link files have lengths that are longer than the space allocated for it since the data type "string" has a maximum char length of 255 characters 
                 'audio_link' => $value["enclosure"]["@attributes"]["url"],
                 'cover_picture_id' => $podcast_collection_cover_asset->id,
             ]);
